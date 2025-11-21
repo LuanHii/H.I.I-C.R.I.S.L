@@ -60,14 +60,18 @@ export function normalizePersonagem(personagem: Personagem, autoPatente: boolean
       ...personagem.pe,
       max: peMax,
       atual: clamp(personagem.pe.atual, 0, peMax),
-      rodada: Math.max(1, personagem.atributos.PRE),
+      rodada: personagem.classe === 'Sobrevivente' ? 1 : Math.max(1, Math.floor(personagem.nex / 5)),
     },
     san: {
       ...personagem.san,
       max: sanMax,
       atual: clamp(personagem.san.atual, 0, sanMax),
     },
-    pd: personagem.pd !== undefined ? clamp(personagem.pd, 0, recursos.pd ?? 999) : recursos.pd,
+    pd: personagem.pd 
+        ? (typeof (personagem.pd as any) === 'number' 
+            ? { atual: (personagem.pd as any) as number, max: recursos.pd || (personagem.pd as any) as number } 
+            : { ...personagem.pd, max: recursos.pd || personagem.pd.max })
+        : undefined,
     limiteItens,
     carga: cargaCalculada,
   } satisfies Personagem;

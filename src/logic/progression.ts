@@ -100,6 +100,10 @@ export function applyAttributePoint(character: Personagem, attribute: AtributoKe
   newChar.atributos[attribute] += 1;
   newChar.pontosAtributoPendentes = (newChar.pontosAtributoPendentes || 0) - 1;
 
+  if (attribute === 'INT') {
+      newChar.periciasTreinadasPendentes = (newChar.periciasTreinadasPendentes || 0) + 1;
+  }
+
   recalculateStats(newChar);
   return newChar;
 }
@@ -143,12 +147,14 @@ function recalculateStats(char: Personagem) {
 
   char.pe.max = derived.peMax;
   char.pe.atual += diffPE;
+  char.pe.rodada = derived.peRodada;
 
   char.san.max = derived.sanMax;
   char.san.atual += diffSAN;
   
   if (char.usarPd) {
-      char.pd = derived.pdMax;
+      const currentPd = char.pd?.atual ?? derived.pdMax;
+      char.pd = { atual: currentPd, max: derived.pdMax };
   }
 }
 

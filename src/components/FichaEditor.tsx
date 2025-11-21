@@ -609,8 +609,8 @@ export function FichaEditor({ registro, onSalvar }: FichaEditorProps) {
         <ResourceHeroCard
           titulo={campanhaRules.usarPd ? 'PD' : sanLabel}
           destaque="from-ordem-white/10 via-ordem-white/5 to-transparent"
-          atual={campanhaRules.usarPd ? (draft.pd ?? 0) : draft.san.atual}
-          maximo={campanhaRules.usarPd ? (recursosCalculados.pd ?? 0) : draft.san.max}
+          atual={campanhaRules.usarPd ? (draft.pd?.atual ?? 0) : draft.san.atual}
+          maximo={campanhaRules.usarPd ? (draft.pd?.max ?? recursosCalculados.pd ?? 0) : draft.san.max}
           deltaOptions={[-5, -1, 1, 5]}
           onDelta={(delta) => campanhaRules.usarPd ? ajustarPd(delta) : ajustarRecursoAtual('san', delta)}
           onReset={() => campanhaRules.usarPd ? resetarPd() : resetarRecurso('san')}
@@ -635,8 +635,8 @@ export function FichaEditor({ registro, onSalvar }: FichaEditorProps) {
           {
             key: 'pd',
             label: 'PD',
-            value: draft.pd ?? 0,
-            adjust: (delta: number) => ajustarCampoLinear('pd', delta),
+            value: draft.pd?.atual ?? 0,
+            adjust: (delta: number) => ajustarPd(delta),
           },
           {
             key: 'carga',
@@ -839,8 +839,14 @@ export function FichaEditor({ registro, onSalvar }: FichaEditorProps) {
         />
         <CampoNumero
           label="PD"
-          value={draft.pd ?? 0}
-          onChange={(valor) => handleNumero('pd', valor)}
+          value={draft.pd?.atual ?? 0}
+          onChange={(valor) => {
+             const numVal = Number(valor);
+             atualizarDraft(prev => ({
+                 ...prev,
+                 pd: { atual: numVal, max: prev.pd?.max ?? numVal }
+             }), { skipNormalize: true });
+          }}
         />
         <CampoNumero
           label="Carga Máxima"
@@ -882,42 +888,55 @@ export function FichaEditor({ registro, onSalvar }: FichaEditorProps) {
       title="Perícias"
       description="Selecione o grau atual de treinamento; bônus detalhado será recalculado futuramente."
     >
-      <div className="max-h-80 overflow-y-auto custom-scrollbar border border-ordem-white/10">
-        <table className="w-full text-xs">
-          <thead className="text-ordem-white/50">
-            <tr>
-              <th className="text-left p-2">Perícia</th>
-              <th className="text-left p-2">Grau</th>
-              <th className="text-right p-2">Bonus</th>
-            </tr>
-          </thead>
-          <tbody>
-            {periciaEntries.map(({ nome, grau, detalhes }) => (
-              <tr key={nome} className="border-t border-ordem-white/10">
-                <td className="p-2 text-ordem-white">
-                  {nome} <span className="text-ordem-white/50 text-[10px] ml-1">({PERICIA_ATRIBUTO[nome]})</span>
-                </td>
-                <td className="p-2">
-                  <select
-                    value={grau}
-                    onChange={(event) => handlePericia(nome, event.target.value as GrauTreinamento)}
-                    className="bg-black border border-ordem-white/20 p-1 text-ordem-white w-full"
-                  >
-                    {GRAUS.map((grauOption) => (
-                      <option key={grauOption} value={grauOption}>
-                        {grauOption}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="p-2 text-right text-ordem-white/70">
-                  {detalhes?.dados}d20 · {detalhes?.bonusFixo >= 0 ? '+' : ''}
-                  {detalhes?.bonusFixo}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="max-h-80 overflow-y-auto custom-scrollbar border border-ordem-white/10 p-2 space-y-6">
+        {ATRIBUTOS.map((attr) => {
+          const skills = periciaEntries.filter((p) => PERICIA_ATRIBUTO[p.nome] === attr);
+          if (skills.length === 0) return null;
+
+          return (
+            <div key={attr}>
+              <h4 className="text-ordem-red font-bold text-sm mb-2 border-b border-ordem-white/10 pb-1 flex items-center gap-2">
+                <span className="w-2 h-2 bg-ordem-red rotate-45 inline-block"></span>
+                {attr}
+              </h4>
+              <table className="w-full text-xs">
+                <thead className="text-ordem-white/50">
+                  <tr>
+                    <th className="text-left p-2 w-1/2">Perícia</th>
+                    <th className="text-left p-2 w-1/3">Grau</th>
+                    <th className="text-right p-2">Bonus</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {skills.map(({ nome, grau, detalhes }) => (
+                    <tr key={nome} className="border-t border-ordem-white/10 hover:bg-white/5 transition-colors">
+                      <td className="p-2 text-ordem-white">
+                        {nome}
+                      </td>
+                      <td className="p-2">
+                        <select
+                          value={grau}
+                          onChange={(event) => handlePericia(nome, event.target.value as GrauTreinamento)}
+                          className="bg-black border border-ordem-white/20 p-1 text-ordem-white w-full focus:border-ordem-red outline-none"
+                        >
+                          {GRAUS.map((grauOption) => (
+                            <option key={grauOption} value={grauOption}>
+                              {grauOption}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="p-2 text-right text-ordem-white/70 font-mono">
+                        {detalhes?.dados}d20 · {detalhes?.bonusFixo >= 0 ? '+' : ''}
+                        {detalhes?.bonusFixo}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        })}
       </div>
     </FichaSection>
   );
@@ -1677,11 +1696,11 @@ export function FichaEditor({ registro, onSalvar }: FichaEditorProps) {
   const ajustarPd = (delta: number) => {
     atualizarDraft(
       (prev) => {
-        const current = prev.pd ?? 0;
-        const max = recursosCalculados.pd ?? 0;
+        const current = prev.pd?.atual ?? 0;
+        const max = prev.pd?.max ?? (recursosCalculados.pd ?? 0);
         return {
           ...prev,
-          pd: clamp(current + delta, 0, max),
+          pd: { atual: clamp(current + delta, 0, max), max },
         };
       },
       { skipNormalize: true },
@@ -1692,13 +1711,13 @@ export function FichaEditor({ registro, onSalvar }: FichaEditorProps) {
     atualizarDraft(
       (prev) => ({
         ...prev,
-        pd: recursosCalculados.pd ?? 0,
+        pd: { atual: recursosCalculados.pd ?? 0, max: recursosCalculados.pd ?? 0 },
       }),
       { skipNormalize: true },
     );
   };
 
-  const ajustarCampoLinear = (campo: 'defesa' | 'deslocamento' | 'pd', delta: number) => {
+  const ajustarCampoLinear = (campo: 'defesa' | 'deslocamento', delta: number) => {
     const atual = Number(draft[campo] ?? 0);
     handleCampo(campo, Math.max(0, atual + delta) as Personagem[typeof campo]);
   };
@@ -2033,8 +2052,14 @@ export function FichaEditor({ registro, onSalvar }: FichaEditorProps) {
           />
           <CampoNumero
             label="PD"
-            value={draft.pd ?? 0}
-            onChange={(valor) => handleNumero('pd', valor)}
+            value={draft.pd?.atual ?? 0}
+            onChange={(valor) => {
+               const numVal = Number(valor);
+               atualizarDraft(prev => ({
+                   ...prev,
+                   pd: { atual: numVal, max: prev.pd?.max ?? numVal }
+               }), { skipNormalize: true });
+            }}
           />
           <CampoNumero
             label="Carga Máxima"

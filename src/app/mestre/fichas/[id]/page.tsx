@@ -302,7 +302,7 @@ function LiveTrackingPanel({
         </div>
         <div className="border border-ordem-white/10 p-3">
           <p className="text-[10px] tracking-[0.3em] text-ordem-white/60">PD</p>
-          <p className="text-2xl font-mono text-ordem-white">{personagem.pd ?? 0}</p>
+          <p className="text-2xl font-mono text-ordem-white">{personagem.pd?.atual ?? 0}</p>
         </div>
         <div className="border border-ordem-white/10 p-3">
           <p className="text-[10px] tracking-[0.3em] text-ordem-white/60">Condições</p>

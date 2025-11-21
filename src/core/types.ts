@@ -234,8 +234,9 @@ export interface Personagem {
   nex: number;
   estagio?: number;
   patente?: Patente;
-  pontosAtributoPendentes?: number; // Novo campo para controlar evolução
-  escolhaTrilhaPendente?: boolean; // Novo campo para escolha de trilha
+  pontosAtributoPendentes?: number;
+  periciasTreinadasPendentes?: number;
+  escolhaTrilhaPendente?: boolean;
   habilidadesTrilhaPendentes?: {
     trilha: string;
     habilidade: string;
@@ -253,7 +254,7 @@ export interface Personagem {
   pv: { atual: number; max: number; temp: number; machucado: number };
   pe: { atual: number; max: number; rodada: number };
   san: { atual: number; max: number; perturbado: boolean };
-  pd?: number;
+  pd?: { atual: number; max: number };
   usarPd?: boolean;
   ativo?: boolean;
   defesa: number;

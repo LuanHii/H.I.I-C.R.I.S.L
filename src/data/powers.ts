@@ -493,6 +493,7 @@ export const PODERES: Poder[] = [
   {
     nome: 'Empenho',
     descricao: 'Quando faz um teste de perícia, você pode gastar 1 PE para receber +2 nesse teste.',
+    custo: '1 PE',
     tipo: 'Sobrevivente',
     livro: 'Sobrevivendo ao Horror'
   },
@@ -961,6 +962,7 @@ export const PODERES: Poder[] = [
   {
     nome: 'Empenho',
     descricao: 'Quando faz um teste de perícia, você pode gastar 1 PE para receber +2 nesse teste.',
+    custo: '1 PE',
     tipo: 'Sobrevivente',
     livro: 'Sobrevivendo ao Horror'
   },

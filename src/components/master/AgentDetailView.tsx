@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Personagem, AtributoKey, PericiaName, Item, Poder } from '../../core/types';
 import { StatusBar } from '../StatusBar';
 import { calcularDefesaEfetiva } from '../../logic/combatUtils';
-import { PERICIA_ATRIBUTO } from '../../logic/rulesEngine';
+import { PERICIA_ATRIBUTO, calcularPericiasDetalhadas } from '../../logic/rulesEngine';
 import { ActionsTab } from '../ActionsTab';
 import { ItemSelectorModal } from './ItemSelectorModal';
 import { AbilitySelectorModal } from './AbilitySelectorModal';
+import { SkillSelectorModal } from './SkillSelectorModal';
 import { levelUp, levelDown, applyAttributePoint, removeAttributePoint, chooseTrack } from '../../logic/progression';
 import { ProgressionTab } from '../ProgressionTab';
 import { PendingChoiceModal } from '../PendingChoiceModal';
@@ -59,7 +60,10 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     if (stat === 'pv') updated.pv.atual = newValue;
     if (stat === 'pe') updated.pe.atual = newValue;
     if (stat === 'san') updated.san.atual = newValue;
-    if (stat === 'pd') updated.pd = newValue;
+    if (stat === 'pd') {
+        if (updated.pd) updated.pd.atual = newValue;
+        else updated.pd = { atual: newValue, max: newValue };
+    }
     onUpdate(updated);
   };
 
@@ -99,12 +103,27 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
       onUpdate(updated);
   };
 
+  const handleSkillSelection = (skill: PericiaName) => {
+      const updated = { ...agent };
+      updated.pericias = { ...updated.pericias, [skill]: 'Treinado' };
+      updated.periciasTreinadasPendentes = (updated.periciasTreinadasPendentes || 0) - 1;
+      updated.periciasDetalhadas = calcularPericiasDetalhadas(updated.atributos, updated.pericias);
+      onUpdate(updated);
+  };
+
   const pendingChoice = agent.habilidadesTrilhaPendentes && agent.habilidadesTrilhaPendentes.length > 0 
     ? agent.habilidadesTrilhaPendentes[0] 
     : null;
 
   return (
     <div className="flex flex-col gap-4 h-full overflow-y-auto custom-scrollbar pr-2">
+      {agent.periciasTreinadasPendentes && agent.periciasTreinadasPendentes > 0 && (
+          <SkillSelectorModal 
+            isOpen={true}
+            currentSkills={agent.pericias}
+            onSelect={handleSkillSelection}
+          />
+      )}
       {agent.escolhaTrilhaPendente && (
           <TrackSelectorModal 
             agent={agent}
@@ -173,24 +192,35 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 onChange={(v) => updateStat('pv', v)} 
                 readOnly={readOnly}
             />
-            <div className="grid grid-cols-2 gap-4">
+            {agent.usarPd ? (
                 <StatusBar 
-                    label={agent.usarPd ? "Determinação" : "Sanidade"} 
-                    current={agent.usarPd ? (agent.pd || 0) : agent.san.atual} 
-                    max={agent.usarPd ? (agent.pd || 0) : agent.san.max} 
-                    color={agent.usarPd ? "purple" : "blue"} 
-                    onChange={(v) => updateStat(agent.usarPd ? 'pd' : 'san', v)} 
+                    label="Determinação" 
+                    current={agent.pd?.atual || 0} 
+                    max={agent.pd?.max || 0} 
+                    color="purple" 
+                    onChange={(v) => updateStat('pd', v)} 
                     readOnly={readOnly}
                 />
-                <StatusBar 
-                    label="Pontos de Esforço" 
-                    current={agent.pe.atual} 
-                    max={agent.pe.max} 
-                    color="gold" 
-                    onChange={(v) => updateStat('pe', v)} 
-                    readOnly={readOnly}
-                />
-            </div>
+            ) : (
+                <div className="grid grid-cols-2 gap-4">
+                    <StatusBar 
+                        label="Sanidade" 
+                        current={agent.san.atual} 
+                        max={agent.san.max} 
+                        color="blue" 
+                        onChange={(v) => updateStat('san', v)} 
+                        readOnly={readOnly}
+                    />
+                    <StatusBar 
+                        label="Pontos de Esforço" 
+                        current={agent.pe.atual} 
+                        max={agent.pe.max} 
+                        color="gold" 
+                        onChange={(v) => updateStat('pe', v)} 
+                        readOnly={readOnly}
+                    />
+                </div>
+            )}
         </div>
       </div>
       

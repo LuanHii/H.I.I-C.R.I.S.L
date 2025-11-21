@@ -79,7 +79,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
   const [showInventory, setShowInventory] = useState(false);
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
 
-  const usesPd = usarPd === true || (pd !== undefined && pd > 0);
+  const usesPd = usarPd === true || (pd !== undefined && (typeof pd === 'number' ? pd > 0 : pd.max > 0));
 
   const pdMax = useMemo(() => {
       if (!usesPd) return 0;
@@ -105,10 +105,10 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
         const novoAtual = Math.min(Math.max(0, san.atual + delta), san.max);
         onUpdate({ san: { ...san, atual: novoAtual } });
     } else if (stat === 'pd') {
-        const currentPd = pd ?? 0;
-        const max = pdMax || 999;
+        const currentPd = pd?.atual ?? 0;
+        const max = pd?.max ?? pdMax;
         const novoPd = Math.min(Math.max(0, currentPd + delta), max);
-        onUpdate({ pd: novoPd });
+        onUpdate({ pd: { atual: novoPd, max } });
     }
   };
 
@@ -184,7 +184,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
           {/* Bar Fill */}
           <div 
             className={`absolute bottom-0 left-0 w-full transition-all duration-500 ease-out z-0 border-t ${usesPd ? 'bg-gray-500/20 border-gray-400/30' : 'bg-blue-600/20 border-blue-500/30'}`}
-            style={{ height: `${usesPd ? `${Math.min(100, ((pd ?? 0) / (pdMax || 1)) * 100)}%` : `${Math.min(100, (san.atual / san.max) * 100)}%`}` }}
+            style={{ height: `${usesPd ? `${Math.min(100, ((pd?.atual ?? 0) / (pdMax || 1)) * 100)}%` : `${Math.min(100, (san.atual / san.max) * 100)}%`}` }}
           />
 
           <div className="relative z-10 flex flex-col items-center w-full">
@@ -192,7 +192,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
                 {usesPd ? 'PD' : 'SAN'}
             </div>
             <div className={`font-bold text-white leading-none ${ativo ? 'text-3xl' : 'text-xl'}`}>
-                {usesPd ? (pd ?? 0) : san.atual}
+                {usesPd ? (pd?.atual ?? 0) : san.atual}
                 <span className="text-xs text-gray-500">/{usesPd ? pdMax : san.max}</span>
             </div>
           </div>

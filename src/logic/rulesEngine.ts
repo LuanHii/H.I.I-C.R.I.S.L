@@ -20,7 +20,7 @@ import { validateAttributes } from '../core/rules/attributes';
 import { CLASSES } from '../data/classes';
 import { ORIGENS } from '../data/origins';
 
-const TODAS_PERICIAS: PericiaName[] = [
+export const TODAS_PERICIAS: PericiaName[] = [
   'Acrobacia',
   'Adestramento',
   'Artes',
@@ -51,7 +51,7 @@ const TODAS_PERICIAS: PericiaName[] = [
   'Vontade',
 ];
 
-const PERICIA_ATRIBUTO: Record<PericiaName, AtributoKey> = {
+export const PERICIA_ATRIBUTO: Record<PericiaName, AtributoKey> = {
   Acrobacia: 'AGI',
   Adestramento: 'PRE',
   Artes: 'PRE',
@@ -145,8 +145,8 @@ const CLASS_RESOURCES = {
     san: { base: 20, porNivel: 5 },
   },
   Sobrevivente: {
-    pv: { base: 8, baseAttr: 'VIG', porNivel: 2, porNivelAttr: 'VIG' },
-    pe: { base: 1, baseAttr: 'PRE', porNivel: 1, porNivelAttr: 'PRE' },
+    pv: { base: 8, baseAttr: 'VIG', porNivel: 2, porNivelAttr: undefined },
+    pe: { base: 2, baseAttr: 'PRE', porNivel: 1, porNivelAttr: undefined },
     san: { base: 8, porNivel: 2 },
   },
 } as const;
@@ -394,14 +394,14 @@ export function gerarFicha(input: CriacaoInput): Personagem {
     pe: {
       atual: recursos.pe,
       max: recursos.pe,
-      rodada: Math.max(1, atributos.PRE),
+      rodada: input.classe === 'Sobrevivente' ? 1 : Math.max(1, Math.floor(nexBase / 5)),
     },
     san: {
       atual: recursos.san,
       max: recursos.san,
       perturbado: recursos.san <= recursos.pv / 2,
     },
-    pd: recursos.pd,
+    pd: recursos.pd ? { atual: recursos.pd, max: recursos.pd } : undefined,
     defesa,
     deslocamento,
     carga,
@@ -709,6 +709,7 @@ function coletarPoderes(
     poderes.push({
       nome: 'Empenho',
       descricao: 'Quando faz um teste de perícia, você pode gastar 1 PE para receber +2 nesse teste.',
+      custo: '1 PE',
       tipo: 'Classe',
       livro: 'Sobrevivendo ao Horror'
     });
@@ -769,8 +770,11 @@ function calcularRecursos(params: {
   pvBonus?: number;
 }): RecursosResultado {
   const data = CLASS_RESOURCES[params.classe];
-  const nivelBase = params.classe === 'Sobrevivente' ? 0 : 5;
-  const niveisExtras = Math.max(0, Math.floor(Math.max(params.nex - nivelBase, 0) / 5));
+  
+  const isSurvivor = params.classe === 'Sobrevivente';
+  const niveisExtras = isSurvivor 
+    ? Math.max(0, (params.estagio || 1) - 1)
+    : Math.max(0, Math.floor(Math.max(params.nex - 5, 0) / 5));
 
   const pvBase = data.pv.base + (data.pv.baseAttr ? params.atributos[data.pv.baseAttr] : 0);
   const peBase = data.pe.base + (data.pe.baseAttr ? params.atributos[data.pe.baseAttr] : 0);
@@ -858,8 +862,6 @@ export function calcularRecursosClasse(params: {
     pvBonus: params.pvBonus,
   });
 }
-
-export { TODAS_PERICIAS, PERICIA_ATRIBUTO };
 
 export function calcularCarga(params: {
   atributos: Atributos;

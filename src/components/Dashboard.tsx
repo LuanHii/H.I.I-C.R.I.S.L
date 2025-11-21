@@ -47,26 +47,11 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     if (!character) return;
 
-    let pdMax = character.pd || 0;
-    
-
-    if (!useSanity) {
-        const recursos = calcularRecursosClasse({
-            classe: character.classe,
-            atributos: character.atributos,
-            nex: character.nex,
-            estagio: character.estagio,
-            patente: character.patente || 'Recruta',
-            usarPd: true
-        });
-        pdMax = recursos.pd || 0;
-    }
-
     setCurrentStats(prev => ({
       pv: character.pv.atual,
       pe: character.pe.atual,
       san: character.san.atual,
-      pd: pdMax
+      pd: character.pd?.atual ?? 0
     }));
   }, [character, useSanity]);
 
@@ -92,7 +77,14 @@ export const Dashboard: React.FC = () => {
         if (stat === 'pv') { oldValue = updatedChar.pv.atual; updatedChar.pv = { ...updatedChar.pv, atual: newValue }; }
         if (stat === 'pe') { oldValue = updatedChar.pe.atual; updatedChar.pe = { ...updatedChar.pe, atual: newValue }; }
         if (stat === 'san') { oldValue = updatedChar.san.atual; updatedChar.san = { ...updatedChar.san, atual: newValue }; }
-        if (stat === 'pd') { oldValue = updatedChar.pd || 0; updatedChar.pd = newValue; }
+        if (stat === 'pd') { 
+            oldValue = updatedChar.pd?.atual || 0; 
+            if (updatedChar.pd) {
+                updatedChar.pd = { ...updatedChar.pd, atual: newValue };
+            } else {
+                updatedChar.pd = { atual: newValue, max: newValue };
+            }
+        }
 
         const diff = newValue - oldValue;
         if (diff !== 0) {
