@@ -56,7 +56,7 @@ export const Dashboard: React.FC = () => {
             atributos: character.atributos,
             nex: character.nex,
             estagio: character.estagio,
-            patente: character.patente,
+            patente: character.patente || 'Recruta',
             usarPd: true
         });
         pdMax = recursos.pd || 0;
@@ -127,7 +127,7 @@ export const Dashboard: React.FC = () => {
       atributos: character.atributos,
       nex: character.nex,
       estagio: character.estagio,
-      patente: character.patente,
+      patente: character.patente || 'Recruta',
       usarPd: !useSanity
   });
 

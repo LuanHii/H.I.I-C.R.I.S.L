@@ -88,7 +88,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
           atributos: personagem.atributos,
           nex: personagem.nex,
           estagio: personagem.estagio,
-          patente: personagem.patente,
+          patente: personagem.patente || 'Recruta',
           usarPd: true
       });
       return recursos.pd || 0;

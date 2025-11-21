@@ -11,14 +11,14 @@ import {
 export const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 export function normalizePersonagem(personagem: Personagem, autoPatente: boolean): Personagem {
-  const patente = autoPatente ? getPatentePorNex(personagem.nex) : personagem.patente;
+  const patente = (autoPatente ? getPatentePorNex(personagem.nex) : personagem.patente) || 'Recruta';
   const periciasRecalc = calcularPericiasDetalhadas(personagem.atributos, personagem.pericias);
   const recursos = calcularRecursosClasse({
     classe: personagem.classe,
     atributos: personagem.atributos,
     nex: personagem.nex,
     estagio: personagem.estagio,
-    patente,
+    patente: patente || 'Recruta',
     usarPd: personagem.pd !== undefined,
   });
 

@@ -217,7 +217,7 @@ export function FichaEditor({ registro, onSalvar }: FichaEditorProps) {
       classe: draft.classe,
       atributos: draft.atributos,
       nex: draft.nex,
-      patente: draft.patente,
+      patente: draft.patente || 'Recruta',
       usarPd: campanhaRules.usarPd
     });
   }, [
@@ -679,7 +679,7 @@ export function FichaEditor({ registro, onSalvar }: FichaEditorProps) {
         <div className="space-y-2">
           <CampoSelect
             label="Patente"
-            value={draft.patente}
+            value={draft.patente || 'Recruta'}
             disabled={autoPatente}
             onChange={(valor) => {
               if (autoPatente) setAutoPatente(false);
@@ -1873,7 +1873,7 @@ export function FichaEditor({ registro, onSalvar }: FichaEditorProps) {
           <div className="space-y-2">
             <CampoSelect
               label="Patente"
-              value={draft.patente}
+              value={draft.patente || 'Recruta'}
               disabled={autoPatente}
               onChange={(valor) => {
                 if (autoPatente) setAutoPatente(false);
