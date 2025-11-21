@@ -77,11 +77,22 @@ export const SessionManager: React.FC = () => {
     }
   };
 
-  const handleShareAgent = (id: string) => {
-    const link = `${window.location.origin}/ficha/${id}`;
-    navigator.clipboard.writeText(link).then(() => {
-      alert('Link de compartilhamento copiado para a área de transferência!');
-    });
+  const handleShareAgent = async (id: string) => {
+    const agentToShare = fichas.find(a => a.id === id);
+    if (agentToShare) {
+        try {
+            // Força o salvamento na nuvem antes de compartilhar
+            await saveAgentToCloud(id, agentToShare);
+            
+            const link = `${window.location.origin}/ficha/${id}`;
+            navigator.clipboard.writeText(link).then(() => {
+              alert('Ficha sincronizada e Link copiado para a área de transferência!');
+            });
+        } catch (error) {
+            console.error("Erro ao compartilhar:", error);
+            alert("Erro ao sincronizar com a nuvem. Verifique sua conexão.");
+        }
+    }
   };
 
   return (
