@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Personagem, AtributoKey, PericiaName, Item, Poder } from '../../core/types';
 import { StatusBar } from '../StatusBar';
 import { calcularDefesaEfetiva } from '../../logic/combatUtils';
+import { PERICIA_ATRIBUTO } from '../../logic/rulesEngine';
 import { ActionsTab } from '../ActionsTab';
 import { ItemSelectorModal } from './ItemSelectorModal';
 import { AbilitySelectorModal } from './AbilitySelectorModal';
@@ -248,12 +249,23 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 </div>
                 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                    {Object.entries(agent.periciasDetalhadas).map(([nome, detalhe]) => (
-                        <div key={nome} className="flex justify-between items-center p-2 bg-zinc-950/30 rounded border border-zinc-700/50 hover:border-zinc-600 transition-colors">
-                            <span className="text-sm text-zinc-300">{nome}</span>
-                            <span className="font-mono text-zinc-100 font-bold">+{detalhe.bonusFixo}</span>
-                        </div>
-                    ))}
+                    {Object.entries(agent.periciasDetalhadas).map(([nome, detalhe]) => {
+                        const attrKey = PERICIA_ATRIBUTO[nome as PericiaName];
+                        const diceCount = attrKey ? agent.atributos[attrKey] : 0;
+                        
+                        return (
+                            <div key={nome} className="flex justify-between items-center p-2 bg-zinc-950/30 rounded border border-zinc-700/50 hover:border-zinc-600 transition-colors">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-sm text-zinc-300">{nome}</span>
+                                    {attrKey && <span className="text-[10px] text-zinc-500 font-mono uppercase">({attrKey})</span>}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    {attrKey && <span className="text-xs text-zinc-500 font-mono">{diceCount}d20</span>}
+                                    <span className="font-mono text-zinc-100 font-bold">+{detalhe.bonusFixo}</span>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
         )}

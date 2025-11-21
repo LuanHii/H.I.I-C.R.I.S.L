@@ -30,8 +30,6 @@ export default function PlayerAgentPage() {
   }, [id]);
 
   const handleUpdate = async (updatedAgent: Personagem) => {
-      // Allow updates from the player view (e.g. pending choices)
-      // We optimistically update local state (though subscription will overwrite it)
       setAgent(updatedAgent);
       await saveAgentToCloud(id, updatedAgent);
   };

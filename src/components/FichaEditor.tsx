@@ -20,6 +20,7 @@ import {
   getPatenteConfig,
   getPatentePorNex,
   listarEventosNex,
+  PERICIA_ATRIBUTO,
 } from '../logic/rulesEngine';
 import { clamp, normalizePersonagem } from '../core/personagemUtils';
 import { ITENS } from '../data/items';
@@ -893,7 +894,9 @@ export function FichaEditor({ registro, onSalvar }: FichaEditorProps) {
           <tbody>
             {periciaEntries.map(({ nome, grau, detalhes }) => (
               <tr key={nome} className="border-t border-ordem-white/10">
-                <td className="p-2 text-ordem-white">{nome}</td>
+                <td className="p-2 text-ordem-white">
+                  {nome} <span className="text-ordem-white/50 text-[10px] ml-1">({PERICIA_ATRIBUTO[nome]})</span>
+                </td>
                 <td className="p-2">
                   <select
                     value={grau}
@@ -2081,7 +2084,9 @@ export function FichaEditor({ registro, onSalvar }: FichaEditorProps) {
             <tbody>
               {periciaEntries.map(({ nome, grau, detalhes }) => (
                 <tr key={nome} className="border-t border-ordem-white/10">
-                  <td className="p-2 text-ordem-white">{nome}</td>
+                  <td className="p-2 text-ordem-white">
+                    {nome} <span className="text-ordem-white/50 text-[10px] ml-1">({PERICIA_ATRIBUTO[nome]})</span>
+                  </td>
                   <td className="p-2">
                     <select
                       value={grau}

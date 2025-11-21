@@ -53,7 +53,7 @@ const TODAS_PERICIAS: PericiaName[] = [
 
 const PERICIA_ATRIBUTO: Record<PericiaName, AtributoKey> = {
   Acrobacia: 'AGI',
-  Adestramento: 'VIG',
+  Adestramento: 'PRE',
   Artes: 'PRE',
   Atletismo: 'FOR',
   Atualidades: 'INT',
@@ -65,7 +65,7 @@ const PERICIA_ATRIBUTO: Record<PericiaName, AtributoKey> = {
   Furtividade: 'AGI',
   Iniciativa: 'AGI',
   Intimidação: 'PRE',
-  Intuição: 'PRE',
+  Intuição: 'INT',
   Investigação: 'INT',
   Luta: 'FOR',
   Medicina: 'INT',
@@ -729,7 +729,9 @@ function gerarDetalhesPericia(params: {
     const atributoValor = params.atributos[atributoBase];
     const dadosBase = atributoValor > 0 ? atributoValor : 2;
     const criterio = atributoValor > 0 ? 'melhor' : 'pior';
-    const bonusFixo = atributoValor + GRAU_BONUS[params.graus[pericia]] + (params.extrasFixos[pericia] ?? 0);
+    // O bônus fixo NÃO deve somar o valor do atributo. O atributo define os DADOS.
+    // O bônus fixo vem APENAS do grau de treinamento e outros bônus (itens, poderes).
+    const bonusFixo = GRAU_BONUS[params.graus[pericia]] + (params.extrasFixos[pericia] ?? 0);
     const bonusO = params.extrasDados[pericia] ?? 0;
     detalhes[pericia] = {
       atributoBase,
