@@ -50,10 +50,6 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
   }
 
   const personagemAtual = personagemView ?? registro.personagem;
-  // Ensure usarPd is set correctly from the record if missing in character
-  if (registro.usarPd && !personagemAtual.usarPd) {
-      personagemAtual.usarPd = true;
-  }
 
   return (
     <main className="min-h-screen bg-zinc-950 text-white p-4">

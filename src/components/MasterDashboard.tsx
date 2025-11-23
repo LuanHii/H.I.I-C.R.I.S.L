@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { AgentList } from './master/AgentList';
 import { MonsterList } from './master/MonsterList';
 import { SessionManager } from './master/SessionManager';
+import { ItemManager } from './master/ItemManager';
 
 export const MasterDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'sessao' | 'agentes' | 'inventario' | 'ameacas' | 'missoes' | 'regras'>('sessao');
@@ -71,7 +72,13 @@ export const MasterDashboard: React.FC = () => {
                 </div>
             )}
             
-            {(activeTab === 'inventario' || activeTab === 'missoes' || activeTab === 'regras') && (
+            {activeTab === 'inventario' && (
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full">
+                    <ItemManager />
+                </div>
+            )}
+            
+            {(activeTab === 'missoes' || activeTab === 'regras') && (
                 <div className="flex items-center justify-center h-full text-gray-600 font-mono">
                     Módulo em desenvolvimento...
                 </div>
