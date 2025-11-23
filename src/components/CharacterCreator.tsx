@@ -17,6 +17,7 @@ import { CLASSES } from '../data/classes';
 import { ORIGENS } from '../data/origins';
 import { RITUAIS } from '../data/rituals';
 import { ITENS } from '../data/items';
+import { WEAPOWS } from '../data/weapows';
 import { Atributos, ClasseName, ClasseStats, Personagem, PericiaName, Ritual, Item, Elemento } from '../core/types';
 
 const ELEMENTO_COLORS: Record<Elemento, string> = {
@@ -49,6 +50,7 @@ export default function CharacterCreator() {
   const [rituaisSelecionados, setRituaisSelecionados] = useState<Ritual[]>([]);
 
   const [equipamentosSelecionados, setEquipamentosSelecionados] = useState<Item[]>([]);
+  const [activeTab, setActiveTab] = useState<'items' | 'weapons'>('items');
 
   const classeAtual = state.data.classe ?? classeSelecionada ?? (tipoSelecionado === 'Sobrevivente' ? 'Sobrevivente' : 'Combatente');
   const targetSum = tipoSelecionado === 'Sobrevivente' ? 8 : 9;
@@ -67,6 +69,7 @@ export default function CharacterCreator() {
   const limiteRituais = 3;
 
   const itensDisponiveis = useMemo(() => ITENS.filter(i => i.categoria <= 1), []);
+  const armasDisponiveis = useMemo(() => WEAPOWS.filter(w => w.categoria <= 1), []);
   const limiteCatI = tipoSelecionado === 'Sobrevivente' ? 1 : 3;
   const contagemCatI = equipamentosSelecionados.filter(i => i.categoria === 1).length;
 
@@ -643,36 +646,106 @@ export default function CharacterCreator() {
                     </div>
                 </div>
 
+                <div className="flex justify-center gap-4 border-b border-gray-800 pb-4">
+                    <button
+                        onClick={() => setActiveTab('items')}
+                        className={`px-4 py-2 text-sm font-mono uppercase tracking-wider transition-all ${
+                            activeTab === 'items' 
+                                ? 'text-white border-b-2 border-ordem-green' 
+                                : 'text-gray-500 hover:text-gray-300'
+                        }`}
+                    >
+                        Itens Gerais
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('weapons')}
+                        className={`px-4 py-2 text-sm font-mono uppercase tracking-wider transition-all ${
+                            activeTab === 'weapons' 
+                                ? 'text-white border-b-2 border-ordem-red' 
+                                : 'text-gray-500 hover:text-gray-300'
+                        }`}
+                    >
+                        Armas
+                    </button>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 overflow-y-auto custom-scrollbar pr-2 max-h-[400px]">
-                    {itensDisponiveis.map((item, idx) => {
-                        const isSelected = equipamentosSelecionados.some(i => i.nome === item.nome);
-                        return (
-                            <button
-                                key={`${item.nome}-${idx}`}
-                                onClick={() => {
-                                    setEquipamentosSelecionados(prev => 
+                    {activeTab === 'items' ? (
+                        itensDisponiveis.map((item, idx) => {
+                            const isSelected = equipamentosSelecionados.some(i => i.nome === item.nome);
+                            return (
+                                <button
+                                    key={`${item.nome}-${idx}`}
+                                    onClick={() => {
+                                        setEquipamentosSelecionados(prev => 
+                                            isSelected
+                                                ? prev.filter(i => i.nome !== item.nome)
+                                                : [...prev, item]
+                                        );
+                                    }}
+                                    className={`p-3 border text-left transition-all duration-200 rounded flex justify-between items-center ${
                                         isSelected
-                                            ? prev.filter(i => i.nome !== item.nome)
-                                            : [...prev, item]
-                                    );
-                                }}
-                                className={`p-3 border text-left transition-all duration-200 rounded flex justify-between items-center ${
-                                    isSelected
-                                        ? 'border-blue-500 bg-blue-900/10 text-white'
-                                        : 'border-gray-800 bg-black/40 hover:border-gray-600 text-gray-500'
-                                }`}
-                            >
-                                <div>
-                                    <div className="font-bold text-sm">{item.nome}</div>
-                                    <div className="text-xs opacity-70">{item.tipo}</div>
-                                </div>
-                                <div className="text-xs font-mono text-right">
-                                    <div className={item.categoria > 0 ? 'text-ordem-gold' : 'text-gray-600'}>Cat {item.categoria}</div>
-                                    <div>{item.espaco} esp</div>
-                                </div>
-                            </button>
-                        );
-                    })}
+                                            ? 'border-blue-500 bg-blue-900/10 text-white'
+                                            : 'border-gray-800 bg-black/40 hover:border-gray-600 text-gray-500'
+                                    }`}
+                                >
+                                    <div>
+                                        <div className="font-bold text-sm">{item.nome}</div>
+                                        <div className="text-xs opacity-70">{item.tipo}</div>
+                                    </div>
+                                    <div className="text-xs font-mono text-right">
+                                        <div className={item.categoria > 0 ? 'text-ordem-gold' : 'text-gray-600'}>Cat {item.categoria}</div>
+                                        <div>{item.espaco} esp</div>
+                                    </div>
+                                </button>
+                            );
+                        })
+                    ) : (
+                        armasDisponiveis.map((weapon, idx) => {
+                            const isSelected = equipamentosSelecionados.some(i => i.nome === weapon.nome);
+                            return (
+                                <button
+                                    key={`${weapon.nome}-${idx}`}
+                                    onClick={() => {
+                                        setEquipamentosSelecionados(prev => {
+                                            if (isSelected) {
+                                                return prev.filter(i => i.nome !== weapon.nome);
+                                            }
+                                            const newItem: Item = {
+                                                nome: weapon.nome,
+                                                categoria: weapon.categoria,
+                                                espaco: weapon.espaco,
+                                                tipo: weapon.tipo === 'Munição' ? 'Geral' : 'Arma',
+                                                descricao: `${weapon.descricao} ${weapon.proficiencia !== 'N/A' ? `[${weapon.proficiencia}]` : ''}`,
+                                                stats: {
+                                                    dano: weapon.stats.Dano_Base !== '—' ? weapon.stats.Dano_Base : undefined,
+                                                    tipoDano: weapon.stats.Dano_Tipo !== '—' ? weapon.stats.Dano_Tipo : undefined,
+                                                    critico: weapon.stats.Critico !== '—' ? weapon.stats.Critico : undefined,
+                                                    alcance: weapon.stats.Alcance !== '—' ? weapon.stats.Alcance : undefined,
+                                                },
+                                                livro: weapon.livro as any
+                                            };
+                                            return [...prev, newItem];
+                                        });
+                                    }}
+                                    className={`p-3 border text-left transition-all duration-200 rounded flex justify-between items-center ${
+                                        isSelected
+                                            ? 'border-ordem-red bg-ordem-red/10 text-white'
+                                            : 'border-gray-800 bg-black/40 hover:border-gray-600 text-gray-500'
+                                    }`}
+                                >
+                                    <div>
+                                        <div className="font-bold text-sm">{weapon.nome}</div>
+                                        <div className="text-xs opacity-70">{weapon.tipo} ({weapon.proficiencia})</div>
+                                    </div>
+                                    <div className="text-xs font-mono text-right">
+                                        <div className={weapon.categoria > 0 ? 'text-ordem-gold' : 'text-gray-600'}>Cat {weapon.categoria}</div>
+                                        <div>{weapon.espaco} esp</div>
+                                    </div>
+                                </button>
+                            );
+                        })
+                    )}
                 </div>
             </div>
         )}

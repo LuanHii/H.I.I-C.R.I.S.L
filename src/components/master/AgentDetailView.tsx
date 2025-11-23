@@ -16,9 +16,10 @@ interface AgentDetailViewProps {
   agent: Personagem;
   onUpdate: (updated: Personagem) => void;
   readOnly?: boolean;
+  disableInteractionModals?: boolean;
 }
 
-export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdate, readOnly }) => {
+export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdate, readOnly, disableInteractionModals }) => {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     status: true,
     attributes: true,
@@ -117,20 +118,20 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
 
   return (
     <div className="flex flex-col gap-4 h-full overflow-y-auto custom-scrollbar pr-2">
-      {agent.periciasTreinadasPendentes && agent.periciasTreinadasPendentes > 0 && (
+      {!disableInteractionModals && agent.periciasTreinadasPendentes && agent.periciasTreinadasPendentes > 0 && (
           <SkillSelectorModal 
             isOpen={true}
             currentSkills={agent.pericias}
             onSelect={handleSkillSelection}
           />
       )}
-      {agent.escolhaTrilhaPendente && (
+      {!disableInteractionModals && agent.escolhaTrilhaPendente && (
           <TrackSelectorModal 
             agent={agent}
             onConfirm={handleTrackSelection}
           />
       )}
-      {pendingChoice && (
+      {!disableInteractionModals && pendingChoice && (
           <PendingChoiceModal 
             agent={agent}
             pendingChoice={pendingChoice}
@@ -278,20 +279,36 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                     ))}
                 </div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                    {Object.entries(agent.periciasDetalhadas).map(([nome, detalhe]) => {
-                        const attrKey = PERICIA_ATRIBUTO[nome as PericiaName];
-                        const diceCount = attrKey ? agent.atributos[attrKey] : 0;
-                        
+                <div className="space-y-6">
+                    {(['AGI', 'FOR', 'INT', 'PRE', 'VIG'] as AtributoKey[]).map((attr) => {
+                        const skills = Object.entries(agent.periciasDetalhadas).filter(([nome]) => PERICIA_ATRIBUTO[nome as PericiaName] === attr);
+                        if (skills.length === 0) return null;
+
                         return (
-                            <div key={nome} className="flex justify-between items-center p-2 bg-zinc-950/30 rounded border border-zinc-700/50 hover:border-zinc-600 transition-colors">
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-sm text-zinc-300">{nome}</span>
-                                    {attrKey && <span className="text-[10px] text-zinc-500 font-mono uppercase">({attrKey})</span>}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    {attrKey && <span className="text-xs text-zinc-500 font-mono">{diceCount}d20</span>}
-                                    <span className="font-mono text-zinc-100 font-bold">+{detalhe.bonusFixo}</span>
+                            <div key={attr}>
+                                <h4 className="text-zinc-500 font-bold text-xs uppercase tracking-widest mb-2 border-b border-zinc-800 pb-1 flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-zinc-600 rotate-45 inline-block"></span>
+                                    {attr} <span className="text-zinc-600">({agent.atributos[attr]})</span>
+                                </h4>
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                                    {skills.map(([nome, detalhe]) => (
+                                        <div key={nome} className="flex justify-between items-center p-2 bg-zinc-950/30 rounded border border-zinc-700/50 hover:border-zinc-600 transition-colors">
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="text-sm text-zinc-300">{nome}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`text-[10px] px-1 rounded border ${
+                                                    detalhe.grau === 'Destreinado' ? 'border-zinc-800 text-zinc-600' :
+                                                    detalhe.grau === 'Treinado' ? 'border-green-900 text-green-500' :
+                                                    detalhe.grau === 'Veterano' ? 'border-blue-900 text-blue-500' :
+                                                    'border-purple-900 text-purple-500'
+                                                }`}>
+                                                    {detalhe.grau.substring(0, 3).toUpperCase()}
+                                                </span>
+                                                <span className="font-mono text-zinc-100 font-bold">+{detalhe.bonusFixo}</span>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         );

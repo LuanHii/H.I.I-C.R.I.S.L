@@ -11,7 +11,7 @@ export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (pathname?.startsWith('/ficha')) {
+    if (pathname === '/' || pathname?.startsWith('/ficha') || pathname?.startsWith('/agente/novo')) {
       setIsAuthenticated(true);
       setLoading(false);
       return;
@@ -20,6 +20,8 @@ export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
     const savedAuth = sessionStorage.getItem('cris_auth');
     if (savedAuth === 'true') {
       setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
     }
     setLoading(false);
   }, [pathname]);

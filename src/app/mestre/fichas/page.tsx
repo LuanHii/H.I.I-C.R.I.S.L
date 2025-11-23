@@ -3,13 +3,21 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useStoredFichas } from '../../../core/storage/useStoredFichas';
-import { FichaEditor } from '../../../components/FichaEditor';
+import { AgentDetailView } from '../../../components/master/AgentDetailView';
+import { normalizePersonagem } from '../../../core/personagemUtils';
 
 export default function FichasPage() {
   const { fichas, remover, duplicar, salvar } = useStoredFichas();
   const [selecionada, setSelecionada] = useState<string | null>(null);
   const registroAtual = fichas.find((ficha) => ficha.id === selecionada);
   const fichaAtual = registroAtual?.personagem;
+
+  const handleUpdate = (updated: any) => {
+      if (registroAtual) {
+          const final = normalizePersonagem(updated, true);
+          salvar(final, registroAtual.id);
+      }
+  };
 
   return (
     <main className="min-h-screen bg-ordem-black text-ordem-white grid grid-cols-1 lg:grid-cols-3">
@@ -67,7 +75,7 @@ export default function FichasPage() {
                       onClick={(event) => event.stopPropagation()}
                       className="text-xs px-2 py-1 border border-ordem-green text-ordem-green hover:bg-ordem-green/10"
                     >
-                      COCKPIT
+                      EDITAR
                     </Link>
                   );
                 })()}
@@ -103,9 +111,15 @@ export default function FichasPage() {
         </div>
       </section>
 
-      <section className="lg:col-span-2 p-6">
-        {registroAtual ? (
-          <FichaEditor registro={registroAtual} onSalvar={salvar} />
+      <section className="lg:col-span-2 p-6 bg-zinc-900/50">
+        {fichaAtual ? (
+          <div className="h-full overflow-hidden rounded-xl border border-zinc-800">
+             <AgentDetailView 
+                agent={fichaAtual} 
+                onUpdate={handleUpdate}
+                readOnly={false}
+             />
+          </div>
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-center text-ordem-white/60">
             <p>Selecione uma ficha para visualizar os detalhes.</p>

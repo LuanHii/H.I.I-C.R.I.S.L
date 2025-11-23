@@ -6,7 +6,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 const LINKS: Array<{ label: string; href: Route }> = [
-  { label: 'Início', href: '/' },
   { label: 'Novo Agente', href: '/agente/novo' },
   { label: 'Mestre', href: '/mestre' },
   { label: 'Fichas', href: '/mestre/fichas' },
