@@ -39,6 +39,7 @@ export default function CharacterCreator() {
 
   const [nome, setNome] = useState('');
   const [conceito, setConceito] = useState('');
+  const [usarPd, setUsarPd] = useState(false);
   const [classeSelecionada, setClasseSelecionada] = useState<ClasseName | ''>('');
   const [nivelSelecionado, setNivelSelecionado] = useState<number>(0);
 
@@ -117,6 +118,7 @@ export default function CharacterCreator() {
     setTipoSelecionado('');
     setNome('');
     setConceito('');
+    setUsarPd(false);
     setClasseSelecionada('');
     setAtributosTemp({ ...INITIAL_STATE.data.atributos });
     setOrigemSelecionada('');
@@ -164,7 +166,7 @@ export default function CharacterCreator() {
         
         const classeFinal = (classeSelecionada || 'Sobrevivente') as ClasseName;
 
-        newState = setConceitoClasse(state, nome.trim(), conceito.trim(), classeFinal, nex, estagio);
+        newState = setConceitoClasse(state, nome.trim(), conceito.trim(), classeFinal, nex, estagio, usarPd);
       } else if (state.step === 2) {
         newState = setAtributos(state, atributosTemp);
       } else if (state.step === 3) {
@@ -201,7 +203,7 @@ export default function CharacterCreator() {
           <h2 className="text-4xl font-serif text-ordem-green mb-2 tracking-widest glitch-text">
             {resultado.classe === 'Sobrevivente' ? 'SOBREVIVENTE REGISTRADO' : 'AGENTE REGISTRADO'}
           </h2>
-          <p className="text-gray-500 font-mono text-sm">PROTOCOLO: C.R.I.S // STATUS: <span className="text-ordem-green">ATIVO</span></p>
+          <p className="text-gray-400 font-mono text-sm">PROTOCOLO: C.R.I.S // STATUS: <span className="text-ordem-green">ATIVO</span></p>
         </div>
 
         <div className="bg-black/60 border border-ordem-green/30 p-8 rounded-lg relative overflow-hidden shadow-[0_0_30px_rgba(0,255,0,0.05)]">
@@ -215,24 +217,24 @@ export default function CharacterCreator() {
                     <div className="border-l-2 border-ordem-green pl-4">
                         <h3 className="text-ordem-green font-bold text-xs tracking-[0.2em] mb-1">IDENTIFICAÇÃO</h3>
                         <p className="text-2xl font-serif text-white">{resultado.nome}</p>
-                        <p className="text-gray-400 text-sm italic">{resultado.conceito || 'Sem conceito definido'}</p>
+                        <p className="text-gray-300 text-sm italic">{resultado.conceito || 'Sem conceito definido'}</p>
                     </div>
                     
                     <div className="space-y-2 font-mono text-sm text-gray-300">
                         <div className="flex justify-between border-b border-gray-800 pb-1">
-                            <span className="text-gray-500">CLASSE</span>
+                            <span className="text-gray-400">CLASSE</span>
                             <span className="text-white">{resultado.classe}</span>
                         </div>
                         <div className="flex justify-between border-b border-gray-800 pb-1">
-                            <span className="text-gray-500">ORIGEM</span>
+                            <span className="text-gray-400">ORIGEM</span>
                             <span className="text-white">{resultado.origem}</span>
                         </div>
                         <div className="flex justify-between border-b border-gray-800 pb-1">
-                            <span className="text-gray-500">PATENTE</span>
+                            <span className="text-gray-400">PATENTE</span>
                             <span className="text-white">{resultado.patente}</span>
                         </div>
                         <div className="flex justify-between border-b border-gray-800 pb-1">
-                            <span className="text-gray-500">NEX</span>
+                            <span className="text-gray-400">NEX</span>
                             <span className="text-ordem-green font-bold">{resultado.nex}%</span>
                         </div>
                     </div>
@@ -240,7 +242,7 @@ export default function CharacterCreator() {
 
                 <div className="lg:col-span-2 space-y-6">
                     <div>
-                        <h3 className="text-gray-500 font-bold text-xs tracking-[0.2em] mb-4">RECURSOS VITAIS</h3>
+                        <h3 className="text-gray-400 font-bold text-xs tracking-[0.2em] mb-4">RECURSOS VITAIS</h3>
                         <div className="grid grid-cols-3 gap-4">
                             <StatBlock label="PV" value={`${resultado.pv.atual}/${resultado.pv.max}`} color="text-white" />
                             <StatBlock label="PE" value={`${resultado.pe.atual}/${resultado.pe.max}`} color="text-ordem-gold" />
@@ -249,11 +251,11 @@ export default function CharacterCreator() {
                     </div>
 
                     <div>
-                        <h3 className="text-gray-500 font-bold text-xs tracking-[0.2em] mb-4">ATRIBUTOS</h3>
+                        <h3 className="text-gray-400 font-bold text-xs tracking-[0.2em] mb-4">ATRIBUTOS</h3>
                         <div className="flex justify-between gap-2">
                             {(Object.entries(resultado.atributos) as [keyof Atributos, number][]).map(([chave, valor]) => (
                                 <div key={chave} className="flex-1 bg-gray-900/50 border border-gray-800 p-2 flex flex-col items-center justify-center rounded">
-                                    <span className="text-xs text-gray-500 font-bold mb-1">{chave}</span>
+                                    <span className="text-xs text-gray-400 font-bold mb-1">{chave}</span>
                                     <span className="text-xl font-mono text-white">{valor}</span>
                                 </div>
                             ))}
@@ -263,7 +265,7 @@ export default function CharacterCreator() {
             </div>
 
             <div className="mt-8 pt-8 border-t border-gray-800">
-                <h3 className="text-gray-500 font-bold text-xs tracking-[0.2em] mb-4">PERÍCIAS TREINADAS</h3>
+                <h3 className="text-gray-400 font-bold text-xs tracking-[0.2em] mb-4">PERÍCIAS TREINADAS</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                     {periciaEntries.filter(([_, d]) => d.grau !== 'Destreinado').map(([nomePericia, detalhes]) => (
                         <div key={nomePericia} className="bg-black/40 border border-gray-800 p-2 rounded flex justify-between items-center">
@@ -276,7 +278,7 @@ export default function CharacterCreator() {
 
             {resultado.rituais.length > 0 && (
                 <div className="mt-8 pt-8 border-t border-gray-800">
-                    <h3 className="text-gray-500 font-bold text-xs tracking-[0.2em] mb-4">RITUAIS</h3>
+                    <h3 className="text-gray-400 font-bold text-xs tracking-[0.2em] mb-4">RITUAIS</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {resultado.rituais.map((ritual) => (
                             <div key={ritual.nome} className={`bg-black/40 border p-3 rounded ${ELEMENTO_COLORS[ritual.elemento] || 'border-gray-700'}`}>
@@ -284,7 +286,7 @@ export default function CharacterCreator() {
                                     <span className="font-serif font-bold">{ritual.nome}</span>
                                     <span className="text-[10px] uppercase opacity-70">{ritual.elemento}</span>
                                 </div>
-                                <p className="text-xs text-gray-400 line-clamp-2">{ritual.descricao}</p>
+                                <p className="text-xs text-gray-300 line-clamp-2">{ritual.descricao}</p>
                             </div>
                         ))}
                     </div>
@@ -293,12 +295,12 @@ export default function CharacterCreator() {
 
             {resultado.equipamentos.length > 0 && (
                 <div className="mt-8 pt-8 border-t border-gray-800">
-                    <h3 className="text-gray-500 font-bold text-xs tracking-[0.2em] mb-4">EQUIPAMENTO</h3>
+                    <h3 className="text-gray-400 font-bold text-xs tracking-[0.2em] mb-4">EQUIPAMENTO</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {resultado.equipamentos.map((item, idx) => (
                             <div key={`${item.nome}-${idx}`} className="bg-black/40 border border-gray-800 p-2 rounded flex justify-between items-center">
                                 <span className="text-sm text-gray-300">{item.nome}</span>
-                                <span className="text-xs font-mono text-gray-500">Cat {item.categoria} | {item.espaco} esp</span>
+                                <span className="text-xs font-mono text-gray-400">Cat {item.categoria} | {item.espaco} esp</span>
                             </div>
                         ))}
                     </div>
@@ -331,7 +333,7 @@ export default function CharacterCreator() {
             <h1 className="text-3xl md:text-4xl font-serif text-white tracking-wider mb-2">
                 NOVO <span className="text-ordem-red">{tipoSelecionado === 'Sobrevivente' ? 'SOBREVIVENTE' : 'AGENTE'}</span>
             </h1>
-            <div className="flex items-center gap-2 text-xs font-mono text-gray-500">
+            <div className="flex items-center gap-2 text-xs font-mono text-gray-400">
                 <span className="w-2 h-2 bg-ordem-green rounded-full animate-pulse"></span>
                 <span>SISTEMA C.R.I.S. CONECTADO</span>
             </div>
@@ -347,7 +349,7 @@ export default function CharacterCreator() {
                             state.step >= step ? 'bg-ordem-red shadow-[0_0_8px_rgba(220,38,38,0.5)]' : 'bg-gray-800'
                         }`} 
                     />
-                    <span className={`text-[8px] md:text-[10px] font-mono uppercase ${state.step >= step ? 'text-ordem-red' : 'text-gray-700'}`}>
+                    <span className={`text-[8px] md:text-[10px] font-mono uppercase ${state.step >= step ? 'text-ordem-red' : 'text-gray-400'}`}>
                         {step === 0 && 'Tipo'}
                         {step === 1 && 'Conceito'}
                         {step === 2 && 'Atributos'}
@@ -379,7 +381,7 @@ export default function CharacterCreator() {
                 >
                     <span className="text-4xl">🛡️</span>
                     <h3 className="text-2xl font-serif text-white">AGENTE DA ORDEM</h3>
-                    <p className="text-gray-400 text-center text-sm">Recruta (NEX 5%). Treinado para enfrentar o paranormal.</p>
+                    <p className="text-gray-300 text-center text-sm">Recruta (NEX 5%). Treinado para enfrentar o paranormal.</p>
                 </button>
                 <button 
                     onClick={() => setTipoSelecionado('Sobrevivente')}
@@ -387,7 +389,7 @@ export default function CharacterCreator() {
                 >
                     <span className="text-4xl">🩸</span>
                     <h3 className="text-2xl font-serif text-white">SOBREVIVENTE</h3>
-                    <p className="text-gray-400 text-center text-sm">Civil (NEX 0%). Uma pessoa comum arrastada para o horror.</p>
+                    <p className="text-gray-300 text-center text-sm">Civil (NEX 0%). Uma pessoa comum arrastada para o horror.</p>
                 </button>
             </div>
         )}
@@ -396,7 +398,7 @@ export default function CharacterCreator() {
           <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Nome do Personagem</label>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Nome do Personagem</label>
                 <input 
                   type="text" 
                   value={nome}
@@ -406,7 +408,7 @@ export default function CharacterCreator() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Conceito / Passado</label>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Conceito / Passado</label>
                 <input 
                   type="text" 
                   value={conceito}
@@ -417,11 +419,25 @@ export default function CharacterCreator() {
               </div>
             </div>
 
+            <div className="flex items-center gap-3 p-4 bg-black/30 border border-gray-800 rounded-lg">
+                <input 
+                    type="checkbox" 
+                    id="usarPd" 
+                    checked={usarPd} 
+                    onChange={(e) => setUsarPd(e.target.checked)}
+                    className="w-5 h-5 rounded border-gray-600 bg-black/50 text-ordem-red focus:ring-ordem-red/50"
+                />
+                <label htmlFor="usarPd" className="cursor-pointer">
+                    <span className="block text-sm font-bold text-gray-300">Usar Regra de Determinação (Sobrevivendo ao Horror)</span>
+                    <span className="block text-xs text-gray-400">Substitui Sanidade e PE por Pontos de Determinação (PD).</span>
+                </label>
+            </div>
+
             {tipoSelecionado === 'Agente' && (
                 <div className="space-y-4">
                 <div className="flex gap-4">
                     <div className="flex-1 space-y-4">
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Classe</label>
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Classe</label>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {classeEntries.filter(([nome]) => nome !== 'Sobrevivente').map(([nomeClasse, stats]) => (
                             <button
@@ -437,7 +453,7 @@ export default function CharacterCreator() {
                                 <h3 className={`text-xl font-serif mb-2 ${classeSelecionada === nomeClasse ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}>
                                     {nomeClasse}
                                 </h3>
-                                <ul className="text-xs text-gray-500 space-y-1 font-mono">
+                                <ul className="text-xs text-gray-400 space-y-1 font-mono">
                                     <li>PV: {stats.pvInicial} (+{stats.pvPorNivel})</li>
                                     <li>PE: {stats.peInicial} (+{stats.pePorNivel})</li>
                                     <li>SAN: {stats.sanInicial} (+{stats.sanPorNivel})</li>
@@ -448,7 +464,7 @@ export default function CharacterCreator() {
                         </div>
                     </div>
                     <div className="w-32 space-y-2">
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">NEX Inicial</label>
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">NEX Inicial</label>
                         <select
                             value={nivelSelecionado}
                             onChange={(e) => setNivelSelecionado(Number(e.target.value))}
@@ -467,10 +483,10 @@ export default function CharacterCreator() {
                 <div className="flex gap-4">
                     <div className="flex-1 p-6 border border-ordem-red/30 bg-ordem-red/5 rounded text-center flex flex-col justify-center">
                         <h3 className="text-xl font-serif text-white mb-2">CLASSE: SOBREVIVENTE</h3>
-                        <p className="text-gray-400 text-sm">Você não possui treinamento especial. Sua única arma é sua vontade de viver.</p>
+                        <p className="text-gray-300 text-sm">Você não possui treinamento especial. Sua única arma é sua vontade de viver.</p>
                     </div>
                     <div className="w-32 space-y-2">
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Estágio</label>
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Estágio</label>
                         <select
                             value={nivelSelecionado}
                             onChange={(e) => setNivelSelecionado(Number(e.target.value))}

@@ -164,8 +164,13 @@ function recalculateStats(char: Personagem) {
   char.san.atual += diffSAN;
   
   if (char.usarPd) {
-      const currentPd = char.pd?.atual ?? derived.pdMax;
-      char.pd = { atual: currentPd, max: derived.pdMax };
+      if (!char.pd) {
+          char.pd = { atual: derived.pdMax, max: derived.pdMax };
+      } else {
+          const diffPD = derived.pdMax - char.pd.max;
+          char.pd.max = derived.pdMax;
+          char.pd.atual += diffPD;
+      }
   }
 }
 

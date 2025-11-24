@@ -8,6 +8,8 @@ export const CLASSES: Record<ClasseName, ClasseStats> = {
     pePorNivel: 2,
     sanInicial: 12,
     sanPorNivel: 3,
+    pdInicial: 6,
+    pdPorNivel: 3,
     periciasIniciais: 1,
     periciasObrigatorias: ['Luta', 'Pontaria', 'Fortitude', 'Reflexos'],
     proficiencias: ['Armas Simples', 'Armas Táticas', 'Proteções Leves']
@@ -19,6 +21,8 @@ export const CLASSES: Record<ClasseName, ClasseStats> = {
     pePorNivel: 3,
     sanInicial: 16,
     sanPorNivel: 4,
+    pdInicial: 8,
+    pdPorNivel: 4,
     periciasIniciais: 7,
     periciasObrigatorias: [],
     proficiencias: ['Armas Simples', 'Proteções Leves']
@@ -30,6 +34,8 @@ export const CLASSES: Record<ClasseName, ClasseStats> = {
     pePorNivel: 4,
     sanInicial: 20,
     sanPorNivel: 5,
+    pdInicial: 10,
+    pdPorNivel: 5,
     periciasIniciais: 3,
     periciasObrigatorias: ['Ocultismo', 'Vontade'],
     proficiencias: ['Armas Simples']
@@ -41,6 +47,8 @@ export const CLASSES: Record<ClasseName, ClasseStats> = {
     pePorNivel: 2,
     sanInicial: 8,
     sanPorNivel: 2,
+    pdInicial: 4,
+    pdPorNivel: 2,
     periciasIniciais: 1,
     periciasObrigatorias: [],
     proficiencias: []

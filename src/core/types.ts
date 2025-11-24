@@ -42,6 +42,8 @@ export interface ClasseStats {
   pePorNivel: number;
   sanInicial: number;
   sanPorNivel: number;
+  pdInicial: number;
+  pdPorNivel: number;
   periciasIniciais: number;
   periciasObrigatorias: PericiaName[];
   proficiencias: string[];

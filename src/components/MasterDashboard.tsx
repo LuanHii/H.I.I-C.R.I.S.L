@@ -14,38 +14,38 @@ export const MasterDashboard: React.FC = () => {
         <div className="flex items-center gap-8">
             <div className="flex flex-col">
                 <h1 className="text-xl font-serif text-ordem-red tracking-wider leading-none">MESTRE</h1>
-                <span className="text-[10px] text-gray-500 font-mono tracking-[0.2em]">PAINEL DE CONTROLE</span>
+                <span className="text-[10px] text-gray-400 font-mono tracking-[0.2em]">PAINEL DE CONTROLE</span>
             </div>
 
             <nav className="flex items-center gap-1">
                 <button 
                     onClick={() => setActiveTab('sessao')}
-                    className={`px-4 py-2 font-mono text-sm border-b-2 transition-colors ${activeTab === 'sessao' ? 'border-ordem-red text-white' : 'border-transparent text-gray-500 hover:text-gray-300'}`}
+                    className={`px-4 py-2 font-mono text-sm border-b-2 transition-colors ${activeTab === 'sessao' ? 'border-ordem-red text-white' : 'border-transparent text-gray-400 hover:text-gray-300'}`}
                 >
                     SESSÃO ATUAL
                 </button>
                 <button 
                     onClick={() => setActiveTab('agentes')}
-                    className={`px-4 py-2 font-mono text-sm border-b-2 transition-colors ${activeTab === 'agentes' ? 'border-ordem-red text-white' : 'border-transparent text-gray-500 hover:text-gray-300'}`}
+                    className={`px-4 py-2 font-mono text-sm border-b-2 transition-colors ${activeTab === 'agentes' ? 'border-ordem-red text-white' : 'border-transparent text-gray-400 hover:text-gray-300'}`}
                 >
                     AGENTES
                 </button>
                 <button 
                     onClick={() => setActiveTab('ameacas')}
-                    className={`px-4 py-2 font-mono text-sm border-b-2 transition-colors ${activeTab === 'ameacas' ? 'border-ordem-red text-white' : 'border-transparent text-gray-500 hover:text-gray-300'}`}
+                    className={`px-4 py-2 font-mono text-sm border-b-2 transition-colors ${activeTab === 'ameacas' ? 'border-ordem-red text-white' : 'border-transparent text-gray-400 hover:text-gray-300'}`}
                 >
                     AMEAÇAS
                 </button>
                 <button 
                     onClick={() => setActiveTab('inventario')}
-                    className={`px-4 py-2 font-mono text-sm border-b-2 transition-colors ${activeTab === 'inventario' ? 'border-ordem-red text-white' : 'border-transparent text-gray-500 hover:text-gray-300'}`}
+                    className={`px-4 py-2 font-mono text-sm border-b-2 transition-colors ${activeTab === 'inventario' ? 'border-ordem-red text-white' : 'border-transparent text-gray-400 hover:text-gray-300'}`}
                 >
                     INVENTÁRIO
                 </button>
             </nav>
         </div>
 
-        <Link href="/" className="text-xs font-mono text-gray-600 hover:text-white transition-colors">
+        <Link href="/" className="text-xs font-mono text-gray-400 hover:text-white transition-colors">
             SAIR
         </Link>
       </header>

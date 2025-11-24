@@ -823,7 +823,7 @@ function calcularPd(
 
   const nexBase = Math.max(5, nex);
   const incrementos = Math.floor((nexBase - 5) / 5);
-  const valorPorNivel = cfg.porNivel + presenca;
+  const valorPorNivel = cfg.porNivel;
   return base + incrementos * valorPorNivel;
 }
 

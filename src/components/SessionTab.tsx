@@ -46,7 +46,7 @@ export const SessionTab: React.FC<SessionTabProps> = ({ personagem, onUpdate }) 
               <div className="space-y-2">
                 {personagem.log.map((entry, index) => (
                   <div key={index} className="flex gap-2 text-zinc-400 border-b border-zinc-900 pb-1 last:border-0">
-                    <span className="text-zinc-600 text-xs whitespace-nowrap">
+                    <span className="text-zinc-400 text-xs whitespace-nowrap">
                       {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                     </span>
                     <span className={`
@@ -61,7 +61,7 @@ export const SessionTab: React.FC<SessionTabProps> = ({ personagem, onUpdate }) 
                 ))}
               </div>
             ) : (
-              <p className="text-zinc-600 italic">Nenhum registro.</p>
+              <p className="text-zinc-400 italic">Nenhum registro.</p>
             )}
           </div>
         </div>

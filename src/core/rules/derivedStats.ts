@@ -22,24 +22,22 @@ export function calculateDerivedStats(
   
   const growthSteps = Math.max(0, nivel - 1);
 
-  let basePD = 4;
-  if (classe === 'Combatente') basePD = 6;
-  if (classe === 'Especialista') basePD = 5;
-  if (classe === 'Ocultista') basePD = 10; // Assuming Ocultista base PD based on rulesEngine
+  let pdMax = 0;
   
-  const pdMax = basePD + atributos.PRE + (growthSteps * (classe === 'Sobrevivente' ? 2 : 0)); // Placeholder for non-survivor PD growth if needed
-
   if (classe === 'Sobrevivente') {
     const survivorGrowth = Math.max(0, estagio - 1);
+    pdMax = stats.pdInicial + atributos.PRE + (survivorGrowth * stats.pdPorNivel);
     
     return {
       pvMax: 8 + atributos.VIG + (survivorGrowth * 2),
       peMax: 2 + atributos.PRE + (survivorGrowth * 1),
       sanMax: stats.sanInicial + (survivorGrowth * stats.sanPorNivel),
-      pdMax: 4 + atributos.PRE + (survivorGrowth * 2),
+      pdMax: pdMax,
       peRodada: 1
     };
   }
+
+  pdMax = stats.pdInicial + atributos.PRE + (growthSteps * (stats.pdPorNivel + atributos.PRE));
 
   let peRodada = 1;
   if (nex >= 5) peRodada = 1;
@@ -51,13 +49,11 @@ export function calculateDerivedStats(
   if (nex >= 85) peRodada = 7;
   if (nex >= 99) peRodada = 8;
 
-  peRodada = Math.max(1, Math.floor(nex / 5));
-
   return {
     pvMax: stats.pvInicial + atributos.VIG + (growthSteps * (stats.pvPorNivel + atributos.VIG)),
     peMax: stats.peInicial + atributos.PRE + (growthSteps * (stats.pePorNivel + atributos.PRE)),
     sanMax: stats.sanInicial + (growthSteps * stats.sanPorNivel),
-    pdMax: pdMax,
+    pdMax: stats.pdInicial + atributos.PRE + (growthSteps * stats.pdPorNivel),
     peRodada: peRodada
   };
 }

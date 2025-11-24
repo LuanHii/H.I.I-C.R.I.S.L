@@ -45,7 +45,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
         <span className="text-ordem-white font-bold text-lg tracking-wider uppercase">{label}</span>
         <span className="text-ordem-white font-mono text-xl">
           <span className={current < max / 4 ? "text-ordem-red animate-pulse" : ""}>{current}</span>
-          <span className="text-gray-500 text-sm mx-1">/</span>
+          <span className="text-gray-400 text-sm mx-1">/</span>
           <span className="text-gray-400 text-sm">{max}</span>
         </span>
       </div>

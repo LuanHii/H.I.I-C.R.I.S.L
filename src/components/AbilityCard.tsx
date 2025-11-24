@@ -71,6 +71,7 @@ export const AbilityCard: React.FC<AbilityCardProps> = ({ data, type, useSanity 
               <div>Alcance: {(data as Ritual).alcance}</div>
               <div>Alvo: {(data as Ritual).alvo}</div>
               <div>Duração: {(data as Ritual).duracao}</div>
+              {(data as Ritual).resistencia && <div className="col-span-2">Resistência: {(data as Ritual).resistencia}</div>}
             </div>
           )}
 
@@ -80,10 +81,10 @@ export const AbilityCard: React.FC<AbilityCardProps> = ({ data, type, useSanity 
             <div className="space-y-1 mt-2 bg-black/20 p-2 rounded">
               <div className="text-xs"><strong className="text-ordem-white">Padrão:</strong> {(data as Ritual).efeito.padrao}</div>
               {(data as Ritual).efeito.discente && (
-                <div className="text-xs"><strong className="text-ordem-white">Discente:</strong> {(data as Ritual).efeito.discente}</div>
+                <div className="text-xs"><strong className="text-ordem-gold">Discente:</strong> {(data as Ritual).efeito.discente}</div>
               )}
               {(data as Ritual).efeito.verdadeiro && (
-                <div className="text-xs"><strong className="text-ordem-white">Verdadeiro:</strong> {(data as Ritual).efeito.verdadeiro}</div>
+                <div className="text-xs"><strong className="text-ordem-red">Verdadeiro:</strong> {(data as Ritual).efeito.verdadeiro}</div>
               )}
             </div>
           )}

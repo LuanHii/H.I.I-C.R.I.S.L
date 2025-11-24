@@ -17,6 +17,7 @@ export interface CreationState {
     origem?: Origem;
     nex?: number;
     estagio?: number;
+    usarPd?: boolean;
     atributos: Atributos;
     periciasTreinadas: PericiaName[];
     periciasSelecionadas?: PericiaName[];
@@ -52,11 +53,12 @@ export function setConceitoClasse(
   conceito: string, 
   classe: ClasseName,
   nex?: number,
-  estagio?: number
+  estagio?: number,
+  usarPd?: boolean
 ): CreationState {
   return {
     ...state,
-    data: { ...state.data, nome, conceito, classe, nex, estagio },
+    data: { ...state.data, nome, conceito, classe, nex, estagio, usarPd },
     step: 2
   };
 }

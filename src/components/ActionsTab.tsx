@@ -98,6 +98,39 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
         <p className="text-sm text-gray-400 leading-relaxed relative z-10">
           {action.descricao}
         </p>
+
+        {isRitual && (
+            <div className="mt-3 pt-3 border-t border-gray-800/50 space-y-3 text-xs relative z-10">
+                <div className="grid grid-cols-2 gap-y-1 gap-x-4 text-gray-400">
+                    <div><span className="font-bold text-gray-500 uppercase tracking-wider text-[10px]">Execução:</span> {(action as Ritual).execucao}</div>
+                    <div><span className="font-bold text-gray-500 uppercase tracking-wider text-[10px]">Alcance:</span> {(action as Ritual).alcance}</div>
+                    <div><span className="font-bold text-gray-500 uppercase tracking-wider text-[10px]">Alvo:</span> {(action as Ritual).alvo}</div>
+                    <div><span className="font-bold text-gray-500 uppercase tracking-wider text-[10px]">Duração:</span> {(action as Ritual).duracao}</div>
+                    {(action as Ritual).resistencia && (
+                        <div className="col-span-2"><span className="font-bold text-gray-500 uppercase tracking-wider text-[10px]">Resistência:</span> {(action as Ritual).resistencia}</div>
+                    )}
+                </div>
+                
+                <div className="space-y-2">
+                    <div className="bg-black/20 p-2 rounded border border-gray-800/50">
+                        <span className="text-ordem-white font-bold block mb-1 text-[10px] uppercase tracking-widest">Padrão</span>
+                        <p className="text-gray-400">{(action as Ritual).efeito.padrao}</p>
+                    </div>
+                    {(action as Ritual).efeito.discente && (
+                        <div className="bg-black/20 p-2 rounded border border-gray-800/50">
+                            <span className="text-ordem-gold font-bold block mb-1 text-[10px] uppercase tracking-widest">Discente</span>
+                            <p className="text-gray-400">{(action as Ritual).efeito.discente}</p>
+                        </div>
+                    )}
+                    {(action as Ritual).efeito.verdadeiro && (
+                        <div className="bg-black/20 p-2 rounded border border-gray-800/50">
+                            <span className="text-ordem-red font-bold block mb-1 text-[10px] uppercase tracking-widest">Verdadeiro</span>
+                            <p className="text-gray-400">{(action as Ritual).efeito.verdadeiro}</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        )}
       </div>
     );
   };

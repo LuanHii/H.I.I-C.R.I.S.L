@@ -56,7 +56,7 @@ export const TrackSelectorModal: React.FC<TrackSelectorModalProps> = ({ agent, o
                     </p>
 
                     <div className="mt-4 pt-4 border-t border-zinc-800/50">
-                        <span className="text-xs text-zinc-500 uppercase tracking-wider font-bold mb-2 block">
+                        <span className="text-xs text-zinc-400 uppercase tracking-wider font-bold mb-2 block">
                             Primeira Habilidade
                         </span>
                         {track.habilidades[0] && (
@@ -64,7 +64,7 @@ export const TrackSelectorModal: React.FC<TrackSelectorModalProps> = ({ agent, o
                                 <span className="text-zinc-300 font-bold text-sm block mb-1">
                                     {track.habilidades[0].nome}
                                 </span>
-                                <p className="text-xs text-zinc-500 line-clamp-3">
+                                <p className="text-xs text-zinc-400 line-clamp-3">
                                     {track.habilidades[0].descricao}
                                 </p>
                             </div>
@@ -75,7 +75,7 @@ export const TrackSelectorModal: React.FC<TrackSelectorModalProps> = ({ agent, o
         </div>
 
         <div className="mt-6 pt-4 border-t border-zinc-800 flex justify-end gap-4 items-center">
-            <div className="text-zinc-500 text-sm italic">
+            <div className="text-zinc-400 text-sm italic">
                 {selectedTrack ? `Selecionado: ${selectedTrack}` : 'Nenhuma trilha selecionada'}
             </div>
             {onDefer && (

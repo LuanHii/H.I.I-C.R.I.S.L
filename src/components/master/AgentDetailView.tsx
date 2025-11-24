@@ -11,6 +11,7 @@ import { levelUp, levelDown, applyAttributePoint, removeAttributePoint, chooseTr
 import { ProgressionTab } from '../ProgressionTab';
 import { PendingChoiceModal } from '../PendingChoiceModal';
 import { TrackSelectorModal } from '../TrackSelectorModal';
+import { calculateDerivedStats } from '../../core/rules/derivedStats';
 
 interface AgentDetailViewProps {
   agent: Personagem;
@@ -55,6 +56,32 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
         const updated = removeAttributePoint(agent, attr);
         onUpdate(updated);
     }
+  };
+
+  const togglePdMode = () => {
+    const newMode = !agent.usarPd;
+    const derived = calculateDerivedStats(agent.classe, agent.atributos, agent.nex, agent.estagio);
+    
+    const updated = { ...agent, usarPd: newMode };
+    
+    if (newMode) {
+        updated.pd = {
+            atual: derived.pdMax,
+            max: derived.pdMax
+        };
+    } else {
+        updated.san = {
+            atual: derived.sanMax,
+            max: derived.sanMax,
+            perturbado: false
+        };
+        updated.pe = {
+            atual: derived.peMax,
+            max: derived.peMax,
+            rodada: derived.peRodada
+        };
+    }
+    onUpdate(updated);
   };
 
   const updateStat = (stat: 'pv' | 'pe' | 'san' | 'pd', newValue: number) => {
@@ -158,6 +185,15 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
           />
       )}
       <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-6 relative overflow-hidden shadow-lg">
+        {!readOnly && (
+            <button 
+                onClick={togglePdMode}
+                className="absolute top-4 right-4 p-2 bg-zinc-800/50 hover:bg-zinc-700 rounded-full text-zinc-400 hover:text-white transition-colors z-20"
+                title={agent.usarPd ? "Desativar Regra de Determinação" : "Ativar Regra de Determinação"}
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+        )}
         <div className="absolute top-0 right-0 p-4 opacity-10">
             <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M8 20v2h8v-2"/><path d="m12.5 17-.5-1-.5 1h1z"/><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20"/></svg>
         </div>
@@ -197,7 +233,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
             <div className="text-right">
                 <div className="text-xs text-zinc-400 uppercase tracking-widest mb-1">Defesa</div>
                 <div className="text-3xl font-bold text-zinc-100 flex items-center justify-end gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-500"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
                     {calcularDefesaEfetiva(agent)}
                 </div>
             </div>
@@ -305,9 +341,9 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
 
                         return (
                             <div key={attr}>
-                                <h4 className="text-zinc-500 font-bold text-xs uppercase tracking-widest mb-2 border-b border-zinc-800 pb-1 flex items-center gap-2">
-                                    <span className="w-2 h-2 bg-zinc-600 rotate-45 inline-block"></span>
-                                    {attr} <span className="text-zinc-600">({agent.atributos[attr]})</span>
+                                <h4 className="text-zinc-400 font-bold text-xs uppercase tracking-widest mb-2 border-b border-zinc-800 pb-1 flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-zinc-500 rotate-45 inline-block"></span>
+                                    {attr} <span className="text-zinc-400">({agent.atributos[attr]})</span>
                                 </h4>
                                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                                     {skills.map(([nome, detalhe]) => (
@@ -317,7 +353,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <span className={`text-[10px] px-1 rounded border ${
-                                                    detalhe.grau === 'Destreinado' ? 'border-zinc-800 text-zinc-600' :
+                                                    detalhe.grau === 'Destreinado' ? 'border-zinc-800 text-zinc-400' :
                                                     detalhe.grau === 'Treinado' ? 'border-green-900 text-green-500' :
                                                     detalhe.grau === 'Veterano' ? 'border-blue-900 text-blue-500' :
                                                     'border-purple-900 text-purple-500'
