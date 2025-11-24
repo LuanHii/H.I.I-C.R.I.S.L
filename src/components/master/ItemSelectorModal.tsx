@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ITENS } from '../../data/items';
 import { WEAPOWS } from '../../data/weapows';
+import { useStoredItems } from '../../core/storage/useStoredItems';
 import { Item } from '../../core/types';
 
 interface ItemSelectorModalProps {
@@ -13,9 +14,11 @@ export const ItemSelectorModal: React.FC<ItemSelectorModalProps> = ({ isOpen, on
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<number | 'all'>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const { customItems, customWeapons } = useStoredItems();
 
   const allItems = useMemo(() => {
-    const weaponsAsItems: Item[] = WEAPOWS.map(w => ({
+    const allWeaponsSource = [...WEAPOWS, ...customWeapons];
+    const weaponsAsItems: Item[] = allWeaponsSource.map(w => ({
       nome: w.nome,
       categoria: w.categoria,
       espaco: w.espaco,
@@ -29,8 +32,8 @@ export const ItemSelectorModal: React.FC<ItemSelectorModalProps> = ({ isOpen, on
       },
       livro: w.livro as any
     }));
-    return [...ITENS, ...weaponsAsItems];
-  }, []);
+    return [...ITENS, ...customItems, ...weaponsAsItems];
+  }, [customItems, customWeapons]);
 
   const uniqueTypes = useMemo(() => {
     const types = new Set(allItems.map(i => i.tipo));

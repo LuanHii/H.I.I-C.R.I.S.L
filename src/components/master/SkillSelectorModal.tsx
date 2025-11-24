@@ -6,9 +6,10 @@ interface SkillSelectorModalProps {
   isOpen: boolean;
   currentSkills: Record<PericiaName, GrauTreinamento>;
   onSelect: (skill: PericiaName) => void;
+  onDefer?: () => void;
 }
 
-export const SkillSelectorModal: React.FC<SkillSelectorModalProps> = ({ isOpen, currentSkills, onSelect }) => {
+export const SkillSelectorModal: React.FC<SkillSelectorModalProps> = ({ isOpen, currentSkills, onSelect, onDefer }) => {
   const [selected, setSelected] = useState<PericiaName | null>(null);
 
   if (!isOpen) return null;
@@ -41,13 +42,23 @@ export const SkillSelectorModal: React.FC<SkillSelectorModalProps> = ({ isOpen, 
           ))}
         </div>
 
-        <button
-          onClick={() => selected && onSelect(selected)}
-          disabled={!selected}
-          className="w-full py-3 bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded transition-colors"
-        >
-          Confirmar Escolha
-        </button>
+        <div className="flex gap-2">
+          {onDefer && (
+            <button
+              onClick={onDefer}
+              className="w-1/3 py-3 border border-zinc-600 text-zinc-400 hover:text-white hover:border-white rounded transition-colors font-bold"
+            >
+              Depois
+            </button>
+          )}
+          <button
+            onClick={() => selected && onSelect(selected)}
+            disabled={!selected}
+            className="flex-1 py-3 bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded transition-colors"
+          >
+            Confirmar Escolha
+          </button>
+        </div>
       </div>
     </div>
   );

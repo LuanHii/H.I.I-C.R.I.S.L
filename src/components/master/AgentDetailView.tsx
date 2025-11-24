@@ -31,6 +31,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
 
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [isAbilityModalOpen, setIsAbilityModalOpen] = useState(false);
+  const [isPendingChoiceModalSuppressed, setIsPendingChoiceModalSuppressed] = useState(false);
 
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -116,26 +117,44 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     ? agent.habilidadesTrilhaPendentes[0] 
     : null;
 
+  const hasPendingStuff = pendingChoice || (agent.periciasTreinadasPendentes && agent.periciasTreinadasPendentes > 0) || agent.escolhaTrilhaPendente;
+
   return (
     <div className="flex flex-col gap-4 h-full overflow-y-auto custom-scrollbar pr-2">
-      {!disableInteractionModals && agent.periciasTreinadasPendentes && agent.periciasTreinadasPendentes > 0 && (
+      {hasPendingStuff && isPendingChoiceModalSuppressed && !disableInteractionModals && (
+          <button 
+            onClick={() => setIsPendingChoiceModalSuppressed(false)}
+            className="w-full bg-yellow-600/20 border border-yellow-600/50 text-yellow-500 p-3 rounded flex items-center justify-between hover:bg-yellow-600/30 transition-colors animate-pulse"
+          >
+              <div className="flex items-center gap-2">
+                  <span className="text-xl">⚠️</span>
+                  <span className="font-bold">ESCOLHAS PENDENTES</span>
+              </div>
+              <span className="text-xs uppercase tracking-wider border border-yellow-600/50 px-2 py-1 rounded">Resolver Agora</span>
+          </button>
+      )}
+
+      {!disableInteractionModals && !isPendingChoiceModalSuppressed && agent.periciasTreinadasPendentes && agent.periciasTreinadasPendentes > 0 && (
           <SkillSelectorModal 
             isOpen={true}
             currentSkills={agent.pericias}
             onSelect={handleSkillSelection}
+            onDefer={() => setIsPendingChoiceModalSuppressed(true)}
           />
       )}
-      {!disableInteractionModals && agent.escolhaTrilhaPendente && (
+      {!disableInteractionModals && !isPendingChoiceModalSuppressed && agent.escolhaTrilhaPendente && (
           <TrackSelectorModal 
             agent={agent}
             onConfirm={handleTrackSelection}
+            onDefer={() => setIsPendingChoiceModalSuppressed(true)}
           />
       )}
-      {!disableInteractionModals && pendingChoice && (
+      {!disableInteractionModals && !isPendingChoiceModalSuppressed && pendingChoice && (
           <PendingChoiceModal 
             agent={agent}
             pendingChoice={pendingChoice}
             onConfirm={onUpdate}
+            onDefer={() => setIsPendingChoiceModalSuppressed(true)}
           />
       )}
       <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-6 relative overflow-hidden shadow-lg">
@@ -259,7 +278,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                             <span className="text-xs font-mono text-zinc-400 uppercase mb-1">{key}</span>
                             <span className="text-2xl font-bold text-zinc-100">{val}</span>
                             
-                            {!readOnly && agent.pontosAtributoPendentes && agent.pontosAtributoPendentes > 0 && (
+                            {!readOnly && agent.pontosAtributoPendentes && agent.pontosAtributoPendentes > 0 && (agent.classe !== 'Sobrevivente' || val < 3) && (
                                 <button 
                                     onClick={() => handleAttributeChange(key as AtributoKey, true)}
                                     className="absolute -top-2 -right-2 w-6 h-6 bg-green-600 hover:bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg"

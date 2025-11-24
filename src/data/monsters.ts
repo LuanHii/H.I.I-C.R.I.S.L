@@ -251,7 +251,7 @@ export const AMEACAS: Ameaca[] = [
       },
       {
         nome: 'Investida Predatória',
-        descricao: 'Investida com +O nos ataques (e –5 na Defesa). Realiza dois ataques de garra ao final.',
+        descricao: 'Investida com +1d20 nos ataques (e –5 na Defesa). Realiza dois ataques de garra ao final.',
         tipo: 'Completa'
       }
     ],
@@ -802,7 +802,7 @@ export const AMEACAS: Ameaca[] = [
     habilidades: [
       {
         nome: 'Furtivo e Letal',
-        descricao: 'Quando ataca ser desprevenido, recebe +O nos testes de ataque e cada acerto causa dois dados de dano adicional do mesmo tipo.'
+        descricao: 'Quando ataca ser desprevenido, recebe +1d20 nos testes de ataque e cada acerto causa dois dados de dano adicional do mesmo tipo.'
       },
       {
         nome: 'Instinto Predatório',
@@ -1268,7 +1268,7 @@ export const AMEACAS: Ameaca[] = [
       },
       {
         nome: 'Fortalecimento Paranormal',
-        descricao: 'Até o fim da cena, recebe +O em testes AGI/FOR/VIG e Pancadas causam +2d4 Conhecimento (só se causou dano mental na cena).',
+        descricao: 'Até o fim da cena, recebe +1d20 em testes AGI/FOR/VIG e Pancadas causam +2d4 Conhecimento (só se causou dano mental na cena).',
         tipo: 'Movimento'
       }
     ],

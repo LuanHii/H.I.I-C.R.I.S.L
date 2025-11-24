@@ -95,6 +95,11 @@ export function applyAttributePoint(character: Personagem, attribute: AtributoKe
     return character;
   }
 
+  // Regra de Sobrevivente: Não pode aumentar atributo além de 3 via progressão
+  if (character.classe === 'Sobrevivente' && character.atributos[attribute] >= 3) {
+    return character;
+  }
+
   const newChar = { ...character };
   newChar.atributos = { ...newChar.atributos };
   newChar.atributos[attribute] += 1;
@@ -126,11 +131,17 @@ export function chooseTrack(character: Personagem, trackName: string): Personage
   newChar.trilha = trackName;
   newChar.escolhaTrilhaPendente = false;
 
-  // Add the first ability immediately
-  const level = newChar.classe === 'Sobrevivente' ? (newChar.estagio || 0) : newChar.nex;
+  const currentLevel = newChar.classe === 'Sobrevivente' ? (newChar.estagio || 0) : newChar.nex;
   const isStage = newChar.classe === 'Sobrevivente';
   
-  addTrackAbility(newChar, level, isStage);
+  const trilhaData = TRILHAS.find(t => t.nome === trackName);
+  if (trilhaData) {
+      trilhaData.habilidades.forEach(h => {
+          if (h.nex <= currentLevel) {
+              addTrackAbility(newChar, h.nex, isStage);
+          }
+      });
+  }
 
   return newChar;
 }

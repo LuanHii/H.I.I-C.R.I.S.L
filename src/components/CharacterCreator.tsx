@@ -40,6 +40,12 @@ export default function CharacterCreator() {
   const [nome, setNome] = useState('');
   const [conceito, setConceito] = useState('');
   const [classeSelecionada, setClasseSelecionada] = useState<ClasseName | ''>('');
+  const [nivelSelecionado, setNivelSelecionado] = useState<number>(0);
+
+  useEffect(() => {
+    if (tipoSelecionado === 'Agente') setNivelSelecionado(5);
+    if (tipoSelecionado === 'Sobrevivente') setNivelSelecionado(1);
+  }, [tipoSelecionado]);
 
   const [atributosTemp, setAtributosTemp] = useState<Atributos>({ ...INITIAL_STATE.data.atributos });
 
@@ -151,8 +157,14 @@ export default function CharacterCreator() {
         }
       } else if (state.step === 1) {
         if (!nome.trim()) throw new Error("Informe o nome.");
-        if (!classeSelecionada) throw new Error("Selecione uma classe.");
-        newState = setConceitoClasse(state, nome.trim(), conceito.trim(), classeSelecionada);
+        if (!classeSelecionada && tipoSelecionado === 'Agente') throw new Error("Selecione uma classe.");
+        
+        const nex = tipoSelecionado === 'Agente' ? nivelSelecionado : undefined;
+        const estagio = tipoSelecionado === 'Sobrevivente' ? nivelSelecionado : undefined;
+        
+        const classeFinal = (classeSelecionada || 'Sobrevivente') as ClasseName;
+
+        newState = setConceitoClasse(state, nome.trim(), conceito.trim(), classeFinal, nex, estagio);
       } else if (state.step === 2) {
         newState = setAtributos(state, atributosTemp);
       } else if (state.step === 3) {
@@ -407,38 +419,68 @@ export default function CharacterCreator() {
 
             {tipoSelecionado === 'Agente' && (
                 <div className="space-y-4">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Classe</label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {classeEntries.filter(([nome]) => nome !== 'Sobrevivente').map(([nomeClasse, stats]) => (
-                    <button
-                        key={nomeClasse}
-                        onClick={() => setClasseSelecionada(nomeClasse)}
-                        className={`p-6 border text-left transition-all duration-300 relative overflow-hidden group ${
-                        classeSelecionada === nomeClasse 
-                            ? 'border-ordem-red bg-ordem-red/10 shadow-[0_0_20px_rgba(220,38,38,0.2)]' 
-                            : 'border-gray-800 bg-black/20 hover:border-gray-600'
-                        }`}
-                    >
-                        <div className="relative z-10">
-                        <h3 className={`text-xl font-serif mb-2 ${classeSelecionada === nomeClasse ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}>
-                            {nomeClasse}
-                        </h3>
-                        <ul className="text-xs text-gray-500 space-y-1 font-mono">
-                            <li>PV: {stats.pvInicial} (+{stats.pvPorNivel})</li>
-                            <li>PE: {stats.peInicial} (+{stats.pePorNivel})</li>
-                            <li>SAN: {stats.sanInicial} (+{stats.sanPorNivel})</li>
-                        </ul>
+                <div className="flex gap-4">
+                    <div className="flex-1 space-y-4">
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Classe</label>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {classeEntries.filter(([nome]) => nome !== 'Sobrevivente').map(([nomeClasse, stats]) => (
+                            <button
+                                key={nomeClasse}
+                                onClick={() => setClasseSelecionada(nomeClasse)}
+                                className={`p-6 border text-left transition-all duration-300 relative overflow-hidden group ${
+                                classeSelecionada === nomeClasse 
+                                    ? 'border-ordem-red bg-ordem-red/10 shadow-[0_0_20px_rgba(220,38,38,0.2)]' 
+                                    : 'border-gray-800 bg-black/20 hover:border-gray-600'
+                                }`}
+                            >
+                                <div className="relative z-10">
+                                <h3 className={`text-xl font-serif mb-2 ${classeSelecionada === nomeClasse ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}>
+                                    {nomeClasse}
+                                </h3>
+                                <ul className="text-xs text-gray-500 space-y-1 font-mono">
+                                    <li>PV: {stats.pvInicial} (+{stats.pvPorNivel})</li>
+                                    <li>PE: {stats.peInicial} (+{stats.pePorNivel})</li>
+                                    <li>SAN: {stats.sanInicial} (+{stats.sanPorNivel})</li>
+                                </ul>
+                                </div>
+                            </button>
+                            ))}
                         </div>
-                    </button>
-                    ))}
+                    </div>
+                    <div className="w-32 space-y-2">
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">NEX Inicial</label>
+                        <select
+                            value={nivelSelecionado}
+                            onChange={(e) => setNivelSelecionado(Number(e.target.value))}
+                            className="w-full bg-black/50 border border-gray-700 p-4 text-white focus:border-ordem-red focus:outline-none focus:ring-1 focus:ring-ordem-red/50 transition-all font-mono rounded h-[106px]"
+                        >
+                            {[5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 99].map(nex => (
+                                <option key={nex} value={nex}>{nex}%</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
                 </div>
             )}
             
             {tipoSelecionado === 'Sobrevivente' && (
-                <div className="p-6 border border-ordem-red/30 bg-ordem-red/5 rounded text-center">
-                    <h3 className="text-xl font-serif text-white mb-2">CLASSE: SOBREVIVENTE</h3>
-                    <p className="text-gray-400 text-sm">Você não possui treinamento especial. Sua única arma é sua vontade de viver.</p>
+                <div className="flex gap-4">
+                    <div className="flex-1 p-6 border border-ordem-red/30 bg-ordem-red/5 rounded text-center flex flex-col justify-center">
+                        <h3 className="text-xl font-serif text-white mb-2">CLASSE: SOBREVIVENTE</h3>
+                        <p className="text-gray-400 text-sm">Você não possui treinamento especial. Sua única arma é sua vontade de viver.</p>
+                    </div>
+                    <div className="w-32 space-y-2">
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Estágio</label>
+                        <select
+                            value={nivelSelecionado}
+                            onChange={(e) => setNivelSelecionado(Number(e.target.value))}
+                            className="w-full bg-black/50 border border-gray-700 p-4 text-white focus:border-ordem-red focus:outline-none focus:ring-1 focus:ring-ordem-red/50 transition-all font-mono rounded h-[106px]"
+                        >
+                            {[1, 2, 3, 4, 5].map(estagio => (
+                                <option key={estagio} value={estagio}>Estágio {estagio}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
             )}
           </div>

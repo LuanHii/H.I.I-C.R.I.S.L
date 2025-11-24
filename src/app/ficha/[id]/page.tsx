@@ -73,6 +73,7 @@ export default function PlayerAgentPage() {
             agent={agent} 
             onUpdate={handleUpdate}
             readOnly={true}
+            disableInteractionModals={true}
         />
       </div>
     </div>

@@ -980,7 +980,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Pancada Forte (Trilha Durão Estágio 4)',
-    descricao: 'Quando faz um ataque, você pode gastar 1 PE para receber +O no teste de ataque.',
+    descricao: 'Quando faz um ataque, você pode gastar 1 PE para receber +1d20 no teste de ataque.',
     tipo: 'Trilha',
     livro: 'Sobrevivendo ao Horror'
   },

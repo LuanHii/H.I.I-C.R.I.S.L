@@ -5,9 +5,10 @@ import { TRILHAS } from '../data/tracks';
 interface TrackSelectorModalProps {
   agent: Personagem;
   onConfirm: (trackName: string) => void;
+  onDefer?: () => void;
 }
 
-export const TrackSelectorModal: React.FC<TrackSelectorModalProps> = ({ agent, onConfirm }) => {
+export const TrackSelectorModal: React.FC<TrackSelectorModalProps> = ({ agent, onConfirm, onDefer }) => {
   const [selectedTrack, setSelectedTrack] = useState<string | null>(null);
 
   const availableTracks = TRILHAS.filter(t => t.classe === agent.classe);
@@ -77,6 +78,14 @@ export const TrackSelectorModal: React.FC<TrackSelectorModalProps> = ({ agent, o
             <div className="text-zinc-500 text-sm italic">
                 {selectedTrack ? `Selecionado: ${selectedTrack}` : 'Nenhuma trilha selecionada'}
             </div>
+            {onDefer && (
+                <button 
+                    onClick={onDefer}
+                    className="px-6 py-3 border border-zinc-600 text-zinc-400 rounded hover:text-white hover:border-white transition-colors font-bold tracking-wide"
+                >
+                    ESCOLHER DEPOIS
+                </button>
+            )}
             <button 
                 onClick={handleConfirm}
                 disabled={!selectedTrack}

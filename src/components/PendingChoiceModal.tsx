@@ -6,9 +6,10 @@ interface PendingChoiceModalProps {
   agent: Personagem;
   pendingChoice: NonNullable<Personagem['habilidadesTrilhaPendentes']>[0];
   onConfirm: (updatedAgent: Personagem) => void;
+  onDefer?: () => void;
 }
 
-export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, pendingChoice, onConfirm }) => {
+export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, pendingChoice, onConfirm, onDefer }) => {
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
@@ -205,6 +206,14 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
         </div>
 
         <div className="flex justify-end gap-2">
+            {onDefer && (
+                <button 
+                    onClick={onDefer}
+                    className="px-4 py-2 border border-zinc-600 text-zinc-400 rounded hover:text-white hover:border-white transition-colors font-mono text-sm"
+                >
+                    ESCOLHER DEPOIS
+                </button>
+            )}
             <button 
                 onClick={handleConfirm}
                 disabled={!isValid()}

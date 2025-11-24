@@ -375,7 +375,7 @@ export const RITUAIS: Ritual[] = [
     resistencia: 'Nenhuma',
     descricao: 'Potencializa seus sentidos, recebendo +O em Investigação, Luta, Percepção e Pontaria.',
     efeito: {
-      padrao: 'Recebe +O em Investigação, Luta, Percepção e Pontaria.',
+      padrao: 'Recebe +1d20 em Investigação, Luta, Percepção e Pontaria.',
       discente: 'Seus inimigos sofrem –O em testes de ataque contra você. Requer 2º círculo (+2 PE).',
       verdadeiro: 'Fica imune às condições surpreendido e desprevenido e recebe +10 em Defesa e Reflexos. Requer 4º círculo e afinidade (+5 PE).'
     },

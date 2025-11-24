@@ -5,6 +5,7 @@ import {
   gerarFicha,
 } from './characterUtils';
 import { ORIGENS } from '../data/origins';
+import { levelUp } from './progression';
 
 export interface CreationState {
   step: number;
@@ -14,6 +15,8 @@ export interface CreationState {
     conceito?: string;
     classe?: ClasseName;
     origem?: Origem;
+    nex?: number;
+    estagio?: number;
     atributos: Atributos;
     periciasTreinadas: PericiaName[];
     periciasSelecionadas?: PericiaName[];
@@ -47,11 +50,13 @@ export function setConceitoClasse(
   state: CreationState, 
   nome: string, 
   conceito: string, 
-  classe: ClasseName
+  classe: ClasseName,
+  nex?: number,
+  estagio?: number
 ): CreationState {
   return {
     ...state,
-    data: { ...state.data, nome, conceito, classe },
+    data: { ...state.data, nome, conceito, classe, nex, estagio },
     step: 2
   };
 }
@@ -137,20 +142,39 @@ export function setEquipamento(state: CreationState, equipamentos: Item[]): Crea
 }
 
 export function finalizarCriacao(state: CreationState): Personagem {
-  const { nome, conceito, classe, origem, atributos, periciasSelecionadas, rituais, equipamentos } = state.data;
+  const { nome, conceito, classe, origem, atributos, periciasSelecionadas, rituais, equipamentos, nex, estagio } = state.data;
   
   if (!nome || !classe || !origem) throw new Error("Dados incompletos para finalizar.");
 
-  return gerarFicha({
+  const nexBase = state.data.tipo === 'Sobrevivente' ? 0 : 5;
+  const estagioBase = state.data.tipo === 'Sobrevivente' ? 1 : undefined;
+
+  let personagem = gerarFicha({
     nome,
     conceito,
     classe,
     origem,
     atributos,
     periciasLivres: periciasSelecionadas ?? [],
-    nex: classe === 'Sobrevivente' ? 0 : 5,
-    estagio: classe === 'Sobrevivente' ? 1 : undefined,
+    nex: nexBase,
+    estagio: estagioBase,
     rituais,
     equipamentos
   });
+
+  const targetNex = nex || 5;
+  const targetEstagio = estagio || 1;
+
+  if (personagem.classe === 'Sobrevivente') {
+      for (let i = 1; i < targetEstagio; i++) {
+          personagem = levelUp(personagem);
+      }
+  } else {
+      const steps = (targetNex - 5) / 5;
+      for (let i = 0; i < steps; i++) {
+          personagem = levelUp(personagem);
+      }
+  }
+
+  return personagem;
 }

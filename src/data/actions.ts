@@ -59,7 +59,7 @@ export const INVESTIGATION_ACTIONS: ActionDefinition[] = [
     nome: 'Busca Obstinada',
     tipo: 'Investigação',
     custo: '1d4 SAN',
-    descricao: 'Como procurar pistas, mas recebe +O no teste (Custo cumulativo).',
+    descricao: 'Como procurar pistas, mas recebe +1d20 no teste (Custo cumulativo).',
     pericia: 'Investigação'
   },
   {
@@ -81,7 +81,7 @@ export const CHASE_ACTIONS: ActionDefinition[] = [
     nome: 'Esforço Extra',
     tipo: 'Perseguição',
     custo: '1d4 PV',
-    descricao: 'Recebe +O no teste de Atletismo. (Pode pagar 2 PE com Sacrificar os Joelhos).',
+    descricao: 'Recebe +1d20 no teste de Atletismo. (Pode pagar 2 PE com Sacrificar os Joelhos).',
     pericia: 'Atletismo'
   },
   {
@@ -99,7 +99,7 @@ export const CHASE_ACTIONS: ActionDefinition[] = [
   {
     nome: 'Sacrifício',
     tipo: 'Perseguição',
-    descricao: 'Deixa de correr para atrapalhar adversários (+O no teste dos outros).',
+    descricao: 'Deixa de correr para atrapalhar adversários (+1d20 no teste dos outros).',
   }
 ];
 
@@ -107,7 +107,7 @@ export const STEALTH_ACTIONS: ActionDefinition[] = [
   {
     nome: 'Ação Discreta',
     tipo: 'Furtividade',
-    descricao: 'Camufla a ação, Visibilidade +0. Sofre -O no teste.',
+    descricao: 'Camufla a ação, Visibilidade +1d20. Sofre -1d20 no teste.',
     pericia: 'Furtividade'
   },
   {

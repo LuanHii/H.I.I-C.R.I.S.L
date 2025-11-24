@@ -19,7 +19,7 @@ export function normalizePersonagem(personagem: Personagem, autoPatente: boolean
     nex: personagem.nex,
     estagio: personagem.estagio,
     patente: patente || 'Recruta',
-    usarPd: personagem.pd !== undefined,
+    usarPd: personagem.usarPd || personagem.pd !== undefined,
   });
 
   const eventosBase = listarEventosNex(personagem.nex);
@@ -67,10 +67,12 @@ export function normalizePersonagem(personagem: Personagem, autoPatente: boolean
       max: sanMax,
       atual: clamp(personagem.san.atual, 0, sanMax),
     },
-    pd: personagem.pd 
-        ? (typeof (personagem.pd as any) === 'number' 
-            ? { atual: (personagem.pd as any) as number, max: recursos.pd || (personagem.pd as any) as number } 
-            : { ...personagem.pd, max: recursos.pd || personagem.pd.max })
+    pd: (personagem.usarPd || personagem.pd)
+        ? (personagem.pd 
+            ? (typeof (personagem.pd as any) === 'number' 
+                ? { atual: (personagem.pd as any) as number, max: recursos.pd || (personagem.pd as any) as number } 
+                : { ...personagem.pd, max: recursos.pd || personagem.pd.max })
+            : { atual: recursos.pd || 0, max: recursos.pd || 0 })
         : undefined,
     limiteItens,
     carga: cargaCalculada,
