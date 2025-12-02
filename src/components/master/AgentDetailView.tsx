@@ -33,6 +33,25 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [isAbilityModalOpen, setIsAbilityModalOpen] = useState(false);
   const [isPendingChoiceModalSuppressed, setIsPendingChoiceModalSuppressed] = useState(false);
+  const [isEditingSkills, setIsEditingSkills] = useState(false);
+
+  const toggleSkillGrade = (skillName: PericiaName) => {
+      const currentSkills = { ...agent.pericias };
+      const currentGrade = currentSkills[skillName] || 'Destreinado';
+      
+      let newGrade: 'Destreinado' | 'Treinado' | 'Veterano' | 'Expert' = 'Destreinado';
+
+      if (currentGrade === 'Destreinado') newGrade = 'Treinado';
+      else if (currentGrade === 'Treinado') newGrade = 'Veterano';
+      else if (currentGrade === 'Veterano') newGrade = 'Expert';
+      else newGrade = 'Destreinado';
+
+      const updated = { ...agent };
+      updated.pericias[skillName] = newGrade;
+      
+      updated.periciasDetalhadas = calcularPericiasDetalhadas(updated.atributos, updated.pericias);
+      onUpdate(updated);
+  };
 
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -300,6 +319,28 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
         
         {openSections['attributes'] && (
             <div className="p-6 animate-in slide-in-from-top-2">
+                <div className="flex justify-end mb-4">
+                    <button
+                        onClick={() => setIsEditingSkills(!isEditingSkills)}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold transition-colors ${
+                            isEditingSkills 
+                            ? 'bg-green-900/30 text-green-400 border border-green-800 hover:bg-green-900/50' 
+                            : 'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:bg-zinc-700 hover:text-zinc-200'
+                        }`}
+                    >
+                        {isEditingSkills ? (
+                            <>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                CONCLUIR EDIÇÃO
+                            </>
+                        ) : (
+                            <>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                                EDITAR PERÍCIAS
+                            </>
+                        )}
+                    </button>
+                </div>
                 {agent.pontosAtributoPendentes && agent.pontosAtributoPendentes !== 0 ? (
                     <div className={`mb-4 p-3 rounded border ${agent.pontosAtributoPendentes > 0 ? 'bg-green-900/20 border-green-800 text-green-400' : 'bg-red-900/20 border-red-800 text-red-400'} text-center font-mono text-sm`}>
                         {agent.pontosAtributoPendentes > 0 
@@ -347,20 +388,28 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                 </h4>
                                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                                     {skills.map(([nome, detalhe]) => (
-                                        <div key={nome} className="flex justify-between items-center p-2 bg-zinc-950/30 rounded border border-zinc-700/50 hover:border-zinc-600 transition-colors">
+                                        <div 
+                                            key={nome} 
+                                            onClick={() => isEditingSkills && toggleSkillGrade(nome as PericiaName)}
+                                            className={`flex justify-between items-center p-2 bg-zinc-950/30 rounded border transition-colors ${
+                                                isEditingSkills 
+                                                ? 'cursor-pointer hover:bg-zinc-900 border-zinc-700 hover:border-zinc-500' 
+                                                : 'border-zinc-700/50 hover:border-zinc-600'
+                                            }`}
+                                        >
                                             <div className="flex items-center gap-1.5">
                                                 <span className="text-sm text-zinc-300">{nome}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <span className={`text-[10px] px-1 rounded border ${
-                                                    detalhe.grau === 'Destreinado' ? 'border-zinc-800 text-zinc-400' :
+                                                    (detalhe.grau || 'Destreinado') === 'Destreinado' ? 'border-zinc-800 text-zinc-400' :
                                                     detalhe.grau === 'Treinado' ? 'border-green-900 text-green-500' :
                                                     detalhe.grau === 'Veterano' ? 'border-blue-900 text-blue-500' :
                                                     'border-purple-900 text-purple-500'
                                                 }`}>
-                                                    {detalhe.grau.substring(0, 3).toUpperCase()}
+                                                    {(detalhe.grau || 'Destreinado').substring(0, 3).toUpperCase()}
                                                 </span>
-                                                <span className="font-mono text-zinc-100 font-bold">+{detalhe.bonusFixo}</span>
+                                                <span className="font-mono text-zinc-100 font-bold">+{detalhe.bonusFixo || 0}</span>
                                             </div>
                                         </div>
                                     ))}

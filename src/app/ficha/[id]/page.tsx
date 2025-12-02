@@ -1,14 +1,19 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import React, { useEffect, useState, Suspense } from 'react';
+import { useParams, useSearchParams } from 'next/navigation';
 import { subscribeToAgent, saveAgentToCloud } from '../../../core/firebase/firestore';
 import { Personagem } from '../../../core/types';
 import { AgentDetailView } from '../../../components/master/AgentDetailView';
+import { OverlayView } from './OverlayView';
+import { ExternalLink } from 'lucide-react';
 
-export default function PlayerAgentPage() {
+function PlayerAgentContent() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const id = params.id as string;
+  const isOverlay = searchParams.get('overlay') === 'true';
+
   const [agent, setAgent] = useState<Personagem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +39,14 @@ export default function PlayerAgentPage() {
       await saveAgentToCloud(id, updatedAgent);
   };
 
+  const openOverlay = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('overlay', 'true');
+    window.open(url.toString(), '_blank', 'width=500,height=500,menubar=no,toolbar=no,location=no,status=no');
+  };
+
   if (loading) {
+    if (isOverlay) return null; // Silent load for overlay
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center font-mono">
         <div className="flex flex-col items-center gap-4">
@@ -46,6 +58,7 @@ export default function PlayerAgentPage() {
   }
 
   if (error || !agent) {
+    if (isOverlay) return <div className="text-red-500 font-bold p-4 bg-black/50">ERRO: {error || 'Agente não encontrado'}</div>;
     return (
       <div className="min-h-screen bg-black text-ordem-red flex flex-col items-center justify-center font-mono p-6 text-center">
         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="mb-4 opacity-50"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -53,6 +66,10 @@ export default function PlayerAgentPage() {
         <p className="text-zinc-400 max-w-md">{error || 'Agente não encontrado.'}</p>
       </div>
     );
+  }
+
+  if (isOverlay) {
+    return <OverlayView agent={agent} />;
   }
 
   return (
@@ -63,9 +80,19 @@ export default function PlayerAgentPage() {
                 <h1 className="text-xl font-serif text-ordem-red tracking-wider">VISUALIZAÇÃO REMOTA</h1>
                 <p className="text-xs text-zinc-500 font-mono">Sincronizado em tempo real com o Mestre</p>
             </div>
-            <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-xs font-mono text-green-500">CONECTADO</span>
+            <div className="flex items-center gap-4">
+                <button 
+                  onClick={openOverlay}
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-mono bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded transition-colors text-zinc-300"
+                  title="Abrir modo overlay para OBS/Stream"
+                >
+                  <ExternalLink size={14} />
+                  <span>MODO OVERLAY</span>
+                </button>
+                <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-xs font-mono text-green-500">CONECTADO</span>
+                </div>
             </div>
         </div>
         
@@ -77,5 +104,17 @@ export default function PlayerAgentPage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function PlayerAgentPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black text-white flex items-center justify-center font-mono">
+        <div className="animate-pulse">INICIALIZANDO...</div>
+      </div>
+    }>
+      <PlayerAgentContent />
+    </Suspense>
   );
 }

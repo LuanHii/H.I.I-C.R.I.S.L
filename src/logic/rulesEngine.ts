@@ -732,7 +732,8 @@ function gerarDetalhesPericia(params: {
     const criterio = atributoValor > 0 ? 'melhor' : 'pior';
     // O bônus fixo NÃO deve somar o valor do atributo. O atributo define os DADOS.
     // O bônus fixo vem APENAS do grau de treinamento e outros bônus (itens, poderes).
-    const bonusFixo = GRAU_BONUS[params.graus[pericia]] + (params.extrasFixos[pericia] ?? 0);
+    const grau = params.graus[pericia] || 'Destreinado';
+    const bonusFixo = GRAU_BONUS[grau] + (params.extrasFixos[pericia] ?? 0);
     const bonusO = params.extrasDados[pericia] ?? 0;
     detalhes[pericia] = {
       atributoBase,
@@ -740,7 +741,7 @@ function gerarDetalhesPericia(params: {
       criterio,
       bonusFixo,
       bonusO,
-      grau: params.graus[pericia],
+      grau: grau,
     };
   }
   return detalhes;
