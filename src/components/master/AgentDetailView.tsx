@@ -187,7 +187,10 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     if (stat === 'pv') updated.pv.max = newMax;
     if (stat === 'pe') updated.pe.max = newMax;
     if (stat === 'san') updated.san.max = newMax;
-    if (stat === 'pd' && updated.pd) updated.pd.max = newMax;
+    if (stat === 'pd') {
+        if (!updated.pd) updated.pd = { atual: newMax, max: newMax };
+        else updated.pd.max = newMax;
+    }
     onUpdate(updated);
   };
 

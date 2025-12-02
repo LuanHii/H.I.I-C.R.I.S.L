@@ -76,7 +76,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
             ) : (
                 <span 
                     onClick={() => setIsEditingMax(true)}
-                    className="text-gray-400 text-sm cursor-pointer hover:text-white hover:underline decoration-dashed underline-offset-4"
+                    className="text-gray-400 text-sm cursor-pointer hover:text-white border-b border-dashed border-zinc-600 hover:border-white transition-colors pb-0.5"
                     title="Clique para editar o valor máximo"
                 >
                     {max}
