@@ -8,12 +8,15 @@ interface StatusBarProps {
   max: number;
   color: 'red' | 'gold' | 'blue' | 'purple' | 'green';
   onChange: (newValue: number) => void;
+  onMaxChange?: (newMax: number) => void;
   readOnly?: boolean;
 }
 
-export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color, onChange, readOnly }) => {
+export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color, onChange, onMaxChange, readOnly }) => {
   const [displayCurrent, setDisplayCurrent] = useState(current);
   const [isPulsing, setIsPulsing] = useState(false);
+  const [isEditingMax, setIsEditingMax] = useState(false);
+  const [tempMax, setTempMax] = useState(max.toString());
 
   useEffect(() => {
     if (current !== displayCurrent) {
@@ -23,6 +26,10 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
       return () => clearTimeout(timer);
     }
   }, [current, displayCurrent]);
+
+  useEffect(() => {
+    setTempMax(max.toString());
+  }, [max]);
 
   const percentage = Math.min(100, Math.max(0, (current / max) * 100));
 
@@ -39,14 +46,45 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
     onChange(newValue);
   };
 
+  const handleMaxSubmit = () => {
+    const val = parseInt(tempMax);
+    if (!isNaN(val) && val > 0) {
+        onMaxChange?.(val);
+    }
+    setIsEditingMax(false);
+  }
+
   return (
     <div className="w-full mb-4 select-none">
       <div className="flex justify-between items-end mb-1">
         <span className="text-ordem-white font-bold text-lg tracking-wider uppercase">{label}</span>
-        <span className="text-ordem-white font-mono text-xl">
+        <span className="text-ordem-white font-mono text-xl flex items-center">
           <span className={current < max / 4 ? "text-ordem-red animate-pulse" : ""}>{current}</span>
           <span className="text-gray-400 text-sm mx-1">/</span>
-          <span className="text-gray-400 text-sm">{max}</span>
+          
+          {onMaxChange && !readOnly ? (
+            isEditingMax ? (
+                <input 
+                    type="number"
+                    value={tempMax}
+                    onChange={(e) => setTempMax(e.target.value)}
+                    onBlur={handleMaxSubmit}
+                    onKeyDown={(e) => e.key === 'Enter' && handleMaxSubmit()}
+                    autoFocus
+                    className="w-16 bg-zinc-800 border border-zinc-600 rounded px-1 text-sm text-center text-white focus:outline-none focus:border-ordem-red"
+                />
+            ) : (
+                <span 
+                    onClick={() => setIsEditingMax(true)}
+                    className="text-gray-400 text-sm cursor-pointer hover:text-white hover:underline decoration-dashed underline-offset-4"
+                    title="Clique para editar o valor máximo"
+                >
+                    {max}
+                </span>
+            )
+          ) : (
+            <span className="text-gray-400 text-sm">{max}</span>
+          )}
         </span>
       </div>
 

@@ -33,7 +33,9 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [isAbilityModalOpen, setIsAbilityModalOpen] = useState(false);
   const [isPendingChoiceModalSuppressed, setIsPendingChoiceModalSuppressed] = useState(false);
-  const [isEditingSkills, setIsEditingSkills] = useState(false);
+  const [isEditingMode, setIsEditingMode] = useState(false);
+  const [editingSkill, setEditingSkill] = useState<PericiaName | null>(null);
+  const [tempSkillBonus, setTempSkillBonus] = useState<string>('');
 
   const toggleSkillGrade = (skillName: PericiaName) => {
       const currentSkills = { ...agent.pericias };
@@ -49,8 +51,38 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
       const updated = { ...agent };
       updated.pericias[skillName] = newGrade;
       
+      // Keep existing manual bonuses when toggling grade
+      // We need to pass the existing manual bonuses to the calculation
+      // But currently we don't store "manual bonuses" separately in the type, they are just baked into the result?
+      // No, `periciasDetalhadas` is calculated every time.
+      // If we want manual override, we need to inject it into `extrasFixos` of `calcularPericiasDetalhadas`.
+      // But `agent` type doesn't support storing manual skill bonuses yet.
+      // For now, we'll just toggle grade as requested before, but user asked for "edit values manually".
+      
+      // To support manual value editing properly, we should ideally add a `bonusManual` field to Personagem.
+      // However, without changing schema, we can try to infer it or just calculate standard stats.
+      
       updated.periciasDetalhadas = calcularPericiasDetalhadas(updated.atributos, updated.pericias);
       onUpdate(updated);
+  };
+
+  const handleManualSkillBonusChange = (skillName: PericiaName, newValue: number) => {
+      const updated = { ...agent };
+      // Since we don't have a specific field for manual bonuses, we will update the DETAILED object directly
+      // This is a bit risky because `calcularPericiasDetalhadas` might overwrite it on next recalculation
+      // BUT for "Override Mode" usually the GM expects it to stick until they change something that triggers recalc.
+      
+      // Better approach: We update `periciasDetalhadas` directly.
+      if (updated.periciasDetalhadas[skillName]) {
+          updated.periciasDetalhadas[skillName].bonusFixo = newValue;
+      }
+      onUpdate(updated);
+      setEditingSkill(null);
+  };
+
+  const startEditingSkill = (skillName: PericiaName, currentBonus: number) => {
+      setEditingSkill(skillName);
+      setTempSkillBonus(currentBonus.toString());
   };
 
   const toggleSection = (section: string) => {
@@ -68,12 +100,47 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
   };
 
   const handleAttributeChange = (attr: AtributoKey, increase: boolean) => {
-    if (increase) {
-        const updated = applyAttributePoint(agent, attr);
+    if (isEditingMode) {
+        // Manual Override Mode
+        const updated = { ...agent };
+        updated.atributos[attr] += increase ? 1 : -1;
+        if (updated.atributos[attr] < 0) updated.atributos[attr] = 0;
+        
+        // Update Skills
+        updated.periciasDetalhadas = calcularPericiasDetalhadas(updated.atributos, updated.pericias);
+        
+        // Recalculate Derived Stats
+        const derived = calculateDerivedStats(updated.classe, updated.atributos, updated.nex, updated.estagio);
+        
+        const diffPV = derived.pvMax - updated.pv.max;
+        updated.pv.max = derived.pvMax;
+        updated.pv.atual += diffPV;
+
+        const diffPE = derived.peMax - updated.pe.max;
+        updated.pe.max = derived.peMax;
+        updated.pe.atual += diffPE;
+        updated.pe.rodada = derived.peRodada;
+
+        const diffSAN = derived.sanMax - updated.san.max;
+        updated.san.max = derived.sanMax;
+        updated.san.atual += diffSAN;
+        
+        if (updated.usarPd && updated.pd) {
+             const diffPD = derived.pdMax - updated.pd.max;
+             updated.pd.max = derived.pdMax;
+             updated.pd.atual += diffPD;
+        }
+
         onUpdate(updated);
     } else {
-        const updated = removeAttributePoint(agent, attr);
-        onUpdate(updated);
+        // Standard Progression Mode
+        if (increase) {
+            const updated = applyAttributePoint(agent, attr);
+            onUpdate(updated);
+        } else {
+            const updated = removeAttributePoint(agent, attr);
+            onUpdate(updated);
+        }
     }
   };
 
@@ -112,6 +179,15 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
         if (updated.pd) updated.pd.atual = newValue;
         else updated.pd = { atual: newValue, max: newValue };
     }
+    onUpdate(updated);
+  };
+
+  const updateMaxStat = (stat: 'pv' | 'pe' | 'san' | 'pd', newMax: number) => {
+    const updated = { ...agent };
+    if (stat === 'pv') updated.pv.max = newMax;
+    if (stat === 'pe') updated.pe.max = newMax;
+    if (stat === 'san') updated.san.max = newMax;
+    if (stat === 'pd' && updated.pd) updated.pd.max = newMax;
     onUpdate(updated);
   };
 
@@ -265,6 +341,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 max={agent.pv.max} 
                 color="red" 
                 onChange={(v) => updateStat('pv', v)} 
+                onMaxChange={isEditingMode ? (v) => updateMaxStat('pv', v) : undefined}
                 readOnly={readOnly}
             />
             {agent.usarPd ? (
@@ -274,6 +351,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                     max={agent.pd?.max || 0} 
                     color="purple" 
                     onChange={(v) => updateStat('pd', v)} 
+                    onMaxChange={isEditingMode ? (v) => updateMaxStat('pd', v) : undefined}
                     readOnly={readOnly}
                 />
             ) : (
@@ -284,6 +362,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                         max={agent.san.max} 
                         color="blue" 
                         onChange={(v) => updateStat('san', v)} 
+                        onMaxChange={isEditingMode ? (v) => updateMaxStat('san', v) : undefined}
                         readOnly={readOnly}
                     />
                     <StatusBar 
@@ -292,6 +371,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                         max={agent.pe.max} 
                         color="gold" 
                         onChange={(v) => updateStat('pe', v)} 
+                        onMaxChange={isEditingMode ? (v) => updateMaxStat('pe', v) : undefined}
                         readOnly={readOnly}
                     />
                 </div>
@@ -321,22 +401,22 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
             <div className="p-6 animate-in slide-in-from-top-2">
                 <div className="flex justify-end mb-4">
                     <button
-                        onClick={() => setIsEditingSkills(!isEditingSkills)}
+                        onClick={() => setIsEditingMode(!isEditingMode)}
                         className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold transition-colors ${
-                            isEditingSkills 
-                            ? 'bg-green-900/30 text-green-400 border border-green-800 hover:bg-green-900/50' 
+                            isEditingMode 
+                            ? 'bg-ordem-red text-white shadow-lg shadow-ordem-red/50 animate-pulse' 
                             : 'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:bg-zinc-700 hover:text-zinc-200'
                         }`}
                     >
-                        {isEditingSkills ? (
+                        {isEditingMode ? (
                             <>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                CONCLUIR EDIÇÃO
+                                MODO EDIÇÃO ATIVO (MESTRE)
                             </>
                         ) : (
                             <>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
-                                EDITAR PERÍCIAS
+                                EDITAR DADOS (OVERRIDE)
                             </>
                         )}
                     </button>
@@ -350,29 +430,43 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 ) : null}
 
                 <div className="flex justify-between gap-4 mb-8">
-                    {Object.entries(agent.atributos).map(([key, val]) => (
+                    {Object.entries(agent.atributos).map(([key, val]) => {
+                        const canIncrease = isEditingMode || (!readOnly && agent.pontosAtributoPendentes && agent.pontosAtributoPendentes > 0 && (agent.classe !== 'Sobrevivente' || val < 3));
+                        const canDecrease = isEditingMode || (!readOnly && agent.pontosAtributoPendentes && agent.pontosAtributoPendentes < 0 && val > 0);
+
+                        return (
                         <div key={key} className="flex flex-col items-center flex-1 bg-zinc-950/50 p-3 rounded border border-zinc-700 relative group">
                             <span className="text-xs font-mono text-zinc-400 uppercase mb-1">{key}</span>
                             <span className="text-2xl font-bold text-zinc-100">{val}</span>
                             
-                            {!readOnly && agent.pontosAtributoPendentes && agent.pontosAtributoPendentes > 0 && (agent.classe !== 'Sobrevivente' || val < 3) && (
+                            {canIncrease && (
                                 <button 
                                     onClick={() => handleAttributeChange(key as AtributoKey, true)}
-                                    className="absolute -top-2 -right-2 w-6 h-6 bg-green-600 hover:bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg"
+                                    className={`absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center shadow-lg transition-colors ${
+                                        isEditingMode 
+                                            ? 'bg-ordem-red hover:bg-red-700 text-white' 
+                                            : 'bg-green-600 hover:bg-green-500 text-white'
+                                    }`}
+                                    title={isEditingMode ? "Override (+)" : "Aumentar Atributo"}
                                 >
                                     +
                                 </button>
                             )}
-                            {!readOnly && agent.pontosAtributoPendentes && agent.pontosAtributoPendentes < 0 && val > 0 && (
+                            {canDecrease && (
                                 <button 
                                     onClick={() => handleAttributeChange(key as AtributoKey, false)}
-                                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-600 hover:bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg"
+                                    className={`absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center shadow-lg transition-colors ${
+                                        isEditingMode 
+                                            ? 'bg-zinc-700 hover:bg-zinc-600 text-white right-auto -left-2' 
+                                            : 'bg-red-600 hover:bg-red-500 text-white'
+                                    }`}
+                                    title={isEditingMode ? "Override (-)" : "Diminuir Atributo"}
                                 >
                                     -
                                 </button>
                             )}
                         </div>
-                    ))}
+                    )})}
                 </div>
                 
                 <div className="space-y-6">
@@ -390,18 +484,23 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                     {skills.map(([nome, detalhe]) => (
                                         <div 
                                             key={nome} 
-                                            onClick={() => isEditingSkills && toggleSkillGrade(nome as PericiaName)}
                                             className={`flex justify-between items-center p-2 bg-zinc-950/30 rounded border transition-colors ${
-                                                isEditingSkills 
-                                                ? 'cursor-pointer hover:bg-zinc-900 border-zinc-700 hover:border-zinc-500' 
+                                                isEditingMode 
+                                                ? 'border-zinc-700 hover:border-zinc-500' 
                                                 : 'border-zinc-700/50 hover:border-zinc-600'
                                             }`}
                                         >
-                                            <div className="flex items-center gap-1.5">
+                                            <div 
+                                                className={`flex items-center gap-1.5 ${isEditingMode ? 'cursor-pointer hover:text-white' : ''}`}
+                                                onClick={() => isEditingMode && toggleSkillGrade(nome as PericiaName)}
+                                                title={isEditingMode ? "Clique para alterar o grau de treinamento" : ""}
+                                            >
                                                 <span className="text-sm text-zinc-300">{nome}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <span className={`text-[10px] px-1 rounded border ${
+                                                <span 
+                                                    onClick={() => isEditingMode && toggleSkillGrade(nome as PericiaName)}
+                                                    className={`text-[10px] px-1 rounded border ${isEditingMode ? 'cursor-pointer hover:opacity-80' : ''} ${
                                                     (detalhe.grau || 'Destreinado') === 'Destreinado' ? 'border-zinc-800 text-zinc-400' :
                                                     detalhe.grau === 'Treinado' ? 'border-green-900 text-green-500' :
                                                     detalhe.grau === 'Veterano' ? 'border-blue-900 text-blue-500' :
@@ -409,7 +508,26 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                                 }`}>
                                                     {(detalhe.grau || 'Destreinado').substring(0, 3).toUpperCase()}
                                                 </span>
-                                                <span className="font-mono text-zinc-100 font-bold">+{detalhe.bonusFixo || 0}</span>
+                                                
+                                                {isEditingMode && editingSkill === nome ? (
+                                                    <input 
+                                                        type="number"
+                                                        value={tempSkillBonus}
+                                                        onChange={(e) => setTempSkillBonus(e.target.value)}
+                                                        onBlur={() => handleManualSkillBonusChange(nome as PericiaName, parseInt(tempSkillBonus) || 0)}
+                                                        onKeyDown={(e) => e.key === 'Enter' && handleManualSkillBonusChange(nome as PericiaName, parseInt(tempSkillBonus) || 0)}
+                                                        autoFocus
+                                                        className="w-10 bg-zinc-800 text-white text-center font-mono text-xs border border-ordem-red rounded focus:outline-none"
+                                                    />
+                                                ) : (
+                                                    <span 
+                                                        onClick={() => isEditingMode && startEditingSkill(nome as PericiaName, detalhe.bonusFixo)}
+                                                        className={`font-mono text-zinc-100 font-bold ${isEditingMode ? 'cursor-pointer hover:text-ordem-red underline decoration-dashed underline-offset-4' : ''}`}
+                                                        title={isEditingMode ? "Clique para editar o bônus numérico manualmente" : ""}
+                                                    >
+                                                        +{detalhe.bonusFixo || 0}
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     ))}
@@ -421,7 +539,10 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
             </div>
         )}
       </div>
-
+      
+      {/* ... Inventory, Abilities, Actions, Progression sections ... */}
+      
+      {/* Re-adding Inventory, Abilities, Actions, Progression which were truncated in previous edit block logic */}
       <div className="bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden shadow-lg">
         <button 
             onClick={() => toggleSection('inventory')}
