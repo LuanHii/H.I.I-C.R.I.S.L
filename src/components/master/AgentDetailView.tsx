@@ -13,7 +13,8 @@ import { PendingChoiceModal } from '../PendingChoiceModal';
 import { TrackSelectorModal } from '../TrackSelectorModal';
 import { calculateDerivedStats } from '../../core/rules/derivedStats';
 import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPersonagem';
-import { Brain, Flame } from 'lucide-react';
+import { Brain, Flame, Dices } from 'lucide-react';
+import { rollPericia, type DiceRollResult } from '../../logic/diceRoller';
 
 interface AgentDetailViewProps {
   agent: Personagem;
@@ -39,6 +40,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
   const [isEditingMode, setIsEditingMode] = useState(false);
   const [editingSkill, setEditingSkill] = useState<PericiaName | null>(null);
   const [tempSkillBonus, setTempSkillBonus] = useState<string>('');
+  const [lastRoll, setLastRoll] = useState<{ pericia: PericiaName; result: DiceRollResult } | null>(null);
 
   const auditIssues = useMemo(() => auditPersonagem(agent), [agent]);
   const auditSummary = useMemo(() => summarizeIssues(auditIssues), [auditIssues]);
@@ -635,6 +637,23 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 </div>
                 
                 <div className="space-y-6">
+                    {lastRoll && (
+                      <div className="bg-black/30 border border-zinc-800 rounded p-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="text-xs font-mono text-zinc-400">
+                            ÚLTIMA ROLAGEM: <span className="text-white font-bold">{lastRoll.pericia}</span>
+                          </div>
+                          <div className="text-xs font-mono text-zinc-500">
+                            {lastRoll.result.diceCount}d20 ({lastRoll.result.criterio}){' '}
+                            {lastRoll.result.bonusFixo >= 0 ? '+' : ''}{lastRoll.result.bonusFixo}
+                          </div>
+                        </div>
+                        <div className="mt-2 text-sm text-zinc-200 font-mono">
+                          Dados: [{lastRoll.result.dice.join(', ')}] • Escolhido: {lastRoll.result.chosen} • Total:{' '}
+                          <span className="text-ordem-green font-bold">{lastRoll.result.total}</span>
+                        </div>
+                      </div>
+                    )}
                     {(['AGI', 'FOR', 'INT', 'PRE', 'VIG'] as AtributoKey[]).map((attr) => {
                         const skills = Object.entries(agent.periciasDetalhadas).filter(([nome]) => PERICIA_ATRIBUTO[nome as PericiaName] === attr);
                         if (skills.length === 0) return null;
@@ -663,6 +682,19 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                                 <span className="text-sm text-zinc-300">{nome}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
+                                                <button
+                                                  type="button"
+                                                  onClick={() => {
+                                                    const pericia = nome as PericiaName;
+                                                    const det = agent.periciasDetalhadas[pericia];
+                                                    if (!det) return;
+                                                    setLastRoll({ pericia, result: rollPericia(det) });
+                                                  }}
+                                                  className="p-1 rounded border border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-white transition-colors"
+                                                  title="Rolar teste desta perícia"
+                                                >
+                                                  <Dices size={14} />
+                                                </button>
                                                 <span 
                                                     onClick={() => isEditingMode && toggleSkillGrade(nome as PericiaName)}
                                                     className={`text-[10px] px-1 rounded border ${isEditingMode ? 'cursor-pointer hover:opacity-80' : ''} ${

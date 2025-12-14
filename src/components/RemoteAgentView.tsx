@@ -6,6 +6,8 @@ import { StatusBar } from './StatusBar';
 import { ActionsTab } from './ActionsTab';
 import { PERICIA_ATRIBUTO } from '../logic/rulesEngine';
 import { auditPersonagem, summarizeIssues } from '../core/validation/auditPersonagem';
+import { rollPericia, type DiceRollResult } from '../logic/diceRoller';
+import { Dices } from 'lucide-react';
 
 type RemoteTab = 'status' | 'acoes' | 'pericias' | 'inventario';
 
@@ -23,6 +25,7 @@ export function RemoteAgentView({
   onOpenOverlayFull,
 }: RemoteAgentViewProps) {
   const [tab, setTab] = useState<RemoteTab>('status');
+  const [lastRoll, setLastRoll] = useState<{ pericia: PericiaName; result: DiceRollResult } | null>(null);
 
   const usarDeterminacao = agent.usarPd === true;
 
@@ -252,6 +255,23 @@ export function RemoteAgentView({
 
         {tab === 'pericias' && (
           <div className="space-y-6">
+            {lastRoll && (
+              <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-xs font-mono tracking-[0.25em] text-zinc-500 uppercase">
+                    Última rolagem: <span className="text-white tracking-normal font-bold">{lastRoll.pericia}</span>
+                  </div>
+                  <div className="text-xs font-mono text-zinc-400">
+                    {lastRoll.result.diceCount}d20 ({lastRoll.result.criterio}){' '}
+                    {lastRoll.result.bonusFixo >= 0 ? '+' : ''}{lastRoll.result.bonusFixo}
+                  </div>
+                </div>
+                <div className="mt-2 text-sm text-zinc-200 font-mono">
+                  Dados: [{lastRoll.result.dice.join(', ')}] • Escolhido: {lastRoll.result.chosen} • Total:{' '}
+                  <span className="text-ordem-green font-bold">{lastRoll.result.total}</span>
+                </div>
+              </div>
+            )}
             {(Object.keys(periciasPorAtributo) as AtributoKey[]).map((attr) => (
               <div key={attr} className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-5">
                 <div className="flex items-center justify-between mb-4">
@@ -269,12 +289,22 @@ export function RemoteAgentView({
                           {det.dados}d20 • {det.grau}
                         </div>
                       </div>
-                      <div className="text-lg font-mono font-bold text-white">
-                        {det.bonusFixo >= 0 ? '+' : ''}
-                        {det.bonusFixo}
-                        {det.bonusO !== 0 && (
-                          <span className="text-xs text-zinc-500 ml-1">{det.bonusO > 0 ? `(+${det.bonusO}O)` : `(${det.bonusO}O)`}</span>
-                        )}
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setLastRoll({ pericia: nome, result: rollPericia(det) })}
+                          className="p-2 rounded border border-zinc-800 bg-black/20 text-zinc-300 hover:border-zinc-600 hover:text-white transition-colors"
+                          title="Rolar teste"
+                        >
+                          <Dices size={16} />
+                        </button>
+                        <div className="text-lg font-mono font-bold text-white">
+                          {det.bonusFixo >= 0 ? '+' : ''}
+                          {det.bonusFixo}
+                          {det.bonusO !== 0 && (
+                            <span className="text-xs text-zinc-500 ml-1">{det.bonusO > 0 ? `(+${det.bonusO}O)` : `(${det.bonusO}O)`}</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
