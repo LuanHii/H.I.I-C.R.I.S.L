@@ -4,6 +4,7 @@ import {
   calcularPericiasIniciais,
   gerarFicha,
 } from './characterUtils';
+import type { ClassePreferencias } from './rulesEngine';
 import { ORIGENS } from '../data/origins';
 import { levelUp } from './progression';
 
@@ -18,6 +19,7 @@ export interface CreationState {
     nex?: number;
     estagio?: number;
     usarPd?: boolean;
+    preferenciasClasse?: ClassePreferencias;
     atributos: Atributos;
     periciasTreinadas: PericiaName[];
     periciasSelecionadas?: PericiaName[];
@@ -54,11 +56,12 @@ export function setConceitoClasse(
   classe: ClasseName,
   nex?: number,
   estagio?: number,
-  usarPd?: boolean
+  usarPd?: boolean,
+  preferenciasClasse?: ClassePreferencias
 ): CreationState {
   return {
     ...state,
-    data: { ...state.data, nome, conceito, classe, nex, estagio, usarPd },
+    data: { ...state.data, nome, conceito, classe, nex, estagio, usarPd, preferenciasClasse },
     step: 2
   };
 }
@@ -101,10 +104,10 @@ export function setPericias(
   state: CreationState, 
   periciasEscolhidas: PericiaName[]
 ): CreationState {
-  const { classe, atributos, origem } = state.data;
+  const { classe, atributos, origem, preferenciasClasse } = state.data;
   if (!classe || !atributos || !origem) throw new Error("Dados incompletos.");
 
-  const { qtdEscolhaLivre, obrigatorias } = calcularPericiasIniciais(classe, atributos.INT, origem);
+  const { qtdEscolhaLivre, obrigatorias } = calcularPericiasIniciais(classe, atributos.INT, origem, preferenciasClasse);
   
   if (periciasEscolhidas.length > qtdEscolhaLivre) {
     throw new Error(`Você escolheu ${periciasEscolhidas.length} perícias, mas só pode escolher ${qtdEscolhaLivre}.`);
@@ -144,7 +147,7 @@ export function setEquipamento(state: CreationState, equipamentos: Item[]): Crea
 }
 
 export function finalizarCriacao(state: CreationState): Personagem {
-  const { nome, conceito, classe, origem, atributos, periciasSelecionadas, rituais, equipamentos, nex, estagio } = state.data;
+  const { nome, conceito, classe, origem, atributos, periciasSelecionadas, rituais, equipamentos, nex, estagio, preferenciasClasse } = state.data;
   
   if (!nome || !classe || !origem) throw new Error("Dados incompletos para finalizar.");
 
@@ -160,6 +163,7 @@ export function finalizarCriacao(state: CreationState): Personagem {
     periciasLivres: periciasSelecionadas ?? [],
     nex: nexBase,
     estagio: estagioBase,
+    preferenciasClasse,
     rituais,
     equipamentos
   });

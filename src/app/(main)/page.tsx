@@ -20,7 +20,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           <Link 
-            href="/mestre"
+            href="/mestre/fichas"
             className="group relative p-8 border border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/50 transition-all duration-500 hover:border-ordem-green/50 rounded-xl overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-ordem-green/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>

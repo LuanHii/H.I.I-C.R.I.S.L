@@ -130,9 +130,7 @@ export function OverlayView({ agent, mode = 'mini' }: OverlayViewProps) {
           <div className="border-t border-zinc-800 bg-zinc-950/60 p-3 space-y-3">
             <div className="flex items-center justify-between">
               <div className="text-[10px] font-bold tracking-[0.3em] text-zinc-400 uppercase">Recursos</div>
-              <div className="text-[10px] font-mono text-zinc-500">
-                {usarDeterminacao ? `PD/turno: —` : `PE/turno: ${agent.pe.rodada}`}
-              </div>
+              {/* Sem indicador de turno/rodada (não usado) */}
             </div>
             <div className="grid grid-cols-3 gap-2">
               <div className="bg-black/40 border border-zinc-800 rounded p-2">

@@ -3,6 +3,7 @@ import { useStoredFichas } from '../../core/storage/useStoredFichas';
 import { Personagem, Item } from '../../core/types';
 import { ItemSelectorModal } from './ItemSelectorModal';
 import { calcularRecursosClasse } from '../../logic/rulesEngine';
+import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPersonagem';
 
 export const AgentList: React.FC = () => {
   const { fichas, salvar } = useStoredFichas();
@@ -24,46 +25,24 @@ export const AgentList: React.FC = () => {
     }
   };
 
-  const activeFichas = fichas.filter(f => f.personagem.ativo).sort((a, b) => a.personagem.nome.localeCompare(b.personagem.nome));
-  const inactiveFichas = fichas.filter(f => !f.personagem.ativo).sort((a, b) => a.personagem.nome.localeCompare(b.personagem.nome));
+  // Sem gerenciamento de sessão/tático: listagem única de fichas.
+  const ordenadas = [...fichas].sort((a, b) => a.personagem.nome.localeCompare(b.personagem.nome));
 
   return (
-    <div className="p-4 pb-20 space-y-8">
-      
-      {/* Active Agents Section */}
-      {activeFichas.length > 0 && (
-        <section>
-            <h2 className="text-xl font-serif text-ordem-red mb-4 flex items-center gap-2">
-                <span className="w-2 h-2 bg-ordem-red rounded-full animate-pulse"/>
-                Em Missão
-            </h2>
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                {activeFichas.map((registro) => (
-                    <AgentCard 
-                        key={registro.id} 
-                        id={registro.id}
-                        personagem={registro.personagem} 
-                        onUpdate={(updates) => handleUpdate(registro.id, updates)}
-                    />
-                ))}
-            </div>
-        </section>
-      )}
-
-      {/* Inactive Agents Section */}
-      <section>
-        <h2 className="text-lg font-serif text-gray-500 mb-4">Banco de Agentes</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {inactiveFichas.map((registro) => (
-                <AgentCard 
-                    key={registro.id} 
-                    id={registro.id}
-                    personagem={registro.personagem} 
-                    onUpdate={(updates) => handleUpdate(registro.id, updates)}
-                />
-            ))}
-        </div>
-      </section>
+    <div className="p-4 pb-20 space-y-4">
+      <div className="text-xs font-mono text-zinc-500 uppercase tracking-widest">
+        {ordenadas.length} ficha(s)
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {ordenadas.map((registro) => (
+          <AgentCard
+            key={registro.id}
+            id={registro.id}
+            personagem={registro.personagem}
+            onUpdate={(updates) => handleUpdate(registro.id, updates)}
+          />
+        ))}
+      </div>
     </div>
   );
 };
@@ -75,9 +54,17 @@ interface AgentCardProps {
 }
 
 const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
-  const { nome, classe, nex, patente, pv, pe, san, pd, atributos, defesa, usarPd, ativo, equipamentos } = personagem;
+  const { nome, classe, nex, patente, pv, pe, san, pd, atributos, defesa, usarPd, equipamentos } = personagem;
   const [showInventory, setShowInventory] = useState(false);
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
+
+  const issues = useMemo(() => auditPersonagem(personagem), [personagem]);
+  const issueSummary = useMemo(() => summarizeIssues(issues), [issues]);
+  const issueTitle = useMemo(() => {
+    if (issueSummary.total === 0) return '';
+    const lines = issues.map((i) => `- [${i.severity.toUpperCase()}] ${i.message}`);
+    return `Problemas detectados (${issueSummary.errors} erro(s), ${issueSummary.warns} aviso(s)):\n${lines.join('\n')}`;
+  }, [issues, issueSummary]);
 
   const usesPd = usarPd === true || (pd !== undefined && (typeof pd === 'number' ? pd > 0 : pd.max > 0));
 
@@ -112,10 +99,6 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
     }
   };
 
-  const toggleActive = () => {
-    onUpdate({ ativo: !ativo });
-  };
-
   const handleAddItem = (item: Item) => {
     onUpdate({ equipamentos: [...equipamentos, item] });
     setIsItemModalOpen(false);
@@ -123,27 +106,26 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
 
   return (
     <>
-    <div className={`border p-4 rounded transition-all duration-300 group relative overflow-hidden flex flex-col gap-4
-        ${ativo ? 'bg-black/80 border-ordem-red shadow-[0_0_15px_rgba(220,38,38,0.15)] min-h-[300px]' : 'bg-black/60 border-gray-800 hover:border-gray-600'}
-    `}>
+    <div className="border p-4 rounded transition-all duration-300 group relative overflow-hidden flex flex-col gap-4 bg-black/60 border-gray-800 hover:border-gray-600">
+      {issueSummary.total > 0 && (
+        <div
+          className={`absolute top-3 right-3 px-2 py-1 rounded border text-[10px] font-mono tracking-widest z-20 ${
+            issueSummary.errors > 0
+              ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
+              : 'border-ordem-gold text-ordem-gold bg-ordem-gold/10'
+          }`}
+          title={issueTitle}
+        >
+          {issueSummary.errors > 0 ? 'ERRO' : 'AVISO'} {issueSummary.total}
+        </div>
+      )}
       {/* Header */}
       <div className="flex justify-between items-start">
-        <div className="flex items-start gap-2">
-            <button 
-                onClick={toggleActive}
-                className={`mt-1 w-4 h-4 rounded-full border flex items-center justify-center transition-colors
-                    ${ativo ? 'bg-ordem-red border-ordem-red' : 'border-gray-600 hover:border-gray-400'}
-                `}
-                title={ativo ? "Remover da Sessão" : "Adicionar à Sessão"}
-            >
-                {ativo && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
-            </button>
-            <div>
-                <h3 className={`text-lg font-serif leading-tight truncate ${ativo ? 'text-white text-2xl w-full' : 'text-gray-400 w-40'}`} title={nome}>{nome}</h3>
-                <p className="text-xs font-mono text-gray-500">
-                    {classe} <span className="text-gray-700">|</span> {nex}% <span className="text-gray-700">|</span> {patente}
-                </p>
-            </div>
+        <div>
+            <h3 className="text-lg font-serif leading-tight truncate text-gray-200" title={nome}>{nome}</h3>
+            <p className="text-xs font-mono text-gray-500">
+                {classe} <span className="text-gray-700">|</span> {nex}% <span className="text-gray-700">|</span> {patente}
+            </p>
         </div>
         <div className="text-right bg-gray-900/50 px-2 py-1 rounded border border-gray-800">
             <div className="text-[10px] font-mono text-gray-500 uppercase">DEFESA</div>
@@ -152,9 +134,9 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
       </div>
 
       {/* Stats Grid */}
-      <div className={`grid gap-2 ${ativo ? 'grid-cols-3 gap-4' : 'grid-cols-3'}`}>
+      <div className="grid grid-cols-3 gap-2">
         {/* PV */}
-        <div className={`relative overflow-hidden bg-black/40 border border-red-900/30 p-2 rounded flex flex-col items-center justify-between group/stat ${ativo ? 'h-24' : 'h-20'}`}>
+        <div className="relative overflow-hidden bg-black/40 border border-red-900/30 p-2 rounded flex flex-col items-center justify-between group/stat h-20">
           {/* Bar Background */}
           <div className="absolute bottom-0 left-0 w-full bg-red-900/20 h-full z-0" />
           {/* Bar Fill */}
@@ -165,7 +147,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
           
           <div className="relative z-10 flex flex-col items-center w-full">
             <div className="text-[10px] font-mono text-red-400 uppercase mb-1">PV</div>
-            <div className={`font-bold text-white leading-none ${ativo ? 'text-3xl' : 'text-xl'}`}>
+            <div className="font-bold text-white leading-none text-xl">
                 {pv.atual}<span className="text-xs text-gray-500">/{pv.max}</span>
             </div>
           </div>
@@ -178,7 +160,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
         </div>
 
         {/* SAN / PD */}
-        <div className={`relative overflow-hidden bg-black/40 border p-2 rounded flex flex-col items-center justify-between ${ativo ? 'h-24' : 'h-20'} ${usesPd ? 'border-gray-700' : 'border-blue-900/30'}`}>
+        <div className={`relative overflow-hidden bg-black/40 border p-2 rounded flex flex-col items-center justify-between h-20 ${usesPd ? 'border-gray-700' : 'border-blue-900/30'}`}>
           {/* Bar Background */}
           <div className={`absolute bottom-0 left-0 w-full h-full z-0 ${usesPd ? 'bg-gray-800/20' : 'bg-blue-900/20'}`} />
           {/* Bar Fill */}
@@ -191,7 +173,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
             <div className={`text-[10px] font-mono uppercase mb-1 ${usesPd ? 'text-gray-400' : 'text-blue-400'}`}>
                 {usesPd ? 'PD' : 'SAN'}
             </div>
-            <div className={`font-bold text-white leading-none ${ativo ? 'text-3xl' : 'text-xl'}`}>
+            <div className="font-bold text-white leading-none text-xl">
                 {usesPd ? (pd?.atual ?? 0) : san.atual}
                 <span className="text-xs text-gray-500">/{usesPd ? pdMax : san.max}</span>
             </div>
@@ -217,7 +199,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
 
         {/* PE (Hidden if using PD) */}
         {!usesPd && (
-        <div className={`relative overflow-hidden bg-black/40 border border-yellow-900/30 p-2 rounded flex flex-col items-center justify-between ${ativo ? 'h-24' : 'h-20'}`}>
+        <div className="relative overflow-hidden bg-black/40 border border-yellow-900/30 p-2 rounded flex flex-col items-center justify-between h-20">
           {/* Bar Background */}
           <div className="absolute bottom-0 left-0 w-full bg-yellow-900/20 h-full z-0" />
           {/* Bar Fill */}
@@ -228,7 +210,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
 
           <div className="relative z-10 flex flex-col items-center w-full">
             <div className="text-[10px] font-mono text-yellow-400 uppercase mb-1">PE</div>
-            <div className={`font-bold text-white leading-none ${ativo ? 'text-3xl' : 'text-xl'}`}>
+            <div className="font-bold text-white leading-none text-xl">
                 {pe.atual}<span className="text-xs text-gray-500">/{pe.max}</span>
             </div>
           </div>

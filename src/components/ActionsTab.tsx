@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Personagem, Poder, Ritual } from '../core/types';
 import { UNIVERSAL_ACTIONS, INVESTIGATION_ACTIONS, CHASE_ACTIONS, STEALTH_ACTIONS, ActionDefinition } from '../data/actions';
 import { ORIGENS } from '../data/origins';
@@ -14,6 +14,18 @@ interface ActionsTabProps {
 export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) => {
   const [filter, setFilter] = useState<'todos' | 'universais' | 'habilidades' | 'rituais' | 'cenarios' | 'ataques'>('todos');
   const [query, setQuery] = useState('');
+
+  const ritualDtBonus = useMemo(() => {
+    // OPRPG: trilha "Graduado" (NEX 65%) -> Rituais Eficientes (+5 DT)
+    return character.poderes?.some((p) => p.nome === 'Rituais Eficientes') ? 5 : 0;
+  }, [character.poderes]);
+
+  const q = query.trim().toLowerCase();
+  const matchesQuery = (a: any) => {
+    if (!q) return true;
+    const hay = `${a.nome ?? ''} ${a.descricao ?? ''} ${(a as any).teste ?? ''} ${(a as any).acao ?? ''} ${(a as any).custo ?? ''}`.toLowerCase();
+    return hay.includes(q);
+  };
   
   const formatCost = (cost?: string) => {
     if (!cost) return null;
@@ -26,6 +38,22 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
   const getRitualCost = (circle: number) => {
     const costs = { 1: '1 PE', 2: '3 PE', 3: '6 PE', 4: '10 PE' };
     return costs[circle as keyof typeof costs] || '? PE';
+  };
+
+  const parseDtAttr = (raw?: string): 'AGI' | 'FOR' | 'INT' | 'PRE' | 'VIG' | null => {
+    if (!raw) return null;
+    const m = raw.match(/\bDT\s*(Agi|For|Int|Pre|Vig)\b/i);
+    if (!m) return null;
+    const key = m[1].toUpperCase();
+    if (key === 'AGI' || key === 'FOR' || key === 'INT' || key === 'PRE' || key === 'VIG') return key;
+    return null;
+  };
+
+  const parseNumericCost = (displayCost?: string | null): number | null => {
+    if (!displayCost) return null;
+    const m = displayCost.match(/(\d+)\s*(PE|PD)/i);
+    if (!m) return null;
+    return Number(m[1]);
   };
 
   const renderActionCard = (action: ActionDefinition | Poder | Ritual, source?: string) => {
@@ -50,9 +78,36 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
         if (el === 'Medo') { borderColor = "border-white/10"; hoverColor = "hover:border-white"; }
     }
 
-    const q = query.trim().toLowerCase();
-    const hay = `${action.nome} ${(action as any).descricao ?? ''} ${(source ?? '')}`.toLowerCase();
-    if (q && !hay.includes(q)) return null;
+    const dtRitual = isRitual
+      ? 10 + (character.pe?.rodada ?? 1) + (character.atributos?.PRE ?? 0) + ritualDtBonus
+      : null;
+
+    const isAttack = (action as any).tipo === 'Ataque';
+    const dtAttr = !isRitual ? (parseDtAttr((action as any).teste) ?? parseDtAttr((action as any).descricao)) : null;
+    const dtHabilidade =
+      !isRitual && dtAttr
+        ? 10 + (character.pe?.rodada ?? 1) + (character.atributos?.[dtAttr] ?? 0)
+        : null;
+
+    const badgeText = isRitual
+      ? `DT ${dtRitual ?? '?'}`
+      : isAttack
+        ? `ALVO DEF ${character.defesa ?? 10}`
+        : dtHabilidade !== null
+          ? `DT ${dtHabilidade}`
+          : ((action as any).teste && /\bDT\b/i.test((action as any).teste))
+            ? 'DT ?'
+            : 'DT —';
+
+    const badgeClass = isAttack
+      ? 'text-zinc-300 border-zinc-700'
+      : badgeText.startsWith('DT ') && badgeText !== 'DT —'
+        ? 'text-ordem-green border-ordem-green/30'
+        : 'text-zinc-400 border-zinc-700';
+
+    const numericCost = parseNumericCost(displayCost);
+    const limit = character.pe?.rodada ?? 1;
+    const costExceedsLimit = numericCost !== null && numericCost > limit;
 
     return (
       <div key={action.nome} className={`bg-black/40 border ${borderColor} p-3 rounded ${hoverColor} transition-colors group relative overflow-hidden`}>
@@ -68,11 +123,16 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
 
         <div className="flex justify-between items-start mb-1 relative z-10">
           <h4 className="font-bold text-gray-200 group-hover:text-ordem-red transition-colors">{action.nome}</h4>
-          {displayCost && (
-            <span className="text-xs font-mono bg-gray-900 px-2 py-0.5 rounded text-ordem-gold border border-ordem-gold/30">
-              {displayCost}
+          <div className="flex items-center gap-2">
+            <span className={`text-xs font-mono bg-gray-900 px-2 py-0.5 rounded border ${badgeClass}`}>
+              {badgeText}
             </span>
-          )}
+            {displayCost && (
+              <span className="text-xs font-mono bg-gray-900 px-2 py-0.5 rounded text-ordem-gold border border-ordem-gold/30">
+                {displayCost}
+              </span>
+            )}
+          </div>
         </div>
         
         <div className="flex flex-wrap gap-2 text-xs text-gray-500 mb-2 relative z-10">
@@ -83,6 +143,11 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
                 <span className="text-ordem-green font-mono font-bold border border-ordem-green/30 px-1 rounded">
                     {(action as any).teste}
                 </span>
+            )}
+            {costExceedsLimit && (
+              <span className="text-ordem-gold font-mono font-bold border border-ordem-gold/30 px-1 rounded" title="Custo acima do limite de gasto por turno (o livro ainda permite ao menos 1 uso no custo mínimo)">
+                &gt; LIMITE/TURNO
+              </span>
             )}
             
             {isRitual && (
@@ -172,69 +237,88 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
       } as any;
     });
 
+  const filteredWeaponActions = weaponActions.filter(matchesQuery);
+  const filteredUniversal = UNIVERSAL_ACTIONS.filter(matchesQuery);
+  const filteredInv = INVESTIGATION_ACTIONS.filter(matchesQuery);
+  const filteredChase = CHASE_ACTIONS.filter(matchesQuery);
+  const filteredStealth = STEALTH_ACTIONS.filter(matchesQuery);
+  const filteredRituais = character.rituais.filter(matchesQuery);
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full flex flex-col">
-      {/* Search */}
-      <div className="mb-3 shrink-0">
+      {/* Search + Tabs */}
+      <div className="mb-4 shrink-0 space-y-3">
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Buscar ações, rituais, poderes..."
-          className="w-full bg-black/40 border border-gray-800 rounded px-3 py-2 text-sm text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-ordem-red"
+          className="w-full bg-black/40 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-ordem-red"
         />
-      </div>
-      {/* Tabs Navigation */}
-      <div className="flex gap-2 mb-4 border-b border-gray-800 pb-2 shrink-0 overflow-x-auto custom-scrollbar">
+
+        <div className="flex gap-2 border-b border-gray-800 pb-2 overflow-x-auto custom-scrollbar">
         <button 
           onClick={() => setFilter('todos')}
-          className={`px-3 py-1 text-sm font-mono rounded whitespace-nowrap ${filter === 'todos' ? 'bg-ordem-white text-black' : 'text-gray-400 hover:text-white'}`}
+          className={`px-3 py-1.5 text-xs font-mono rounded-lg whitespace-nowrap border ${
+            filter === 'todos' ? 'bg-ordem-white text-black border-ordem-white' : 'border-zinc-800 text-gray-400 hover:text-white hover:border-zinc-600'
+          }`}
         >
           TODOS
         </button>
         <button 
           onClick={() => setFilter('universais')}
-          className={`px-3 py-1 text-sm font-mono rounded whitespace-nowrap ${filter === 'universais' ? 'bg-ordem-white text-black' : 'text-gray-400 hover:text-white'}`}
+          className={`px-3 py-1.5 text-xs font-mono rounded-lg whitespace-nowrap border ${
+            filter === 'universais' ? 'bg-ordem-white text-black border-ordem-white' : 'border-zinc-800 text-gray-400 hover:text-white hover:border-zinc-600'
+          }`}
         >
-          UNIVERSAIS
+          UNIVERSAIS <span className="text-[10px] opacity-70">({filteredUniversal.length})</span>
         </button>
         <button 
           onClick={() => setFilter('ataques')}
-          className={`px-3 py-1 text-sm font-mono rounded whitespace-nowrap ${filter === 'ataques' ? 'bg-ordem-white text-black' : 'text-gray-400 hover:text-white'}`}
+          className={`px-3 py-1.5 text-xs font-mono rounded-lg whitespace-nowrap border ${
+            filter === 'ataques' ? 'bg-ordem-white text-black border-ordem-white' : 'border-zinc-800 text-gray-400 hover:text-white hover:border-zinc-600'
+          }`}
         >
-          ATAQUES
+          ATAQUES <span className="text-[10px] opacity-70">({filteredWeaponActions.length})</span>
         </button>
         <button 
           onClick={() => setFilter('habilidades')}
-          className={`px-3 py-1 text-sm font-mono rounded whitespace-nowrap ${filter === 'habilidades' ? 'bg-ordem-white text-black' : 'text-gray-400 hover:text-white'}`}
+          className={`px-3 py-1.5 text-xs font-mono rounded-lg whitespace-nowrap border ${
+            filter === 'habilidades' ? 'bg-ordem-white text-black border-ordem-white' : 'border-zinc-800 text-gray-400 hover:text-white hover:border-zinc-600'
+          }`}
         >
           HABILIDADES
         </button>
         <button 
           onClick={() => setFilter('rituais')}
-          className={`px-3 py-1 text-sm font-mono rounded whitespace-nowrap ${filter === 'rituais' ? 'bg-ordem-white text-black' : 'text-gray-400 hover:text-white'}`}
+          className={`px-3 py-1.5 text-xs font-mono rounded-lg whitespace-nowrap border ${
+            filter === 'rituais' ? 'bg-ordem-white text-black border-ordem-white' : 'border-zinc-800 text-gray-400 hover:text-white hover:border-zinc-600'
+          }`}
         >
-          RITUAIS
+          RITUAIS <span className="text-[10px] opacity-70">({filteredRituais.length})</span>
         </button>
         <button 
           onClick={() => setFilter('cenarios')}
-          className={`px-3 py-1 text-sm font-mono rounded whitespace-nowrap ${filter === 'cenarios' ? 'bg-ordem-white text-black' : 'text-gray-400 hover:text-white'}`}
+          className={`px-3 py-1.5 text-xs font-mono rounded-lg whitespace-nowrap border ${
+            filter === 'cenarios' ? 'bg-ordem-white text-black border-ordem-white' : 'border-zinc-800 text-gray-400 hover:text-white hover:border-zinc-600'
+          }`}
         >
-          CENÁRIOS
+          CENÁRIOS <span className="text-[10px] opacity-70">({filteredInv.length + filteredChase.length + filteredStealth.length})</span>
         </button>
+      </div>
       </div>
 
       {/* Scrollable Content */}
       <div className="overflow-y-auto pr-2 custom-scrollbar flex-1 space-y-8">
       
       {/* Section: Weapons & Attacks */}
-      {(filter === 'todos' || filter === 'ataques') && weaponActions.length > 0 && (
+      {(filter === 'todos' || filter === 'ataques') && filteredWeaponActions.length > 0 && (
         <section>
             <h3 className="text-lg font-serif text-ordem-red border-b border-gray-800 pb-2 mb-4 flex items-center gap-2 sticky top-0 bg-black/90 py-2 z-10">
             <span className="w-2 h-2 bg-ordem-red rotate-45 inline-block"></span>
             Armas & Ataques
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {weaponActions.map((a, idx) => renderActionCard(a, 'Equipamento'))}
+            {filteredWeaponActions.map((a) => renderActionCard(a, 'Equipamento'))}
             </div>
         </section>
       )}
@@ -247,7 +331,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
             Ações Universais
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {UNIVERSAL_ACTIONS.map(a => renderActionCard(a))}
+            {filteredUniversal.map(a => renderActionCard(a))}
             </div>
         </section>
       )}
@@ -297,14 +381,14 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
       )}
 
       {/* Section: Rituals */}
-      {(filter === 'todos' || filter === 'rituais') && character.rituais.length > 0 && (
+      {(filter === 'todos' || filter === 'rituais') && filteredRituais.length > 0 && (
         <section>
             <h3 className="text-lg font-serif text-purple-500 border-b border-gray-800 pb-2 mb-4 flex items-center gap-2 sticky top-0 bg-black/90 py-2 z-10">
             <span className="w-2 h-2 bg-purple-500 rotate-45 inline-block"></span>
             Rituais
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {character.rituais.map(r => renderActionCard(r))}
+                {filteredRituais.map(r => renderActionCard(r))}
             </div>
         </section>
       )}
@@ -321,21 +405,21 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
                 <div>
                     <h4 className="text-sm font-bold text-gray-500 mb-2 uppercase tracking-widest">Investigação</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {INVESTIGATION_ACTIONS.map(a => renderActionCard(a))}
+                        {filteredInv.map(a => renderActionCard(a))}
                     </div>
                 </div>
 
                 <div>
                     <h4 className="text-sm font-bold text-gray-500 mb-2 uppercase tracking-widest">Perseguição</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {CHASE_ACTIONS.map(a => renderActionCard(a))}
+                        {filteredChase.map(a => renderActionCard(a))}
                     </div>
                 </div>
 
                 <div>
                     <h4 className="text-sm font-bold text-gray-500 mb-2 uppercase tracking-widest">Furtividade</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {STEALTH_ACTIONS.map(a => renderActionCard(a))}
+                        {filteredStealth.map(a => renderActionCard(a))}
                     </div>
                 </div>
             </div>

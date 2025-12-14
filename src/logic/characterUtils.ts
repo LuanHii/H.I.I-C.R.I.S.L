@@ -4,6 +4,7 @@ import type { CriacaoInput } from './rulesEngine';
 import {
   TODAS_PERICIAS,
   calcularDTRitual,
+  type ClassePreferencias,
   calcularPericiasDisponiveis,
   gerarFicha,
   getPatentePorNex,
@@ -25,8 +26,9 @@ export function calcularPericiasIniciais(
   classe: ClasseName,
   int: number,
   origem: Origem,
+  preferenciasClasse?: ClassePreferencias,
 ): { qtdEscolhaLivre: number; obrigatorias: PericiaName[] } {
-  return calcularPericiasDisponiveis(classe, int, origem);
+  return calcularPericiasDisponiveis(classe, int, origem, preferenciasClasse);
 }
 
 export function criarPersonagemBase(

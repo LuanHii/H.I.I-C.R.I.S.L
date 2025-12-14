@@ -72,6 +72,7 @@ export function normalizePersonagem(personagem: Personagem, autoPatente: boolean
       ...personagem.san,
       max: sanMax,
       atual: clamp(personagem.san.atual, 0, sanMax),
+      perturbado: clamp(personagem.san.atual, 0, sanMax) <= sanMax / 2,
     },
     pd: (personagem.usarPd || personagem.pd)
         ? (personagem.pd 

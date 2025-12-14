@@ -6,6 +6,7 @@ import { AgentDetailView } from '../../../../components/master/AgentDetailView';
 import { useStoredFichas } from '../../../../core/storage/useStoredFichas';
 import { Personagem } from '../../../../core/types';
 import { clamp, normalizePersonagem } from '../../../../core/personagemUtils';
+import { MestreNavbar } from '../../../../components/master/MestreNavbar';
 
 const SECTION_KEYS = ['tracking', 'pericias', 'habilidades', 'inventario'] as const;
 type SectionKey = typeof SECTION_KEYS[number];
@@ -52,32 +53,39 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
   const personagemAtual = personagemView ?? registro.personagem;
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-white p-4">
-      <div className="max-w-7xl mx-auto h-[calc(100vh-2rem)] flex flex-col">
-        <header className="flex items-center justify-between mb-4 shrink-0">
-          <div className="flex items-center gap-4">
-            <Link 
-              href="/mestre/fichas" 
-              className="text-zinc-400 hover:text-white transition-colors flex items-center gap-2"
-            >
-              ← Voltar
-            </Link>
+    <div className="min-h-screen bg-black text-white flex flex-col">
+      <MestreNavbar
+        title="MESTRE"
+        subtitle="ARQUIVO // EDIÇÃO"
+        rightSlot={
+          <Link
+            href="/mestre/fichas"
+            className="px-3 py-2 text-[10px] font-mono tracking-[0.25em] border border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-white rounded-lg transition"
+          >
+            VOLTAR
+          </Link>
+        }
+      />
+
+      <main className="flex-1 bg-zinc-950 p-4">
+        <div className="max-w-7xl mx-auto h-[calc(100vh-96px)] flex flex-col">
+          <header className="flex items-center justify-between mb-4 shrink-0">
             <h1 className="text-xl font-bold text-white">
               Editando: <span className="text-ordem-red">{personagemAtual.nome}</span>
             </h1>
-          </div>
-        </header>
+          </header>
 
-        <div className="flex-1 overflow-hidden bg-zinc-900/50 border border-zinc-800 rounded-xl">
-            <AgentDetailView 
-                agent={personagemAtual}
-                onUpdate={atualizarPersonagem}
-                readOnly={false}
-                disableInteractionModals={true}
-            />
+          <div className="flex-1 overflow-hidden bg-zinc-900/50 border border-zinc-800 rounded-xl">
+              <AgentDetailView 
+                  agent={personagemAtual}
+                  onUpdate={atualizarPersonagem}
+                  readOnly={false}
+                  disableInteractionModals={true}
+              />
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
 

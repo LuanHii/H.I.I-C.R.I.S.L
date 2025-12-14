@@ -4,7 +4,7 @@ import React, { useEffect, useState, Suspense } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { subscribeToAgent, saveAgentToCloud } from '../../../core/firebase/firestore';
 import { Personagem } from '../../../core/types';
-import { AgentDetailView } from '../../../components/master/AgentDetailView';
+import { RemoteAgentView } from '../../../components/RemoteAgentView';
 import { OverlayView } from './OverlayView';
 import { ExternalLink } from 'lucide-react';
 
@@ -82,45 +82,12 @@ function PlayerAgentContent() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-4 md:p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-6 flex items-center justify-between border-b border-zinc-800 pb-4">
-            <div>
-                <h1 className="text-xl font-serif text-ordem-red tracking-wider">VISUALIZAÇÃO REMOTA</h1>
-                <p className="text-xs text-zinc-500 font-mono">Sincronizado em tempo real com o Mestre</p>
-            </div>
-            <div className="flex items-center gap-4">
-                <button 
-                  onClick={openOverlay}
-                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-mono bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded transition-colors text-zinc-300"
-                  title="Abrir modo overlay para OBS/Stream"
-                >
-                  <ExternalLink size={14} />
-                  <span>OVERLAY (MINI)</span>
-                </button>
-                <button 
-                  onClick={openOverlayFull}
-                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-mono bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded transition-colors text-zinc-300"
-                  title="Overlay maior (com painel extra)"
-                >
-                  <ExternalLink size={14} />
-                  <span>OVERLAY (FULL)</span>
-                </button>
-                <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-xs font-mono text-green-500">CONECTADO</span>
-                </div>
-            </div>
-        </div>
-        
-        <AgentDetailView 
-            agent={agent} 
-            onUpdate={handleUpdate}
-            readOnly={true}
-            disableInteractionModals={true}
-        />
-      </div>
-    </div>
+    <RemoteAgentView
+      agent={agent}
+      connected={true}
+      onOpenOverlayMini={openOverlay}
+      onOpenOverlayFull={openOverlayFull}
+    />
   );
 }
 

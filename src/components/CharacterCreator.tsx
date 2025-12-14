@@ -19,6 +19,7 @@ import { RITUAIS } from '../data/rituals';
 import { ITENS } from '../data/items';
 import { WEAPOWS } from '../data/weapows';
 import { Atributos, ClasseName, ClasseStats, Personagem, PericiaName, Ritual, Item, Elemento } from '../core/types';
+import type { ClassePreferencias } from '../logic/rulesEngine';
 
 const ELEMENTO_COLORS: Record<Elemento, string> = {
   Sangue: 'border-red-600 text-red-500',
@@ -41,6 +42,10 @@ export default function CharacterCreator() {
   const [conceito, setConceito] = useState('');
   const [usarPd, setUsarPd] = useState(false);
   const [classeSelecionada, setClasseSelecionada] = useState<ClasseName | ''>('');
+  const [preferenciasCombatente, setPreferenciasCombatente] = useState<ClassePreferencias>({
+    ofensiva: 'Luta',
+    defensiva: 'Fortitude',
+  });
   const [nivelSelecionado, setNivelSelecionado] = useState<number>(0);
 
   useEffect(() => {
@@ -68,7 +73,12 @@ export default function CharacterCreator() {
 
   const periciaMeta =
     state.data.classe && state.data.origem
-      ? calcularPericiasIniciais(state.data.classe, state.data.atributos.INT, state.data.origem)
+      ? calcularPericiasIniciais(
+          state.data.classe,
+          state.data.atributos.INT,
+          state.data.origem,
+          state.data.classe === 'Combatente' ? (state.data.preferenciasClasse ?? preferenciasCombatente) : undefined,
+        )
       : null;
   const excedeuLimite = periciaMeta ? periciasSelecionadas.length > periciaMeta.qtdEscolhaLivre : false;
   const faltandoPericias = periciaMeta ? Math.max(0, periciaMeta.qtdEscolhaLivre - periciasSelecionadas.length) : 0;
@@ -166,7 +176,16 @@ export default function CharacterCreator() {
         
         const classeFinal = (classeSelecionada || 'Sobrevivente') as ClasseName;
 
-        newState = setConceitoClasse(state, nome.trim(), conceito.trim(), classeFinal, nex, estagio, usarPd);
+        newState = setConceitoClasse(
+          state,
+          nome.trim(),
+          conceito.trim(),
+          classeFinal,
+          nex,
+          estagio,
+          usarPd,
+          classeFinal === 'Combatente' ? preferenciasCombatente : undefined,
+        );
       } else if (state.step === 2) {
         newState = setAtributos(state, atributosTemp);
       } else if (state.step === 3) {
@@ -462,6 +481,57 @@ export default function CharacterCreator() {
                             </button>
                             ))}
                         </div>
+
+                        {classeSelecionada === 'Combatente' && (
+                          <div className="mt-4 p-4 border border-gray-800 bg-black/20 rounded-lg">
+                            <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
+                              Preferências do Combatente (perícias de classe)
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <div className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-2">Ofensiva</div>
+                                <div className="flex gap-2">
+                                  {(['Luta', 'Pontaria'] as const).map((p) => (
+                                    <button
+                                      key={p}
+                                      type="button"
+                                      onClick={() => setPreferenciasCombatente((prev) => ({ ...prev, ofensiva: p }))}
+                                      className={`px-3 py-2 text-xs font-mono border rounded transition-colors ${
+                                        preferenciasCombatente.ofensiva === p
+                                          ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
+                                          : 'border-gray-800 text-gray-400 hover:text-white hover:border-gray-600'
+                                      }`}
+                                    >
+                                      {p}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-2">Defensiva</div>
+                                <div className="flex gap-2">
+                                  {(['Fortitude', 'Reflexos'] as const).map((p) => (
+                                    <button
+                                      key={p}
+                                      type="button"
+                                      onClick={() => setPreferenciasCombatente((prev) => ({ ...prev, defensiva: p }))}
+                                      className={`px-3 py-2 text-xs font-mono border rounded transition-colors ${
+                                        preferenciasCombatente.defensiva === p
+                                          ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
+                                          : 'border-gray-800 text-gray-400 hover:text-white hover:border-gray-600'
+                                      }`}
+                                    >
+                                      {p}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="mt-3 text-xs text-gray-500">
+                              Isso define quais perícias o Combatente recebe automaticamente como treinadas.
+                            </div>
+                          </div>
+                        )}
                     </div>
                     <div className="w-32 space-y-2">
                         <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">NEX Inicial</label>
@@ -599,8 +669,8 @@ export default function CharacterCreator() {
                 </div>
               )}
               {periciaMeta && faltandoPericias > 0 && (
-                <p className="mt-2 text-[11px] text-ordem-red font-mono tracking-widest">
-                  FALTAM {faltandoPericias} PERÍCIA(S) PARA AVANÇAR
+                <p className="mt-2 text-[11px] text-ordem-gold font-mono tracking-widest">
+                  FALTAM {faltandoPericias} PERÍCIA(S) — VOCÊ PODE AVANÇAR, MAS FICARÁ PENDENTE
                 </p>
               )}
             </div>

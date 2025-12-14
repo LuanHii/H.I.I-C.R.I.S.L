@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Personagem, AtributoKey, PericiaName, Item, Poder } from '../../core/types';
 import { StatusBar } from '../StatusBar';
 import { calcularDefesaEfetiva } from '../../logic/combatUtils';
@@ -12,6 +12,8 @@ import { ProgressionTab } from '../ProgressionTab';
 import { PendingChoiceModal } from '../PendingChoiceModal';
 import { TrackSelectorModal } from '../TrackSelectorModal';
 import { calculateDerivedStats } from '../../core/rules/derivedStats';
+import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPersonagem';
+import { Brain, Flame } from 'lucide-react';
 
 interface AgentDetailViewProps {
   agent: Personagem;
@@ -37,6 +39,14 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
   const [isEditingMode, setIsEditingMode] = useState(false);
   const [editingSkill, setEditingSkill] = useState<PericiaName | null>(null);
   const [tempSkillBonus, setTempSkillBonus] = useState<string>('');
+
+  const auditIssues = useMemo(() => auditPersonagem(agent), [agent]);
+  const auditSummary = useMemo(() => summarizeIssues(auditIssues), [auditIssues]);
+  const auditTitle = useMemo(() => {
+    if (auditSummary.total === 0) return '';
+    const lines = auditIssues.map((i) => `- [${i.severity.toUpperCase()}] ${i.message}`);
+    return `Problemas detectados (${auditSummary.errors} erro(s), ${auditSummary.warns} aviso(s)):\n${lines.join('\n')}`;
+  }, [auditIssues, auditSummary]);
 
   const recalcularPericias = (ch: Personagem) => {
     const fixos = ch.overrides?.periciaFixos;
@@ -181,7 +191,10 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     const updated = { ...agent };
     if (stat === 'pv') updated.pv.atual = newValue;
     if (stat === 'pe') updated.pe.atual = newValue;
-    if (stat === 'san') updated.san.atual = newValue;
+    if (stat === 'san') {
+        updated.san.atual = newValue;
+        updated.san.perturbado = newValue <= updated.san.max / 2;
+    }
     if (stat === 'pd') {
         if (updated.pd) updated.pd.atual = newValue;
         else updated.pd = { atual: newValue, max: newValue };
@@ -373,13 +386,13 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
         {!readOnly && (
             <button 
                 onClick={togglePdMode}
-                className="absolute top-4 right-4 p-2 bg-zinc-800/50 hover:bg-zinc-700 rounded-full text-zinc-400 hover:text-white transition-colors z-20"
+                className="absolute top-4 left-4 p-2 bg-zinc-800/50 hover:bg-zinc-700 rounded-full text-zinc-400 hover:text-white transition-colors z-20"
                 title={agent.usarPd ? "Desativar Regra de Determinação" : "Ativar Regra de Determinação"}
             >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                {agent.usarPd ? <Flame size={20} className="text-violet-300" /> : <Brain size={20} className="text-blue-300" />}
             </button>
         )}
-        <div className="absolute top-0 right-0 p-4 opacity-10">
+        <div className="absolute bottom-0 right-0 p-4 opacity-10 pointer-events-none">
             <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M8 20v2h8v-2"/><path d="m12.5 17-.5-1-.5 1h1z"/><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20"/></svg>
         </div>
         
@@ -421,8 +434,41 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
                     {calcularDefesaEfetiva(agent)}
                 </div>
+                {auditSummary.total > 0 && (
+                  <div
+                    className={`mt-2 inline-flex items-center justify-end px-2 py-1 rounded border text-[10px] font-mono tracking-widest ${
+                      auditSummary.errors > 0
+                        ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
+                        : 'border-ordem-gold text-ordem-gold bg-ordem-gold/10'
+                    }`}
+                    title={auditTitle}
+                  >
+                    {auditSummary.errors > 0 ? 'ERRO' : 'AVISO'} {auditSummary.total}
+                  </div>
+                )}
             </div>
         </div>
+
+        {auditSummary.total > 0 && (
+          <div className="mt-6 bg-black/30 border border-zinc-800 rounded p-4">
+            <div className="text-xs font-mono tracking-[0.25em] text-zinc-500 uppercase mb-2">Avisos da ficha</div>
+            <ul className="text-xs text-zinc-200 space-y-1 list-disc pl-5">
+              {auditIssues.slice(0, 6).map((i, idx) => (
+                <li key={idx}>
+                  <span className={i.severity === 'erro' ? 'text-ordem-red' : 'text-ordem-gold'}>
+                    [{i.severity.toUpperCase()}]
+                  </span>{' '}
+                  {i.message}
+                </li>
+              ))}
+            </ul>
+            {auditIssues.length > 6 && (
+              <div className="mt-2 text-[11px] text-zinc-500 font-mono">
+                +{auditIssues.length - 6} aviso(s) oculto(s) (passe o mouse no badge).
+              </div>
+            )}
+          </div>
+        )}
 
         {warnings.length > 0 && (
           <div className="mt-6 bg-ordem-red/10 border border-ordem-red/30 rounded p-4">

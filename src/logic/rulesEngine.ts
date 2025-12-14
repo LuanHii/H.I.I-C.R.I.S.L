@@ -187,7 +187,7 @@ const NEX_EVENTOS_BASE: { requisito: number; tipo: NexEvento['tipo']; descricao:
 
 const ORDEM_PATENTE: Patente[] = PATENTE_CONFIGS.map((cfg) => cfg.nome);
 
-interface ClassePreferencias {
+export interface ClassePreferencias {
   ofensiva?: Extract<PericiaName, 'Luta' | 'Pontaria'>;
   defensiva?: Extract<PericiaName, 'Fortitude' | 'Reflexos'>;
 }
@@ -241,6 +241,7 @@ interface PericiaBuildResult {
   extrasFixos: Partial<Record<PericiaName, number>>;
   extrasDados: Partial<Record<PericiaName, number>>;
   logs: string[];
+  pendentesLivres: number;
 }
 
 interface TrilhaEffectResult {
@@ -271,16 +272,17 @@ export function calcularPericiasDisponiveis(
   classe: ClasseName,
   intelecto: number,
   origem: Origem,
+  preferenciasClasse?: ClassePreferencias,
 ): { qtdEscolhaLivre: number; obrigatorias: PericiaName[] } {
   const obrigatorias = new Set<PericiaName>();
   origem.pericias.forEach((p) => obrigatorias.add(p));
 
   switch (classe) {
     case 'Combatente':
-      obrigatorias.add('Luta');
-      obrigatorias.add('Pontaria');
-      obrigatorias.add('Fortitude');
-      obrigatorias.add('Reflexos');
+      // Combatente escolhe 1 perícia ofensiva (Luta/Pontaria) e 1 defensiva (Fortitude/Reflexos).
+      // Guardamos a escolha em `preferenciasClasse`. Se não houver, usamos padrão (Luta + Fortitude).
+      obrigatorias.add(preferenciasClasse?.ofensiva ?? 'Luta');
+      obrigatorias.add(preferenciasClasse?.defensiva ?? 'Fortitude');
       return { qtdEscolhaLivre: Math.max(1, 1 + intelecto), obrigatorias: Array.from(obrigatorias) };
     case 'Especialista':
       return { qtdEscolhaLivre: Math.max(1, 7 + intelecto), obrigatorias: Array.from(obrigatorias) };
@@ -385,6 +387,7 @@ export function gerarFicha(input: CriacaoInput): Personagem {
     atributos,
     pericias: periciasBase.graus,
     periciasDetalhadas,
+    periciasTreinadasPendentes: periciasBase.pendentesLivres > 0 ? periciasBase.pendentesLivres : undefined,
     pv: {
       atual: recursos.pv,
       max: recursos.pv,
@@ -400,7 +403,9 @@ export function gerarFicha(input: CriacaoInput): Personagem {
     san: {
       atual: recursos.san,
       max: recursos.san,
-      perturbado: recursos.san <= recursos.pv / 2,
+      // Perturbado é derivado da SAN atual vs SAN máxima (não PV).
+      // Na criação, SAN atual == SAN máxima, então começa como false.
+      perturbado: false,
     },
     pd: recursos.pd ? { atual: recursos.pd, max: recursos.pd } : undefined,
     defesa,
@@ -425,18 +430,16 @@ export function listarEventosNex(nex: number): NexEvento[] {
   }));
 }
 
+// DT para resistir a rituais (OPRPG): mesma regra de DT de habilidades (p. 78),
+// usando Presença como atributo (ver seção de rituais).
+// DT = 10 + limite de PE por turno + Presença + bônus situacionais.
 export function calcularDTRitual(params: {
-  ritual: Ritual;
   atributos: Atributos;
-  periciaBonus: number;
-  afinidade?: Elemento;
+  limitePe: number;
   bonusDT?: number;
 }): number {
-  const { ritual, atributos, periciaBonus, bonusDT } = params;
-  const atributoChave = Math.max(atributos.INT, atributos.PRE);
-  const base = 10 + ritual.circulo;
-  const afinidadeBonus = params.afinidade && params.afinidade === ritual.elemento ? 2 : 0;
-  return base + atributoChave + periciaBonus + afinidadeBonus + (bonusDT ?? 0);
+  const { atributos, limitePe, bonusDT } = params;
+  return 10 + limitePe + atributos.PRE + (bonusDT ?? 0);
 }
 
 function inferirEstagioDoNex(nex: number): number {
@@ -517,9 +520,8 @@ function construirPericias(params: {
     logs.push(`Faltam ${slotsLivres} perícia(s) livre(s) para escolher.`);
   }
 
-  promoverPericias(graus, atributos, nex, logs);
-
-  return { graus, extrasFixos, extrasDados, logs };
+  // Promoções de Grau de Treinamento (35%/70%) são escolhas do jogador e devem ser tratadas na progressão.
+  return { graus, extrasFixos, extrasDados, logs, pendentesLivres: slotsLivres };
 }
 
 function calcularSlotsLivres(classe: ClasseName, intelecto: number): number {
@@ -534,51 +536,6 @@ function calcularSlotsLivres(classe: ClasseName, intelecto: number): number {
       return Math.max(1, 1 + intelecto);
     default:
       return 1;
-  }
-}
-
-function promoverPericias(
-  graus: Record<PericiaName, GrauTreinamento>,
-  atributos: Atributos,
-  nex: number,
-  logs: string[],
-): void {
-  const quantidade = (base: number) => Math.max(0, base + atributos.INT);
-  if (nex >= 35) {
-    aplicarPromocao(graus, quantidade(2), logs, '35%');
-  }
-  if (nex >= 70) {
-    aplicarPromocao(graus, quantidade(2), logs, '70%');
-  }
-}
-
-function aplicarPromocao(
-  graus: Record<PericiaName, GrauTreinamento>,
-  quantidade: number,
-  logs: string[],
-  marcador: string,
-): void {
-  for (const pericia of TODAS_PERICIAS) {
-    if (quantidade <= 0) break;
-    const proximo = proximoGrau(graus[pericia]);
-    if (proximo) {
-      graus[pericia] = proximo;
-      quantidade -= 1;
-      logs.push(`Perícia ${pericia} promovida para ${proximo} (marco ${marcador}).`);
-    }
-  }
-}
-
-function proximoGrau(grau: GrauTreinamento): GrauTreinamento | null {
-  switch (grau) {
-    case 'Destreinado':
-      return 'Treinado';
-    case 'Treinado':
-      return 'Veterano';
-    case 'Veterano':
-      return 'Expert';
-    default:
-      return null;
   }
 }
 
