@@ -23,11 +23,12 @@ interface AgentDetailViewProps {
 export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdate, readOnly, disableInteractionModals }) => {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     status: true,
-    attributes: true,
+    // Na visualização remota, a prioridade é status + ações.
+    attributes: !!readOnly ? false : true,
     inventory: false,
     abilities: false,
-    actions: false,
-    progression: false
+    actions: !!readOnly ? true : false,
+    progression: false,
   });
 
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
@@ -36,6 +37,11 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
   const [isEditingMode, setIsEditingMode] = useState(false);
   const [editingSkill, setEditingSkill] = useState<PericiaName | null>(null);
   const [tempSkillBonus, setTempSkillBonus] = useState<string>('');
+
+  const recalcularPericias = (ch: Personagem) => {
+    const fixos = ch.overrides?.periciaFixos;
+    return calcularPericiasDetalhadas(ch.atributos, ch.pericias, fixos ? { fixos } : undefined);
+  };
 
   const toggleSkillGrade = (skillName: PericiaName) => {
       const currentSkills = { ...agent.pericias };
@@ -51,31 +57,24 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
       const updated = { ...agent };
       updated.pericias[skillName] = newGrade;
       
-      // Keep existing manual bonuses when toggling grade
-      // We need to pass the existing manual bonuses to the calculation
-      // But currently we don't store "manual bonuses" separately in the type, they are just baked into the result?
-      // No, `periciasDetalhadas` is calculated every time.
-      // If we want manual override, we need to inject it into `extrasFixos` of `calcularPericiasDetalhadas`.
-      // But `agent` type doesn't support storing manual skill bonuses yet.
-      // For now, we'll just toggle grade as requested before, but user asked for "edit values manually".
-      
-      // To support manual value editing properly, we should ideally add a `bonusManual` field to Personagem.
-      // However, without changing schema, we can try to infer it or just calculate standard stats.
-      
-      updated.periciasDetalhadas = calcularPericiasDetalhadas(updated.atributos, updated.pericias);
+      updated.periciasDetalhadas = recalcularPericias(updated);
       onUpdate(updated);
   };
 
   const handleManualSkillBonusChange = (skillName: PericiaName, newValue: number) => {
       const updated = { ...agent };
-      // Since we don't have a specific field for manual bonuses, we will update the DETAILED object directly
-      // This is a bit risky because `calcularPericiasDetalhadas` might overwrite it on next recalculation
-      // BUT for "Override Mode" usually the GM expects it to stick until they change something that triggers recalc.
-      
-      // Better approach: We update `periciasDetalhadas` directly.
-      if (updated.periciasDetalhadas[skillName]) {
-          updated.periciasDetalhadas[skillName].bonusFixo = newValue;
-      }
+
+      // Persistimos um DELTA (extras fixos) para atingir o valor final desejado.
+      const baseBonus = calcularPericiasDetalhadas(updated.atributos, updated.pericias)[skillName]?.bonusFixo ?? 0;
+      const delta = newValue - baseBonus;
+      updated.overrides = {
+        ...(updated.overrides ?? {}),
+        periciaFixos: {
+          ...((updated.overrides?.periciaFixos ?? {}) as Partial<Record<PericiaName, number>>),
+          [skillName]: delta,
+        },
+      };
+      updated.periciasDetalhadas = recalcularPericias(updated);
       onUpdate(updated);
       setEditingSkill(null);
   };
@@ -107,28 +106,33 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
         if (updated.atributos[attr] < 0) updated.atributos[attr] = 0;
         
         // Update Skills
-        updated.periciasDetalhadas = calcularPericiasDetalhadas(updated.atributos, updated.pericias);
+        updated.periciasDetalhadas = recalcularPericias(updated);
         
         // Recalculate Derived Stats
         const derived = calculateDerivedStats(updated.classe, updated.atributos, updated.nex, updated.estagio);
         
-        const diffPV = derived.pvMax - updated.pv.max;
-        updated.pv.max = derived.pvMax;
-        updated.pv.atual += diffPV;
+        const targetPvMax = updated.overrides?.pvMax ?? derived.pvMax;
+        const targetPeMax = updated.overrides?.peMax ?? derived.peMax;
+        const targetSanMax = updated.overrides?.sanMax ?? derived.sanMax;
 
-        const diffPE = derived.peMax - updated.pe.max;
-        updated.pe.max = derived.peMax;
-        updated.pe.atual += diffPE;
+        const diffPV = targetPvMax - updated.pv.max;
+        updated.pv.max = targetPvMax;
+        updated.pv.atual = Math.min(updated.pv.max, Math.max(0, updated.pv.atual + diffPV));
+
+        const diffPE = targetPeMax - updated.pe.max;
+        updated.pe.max = targetPeMax;
+        updated.pe.atual = Math.min(updated.pe.max, Math.max(0, updated.pe.atual + diffPE));
         updated.pe.rodada = derived.peRodada;
 
-        const diffSAN = derived.sanMax - updated.san.max;
-        updated.san.max = derived.sanMax;
-        updated.san.atual += diffSAN;
+        const diffSAN = targetSanMax - updated.san.max;
+        updated.san.max = targetSanMax;
+        updated.san.atual = Math.min(updated.san.max, Math.max(0, updated.san.atual + diffSAN));
         
         if (updated.usarPd && updated.pd) {
-             const diffPD = derived.pdMax - updated.pd.max;
-             updated.pd.max = derived.pdMax;
-             updated.pd.atual += diffPD;
+             const targetPdMax = updated.overrides?.pdMax ?? derived.pdMax;
+             const diffPD = targetPdMax - updated.pd.max;
+             updated.pd.max = targetPdMax;
+             updated.pd.atual = Math.min(updated.pd.max, Math.max(0, updated.pd.atual + diffPD));
         }
 
         onUpdate(updated);
@@ -151,19 +155,22 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     const updated = { ...agent, usarPd: newMode };
     
     if (newMode) {
+        const targetPdMax = updated.overrides?.pdMax ?? derived.pdMax;
         updated.pd = {
-            atual: derived.pdMax,
-            max: derived.pdMax
+            atual: targetPdMax,
+            max: targetPdMax
         };
     } else {
+        const targetSanMax = updated.overrides?.sanMax ?? derived.sanMax;
+        const targetPeMax = updated.overrides?.peMax ?? derived.peMax;
         updated.san = {
-            atual: derived.sanMax,
-            max: derived.sanMax,
+            atual: targetSanMax,
+            max: targetSanMax,
             perturbado: false
         };
         updated.pe = {
-            atual: derived.peMax,
-            max: derived.peMax,
+            atual: targetPeMax,
+            max: targetPeMax,
             rodada: derived.peRodada
         };
     }
@@ -191,6 +198,22 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
         if (!updated.pd) updated.pd = { atual: newMax, max: newMax };
         else updated.pd.max = newMax;
     }
+
+    // Persistir override no modo Mestre/Operador
+    updated.overrides = {
+      ...(updated.overrides ?? {}),
+      pvMax: stat === 'pv' ? newMax : updated.overrides?.pvMax,
+      peMax: stat === 'pe' ? newMax : updated.overrides?.peMax,
+      sanMax: stat === 'san' ? newMax : updated.overrides?.sanMax,
+      pdMax: stat === 'pd' ? newMax : updated.overrides?.pdMax,
+      periciaFixos: updated.overrides?.periciaFixos,
+    };
+
+    // Clamp dos atuais
+    if (stat === 'pv') updated.pv.atual = Math.min(updated.pv.atual, updated.pv.max);
+    if (stat === 'pe') updated.pe.atual = Math.min(updated.pe.atual, updated.pe.max);
+    if (stat === 'san') updated.san.atual = Math.min(updated.san.atual, updated.san.max);
+    if (stat === 'pd' && updated.pd) updated.pd.atual = Math.min(updated.pd.atual, updated.pd.max);
     onUpdate(updated);
   };
 
@@ -234,7 +257,22 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
       const updated = { ...agent };
       updated.pericias = { ...updated.pericias, [skill]: 'Treinado' };
       updated.periciasTreinadasPendentes = (updated.periciasTreinadasPendentes || 0) - 1;
-      updated.periciasDetalhadas = calcularPericiasDetalhadas(updated.atributos, updated.pericias);
+      updated.periciasDetalhadas = recalcularPericias(updated);
+      onUpdate(updated);
+  };
+
+  const handleSkillPromotionSelection = (skill: PericiaName) => {
+      const pending = agent.periciasPromocaoPendentes;
+      if (!pending) return;
+
+      const requiredFrom = pending.alvo === 'Veterano' ? 'Treinado' : 'Veterano';
+      if (agent.pericias[skill] !== requiredFrom) return;
+
+      const updated = { ...agent };
+      updated.pericias = { ...updated.pericias, [skill]: pending.alvo };
+      const restante = Math.max(0, (pending.restante || 0) - 1);
+      updated.periciasPromocaoPendentes = restante > 0 ? { ...pending, restante } : undefined;
+      updated.periciasDetalhadas = recalcularPericias(updated);
       onUpdate(updated);
   };
 
@@ -242,7 +280,44 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     ? agent.habilidadesTrilhaPendentes[0] 
     : null;
 
-  const hasPendingStuff = pendingChoice || (agent.periciasTreinadasPendentes && agent.periciasTreinadasPendentes > 0) || agent.escolhaTrilhaPendente;
+  const hasPendingStuff =
+    pendingChoice ||
+    (agent.periciasTreinadasPendentes && agent.periciasTreinadasPendentes > 0) ||
+    (agent.periciasPromocaoPendentes && agent.periciasPromocaoPendentes.restante > 0) ||
+    agent.escolhaTrilhaPendente;
+
+  const derivedPreview = calculateDerivedStats(agent.classe, agent.atributos, agent.nex, agent.estagio);
+  const expectedPvMax = agent.overrides?.pvMax ?? derivedPreview.pvMax;
+  const expectedPeMax = agent.overrides?.peMax ?? derivedPreview.peMax;
+  const expectedSanMax = agent.overrides?.sanMax ?? derivedPreview.sanMax;
+  const expectedPdMax = agent.overrides?.pdMax ?? derivedPreview.pdMax;
+
+  const warnings: string[] = [];
+  if (agent.pv.atual > agent.pv.max) warnings.push('PV atual está acima do PV máximo.');
+  if (!agent.usarPd) {
+    if (agent.pe.atual > agent.pe.max) warnings.push('PE atual está acima do PE máximo.');
+    if (agent.san.atual > agent.san.max) warnings.push('SAN atual está acima do SAN máximo.');
+  } else {
+    if (!agent.pd) warnings.push('Regra de Determinação ativa, mas PD está ausente na ficha.');
+    if (agent.pd && agent.pd.atual > agent.pd.max) warnings.push('PD atual está acima do PD máximo.');
+  }
+  if (agent.pv.max !== expectedPvMax) warnings.push('PV máximo diverge do valor esperado pela regra (ou override).');
+  if (agent.pe.max !== expectedPeMax) warnings.push('PE máximo diverge do valor esperado pela regra (ou override).');
+  if (agent.san.max !== expectedSanMax) warnings.push('SAN máximo diverge do valor esperado pela regra (ou override).');
+  if (agent.usarPd && agent.pd && agent.pd.max !== expectedPdMax) warnings.push('PD máximo diverge do valor esperado pela regra (ou override).');
+  if (agent.pe.rodada !== derivedPreview.peRodada) warnings.push('Limite de PE por turno diverge da Tabela 1.2 (NEX).');
+
+  const fixInconsistencies = () => {
+    const updated = { ...agent };
+    updated.pv = { ...updated.pv, max: expectedPvMax, atual: Math.min(updated.pv.atual, expectedPvMax) };
+    updated.pe = { ...updated.pe, max: expectedPeMax, atual: Math.min(updated.pe.atual, expectedPeMax), rodada: derivedPreview.peRodada };
+    updated.san = { ...updated.san, max: expectedSanMax, atual: Math.min(updated.san.atual, expectedSanMax) };
+    if (updated.usarPd) {
+      if (!updated.pd) updated.pd = { atual: expectedPdMax, max: expectedPdMax };
+      else updated.pd = { ...updated.pd, max: expectedPdMax, atual: Math.min(updated.pd.atual, expectedPdMax) };
+    }
+    onUpdate(updated);
+  };
 
   return (
     <div className="flex flex-col gap-4 h-full overflow-y-auto custom-scrollbar pr-2">
@@ -259,12 +334,24 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
           </button>
       )}
 
-      {!disableInteractionModals && !isPendingChoiceModalSuppressed && agent.periciasTreinadasPendentes && agent.periciasTreinadasPendentes > 0 && (
+      {!disableInteractionModals && !isPendingChoiceModalSuppressed && !(agent.periciasPromocaoPendentes && agent.periciasPromocaoPendentes.restante > 0) && agent.periciasTreinadasPendentes && agent.periciasTreinadasPendentes > 0 && (
           <SkillSelectorModal 
             isOpen={true}
             currentSkills={agent.pericias}
             onSelect={handleSkillSelection}
             onDefer={() => setIsPendingChoiceModalSuppressed(true)}
+          />
+      )}
+      {!disableInteractionModals && !isPendingChoiceModalSuppressed && agent.periciasPromocaoPendentes && agent.periciasPromocaoPendentes.restante > 0 && (
+          <SkillSelectorModal 
+            isOpen={true}
+            currentSkills={agent.pericias}
+            onSelect={handleSkillPromotionSelection}
+            onDefer={() => setIsPendingChoiceModalSuppressed(true)}
+            eligibleFrom={agent.periciasPromocaoPendentes.alvo === 'Veterano' ? 'Treinado' : 'Veterano'}
+            title={`Grau de Treinamento (${agent.periciasPromocaoPendentes.alvo})`}
+            description={`Pela regra de Grau de Treinamento (NEX ${agent.periciasPromocaoPendentes.alvo === 'Veterano' ? '35%' : '70%'}), escolha perícias elegíveis para promover. Restante: ${agent.periciasPromocaoPendentes.restante}.`}
+            confirmLabel="Promover"
           />
       )}
       {!disableInteractionModals && !isPendingChoiceModalSuppressed && agent.escolhaTrilhaPendente && (
@@ -337,6 +424,33 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
             </div>
         </div>
 
+        {warnings.length > 0 && (
+          <div className="mt-6 bg-ordem-red/10 border border-ordem-red/30 rounded p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-xs font-bold text-ordem-red uppercase tracking-widest mb-2">
+                  Avisos de consistência
+                </div>
+                <ul className="text-xs text-zinc-200 space-y-1 list-disc pl-5">
+                  {warnings.map((w, idx) => (
+                    <li key={idx}>{w}</li>
+                  ))}
+                </ul>
+              </div>
+              {!readOnly && (
+                <button
+                  type="button"
+                  onClick={fixInconsistencies}
+                  className="shrink-0 px-3 py-2 text-[10px] font-mono tracking-widest uppercase border border-ordem-red/40 text-ordem-red hover:bg-ordem-red/15 rounded transition-colors"
+                  title="Ajusta máximos/limites para o valor calculado (respeitando overrides)"
+                >
+                  Corrigir
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             <StatusBar 
                 label="Pontos de Vida" 
@@ -402,28 +516,30 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
         
         {openSections['attributes'] && (
             <div className="p-6 animate-in slide-in-from-top-2">
-                <div className="flex justify-end mb-4">
-                    <button
-                        onClick={() => setIsEditingMode(!isEditingMode)}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold transition-colors ${
-                            isEditingMode 
-                            ? 'bg-ordem-red text-white shadow-lg shadow-ordem-red/50 animate-pulse' 
-                            : 'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:bg-zinc-700 hover:text-zinc-200'
-                        }`}
-                    >
-                        {isEditingMode ? (
-                            <>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                MODO EDIÇÃO ATIVO (MESTRE)
-                            </>
-                        ) : (
-                            <>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
-                                EDITAR DADOS (OVERRIDE)
-                            </>
-                        )}
-                    </button>
-                </div>
+                {!readOnly && (
+                  <div className="flex justify-end mb-4">
+                      <button
+                          onClick={() => setIsEditingMode(!isEditingMode)}
+                          className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold transition-colors ${
+                              isEditingMode 
+                              ? 'bg-ordem-red text-white shadow-lg shadow-ordem-red/50 animate-pulse' 
+                              : 'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:bg-zinc-700 hover:text-zinc-200'
+                          }`}
+                      >
+                          {isEditingMode ? (
+                              <>
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                  MODO EDIÇÃO ATIVO (MESTRE)
+                              </>
+                          ) : (
+                              <>
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                                  EDITAR DADOS (OVERRIDE)
+                              </>
+                          )}
+                      </button>
+                  </div>
+                )}
                 {agent.pontosAtributoPendentes && agent.pontosAtributoPendentes !== 0 ? (
                     <div className={`mb-4 p-3 rounded border ${agent.pontosAtributoPendentes > 0 ? 'bg-green-900/20 border-green-800 text-green-400' : 'bg-red-900/20 border-red-800 text-red-400'} text-center font-mono text-sm`}>
                         {agent.pontosAtributoPendentes > 0 

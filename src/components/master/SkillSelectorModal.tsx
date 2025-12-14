@@ -7,23 +7,37 @@ interface SkillSelectorModalProps {
   currentSkills: Record<PericiaName, GrauTreinamento>;
   onSelect: (skill: PericiaName) => void;
   onDefer?: () => void;
+  title?: string;
+  description?: string;
+  eligibleFrom?: GrauTreinamento;
+  confirmLabel?: string;
 }
 
-export const SkillSelectorModal: React.FC<SkillSelectorModalProps> = ({ isOpen, currentSkills, onSelect, onDefer }) => {
+export const SkillSelectorModal: React.FC<SkillSelectorModalProps> = ({
+  isOpen,
+  currentSkills,
+  onSelect,
+  onDefer,
+  title,
+  description,
+  eligibleFrom,
+  confirmLabel,
+}) => {
   const [selected, setSelected] = useState<PericiaName | null>(null);
 
   if (!isOpen) return null;
 
+  const from = eligibleFrom ?? 'Destreinado';
   const availableSkills = TODAS_PERICIAS.filter(
-    (p) => currentSkills[p] === 'Destreinado'
+    (p) => currentSkills[p] === from
   );
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
       <div className="bg-zinc-900 border border-zinc-700 rounded-xl max-w-md w-full p-6 shadow-2xl">
-        <h3 className="text-xl font-bold text-white mb-2">Nova Perícia Treinada</h3>
+        <h3 className="text-xl font-bold text-white mb-2">{title ?? 'Nova Perícia Treinada'}</h3>
         <p className="text-zinc-400 text-sm mb-4">
-          Seu Intelecto aumentou! Escolha uma nova perícia para se tornar Treinado.
+          {description ?? 'Seu Intelecto aumentou! Escolha uma nova perícia para se tornar Treinado.'}
         </p>
 
         <div className="max-h-60 overflow-y-auto custom-scrollbar space-y-2 mb-6">
@@ -56,7 +70,7 @@ export const SkillSelectorModal: React.FC<SkillSelectorModalProps> = ({ isOpen, 
             disabled={!selected}
             className="flex-1 py-3 bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded transition-colors"
           >
-            Confirmar Escolha
+            {confirmLabel ?? 'Confirmar Escolha'}
           </button>
         </div>
       </div>

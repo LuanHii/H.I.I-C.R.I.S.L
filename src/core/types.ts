@@ -238,6 +238,12 @@ export interface Personagem {
   patente?: Patente;
   pontosAtributoPendentes?: number;
   periciasTreinadasPendentes?: number;
+  // Promoção de grau de treinamento em marcos de NEX (35%/70%).
+  // Quando presente, o jogador/mestre deve escolher perícias elegíveis para promover.
+  periciasPromocaoPendentes?: {
+    alvo: 'Veterano' | 'Expert';
+    restante: number;
+  };
   escolhaTrilhaPendente?: boolean;
   habilidadesTrilhaPendentes?: {
     trilha: string;
@@ -270,4 +276,15 @@ export interface Personagem {
   proficiencias: string[];
   efeitosAtivos: string[];
   log?: LogEntry[];
+  // Overrides persistentes (modo Mestre/Operador) para ajustes pontuais fora da regra padrão.
+  // Sempre que possível, o sistema deve calcular derivados automaticamente; overrides existem
+  // para casos excepcionais (regras da casa, correções de ficha, bônus temporários).
+  overrides?: {
+    pvMax?: number;
+    peMax?: number;
+    sanMax?: number;
+    pdMax?: number;
+    // Bônus fixos adicionais (delta) por perícia. Soma ao bônus calculado (grau + outros bônus).
+    periciaFixos?: Partial<Record<PericiaName, number>>;
+  };
 }

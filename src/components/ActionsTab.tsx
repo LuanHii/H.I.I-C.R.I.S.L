@@ -13,6 +13,7 @@ interface ActionsTabProps {
 
 export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) => {
   const [filter, setFilter] = useState<'todos' | 'universais' | 'habilidades' | 'rituais' | 'cenarios' | 'ataques'>('todos');
+  const [query, setQuery] = useState('');
   
   const formatCost = (cost?: string) => {
     if (!cost) return null;
@@ -48,6 +49,10 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
         if (el === 'Energia') { borderColor = "border-purple-900/30"; hoverColor = "hover:border-purple-500"; }
         if (el === 'Medo') { borderColor = "border-white/10"; hoverColor = "hover:border-white"; }
     }
+
+    const q = query.trim().toLowerCase();
+    const hay = `${action.nome} ${(action as any).descricao ?? ''} ${(source ?? '')}`.toLowerCase();
+    if (q && !hay.includes(q)) return null;
 
     return (
       <div key={action.nome} className={`bg-black/40 border ${borderColor} p-3 rounded ${hoverColor} transition-colors group relative overflow-hidden`}>
@@ -169,6 +174,15 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full flex flex-col">
+      {/* Search */}
+      <div className="mb-3 shrink-0">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Buscar ações, rituais, poderes..."
+          className="w-full bg-black/40 border border-gray-800 rounded px-3 py-2 text-sm text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-ordem-red"
+        />
+      </div>
       {/* Tabs Navigation */}
       <div className="flex gap-2 mb-4 border-b border-gray-800 pb-2 shrink-0 overflow-x-auto custom-scrollbar">
         <button 

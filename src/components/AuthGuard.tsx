@@ -11,7 +11,12 @@ export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (pathname === '/' || pathname?.startsWith('/ficha') || pathname?.startsWith('/agente/novo')) {
+    if (
+      pathname === '/' ||
+      pathname?.startsWith('/ficha') ||
+      pathname?.startsWith('/agente/novo') ||
+      pathname?.startsWith('/mestre')
+    ) {
       setIsAuthenticated(true);
       setLoading(false);
       return;

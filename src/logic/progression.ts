@@ -30,8 +30,30 @@ export function levelUp(character: Personagem): Personagem {
 
   } else {
     const currentNex = newChar.nex;
-    const newNex = currentNex + 5;
+    // NEX avança em degraus de 5% até 95%, e o último degrau é 99% (OPRPG).
+    // Portanto 95% -> 99% (não 100%).
+    if (currentNex >= 99) return newChar;
+    const newNex = currentNex === 95 ? 99 : currentNex + 5;
     newChar.nex = newNex;
+
+    // Grau de Treinamento (OPRPG): em NEX 35% e 70% promove perícias (escolha do jogador).
+    if (newNex === 35 || newNex === 70) {
+      const basePorClasse: Record<string, number> = {
+        Combatente: 2,
+        Especialista: 5,
+        Ocultista: 3,
+      };
+      const base = basePorClasse[newChar.classe] ?? 0;
+      const qtd = Math.max(0, base + newChar.atributos.INT);
+      if (qtd > 0) {
+        const alvo = newNex === 35 ? 'Veterano' : 'Expert';
+        const atual = newChar.periciasPromocaoPendentes;
+        newChar.periciasPromocaoPendentes = {
+          alvo,
+          restante: (atual && atual.alvo === alvo ? atual.restante : 0) + qtd,
+        };
+      }
+    }
 
     if (NEX_ATRIBUTO.includes(newNex)) {
       newChar.pontosAtributoPendentes = (newChar.pontosAtributoPendentes || 0) + 1;
@@ -74,7 +96,8 @@ export function levelDown(character: Personagem): Personagem {
     if (currentNex <= 5) return newChar;
 
     const oldNex = currentNex;
-    newChar.nex = currentNex - 5;
+    // Degrau especial: 99% volta para 95%.
+    newChar.nex = currentNex === 99 ? 95 : currentNex - 5;
 
     if (NEX_ATRIBUTO.includes(oldNex)) {
       newChar.pontosAtributoPendentes = (newChar.pontosAtributoPendentes || 0) - 1;
@@ -149,27 +172,33 @@ export function chooseTrack(character: Personagem, trackName: string): Personage
 function recalculateStats(char: Personagem) {
   const derived = calculateDerivedStats(char.classe, char.atributos, char.nex, char.estagio);
   
-  const diffPV = derived.pvMax - char.pv.max;
-  const diffPE = derived.peMax - char.pe.max;
-  const diffSAN = derived.sanMax - char.san.max;
+  const targetPvMax = char.overrides?.pvMax ?? derived.pvMax;
+  const targetPeMax = char.overrides?.peMax ?? derived.peMax;
+  const targetSanMax = char.overrides?.sanMax ?? derived.sanMax;
 
-  char.pv.max = derived.pvMax;
-  char.pv.atual += diffPV;
+  const diffPV = targetPvMax - char.pv.max;
+  const diffPE = targetPeMax - char.pe.max;
+  const diffSAN = targetSanMax - char.san.max;
 
-  char.pe.max = derived.peMax;
-  char.pe.atual += diffPE;
+  char.pv.max = targetPvMax;
+  char.pv.atual = Math.min(char.pv.max, Math.max(0, char.pv.atual + diffPV));
+
+  char.pe.max = targetPeMax;
+  char.pe.atual = Math.min(char.pe.max, Math.max(0, char.pe.atual + diffPE));
   char.pe.rodada = derived.peRodada;
 
-  char.san.max = derived.sanMax;
-  char.san.atual += diffSAN;
+  char.san.max = targetSanMax;
+  char.san.atual = Math.min(char.san.max, Math.max(0, char.san.atual + diffSAN));
   
   if (char.usarPd) {
       if (!char.pd) {
-          char.pd = { atual: derived.pdMax, max: derived.pdMax };
+          const targetPdMax = char.overrides?.pdMax ?? derived.pdMax;
+          char.pd = { atual: targetPdMax, max: targetPdMax };
       } else {
-          const diffPD = derived.pdMax - char.pd.max;
-          char.pd.max = derived.pdMax;
-          char.pd.atual += diffPD;
+          const targetPdMax = char.overrides?.pdMax ?? derived.pdMax;
+          const diffPD = targetPdMax - char.pd.max;
+          char.pd.max = targetPdMax;
+          char.pd.atual = Math.min(char.pd.max, Math.max(0, char.pd.atual + diffPD));
       }
   }
 }

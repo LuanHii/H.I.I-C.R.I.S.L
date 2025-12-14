@@ -394,7 +394,8 @@ export function gerarFicha(input: CriacaoInput): Personagem {
     pe: {
       atual: recursos.pe,
       max: recursos.pe,
-      rodada: input.classe === 'Sobrevivente' ? 1 : Math.max(1, Math.floor(nexBase / 5)),
+      // Limite de PE por turno segue a Tabela 1.2 (5%->1 ... 95%->19, 99%->20)
+      rodada: input.classe === 'Sobrevivente' ? 1 : Math.min(20, Math.max(1, Math.ceil(nexBase / 5))),
     },
     san: {
       atual: recursos.san,
@@ -509,15 +510,11 @@ function construirPericias(params: {
     slotsLivres -= 1;
   });
 
+  // Regra: o jogador escolhe suas perícias treinadas. Não preenchemos automaticamente.
+  // Se o fluxo de UI permitir finalizar com escolhas incompletas, isso deve gerar aviso,
+  // não alterar a ficha silenciosamente.
   if (slotsLivres > 0) {
-    for (const pericia of TODAS_PERICIAS) {
-      if (slotsLivres === 0) break;
-      if (graus[pericia] === 'Destreinado') {
-        graus[pericia] = 'Treinado';
-        slotsLivres -= 1;
-        logs.push(`Perícia ${pericia} atribuída automaticamente para preencher o limite.`);
-      }
-    }
+    logs.push(`Faltam ${slotsLivres} perícia(s) livre(s) para escolher.`);
   }
 
   promoverPericias(graus, atributos, nex, logs);
@@ -775,7 +772,7 @@ function calcularRecursos(params: {
   const isSurvivor = params.classe === 'Sobrevivente';
   const niveisExtras = isSurvivor 
     ? Math.max(0, (params.estagio || 1) - 1)
-    : Math.max(0, Math.floor(Math.max(params.nex - 5, 0) / 5));
+    : Math.max(0, Math.min(20, Math.max(1, Math.ceil(params.nex / 5))) - 1);
 
   const pvBase = data.pv.base + (data.pv.baseAttr ? params.atributos[data.pv.baseAttr] : 0);
   const peBase = data.pe.base + (data.pe.baseAttr ? params.atributos[data.pe.baseAttr] : 0);
@@ -822,9 +819,10 @@ function calcularPd(
     return base + incrementos * valorPorNivel;
   }
 
-  const nexBase = Math.max(5, nex);
-  const incrementos = Math.floor((nexBase - 5) / 5);
-  const valorPorNivel = cfg.porNivel;
+  const nivel = Math.min(20, Math.max(1, Math.ceil(Math.max(nex, 0) / 5)));
+  const incrementos = Math.max(0, nivel - 1);
+  // SaH p.104: a cada novo NEX soma (porNivel + PRE)
+  const valorPorNivel = cfg.porNivel + presenca;
   return base + incrementos * valorPorNivel;
 }
 

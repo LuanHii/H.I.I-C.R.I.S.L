@@ -71,6 +71,7 @@ export default function CharacterCreator() {
       ? calcularPericiasIniciais(state.data.classe, state.data.atributos.INT, state.data.origem)
       : null;
   const excedeuLimite = periciaMeta ? periciasSelecionadas.length > periciaMeta.qtdEscolhaLivre : false;
+  const faltandoPericias = periciaMeta ? Math.max(0, periciaMeta.qtdEscolhaLivre - periciasSelecionadas.length) : 0;
   
   const rituaisDisponiveis = useMemo(() => RITUAIS.filter(r => r.circulo === 1), []);
   const limiteRituais = 3;
@@ -80,10 +81,9 @@ export default function CharacterCreator() {
   const limiteCatI = tipoSelecionado === 'Sobrevivente' ? 1 : 3;
   const contagemCatI = equipamentosSelecionados.filter(i => i.categoria === 1).length;
 
-  const isNextDisabled = 
-    (state.step === 4 && excedeuLimite) ||
-    (state.step === 5 && rituaisSelecionados.length > limiteRituais) ||
-    (state.step === 6 && contagemCatI > limiteCatI);
+  // Modo permissivo: não bloqueia avanço. Em vez disso, mostramos avisos visuais.
+  // Erros que quebram a geração (ex.: perícias acima do limite) serão reportados no "Finalizar".
+  const isNextDisabled = false;
 
   const atualizarAtributo = (atributo: keyof Atributos, delta: number) => {
     setAtributosTemp((prev) => {
@@ -591,12 +591,17 @@ export default function CharacterCreator() {
               </p>
               {periciaMeta && (
                 <div className={`mt-4 inline-block px-4 py-1 rounded-full text-xs font-mono border ${
-                    excedeuLimite 
+                    (excedeuLimite || faltandoPericias > 0)
                         ? 'border-ordem-red text-ordem-red bg-ordem-red/10' 
                         : 'border-ordem-green text-ordem-green bg-ordem-green/10'
                 }`}>
                   ESCOLHAS LIVRES: {periciasSelecionadas.length} / {periciaMeta.qtdEscolhaLivre}
                 </div>
+              )}
+              {periciaMeta && faltandoPericias > 0 && (
+                <p className="mt-2 text-[11px] text-ordem-red font-mono tracking-widest">
+                  FALTAM {faltandoPericias} PERÍCIA(S) PARA AVANÇAR
+                </p>
               )}
             </div>
 

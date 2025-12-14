@@ -12,7 +12,11 @@ export const clamp = (value: number, min: number, max: number) => Math.min(Math.
 
 export function normalizePersonagem(personagem: Personagem, autoPatente: boolean): Personagem {
   const patente = (autoPatente ? getPatentePorNex(personagem.nex) : personagem.patente) || 'Recruta';
-  const periciasRecalc = calcularPericiasDetalhadas(personagem.atributos, personagem.pericias);
+  const periciasRecalc = calcularPericiasDetalhadas(
+    personagem.atributos,
+    personagem.pericias,
+    personagem.overrides?.periciaFixos ? { fixos: personagem.overrides.periciaFixos } : undefined,
+  );
   const recursos = calcularRecursosClasse({
     classe: personagem.classe,
     atributos: personagem.atributos,
@@ -33,9 +37,10 @@ export function normalizePersonagem(personagem: Personagem, autoPatente: boolean
     };
   });
 
-  const pvMax = recursos.pv;
-  const peMax = recursos.pe;
-  const sanMax = recursos.san;
+  const pvMax = personagem.overrides?.pvMax ?? recursos.pv;
+  const peMax = personagem.overrides?.peMax ?? recursos.pe;
+  const sanMax = personagem.overrides?.sanMax ?? recursos.san;
+  const pdMax = personagem.overrides?.pdMax ?? recursos.pd;
 
   const limiteItens = getPatenteConfig(patente).limiteItens;
   
@@ -60,7 +65,8 @@ export function normalizePersonagem(personagem: Personagem, autoPatente: boolean
       ...personagem.pe,
       max: peMax,
       atual: clamp(personagem.pe.atual, 0, peMax),
-      rodada: personagem.classe === 'Sobrevivente' ? 1 : Math.max(1, Math.floor(personagem.nex / 5)),
+      // Limite de PE por turno (Tabela 1.2): 5%->1 ... 95%->19, 99%->20.
+      rodada: personagem.classe === 'Sobrevivente' ? 1 : Math.min(20, Math.max(1, Math.ceil(personagem.nex / 5))),
     },
     san: {
       ...personagem.san,
@@ -70,9 +76,9 @@ export function normalizePersonagem(personagem: Personagem, autoPatente: boolean
     pd: (personagem.usarPd || personagem.pd)
         ? (personagem.pd 
             ? (typeof (personagem.pd as any) === 'number' 
-                ? { atual: (personagem.pd as any) as number, max: recursos.pd || (personagem.pd as any) as number } 
-                : { ...personagem.pd, max: recursos.pd || personagem.pd.max })
-            : { atual: recursos.pd || 0, max: recursos.pd || 0 })
+                ? { atual: clamp((personagem.pd as any) as number, 0, pdMax ?? (personagem.pd as any) as number), max: pdMax ?? (personagem.pd as any) as number } 
+                : { ...personagem.pd, max: pdMax ?? personagem.pd.max, atual: clamp(personagem.pd.atual, 0, pdMax ?? personagem.pd.max) })
+            : { atual: clamp(pdMax || 0, 0, pdMax || 0), max: pdMax || 0 })
         : undefined,
     limiteItens,
     carga: cargaCalculada,

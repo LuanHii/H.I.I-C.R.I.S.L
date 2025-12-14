@@ -172,8 +172,9 @@ export function finalizarCriacao(state: CreationState): Personagem {
           personagem = levelUp(personagem);
       }
   } else {
-      const steps = (targetNex - 5) / 5;
-      for (let i = 0; i < steps; i++) {
+      const safeTarget = Math.min(99, Math.max(5, targetNex));
+      // NEX sobe em degraus (inclui 99%). Evitamos aritmética de +5 aqui para não cair em 100%.
+      while (personagem.nex < safeTarget) {
           personagem = levelUp(personagem);
       }
   }

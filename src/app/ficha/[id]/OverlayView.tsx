@@ -4,6 +4,7 @@ import { Heart, Brain, Zap, Shield, Flame } from 'lucide-react';
 
 interface OverlayViewProps {
   agent: Personagem;
+  mode?: 'mini' | 'full';
 }
 
 interface StatusCompactProps {
@@ -38,19 +39,24 @@ const StatusCompact = ({ icon, label, current, max, color }: StatusCompactProps)
   );
 };
 
-export function OverlayView({ agent }: OverlayViewProps) {
+export function OverlayView({ agent, mode = 'mini' }: OverlayViewProps) {
   // Se usarPd for true, ativamos a regra de Determinação (substitui SAN e PE)
   const usarDeterminacao = agent.usarPd && agent.pd;
+  const hasPendencias =
+    (agent.periciasTreinadasPendentes && agent.periciasTreinadasPendentes > 0) ||
+    (agent.periciasPromocaoPendentes && agent.periciasPromocaoPendentes.restante > 0) ||
+    agent.escolhaTrilhaPendente ||
+    (agent.habilidadesTrilhaPendentes && agent.habilidadesTrilhaPendentes.length > 0);
 
   return (
     // Fundo Verde Chroma Key
     <div className="min-h-screen w-full bg-[#00FF00] flex items-center justify-center p-4">
       
       {/* Card Principal - Estilo "Widget" */}
-      <div className="w-full max-w-[400px] bg-black border-2 border-zinc-800 rounded-xl shadow-2xl overflow-hidden flex flex-col">
+      <div className="w-full max-w-[420px] bg-black border-2 border-zinc-800 rounded-xl shadow-2xl overflow-hidden flex flex-col">
         
         {/* Header Compacto */}
-        <div className="bg-zinc-900 border-b border-zinc-800 p-4 pb-3 flex justify-between items-center">
+        <div className="bg-zinc-900 border-b border-zinc-800 p-4 pb-3 flex justify-between items-center gap-3">
            <div className="overflow-hidden mr-2">
              <h1 className="text-2xl font-bold text-white truncate leading-tight">
                {agent.nome}
@@ -60,7 +66,15 @@ export function OverlayView({ agent }: OverlayViewProps) {
                   {agent.classe}
                 </span>
                 <span className="text-zinc-500">|</span>
-                <span className="text-zinc-400 font-semibold">{agent.nex}% NEX</span>
+                <span className="text-zinc-400 font-semibold">{agent.classe === 'Sobrevivente' ? `Estágio ${agent.estagio ?? 1}` : `${agent.nex}% NEX`}</span>
+                {hasPendencias && (
+                  <>
+                    <span className="text-zinc-500">|</span>
+                    <span className="text-[10px] font-bold tracking-widest uppercase text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 px-1.5 py-0.5 rounded">
+                      PENDENTE
+                    </span>
+                  </>
+                )}
              </div>
            </div>
            
@@ -111,6 +125,40 @@ export function OverlayView({ agent }: OverlayViewProps) {
              </>
            )}
         </div>
+
+        {mode === 'full' && (
+          <div className="border-t border-zinc-800 bg-zinc-950/60 p-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="text-[10px] font-bold tracking-[0.3em] text-zinc-400 uppercase">Recursos</div>
+              <div className="text-[10px] font-mono text-zinc-500">
+                {usarDeterminacao ? `PD/turno: —` : `PE/turno: ${agent.pe.rodada}`}
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-black/40 border border-zinc-800 rounded p-2">
+                <div className="text-[10px] text-zinc-500 uppercase tracking-widest">PV</div>
+                <div className="text-sm font-bold text-white font-mono">{agent.pv.atual}/{agent.pv.max}</div>
+              </div>
+              {usarDeterminacao ? (
+                <div className="bg-black/40 border border-zinc-800 rounded p-2 col-span-2">
+                  <div className="text-[10px] text-zinc-500 uppercase tracking-widest">PD</div>
+                  <div className="text-sm font-bold text-white font-mono">{agent.pd?.atual ?? 0}/{agent.pd?.max ?? 0}</div>
+                </div>
+              ) : (
+                <>
+                  <div className="bg-black/40 border border-zinc-800 rounded p-2">
+                    <div className="text-[10px] text-zinc-500 uppercase tracking-widest">PE</div>
+                    <div className="text-sm font-bold text-white font-mono">{agent.pe.atual}/{agent.pe.max}</div>
+                  </div>
+                  <div className="bg-black/40 border border-zinc-800 rounded p-2">
+                    <div className="text-[10px] text-zinc-500 uppercase tracking-widest">SAN</div>
+                    <div className="text-sm font-bold text-white font-mono">{agent.san.atual}/{agent.san.max}</div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

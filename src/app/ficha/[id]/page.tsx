@@ -13,6 +13,7 @@ function PlayerAgentContent() {
   const searchParams = useSearchParams();
   const id = params.id as string;
   const isOverlay = searchParams.get('overlay') === 'true';
+  const overlayMode = (searchParams.get('overlayMode') as 'mini' | 'full' | null) ?? 'mini';
 
   const [agent, setAgent] = useState<Personagem | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,7 +43,15 @@ function PlayerAgentContent() {
   const openOverlay = () => {
     const url = new URL(window.location.href);
     url.searchParams.set('overlay', 'true');
+    url.searchParams.set('overlayMode', 'mini');
     window.open(url.toString(), '_blank', 'width=500,height=500,menubar=no,toolbar=no,location=no,status=no');
+  };
+
+  const openOverlayFull = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('overlay', 'true');
+    url.searchParams.set('overlayMode', 'full');
+    window.open(url.toString(), '_blank', 'width=520,height=680,menubar=no,toolbar=no,location=no,status=no');
   };
 
   if (loading) {
@@ -69,7 +78,7 @@ function PlayerAgentContent() {
   }
 
   if (isOverlay) {
-    return <OverlayView agent={agent} />;
+    return <OverlayView agent={agent} mode={overlayMode} />;
   }
 
   return (
@@ -87,7 +96,15 @@ function PlayerAgentContent() {
                   title="Abrir modo overlay para OBS/Stream"
                 >
                   <ExternalLink size={14} />
-                  <span>MODO OVERLAY</span>
+                  <span>OVERLAY (MINI)</span>
+                </button>
+                <button 
+                  onClick={openOverlayFull}
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-mono bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded transition-colors text-zinc-300"
+                  title="Overlay maior (com painel extra)"
+                >
+                  <ExternalLink size={14} />
+                  <span>OVERLAY (FULL)</span>
                 </button>
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
