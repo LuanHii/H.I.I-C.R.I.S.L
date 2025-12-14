@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   INITIAL_STATE,
+  type CreationState,
   setTipo,
   setConceitoClasse,
   setAtributos,
@@ -20,6 +21,7 @@ import { ITENS } from '../data/items';
 import { WEAPOWS } from '../data/weapows';
 import { Atributos, ClasseName, ClasseStats, Personagem, PericiaName, Ritual, Item, Elemento } from '../core/types';
 import type { ClassePreferencias } from '../logic/rulesEngine';
+import type { RecreateDraft } from '../logic/recreateFromPersonagem';
 
 const ELEMENTO_COLORS: Record<Elemento, string> = {
   Sangue: 'border-red-600 text-red-500',
@@ -29,8 +31,16 @@ const ELEMENTO_COLORS: Record<Elemento, string> = {
   Medo: 'border-white text-white',
 };
 
-export default function CharacterCreator() {
-  const [state, setState] = useState(INITIAL_STATE);
+export default function CharacterCreator({
+  initialDraft,
+  initialStep = 0,
+  onCreated,
+}: {
+  initialDraft?: RecreateDraft;
+  initialStep?: number;
+  onCreated?: (created: Personagem) => void;
+}) {
+  const [state, setState] = useState<CreationState>(INITIAL_STATE);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [resultado, setResultado] = useState<Personagem | null>(null);
@@ -52,6 +62,52 @@ export default function CharacterCreator() {
     if (tipoSelecionado === 'Agente') setNivelSelecionado(5);
     if (tipoSelecionado === 'Sobrevivente') setNivelSelecionado(1);
   }, [tipoSelecionado]);
+
+  // Prefill (recriar): preenche campos e posiciona o usuário no step inicial.
+  useEffect(() => {
+    if (!initialDraft) return;
+
+    setError(null);
+    setSuccess(false);
+    setResultado(null);
+
+    setTipoSelecionado(initialDraft.tipo);
+    setNome(initialDraft.nome);
+    setConceito(initialDraft.conceito ?? '');
+    setUsarPd(initialDraft.usarPd === true);
+    setClasseSelecionada(initialDraft.classe);
+    if (initialDraft.classe === 'Combatente' && initialDraft.preferenciasClasse) {
+      setPreferenciasCombatente(initialDraft.preferenciasClasse);
+    }
+    setNivelSelecionado(initialDraft.nexOrEstagio);
+    setAtributosTemp({ ...initialDraft.atributosBase });
+    setOrigemSelecionada(initialDraft.origemNome);
+    setPericiasSelecionadas([...(initialDraft.periciasLivres ?? [])]);
+    setRituaisSelecionados([...(initialDraft.rituaisIniciais ?? [])]);
+    setEquipamentosSelecionados([...(initialDraft.equipamentosIniciais ?? [])]);
+
+    setState((prev) => ({
+      ...prev,
+      step: Math.max(0, Math.min(6, initialStep)),
+      data: {
+        ...prev.data,
+        tipo: initialDraft.tipo,
+        nome: initialDraft.nome,
+        conceito: initialDraft.conceito ?? '',
+        classe: initialDraft.classe,
+        nex: initialDraft.tipo === 'Agente' ? initialDraft.nexOrEstagio : undefined,
+        estagio: initialDraft.tipo === 'Sobrevivente' ? initialDraft.nexOrEstagio : undefined,
+        usarPd: initialDraft.usarPd === true,
+        preferenciasClasse: initialDraft.preferenciasClasse,
+        atributos: { ...initialDraft.atributosBase },
+        // Origem precisa ser objeto (com `pericias`) para o cálculo de perícias iniciais.
+        origem: ORIGENS.find((o) => o.nome === initialDraft.origemNome) as any,
+        periciasSelecionadas: [...(initialDraft.periciasLivres ?? [])],
+        rituais: [...(initialDraft.rituaisIniciais ?? [])],
+        equipamentos: [...(initialDraft.equipamentosIniciais ?? [])],
+      },
+    }));
+  }, [initialDraft, initialStep]);
 
   const [atributosTemp, setAtributosTemp] = useState<Atributos>({ ...INITIAL_STATE.data.atributos });
 
@@ -112,6 +168,7 @@ export default function CharacterCreator() {
 
   useEffect(() => {
     if (!resultado) return;
+    if (onCreated) return;
     if (typeof window === 'undefined') return;
     try {
       const raw = window.localStorage.getItem('fichas-origem');
@@ -121,7 +178,7 @@ export default function CharacterCreator() {
     } catch (err) {
       console.error('Falha ao salvar ficha localmente', err);
     }
-  }, [resultado]);
+  }, [resultado, onCreated]);
 
   const handleReset = () => {
     setState(INITIAL_STATE);
@@ -203,6 +260,7 @@ export default function CharacterCreator() {
         const personagem = finalizarCriacao(newState);
         setResultado(personagem);
         setSuccess(true);
+        if (onCreated) onCreated(personagem);
       }
 
       setState(newState);

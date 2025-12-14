@@ -181,6 +181,13 @@ export function FichasManager() {
                   >
                     COMPARTILHAR
                   </button>
+                  <Link
+                    href={`/agente/recriar/${registro.id}`}
+                    onClick={(event) => event.stopPropagation()}
+                    className="text-xs px-2 py-1 border border-zinc-700 text-zinc-300 hover:border-zinc-400 hover:text-white rounded"
+                  >
+                    RECRIAR
+                  </Link>
                   <button
                     type="button"
                     onClick={(event) => {

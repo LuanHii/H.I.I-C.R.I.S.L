@@ -275,7 +275,9 @@ export function calcularPericiasDisponiveis(
   preferenciasClasse?: ClassePreferencias,
 ): { qtdEscolhaLivre: number; obrigatorias: PericiaName[] } {
   const obrigatorias = new Set<PericiaName>();
-  origem.pericias.forEach((p) => obrigatorias.add(p));
+  // Modo permissivo: evita quebrar se `origem` vier incompleta por dados antigos/edge cases.
+  const origemPericias = (origem as any)?.pericias ?? [];
+  origemPericias.forEach((p: PericiaName) => obrigatorias.add(p));
 
   switch (classe) {
     case 'Combatente':
