@@ -8,12 +8,15 @@ import { normalizePersonagem } from '../../../core/personagemUtils';
 import { auditPersonagem, summarizeIssues } from '../../../core/validation/auditPersonagem';
 import { MestreNavbar } from '../../../components/master/MestreNavbar';
 import { saveAgentToCloud } from '../../../core/firebase/firestore';
+import { ImportExportModal } from '../../../components/master/ImportExportModal';
+import { downloadJSON } from '../../../core/storage/exportImportUtils';
 
 export default function FichasPage() {
   const { fichas, remover, duplicar, salvar } = useStoredFichas();
   const [selecionada, setSelecionada] = useState<string | null>(null);
   const [busca, setBusca] = useState('');
   const [ordem, setOrdem] = useState<'atualizado' | 'nome' | 'nex'>('atualizado');
+  const [modalAberto, setModalAberto] = useState(false);
   const registroAtual = fichas.find((ficha) => ficha.id === selecionada);
   const fichaAtual = registroAtual?.personagem;
 
@@ -35,6 +38,27 @@ export default function FichasPage() {
     } catch (e) {
       console.error(e);
       alert('Não foi possível copiar o link. Verifique permissões do navegador.');
+    }
+  };
+
+  const handleExportarFicha = (id: string) => {
+    const registro = fichas.find((f) => f.id === id);
+    if (!registro) return;
+    try {
+      const data = JSON.stringify(
+        {
+          version: '1.0.0',
+          exportadoEm: new Date().toISOString(),
+          fichas: [registro],
+        },
+        null,
+        2
+      );
+      const nomeArquivo = `${registro.personagem.nome.replace(/[^a-z0-9]/gi, '_')}-${id.slice(0, 8)}.json`;
+      downloadJSON(data, nomeArquivo);
+    } catch (error) {
+      console.error('Erro ao exportar ficha:', error);
+      alert('Erro ao exportar ficha. Verifique o console para mais detalhes.');
     }
   };
 
@@ -76,12 +100,20 @@ export default function FichasPage() {
         title="MESTRE"
         subtitle="ARQUIVO // FICHAS"
         rightSlot={
-          <Link
-            href="/agente/novo"
-            className="px-3 py-2 text-[10px] font-mono tracking-[0.25em] border border-ordem-green text-ordem-green hover:bg-ordem-green/10 rounded-lg transition"
-          >
-            NOVA FICHA
-          </Link>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setModalAberto(true)}
+              className="px-3 py-2 text-[10px] font-mono tracking-[0.25em] border border-ordem-gold text-ordem-gold hover:bg-ordem-gold/10 rounded-lg transition"
+            >
+              EXPORTAR/IMPORTAR
+            </button>
+            <Link
+              href="/agente/novo"
+              className="px-3 py-2 text-[10px] font-mono tracking-[0.25em] border border-ordem-green text-ordem-green hover:bg-ordem-green/10 rounded-lg transition"
+            >
+              NOVA FICHA
+            </Link>
+          </div>
         }
       />
 
@@ -198,6 +230,17 @@ export default function FichasPage() {
                 >
                   COMPARTILHAR
                 </button>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleExportarFicha(registro.id);
+                  }}
+                  className="text-xs px-2 py-1 border border-ordem-gold text-ordem-gold hover:bg-ordem-gold/10 rounded"
+                  title="Exportar esta ficha"
+                >
+                  EXPORTAR
+                </button>
                 <Link
                   href={`/agente/recriar/${registro.id}`}
                   onClick={(event) => event.stopPropagation()}
@@ -255,6 +298,15 @@ export default function FichasPage() {
         )}
       </section>
       </main>
+
+      <ImportExportModal
+        isOpen={modalAberto}
+        onClose={() => setModalAberto(false)}
+        onImportComplete={() => {
+          // Recarrega os dados após importação
+          window.location.reload();
+        }}
+      />
     </div>
   );
 }
