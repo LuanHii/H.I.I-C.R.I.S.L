@@ -75,13 +75,13 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
             </h1>
           </header>
 
-          <div className="flex-1 overflow-hidden bg-zinc-900/50 border border-zinc-800 rounded-xl">
-              <AgentDetailView 
-                  agent={personagemAtual}
-                  onUpdate={atualizarPersonagem}
-                  readOnly={false}
-                  disableInteractionModals={true}
-              />
+          <div className="flex-1 overflow-y-auto bg-zinc-900/50 border border-zinc-800 rounded-xl">
+            <AgentDetailView
+              agent={personagemAtual}
+              onUpdate={atualizarPersonagem}
+              readOnly={false}
+              disableInteractionModals={true}
+            />
           </div>
         </div>
       </main>

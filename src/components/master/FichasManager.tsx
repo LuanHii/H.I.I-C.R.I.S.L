@@ -151,8 +151,8 @@ export function FichasManager() {
           }
         }}
         className={`w-full text-left border rounded-xl p-3 transition relative overflow-hidden ${selecionada === registro.id
-            ? 'border-ordem-red bg-ordem-red/10'
-            : 'border-zinc-800 bg-black/40 hover:border-zinc-600'
+          ? 'border-ordem-red bg-ordem-red/10'
+          : 'border-zinc-800 bg-black/40 hover:border-zinc-600'
           }`}
       >
         <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_20%_0%,rgba(220,38,38,0.08),transparent_55%)]" />
@@ -162,8 +162,8 @@ export function FichasManager() {
             {summary.total > 0 && (
               <span
                 className={`px-2 py-0.5 rounded border text-[10px] font-mono tracking-widest ${summary.errors > 0
-                    ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
-                    : 'border-ordem-gold text-ordem-gold bg-ordem-gold/10'
+                  ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
+                  : 'border-ordem-gold text-ordem-gold bg-ordem-gold/10'
                   }`}
                 title={title}
               >
@@ -346,9 +346,9 @@ export function FichasManager() {
         </div>
       </section>
 
-      <section className="lg:col-span-2 p-6 bg-zinc-950 overflow-hidden">
+      <section className="lg:col-span-2 p-6 bg-zinc-950 overflow-y-auto">
         {fichaAtual ? (
-          <div className="h-full overflow-hidden rounded-xl border border-zinc-800">
+          <div className="rounded-xl border border-zinc-800 overflow-hidden">
             <AgentDetailView agent={fichaAtual} onUpdate={handleUpdate} readOnly={false} />
           </div>
         ) : (
