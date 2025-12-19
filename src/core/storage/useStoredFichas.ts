@@ -5,9 +5,18 @@ export interface FichaRegistro {
   id: string;
   personagem: Personagem;
   atualizadoEm: string;
+  campanha?: string; // ID da campanha (opcional, undefined = sem campanha)
+}
+
+export interface Campanha {
+  id: string;
+  nome: string;
+  cor?: string; // Cor para identificar a campanha
+  ordem: number; // Para ordenar campanhas
 }
 
 const STORAGE_KEY = 'fichas-origem';
+const CAMPANHAS_KEY = 'campanhas';
 const LIMITE_FICHAS = 50;
 
 function lerFichas(): FichaRegistro[] {
@@ -35,6 +44,7 @@ function normalizarRegistro(entrada: unknown): FichaRegistro | null {
       id: registroPossivel.id ?? crypto.randomUUID(),
       personagem: registroPossivel.personagem,
       atualizadoEm: registroPossivel.atualizadoEm ?? new Date().toISOString(),
+      campanha: registroPossivel.campanha,
     };
   }
 
@@ -60,6 +70,29 @@ function gravarFichas(fichas: FichaRegistro[]) {
   }
 }
 
+function lerCampanhas(): Campanha[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = window.localStorage.getItem(CAMPANHAS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed;
+  } catch (err) {
+    console.error('Erro ao ler campanhas', err);
+    return [];
+  }
+}
+
+function gravarCampanhas(campanhas: Campanha[]) {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(CAMPANHAS_KEY, JSON.stringify(campanhas));
+  } catch (err) {
+    console.error('Erro ao salvar campanhas', err);
+  }
+}
+
 export function useStoredFichas() {
   const [fichas, setFichas] = useState<FichaRegistro[]>([]);
 
@@ -67,13 +100,15 @@ export function useStoredFichas() {
     setFichas(lerFichas());
   }, []);
 
-  const salvar = useCallback((personagem: Personagem, id?: string) => {
+  const salvar = useCallback((personagem: Personagem, id?: string, campanha?: string) => {
     setFichas((prev) => {
       const fichaId = id ?? personagem.nome ?? crypto.randomUUID();
+      const fichaExistente = prev.find((f) => f.id === fichaId);
       const registro: FichaRegistro = {
         id: fichaId,
         personagem,
         atualizadoEm: new Date().toISOString(),
+        campanha: campanha ?? fichaExistente?.campanha,
       };
       const existentes = prev.filter((f) => f.id !== fichaId);
       const atualizadas = [registro, ...existentes];
@@ -98,6 +133,7 @@ export function useStoredFichas() {
         id: crypto.randomUUID(),
         personagem: { ...alvo.personagem, nome: `${alvo.personagem.nome} (cópia)` },
         atualizadoEm: new Date().toISOString(),
+        campanha: alvo.campanha,
       };
       const atualizadas = [novo, ...prev];
       gravarFichas(atualizadas);
@@ -105,8 +141,69 @@ export function useStoredFichas() {
     });
   }, []);
 
+  const moverParaCampanha = useCallback((fichaId: string, campanhaId: string | undefined) => {
+    setFichas((prev) => {
+      const atualizadas = prev.map((f) =>
+        f.id === fichaId ? { ...f, campanha: campanhaId, atualizadoEm: new Date().toISOString() } : f
+      );
+      gravarFichas(atualizadas);
+      return atualizadas;
+    });
+  }, []);
+
   return useMemo(
-    () => ({ fichas, salvar, remover, duplicar }),
-    [fichas, salvar, remover, duplicar],
+    () => ({ fichas, salvar, remover, duplicar, moverParaCampanha }),
+    [fichas, salvar, remover, duplicar, moverParaCampanha],
+  );
+}
+
+export function useCampanhas() {
+  const [campanhas, setCampanhas] = useState<Campanha[]>([]);
+
+  useEffect(() => {
+    setCampanhas(lerCampanhas());
+  }, []);
+
+  const criarCampanha = useCallback((nome: string, cor?: string) => {
+    setCampanhas((prev) => {
+      const nova: Campanha = {
+        id: crypto.randomUUID(),
+        nome,
+        cor: cor || '#dc2626', // vermelho padrão (ordem-red)
+        ordem: prev.length,
+      };
+      const atualizadas = [...prev, nova];
+      gravarCampanhas(atualizadas);
+      return atualizadas;
+    });
+  }, []);
+
+  const renomearCampanha = useCallback((id: string, nome: string) => {
+    setCampanhas((prev) => {
+      const atualizadas = prev.map((c) => (c.id === id ? { ...c, nome } : c));
+      gravarCampanhas(atualizadas);
+      return atualizadas;
+    });
+  }, []);
+
+  const removerCampanha = useCallback((id: string) => {
+    setCampanhas((prev) => {
+      const filtradas = prev.filter((c) => c.id !== id);
+      gravarCampanhas(filtradas);
+      return filtradas;
+    });
+  }, []);
+
+  const alterarCorCampanha = useCallback((id: string, cor: string) => {
+    setCampanhas((prev) => {
+      const atualizadas = prev.map((c) => (c.id === id ? { ...c, cor } : c));
+      gravarCampanhas(atualizadas);
+      return atualizadas;
+    });
+  }, []);
+
+  return useMemo(
+    () => ({ campanhas, criarCampanha, renomearCampanha, removerCampanha, alterarCorCampanha }),
+    [campanhas, criarCampanha, renomearCampanha, removerCampanha, alterarCorCampanha],
   );
 }

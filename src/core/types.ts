@@ -11,12 +11,12 @@ export type Patente =
   | 'Oficial de Operações'
   | 'Agente de Elite';
 
-export type PericiaName = 
-  | 'Acrobacia' | 'Adestramento' | 'Artes' | 'Atletismo' | 'Atualidades' 
-  | 'Ciências' | 'Crime' | 'Diplomacia' | 'Enganação' | 'Fortitude' 
-  | 'Furtividade' | 'Iniciativa' | 'Intimidação' | 'Intuição' | 'Investigação' 
-  | 'Luta' | 'Medicina' | 'Ocultismo' | 'Percepção' | 'Pilotagem' 
-  | 'Pontaria' | 'Profissão' | 'Reflexos' | 'Religião' | 'Sobrevivência' 
+export type PericiaName =
+  | 'Acrobacia' | 'Adestramento' | 'Artes' | 'Atletismo' | 'Atualidades'
+  | 'Ciências' | 'Crime' | 'Diplomacia' | 'Enganação' | 'Fortitude'
+  | 'Furtividade' | 'Iniciativa' | 'Intimidação' | 'Intuição' | 'Investigação'
+  | 'Luta' | 'Medicina' | 'Ocultismo' | 'Percepção' | 'Pilotagem'
+  | 'Pontaria' | 'Profissão' | 'Reflexos' | 'Religião' | 'Sobrevivência'
   | 'Tática' | 'Tecnologia' | 'Vontade';
 
 export type GrauTreinamento = 'Destreinado' | 'Treinado' | 'Veterano' | 'Expert';
@@ -132,11 +132,11 @@ export interface Item {
   nome: string;
   categoria: 0 | 1 | 2 | 3 | 4;
   espaco: number;
-  tipo: 'Arma' | 'Proteção' | 'Acessório' | 'Geral' | 'Amaldiçoado' | 
-        'Modificação Paranormal (Acessório)' | 
-        'Amaldiçoado (Sangue)' | 'Amaldiçoado (Sangue/Energia)' | 'Amaldiçoado (Morte)' | 'Amaldiçoado (Conhecimento)' | 'Amaldiçoado (Energia)' |
-        'Geral (Acessório)' | 'Geral (Utensílio)' | 'Geral (Medicamento)' | 'Geral (Operacional)' |
-        'Explosivo' | 'Paranormal';
+  tipo: 'Arma' | 'Proteção' | 'Acessório' | 'Geral' | 'Amaldiçoado' |
+  'Modificação Paranormal (Acessório)' |
+  'Amaldiçoado (Sangue)' | 'Amaldiçoado (Sangue/Energia)' | 'Amaldiçoado (Morte)' | 'Amaldiçoado (Conhecimento)' | 'Amaldiçoado (Energia)' |
+  'Geral (Acessório)' | 'Geral (Utensílio)' | 'Geral (Medicamento)' | 'Geral (Operacional)' |
+  'Explosivo' | 'Paranormal';
   descricao: string;
   stats?: {
     dano?: string;
@@ -194,13 +194,13 @@ export interface PericiaDetalhada {
 export interface NexEvento {
   requisito: number;
   tipo:
-    | 'Trilha'
-    | 'Atributo'
-    | 'Poder'
-    | 'Pericia'
-    | 'Afinidade'
-    | 'Versatilidade'
-    | 'Patente';
+  | 'Trilha'
+  | 'Atributo'
+  | 'Poder'
+  | 'Pericia'
+  | 'Afinidade'
+  | 'Versatilidade'
+  | 'Patente';
   descricao: string;
   desbloqueado: boolean;
 }
@@ -284,6 +284,7 @@ export interface Personagem {
     peMax?: number;
     sanMax?: number;
     pdMax?: number;
+    defesa?: number;
     // Bônus fixos adicionais (delta) por perícia. Soma ao bônus calculado (grau + outros bônus).
     periciaFixos?: Partial<Record<PericiaName, number>>;
   };

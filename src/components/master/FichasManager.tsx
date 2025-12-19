@@ -2,16 +2,19 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { useStoredFichas } from '../../core/storage/useStoredFichas';
+import { useStoredFichas, useCampanhas, type FichaRegistro } from '../../core/storage/useStoredFichas';
 import { AgentDetailView } from './AgentDetailView';
 import { normalizePersonagem } from '../../core/personagemUtils';
 import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPersonagem';
 import { saveAgentToCloud } from '../../core/firebase/firestore';
 import { ImportExportModal } from './ImportExportModal';
-import { downloadJSON } from '../../core/storage/exportImportUtils';
+import { downloadJSON, exportarFichaIndividual } from '../../core/storage/exportImportUtils';
+import { CampanhaSection, NovaCampanhaForm } from './CampanhaSection';
+import { recalcularRecursosPersonagem } from '../../logic/progression';
 
 export function FichasManager() {
-  const { fichas, remover, duplicar, salvar } = useStoredFichas();
+  const { fichas, remover, duplicar, salvar, moverParaCampanha } = useStoredFichas();
+  const { campanhas, criarCampanha, renomearCampanha, removerCampanha } = useCampanhas();
   const [selecionada, setSelecionada] = useState<string | null>(null);
   const [busca, setBusca] = useState('');
   const [ordem, setOrdem] = useState<'atualizado' | 'nome' | 'nex'>('atualizado');
@@ -50,10 +53,44 @@ export function FichasManager() {
     });
   }, [busca, fichas, ordem]);
 
+  // Agrupar fichas por campanha
+  const fichasPorCampanha = useMemo(() => {
+    const grupos: Map<string | undefined, FichaRegistro[]> = new Map();
+
+    // Inicializa grupos para todas as campanhas
+    campanhas.forEach((c) => grupos.set(c.id, []));
+    grupos.set(undefined, []); // Fichas sem campanha
+
+    // Distribui fichas
+    fichasFiltradas.forEach((f) => {
+      const campanhaId = f.campanha;
+      if (!grupos.has(campanhaId)) {
+        grupos.set(undefined, [...(grupos.get(undefined) || []), f]);
+      } else {
+        grupos.get(campanhaId)!.push(f);
+      }
+    });
+
+    return grupos;
+  }, [fichasFiltradas, campanhas]);
+
   const handleUpdate = (updated: any) => {
     if (!registroAtual) return;
     const final = normalizePersonagem(updated, true);
     salvar(final, registroAtual.id);
+  };
+
+  const handleRecalcular = (id: string) => {
+    const registro = fichas.find((f) => f.id === id);
+    if (!registro) return;
+    try {
+      const recalculado = recalcularRecursosPersonagem(registro.personagem);
+      salvar(recalculado, id);
+      alert(`Recursos de "${registro.personagem.nome}" recalculados com sucesso!`);
+    } catch (error) {
+      console.error('Erro ao recalcular:', error);
+      alert('Erro ao recalcular recursos.');
+    }
   };
 
   const handleShare = async (id: string) => {
@@ -74,15 +111,7 @@ export function FichasManager() {
     const registro = fichas.find((f) => f.id === id);
     if (!registro) return;
     try {
-      const data = JSON.stringify(
-        {
-          version: '1.0.0',
-          exportadoEm: new Date().toISOString(),
-          fichas: [registro],
-        },
-        null,
-        2
-      );
+      const data = exportarFichaIndividual(registro);
       const nomeArquivo = `${registro.personagem.nome.replace(/[^a-z0-9]/gi, '_')}-${id.slice(0, 8)}.json`;
       downloadJSON(data, nomeArquivo);
     } catch (error) {
@@ -91,9 +120,143 @@ export function FichasManager() {
     }
   };
 
+  const handleRemoverCampanha = (campanhaId: string) => {
+    // Move todas as fichas da campanha para "Fichas Soltas"
+    fichas
+      .filter((f) => f.campanha === campanhaId)
+      .forEach((f) => moverParaCampanha(f.id, undefined));
+    removerCampanha(campanhaId);
+  };
+
+  const renderFichaCard = (registro: FichaRegistro) => {
+    const issues = auditPersonagem(registro.personagem);
+    const summary = summarizeIssues(issues);
+    const title =
+      summary.total === 0
+        ? ''
+        : `Problemas detectados (${summary.errors} erro(s), ${summary.warns} aviso(s)):\n${issues
+          .map((i) => `- [${i.severity.toUpperCase()}] ${i.message}`)
+          .join('\n')}`;
+
+    return (
+      <article
+        key={registro.id}
+        role="button"
+        tabIndex={0}
+        onClick={() => setSelecionada(registro.id)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            setSelecionada(registro.id);
+          }
+        }}
+        className={`w-full text-left border rounded-xl p-3 transition relative overflow-hidden ${selecionada === registro.id
+            ? 'border-ordem-red bg-ordem-red/10'
+            : 'border-zinc-800 bg-black/40 hover:border-zinc-600'
+          }`}
+      >
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_20%_0%,rgba(220,38,38,0.08),transparent_55%)]" />
+        <div className="flex justify-between text-xs text-ordem-white/60 relative">
+          <span>{registro.personagem.classe}</span>
+          <div className="flex items-center gap-2">
+            {summary.total > 0 && (
+              <span
+                className={`px-2 py-0.5 rounded border text-[10px] font-mono tracking-widest ${summary.errors > 0
+                    ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
+                    : 'border-ordem-gold text-ordem-gold bg-ordem-gold/10'
+                  }`}
+                title={title}
+              >
+                {summary.errors > 0 ? 'ERRO' : 'AVISO'} {summary.total}
+              </span>
+            )}
+            <span>{new Date(registro.atualizadoEm as any).toLocaleDateString()}</span>
+          </div>
+        </div>
+        <p className="text-lg font-semibold text-white relative">{registro.personagem.nome}</p>
+        <p className="text-xs text-zinc-400 relative">
+          NEX {registro.personagem.nex}% · Patente {registro.personagem.patente}
+        </p>
+        <div className="mt-2 flex gap-2 text-[10px] text-zinc-400 relative">
+          <span>
+            PV {registro.personagem.pv.atual}/{registro.personagem.pv.max}
+          </span>
+          <span>
+            PE {registro.personagem.pe.atual}/{registro.personagem.pe.max}
+          </span>
+          <span>
+            SAN {registro.personagem.san.atual}/{registro.personagem.san.max}
+          </span>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2 relative">
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              void handleShare(registro.id);
+            }}
+            className="text-xs px-2 py-1 border border-ordem-green text-ordem-green hover:bg-ordem-green/10 rounded"
+          >
+            COMPARTILHAR
+          </button>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleExportarFicha(registro.id);
+            }}
+            className="text-xs px-2 py-1 border border-ordem-gold text-ordem-gold hover:bg-ordem-gold/10 rounded"
+            title="Exportar esta ficha"
+          >
+            EXPORTAR
+          </button>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleRecalcular(registro.id);
+            }}
+            className="text-xs px-2 py-1 border border-cyan-500 text-cyan-500 hover:bg-cyan-500/10 rounded"
+            title="Recalcular PV, PE, SAN, Defesa (aplica bônus de origem e trilha)"
+          >
+            ♻ RECALCULAR
+          </button>
+          <Link
+            href={`/agente/recriar/${registro.id}`}
+            onClick={(event) => event.stopPropagation()}
+            className="text-xs px-2 py-1 border border-zinc-700 text-zinc-300 hover:border-zinc-400 hover:text-white rounded"
+          >
+            RECRIAR
+          </Link>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              duplicar(registro.id);
+            }}
+            className="text-xs px-2 py-1 border border-zinc-700 hover:border-zinc-400 rounded"
+          >
+            DUPLICAR
+          </button>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              remover(registro.id);
+              if (selecionada === registro.id) setSelecionada(null);
+            }}
+            className="text-xs px-2 py-1 border border-ordem-red text-ordem-red hover:bg-ordem-red/10 rounded"
+          >
+            REMOVER
+          </button>
+        </div>
+      </article>
+    );
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 h-[calc(100vh-64px)]">
-      <section className="border-r border-zinc-800 p-6 space-y-4 overflow-hidden">
+      <section className="border-r border-zinc-800 p-6 space-y-4 overflow-hidden flex flex-col">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="text-xs font-mono tracking-[0.35em] text-zinc-500 uppercase">Arquivo</div>
@@ -139,123 +302,37 @@ export function FichasManager() {
           </div>
         </div>
 
-        <div className="space-y-2 max-h-[calc(100vh-260px)] overflow-y-auto custom-scrollbar pr-2">
-          {fichasFiltradas.map((registro) => {
-            const issues = auditPersonagem(registro.personagem);
-            const summary = summarizeIssues(issues);
-            const title =
-              summary.total === 0
-                ? ''
-                : `Problemas detectados (${summary.errors} erro(s), ${summary.warns} aviso(s)):\n${issues
-                    .map((i) => `- [${i.severity.toUpperCase()}] ${i.message}`)
-                    .join('\n')}`;
+        {/* Campanhas */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2">
+          {/* Campanhas existentes */}
+          {campanhas.map((campanha) => (
+            <CampanhaSection
+              key={campanha.id}
+              campanha={campanha}
+              fichas={fichasPorCampanha.get(campanha.id) || []}
+              selecionada={selecionada}
+              onSelecionar={setSelecionada}
+              onMover={moverParaCampanha}
+              campanhasDisponiveis={campanhas}
+              renderFichaCard={renderFichaCard}
+              onRenomear={renomearCampanha}
+              onRemoverCampanha={handleRemoverCampanha}
+            />
+          ))}
 
-            return (
-              <article
-                key={registro.id}
-                role="button"
-                tabIndex={0}
-                onClick={() => setSelecionada(registro.id)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    setSelecionada(registro.id);
-                  }
-                }}
-                className={`w-full text-left border rounded-xl p-3 transition relative overflow-hidden ${
-                  selecionada === registro.id
-                    ? 'border-ordem-red bg-ordem-red/10'
-                    : 'border-zinc-800 bg-black/40 hover:border-zinc-600'
-                }`}
-              >
-                <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_20%_0%,rgba(220,38,38,0.08),transparent_55%)]" />
-                <div className="flex justify-between text-xs text-ordem-white/60 relative">
-                  <span>{registro.personagem.classe}</span>
-                  <div className="flex items-center gap-2">
-                    {summary.total > 0 && (
-                      <span
-                        className={`px-2 py-0.5 rounded border text-[10px] font-mono tracking-widest ${
-                          summary.errors > 0
-                            ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
-                            : 'border-ordem-gold text-ordem-gold bg-ordem-gold/10'
-                        }`}
-                        title={title}
-                      >
-                        {summary.errors > 0 ? 'ERRO' : 'AVISO'} {summary.total}
-                      </span>
-                    )}
-                    <span>{new Date(registro.atualizadoEm as any).toLocaleDateString()}</span>
-                  </div>
-                </div>
-                <p className="text-lg font-semibold text-white relative">{registro.personagem.nome}</p>
-                <p className="text-xs text-zinc-400 relative">
-                  NEX {registro.personagem.nex}% · Patente {registro.personagem.patente}
-                </p>
-                <div className="mt-2 flex gap-2 text-[10px] text-zinc-400 relative">
-                  <span>
-                    PV {registro.personagem.pv.atual}/{registro.personagem.pv.max}
-                  </span>
-                  <span>
-                    PE {registro.personagem.pe.atual}/{registro.personagem.pe.max}
-                  </span>
-                  <span>
-                    SAN {registro.personagem.san.atual}/{registro.personagem.san.max}
-                  </span>
-                </div>
-                <div className="mt-3 flex gap-2 relative">
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      void handleShare(registro.id);
-                    }}
-                    className="text-xs px-2 py-1 border border-ordem-green text-ordem-green hover:bg-ordem-green/10 rounded"
-                  >
-                    COMPARTILHAR
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      handleExportarFicha(registro.id);
-                    }}
-                    className="text-xs px-2 py-1 border border-ordem-gold text-ordem-gold hover:bg-ordem-gold/10 rounded"
-                    title="Exportar esta ficha"
-                  >
-                    EXPORTAR
-                  </button>
-                  <Link
-                    href={`/agente/recriar/${registro.id}`}
-                    onClick={(event) => event.stopPropagation()}
-                    className="text-xs px-2 py-1 border border-zinc-700 text-zinc-300 hover:border-zinc-400 hover:text-white rounded"
-                  >
-                    RECRIAR
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      duplicar(registro.id);
-                    }}
-                    className="text-xs px-2 py-1 border border-zinc-700 hover:border-zinc-400 rounded"
-                  >
-                    DUPLICAR
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      remover(registro.id);
-                      if (selecionada === registro.id) setSelecionada(null);
-                    }}
-                    className="text-xs px-2 py-1 border border-ordem-red text-ordem-red hover:bg-ordem-red/10 rounded"
-                  >
-                    REMOVER
-                  </button>
-                </div>
-              </article>
-            );
-          })}
+          {/* Fichas sem campanha */}
+          <CampanhaSection
+            campanha={null}
+            fichas={fichasPorCampanha.get(undefined) || []}
+            selecionada={selecionada}
+            onSelecionar={setSelecionada}
+            onMover={moverParaCampanha}
+            campanhasDisponiveis={campanhas}
+            renderFichaCard={renderFichaCard}
+          />
+
+          {/* Criar nova campanha */}
+          <NovaCampanhaForm onCriar={criarCampanha} />
 
           {fichas.length === 0 && (
             <p className="text-sm text-ordem-white/60">
@@ -285,12 +362,9 @@ export function FichasManager() {
         isOpen={modalAberto}
         onClose={() => setModalAberto(false)}
         onImportComplete={() => {
-          // Recarrega os dados após importação
           window.location.reload();
         }}
       />
     </div>
   );
 }
-
-

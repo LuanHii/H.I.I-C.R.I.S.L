@@ -10,7 +10,7 @@ const ESTAGIO_HABILIDADE = [2, 4];
 
 export function levelUp(character: Personagem): Personagem {
   const newChar = { ...character };
-  
+
   if (newChar.classe === 'Sobrevivente') {
     const currentStage = newChar.estagio || 1;
     const newStage = currentStage + 1;
@@ -22,9 +22,9 @@ export function levelUp(character: Personagem): Personagem {
 
     if (ESTAGIO_HABILIDADE.includes(newStage)) {
       if (!newChar.trilha && newStage === 2) {
-          newChar.escolhaTrilhaPendente = true;
+        newChar.escolhaTrilhaPendente = true;
       } else if (newChar.trilha) {
-          addTrackAbility(newChar, newStage, true);
+        addTrackAbility(newChar, newStage, true);
       }
     }
 
@@ -61,9 +61,9 @@ export function levelUp(character: Personagem): Personagem {
 
     if (NEX_HABILIDADE.includes(newNex)) {
       if (!newChar.trilha && newNex === 10) {
-          newChar.escolhaTrilhaPendente = true;
+        newChar.escolhaTrilhaPendente = true;
       } else if (newChar.trilha) {
-          addTrackAbility(newChar, newNex, false);
+        addTrackAbility(newChar, newNex, false);
       }
     }
   }
@@ -88,7 +88,7 @@ export function levelDown(character: Personagem): Personagem {
     }
 
     if (ESTAGIO_HABILIDADE.includes(oldStage) && newChar.trilha) {
-       removeTrackAbility(newChar, oldStage, true);
+      removeTrackAbility(newChar, oldStage, true);
     }
 
   } else {
@@ -129,7 +129,7 @@ export function applyAttributePoint(character: Personagem, attribute: AtributoKe
   newChar.pontosAtributoPendentes = (newChar.pontosAtributoPendentes || 0) - 1;
 
   if (attribute === 'INT') {
-      newChar.periciasTreinadasPendentes = (newChar.periciasTreinadasPendentes || 0) + 1;
+    newChar.periciasTreinadasPendentes = (newChar.periciasTreinadasPendentes || 0) + 1;
   }
 
   recalculateStats(newChar);
@@ -137,16 +137,16 @@ export function applyAttributePoint(character: Personagem, attribute: AtributoKe
 }
 
 export function removeAttributePoint(character: Personagem, attribute: AtributoKey): Personagem {
-    const newChar = { ...character };
-    newChar.atributos = { ...newChar.atributos };
-    
-    if (newChar.atributos[attribute] > 0) { // Evita atributo negativo
-        newChar.atributos[attribute] -= 1;
-        newChar.pontosAtributoPendentes = (newChar.pontosAtributoPendentes || 0) + 1;
-        recalculateStats(newChar);
-    }
-    
-    return newChar;
+  const newChar = { ...character };
+  newChar.atributos = { ...newChar.atributos };
+
+  if (newChar.atributos[attribute] > 0) { // Evita atributo negativo
+    newChar.atributos[attribute] -= 1;
+    newChar.pontosAtributoPendentes = (newChar.pontosAtributoPendentes || 0) + 1;
+    recalculateStats(newChar);
+  }
+
+  return newChar;
 }
 
 export function chooseTrack(character: Personagem, trackName: string): Personagem {
@@ -156,22 +156,29 @@ export function chooseTrack(character: Personagem, trackName: string): Personage
 
   const currentLevel = newChar.classe === 'Sobrevivente' ? (newChar.estagio || 0) : newChar.nex;
   const isStage = newChar.classe === 'Sobrevivente';
-  
+
   const trilhaData = TRILHAS.find(t => t.nome === trackName);
   if (trilhaData) {
-      trilhaData.habilidades.forEach(h => {
-          if (h.nex <= currentLevel) {
-              addTrackAbility(newChar, h.nex, isStage);
-          }
-      });
+    trilhaData.habilidades.forEach(h => {
+      if (h.nex <= currentLevel) {
+        addTrackAbility(newChar, h.nex, isStage);
+      }
+    });
   }
 
   return newChar;
 }
 
 function recalculateStats(char: Personagem) {
-  const derived = calculateDerivedStats(char.classe, char.atributos, char.nex, char.estagio);
-  
+  const derived = calculateDerivedStats({
+    classe: char.classe,
+    atributos: char.atributos,
+    nex: char.nex,
+    estagio: char.estagio,
+    origemNome: char.origem,
+    trilhaNome: char.trilha,
+  });
+
   const targetPvMax = char.overrides?.pvMax ?? derived.pvMax;
   const targetPeMax = char.overrides?.peMax ?? derived.peMax;
   const targetSanMax = char.overrides?.sanMax ?? derived.sanMax;
@@ -182,6 +189,7 @@ function recalculateStats(char: Personagem) {
 
   char.pv.max = targetPvMax;
   char.pv.atual = Math.min(char.pv.max, Math.max(0, char.pv.atual + diffPV));
+  char.pv.machucado = Math.floor(char.pv.max / 2);
 
   char.pe.max = targetPeMax;
   char.pe.atual = Math.min(char.pe.max, Math.max(0, char.pe.atual + diffPE));
@@ -189,18 +197,94 @@ function recalculateStats(char: Personagem) {
 
   char.san.max = targetSanMax;
   char.san.atual = Math.min(char.san.max, Math.max(0, char.san.atual + diffSAN));
-  
-  if (char.usarPd) {
-      if (!char.pd) {
-          const targetPdMax = char.overrides?.pdMax ?? derived.pdMax;
-          char.pd = { atual: targetPdMax, max: targetPdMax };
-      } else {
-          const targetPdMax = char.overrides?.pdMax ?? derived.pdMax;
-          const diffPD = targetPdMax - char.pd.max;
-          char.pd.max = targetPdMax;
-          char.pd.atual = Math.min(char.pd.max, Math.max(0, char.pd.atual + diffPD));
-      }
+
+  // Atualizar defesa se derivado do cálculo
+  if (char.defesa !== undefined && !char.overrides?.defesa) {
+    char.defesa = derived.defesa;
   }
+
+  if (char.usarPd) {
+    if (!char.pd) {
+      const targetPdMax = char.overrides?.pdMax ?? derived.pdMax;
+      char.pd = { atual: targetPdMax, max: targetPdMax };
+    } else {
+      const targetPdMax = char.overrides?.pdMax ?? derived.pdMax;
+      const diffPD = targetPdMax - char.pd.max;
+      char.pd.max = targetPdMax;
+      char.pd.atual = Math.min(char.pd.max, Math.max(0, char.pd.atual + diffPD));
+    }
+  }
+}
+
+/**
+ * Recalcula todos os recursos de um personagem existente, aplicando os bônus de origem e trilha.
+ * Use esta função para atualizar personagens criados antes da implementação dos bônus automáticos.
+ * 
+ * @param personagem - O personagem a ser recalculado
+ * @returns O personagem com os recursos atualizados
+ */
+export function recalcularRecursosPersonagem(personagem: Personagem): Personagem {
+  const char = { ...personagem };
+
+  // Recalcular stats derivados com suporte a origem e trilha
+  const derived = calculateDerivedStats({
+    classe: char.classe,
+    atributos: char.atributos,
+    nex: char.nex,
+    estagio: char.estagio,
+    origemNome: char.origem,
+    trilhaNome: char.trilha,
+  });
+
+  // Aplicar PV
+  const oldPvMax = char.pv.max;
+  const newPvMax = char.overrides?.pvMax ?? derived.pvMax;
+  const pvDiff = newPvMax - oldPvMax;
+  char.pv = {
+    ...char.pv,
+    max: newPvMax,
+    atual: Math.min(newPvMax, Math.max(0, char.pv.atual + pvDiff)),
+    machucado: Math.floor(newPvMax / 2),
+  };
+
+  // Aplicar PE
+  const oldPeMax = char.pe.max;
+  const newPeMax = char.overrides?.peMax ?? derived.peMax;
+  const peDiff = newPeMax - oldPeMax;
+  char.pe = {
+    ...char.pe,
+    max: newPeMax,
+    atual: Math.min(newPeMax, Math.max(0, char.pe.atual + peDiff)),
+    rodada: derived.peRodada,
+  };
+
+  // Aplicar SAN
+  const oldSanMax = char.san.max;
+  const newSanMax = char.overrides?.sanMax ?? derived.sanMax;
+  const sanDiff = newSanMax - oldSanMax;
+  char.san = {
+    ...char.san,
+    max: newSanMax,
+    atual: Math.min(newSanMax, Math.max(0, char.san.atual + sanDiff)),
+  };
+
+  // Aplicar Defesa (se não tiver override)
+  if (!char.overrides?.defesa) {
+    char.defesa = derived.defesa;
+  }
+
+  // Aplicar PD se usar
+  if (char.usarPd) {
+    const oldPdMax = char.pd?.max ?? 0;
+    const newPdMax = char.overrides?.pdMax ?? derived.pdMax;
+    const pdDiff = newPdMax - oldPdMax;
+    char.pd = {
+      max: newPdMax,
+      atual: char.pd ? Math.min(newPdMax, Math.max(0, char.pd.atual + pdDiff)) : newPdMax,
+    };
+  }
+
+  return char;
 }
 
 function addTrackAbility(char: Personagem, level: number, isStage: boolean) {
@@ -215,7 +299,7 @@ function addTrackAbility(char: Personagem, level: number, isStage: boolean) {
         nome: habilidade.nome,
         descricao: habilidade.descricao,
         tipo: 'Trilha',
-        livro: trilhaData.livro as any 
+        livro: trilhaData.livro as any
       };
       char.poderes = [...char.poderes, novoPoder];
 
@@ -223,26 +307,26 @@ function addTrackAbility(char: Personagem, level: number, isStage: boolean) {
         if (!char.habilidadesTrilhaPendentes) char.habilidadesTrilhaPendentes = [];
         const isPending = char.habilidadesTrilhaPendentes.some(p => p.habilidade === habilidade.nome);
         if (!isPending) {
-            char.habilidadesTrilhaPendentes.push({
-                trilha: trilhaData.nome,
-                habilidade: habilidade.nome,
-                escolha: habilidade.escolha
-            });
+          char.habilidadesTrilhaPendentes.push({
+            trilha: trilhaData.nome,
+            habilidade: habilidade.nome,
+            escolha: habilidade.escolha
+          });
         }
-     }
+      }
     }
   }
 }
 
 function removeTrackAbility(char: Personagem, level: number, isStage: boolean) {
-    const trilhaData = TRILHAS.find(t => t.nome === char.trilha);
-    if (!trilhaData) return;
-  
-    const habilidade = trilhaData.habilidades.find(h => h.nex === level);
-    if (habilidade) {
-      char.poderes = char.poderes.filter(p => p.nome !== habilidade.nome);
-      if (char.habilidadesTrilhaPendentes) {
-        char.habilidadesTrilhaPendentes = char.habilidadesTrilhaPendentes.filter(p => p.habilidade !== habilidade.nome);
-      }
+  const trilhaData = TRILHAS.find(t => t.nome === char.trilha);
+  if (!trilhaData) return;
+
+  const habilidade = trilhaData.habilidades.find(h => h.nex === level);
+  if (habilidade) {
+    char.poderes = char.poderes.filter(p => p.nome !== habilidade.nome);
+    if (char.habilidadesTrilhaPendentes) {
+      char.habilidadesTrilhaPendentes = char.habilidadesTrilhaPendentes.filter(p => p.habilidade !== habilidade.nome);
     }
+  }
 }
