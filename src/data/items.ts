@@ -33,7 +33,7 @@ export const ITENS: Item[] = [
     categoria: 2,
     espaco: 1,
     tipo: 'Amaldiçoado (Sangue)',
-    descricao: 'Pedaço de carne retangular impregnado de instintos primais. Ação padrão: aplica como máscara. Recebe faro e visão no escuro, mas vulnerabilidade a Morte e –2O em interação social. +1 dano cumulativo/dia. No fim de cada dia, perde 1d6 PV (Fortitude DT 15 +5/teste).',
+    descricao: 'Pedaço de carne retangular impregnado de instintos primais. Ação padrão: aplica como máscara. Recebe faro e visão no escuro, mas vulnerabilidade a Morte e –2d20 em interação social. +1 dano cumulativo/dia. No fim de cada dia, perde 1d6 PV (Fortitude DT 15 +5/teste).',
     livro: 'Sobrevivendo ao Horror'
   },
   {

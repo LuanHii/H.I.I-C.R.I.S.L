@@ -64,9 +64,9 @@ export const RITUAIS: Ritual[] = [
     alvo: 'Você',
     duracao: 'Veja texto',
     resistencia: 'Nenhuma',
-    descricao: 'Você se transforma em uma monstruosidade bestial, ganhando benefícios físicos (faro, visão no escuro, cura acelerada 10, +10 ataque/dano/Defesa, 30 PV temporários, ataque desarmado +1 dado letal) em troca de foco e concentração (–3O social). Ao final da cena, você se torna permanentemente uma criatura de Sangue.',
+    descricao: 'Você se transforma em uma monstruosidade bestial, ganhando benefícios físicos (faro, visão no escuro, cura acelerada 10, +10 ataque/dano/Defesa, 30 PV temporários, ataque desarmado +1 dado letal) em troca de foco e concentração (–3d20 social). Ao final da cena, você se torna permanentemente uma criatura de Sangue.',
     efeito: {
-      padrao: 'Recebe +10 em Defesa, ataque, rolagens de dano C.a.C, Cura Acelerada 10 e 30 PV temporários. Perde foco (ex: não conjura rituais) e sofre –3O em perícias sociais.',
+      padrao: 'Recebe +10 em Defesa, ataque, rolagens de dano C.a.C, Cura Acelerada 10 e 30 PV temporários. Perde foco (ex: não conjura rituais) e sofre –3d20 em perícias sociais.',
       discente: 'Muda os bônus para +20 e os PV temporários para 50. Requer afinidade (+5 PE).',
       verdadeiro: 'Não possui forma Verdadeira listada.'
     },

@@ -12,7 +12,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Caminho para Forca',
-    descricao: 'Quando usa a ação sacrifício em perseguição, gasta 1 PE para fornecer +O extra (total +2O) nos testes dos aliados. Quando usa chamar atenção em furtividade, gasta 1 PE para diminuir a visibilidade de todos os aliados próximos em –2 (em vez de –1).',
+    descricao: 'Quando usa a ação sacrifício em perseguição, gasta 1 PE para fornecer +O extra (total +2d20) nos testes dos aliados. Quando usa chamar atenção em furtividade, gasta 1 PE para diminuir a visibilidade de todos os aliados próximos em –2 (em vez de –1).',
     tipo: 'Classe',
     livro: 'Sobrevivendo ao Horror'
   },

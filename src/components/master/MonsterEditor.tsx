@@ -85,26 +85,26 @@ export const MonsterEditor: React.FC<MonsterEditorProps> = ({ initialData, onSav
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs text-gray-500 mb-1">Nome</label>
-                <input 
-                  type="text" 
-                  value={monster.nome} 
+                <input
+                  type="text"
+                  value={monster.nome}
                   onChange={e => handleChange('nome', e.target.value)}
                   className="w-full bg-black/40 border border-gray-700 rounded px-3 py-2 text-white focus:border-ordem-red outline-none"
                 />
               </div>
               <div>
                 <label className="block text-xs text-gray-500 mb-1">VD</label>
-                <input 
-                  type="number" 
-                  value={monster.vd} 
+                <input
+                  type="number"
+                  value={monster.vd}
                   onChange={e => handleChange('vd', Number(e.target.value))}
                   className="w-full bg-black/40 border border-gray-700 rounded px-3 py-2 text-white focus:border-ordem-red outline-none"
                 />
               </div>
               <div>
                 <label className="block text-xs text-gray-500 mb-1">Elemento</label>
-                <select 
-                  value={monster.tipo} 
+                <select
+                  value={monster.tipo}
                   onChange={e => handleChange('tipo', e.target.value)}
                   className="w-full bg-black/40 border border-gray-700 rounded px-3 py-2 text-white focus:border-ordem-red outline-none"
                 >
@@ -115,8 +115,8 @@ export const MonsterEditor: React.FC<MonsterEditorProps> = ({ initialData, onSav
               </div>
               <div>
                 <label className="block text-xs text-gray-500 mb-1">Tamanho</label>
-                <select 
-                  value={monster.tamanho} 
+                <select
+                  value={monster.tamanho}
                   onChange={e => handleChange('tamanho', e.target.value)}
                   className="w-full bg-black/40 border border-gray-700 rounded px-3 py-2 text-white focus:border-ordem-red outline-none"
                 >
@@ -132,9 +132,9 @@ export const MonsterEditor: React.FC<MonsterEditorProps> = ({ initialData, onSav
               {(['AGI', 'FOR', 'INT', 'PRE', 'VIG'] as AtributoKey[]).map(attr => (
                 <div key={attr} className="text-center">
                   <label className="block text-xs text-gray-500 mb-1">{attr}</label>
-                  <input 
-                    type="number" 
-                    value={monster.atributos[attr]} 
+                  <input
+                    type="number"
+                    value={monster.atributos[attr]}
                     onChange={e => handleAtributo(attr, Number(e.target.value))}
                     className="w-full bg-black/40 border border-gray-700 rounded px-1 py-2 text-center text-white focus:border-ordem-red outline-none"
                   />
@@ -148,27 +148,27 @@ export const MonsterEditor: React.FC<MonsterEditorProps> = ({ initialData, onSav
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs text-gray-500 mb-1">Vida</label>
-                <input 
-                  type="number" 
-                  value={monster.vida} 
+                <input
+                  type="number"
+                  value={monster.vida}
                   onChange={e => handleChange('vida', Number(e.target.value))}
                   className="w-full bg-black/40 border border-gray-700 rounded px-3 py-2 text-white focus:border-ordem-red outline-none"
                 />
               </div>
               <div>
                 <label className="block text-xs text-gray-500 mb-1">Defesa</label>
-                <input 
-                  type="number" 
-                  value={monster.defesa} 
+                <input
+                  type="number"
+                  value={monster.defesa}
                   onChange={e => handleChange('defesa', Number(e.target.value))}
                   className="w-full bg-black/40 border border-gray-700 rounded px-3 py-2 text-white focus:border-ordem-red outline-none"
                 />
               </div>
               <div>
                 <label className="block text-xs text-gray-500 mb-1">Deslocamento</label>
-                <input 
-                  type="text" 
-                  value={monster.deslocamento || ''} 
+                <input
+                  type="text"
+                  value={monster.deslocamento || ''}
                   onChange={e => handleChange('deslocamento', e.target.value)}
                   className="w-full bg-black/40 border border-gray-700 rounded px-3 py-2 text-white focus:border-ordem-red outline-none"
                 />
@@ -176,21 +176,21 @@ export const MonsterEditor: React.FC<MonsterEditorProps> = ({ initialData, onSav
             </div>
 
             <div className="grid grid-cols-3 gap-2 mt-2">
-               <div>
+              <div>
                 <label className="block text-xs text-gray-500 mb-1">Fortitude</label>
-                <input 
-                  type="text" 
-                  value={monster.fortitude || ''} 
+                <input
+                  type="text"
+                  value={monster.fortitude || ''}
                   onChange={e => handleChange('fortitude', e.target.value)}
                   className="w-full bg-black/40 border border-gray-700 rounded px-2 py-2 text-white focus:border-ordem-red outline-none text-sm"
-                  placeholder="Ex: 2O+5"
+                  placeholder="Ex: 2d20+5"
                 />
               </div>
               <div>
                 <label className="block text-xs text-gray-500 mb-1">Reflexos</label>
-                <input 
-                  type="text" 
-                  value={monster.reflexos || ''} 
+                <input
+                  type="text"
+                  value={monster.reflexos || ''}
                   onChange={e => handleChange('reflexos', e.target.value)}
                   className="w-full bg-black/40 border border-gray-700 rounded px-2 py-2 text-white focus:border-ordem-red outline-none text-sm"
                   placeholder="Ex: O"
@@ -198,12 +198,12 @@ export const MonsterEditor: React.FC<MonsterEditorProps> = ({ initialData, onSav
               </div>
               <div>
                 <label className="block text-xs text-gray-500 mb-1">Vontade</label>
-                <input 
-                  type="text" 
-                  value={monster.vontade || ''} 
+                <input
+                  type="text"
+                  value={monster.vontade || ''}
                   onChange={e => handleChange('vontade', e.target.value)}
                   className="w-full bg-black/40 border border-gray-700 rounded px-2 py-2 text-white focus:border-ordem-red outline-none text-sm"
-                  placeholder="Ex: 3O"
+                  placeholder="Ex: 3d20"
                 />
               </div>
             </div>
@@ -220,7 +220,7 @@ export const MonsterEditor: React.FC<MonsterEditorProps> = ({ initialData, onSav
               {monster.acoes.map((acao, idx) => (
                 <div key={idx} className="bg-black/40 p-3 rounded border border-gray-800">
                   <div className="flex justify-between mb-2">
-                    <input 
+                    <input
                       value={acao.nome}
                       onChange={e => updateArrayItem('acoes', idx, 'nome', e.target.value)}
                       className="bg-transparent border-b border-gray-700 text-white text-sm font-bold w-2/3 focus:border-ordem-red outline-none"
@@ -228,7 +228,7 @@ export const MonsterEditor: React.FC<MonsterEditorProps> = ({ initialData, onSav
                     />
                     <button onClick={() => removeArrayItem('acoes', idx)} className="text-red-500 text-xs">Remover</button>
                   </div>
-                  <textarea 
+                  <textarea
                     value={acao.descricao}
                     onChange={e => updateArrayItem('acoes', idx, 'descricao', e.target.value)}
                     className="w-full bg-transparent text-gray-300 text-xs resize-none focus:bg-black/20 outline-none rounded p-1"
@@ -249,7 +249,7 @@ export const MonsterEditor: React.FC<MonsterEditorProps> = ({ initialData, onSav
               {monster.habilidades.map((hab, idx) => (
                 <div key={idx} className="bg-black/40 p-3 rounded border border-gray-800">
                   <div className="flex justify-between mb-2">
-                    <input 
+                    <input
                       value={hab.nome}
                       onChange={e => updateArrayItem('habilidades', idx, 'nome', e.target.value)}
                       className="bg-transparent border-b border-gray-700 text-white text-sm font-bold w-2/3 focus:border-ordem-red outline-none"
@@ -257,7 +257,7 @@ export const MonsterEditor: React.FC<MonsterEditorProps> = ({ initialData, onSav
                     />
                     <button onClick={() => removeArrayItem('habilidades', idx)} className="text-red-500 text-xs">Remover</button>
                   </div>
-                  <textarea 
+                  <textarea
                     value={hab.descricao}
                     onChange={e => updateArrayItem('habilidades', idx, 'descricao', e.target.value)}
                     className="w-full bg-transparent text-gray-300 text-xs resize-none focus:bg-black/20 outline-none rounded p-1"

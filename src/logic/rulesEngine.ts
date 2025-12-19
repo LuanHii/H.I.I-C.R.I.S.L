@@ -351,7 +351,7 @@ export function gerarFicha(input: CriacaoInput): Personagem {
   const limiteItens = getPatenteConfig(patente).limiteItens;
   const defesa = 10 + atributos.AGI + (input.bonus?.defesa ?? 0);
   const deslocamento = 9 + (input.bonus?.deslocamento ?? 0);
-  
+
   const poderes = coletarPoderes(origem, input.classe, input.sobreviventeBeneficioOrigem);
   const carga = calcularCarga({
     atributos,
@@ -573,7 +573,7 @@ function aplicarTrilhaEfeitos(params: {
       efeito.efeitos.push('Monstruoso (Traços da Entidade): resistência 5 ao elemento escolhido e +2 em ataques/dano C.A.C.');
     }
     if (params.nex >= 40) {
-      efeito.efeitos.push('Monstruoso (Ser Macabro): penalidade aumenta para –2O na perícia social escolhida.');
+      efeito.efeitos.push('Monstruoso (Ser Macabro): penalidade aumenta para –2d20 na perícia social escolhida.');
       adicionaPenaltySocial(1);
     }
     if (params.nex >= 99) {
@@ -630,7 +630,7 @@ function coletarPoderes(
     classe === 'Sobrevivente' && sobreviventeBeneficioOrigem === 'pericias'
       ? false
       : true;
-  
+
   if (incluirOrigem) {
     poderes.push({
       nome: origem.poder.nome,
@@ -727,9 +727,9 @@ function calcularRecursos(params: {
   pvBonus?: number;
 }): RecursosResultado {
   const data = CLASS_RESOURCES[params.classe];
-  
+
   const isSurvivor = params.classe === 'Sobrevivente';
-  const niveisExtras = isSurvivor 
+  const niveisExtras = isSurvivor
     ? Math.max(0, (params.estagio || 1) - 1)
     : Math.max(0, Math.min(20, Math.max(1, Math.ceil(params.nex / 5))) - 1);
 
@@ -770,7 +770,7 @@ function calcularPd(
 
   const cfg = PD_NEX_CONFIG[classe];
   const base = cfg.base + presenca;
-  
+
   if (classe === 'Sobrevivente') {
     const estagioAtual = estagio ?? 1;
     const incrementos = Math.max(0, estagioAtual - 1);
