@@ -13,6 +13,14 @@ export interface DerivedStats {
   danoCorpoACorpoBonus: number;
   danoArmaFogoBonus: number;
   resistenciaDanoMental: number;
+  // Bônus de trilha adicionais
+  iniciativaBonus: number;
+  resistenciaParanormal: number;
+  furtividadeBonus: number;
+  percepcaoBonus: number;
+  enganacaoBonus: number;
+  diplomaciaBonus: number;
+  fortitudeBonus: number;
 }
 
 export interface DerivedStatsInput {
@@ -94,56 +102,125 @@ function calcularBonusOrigem(
 }
 
 /**
- * Calcula os bônus de trilha (PV, Defesa, etc.)
+ * Bônus calculados de trilha com suporte a mais stats
+ */
+interface TrilhaBonus {
+  pvBonus: number;
+  defesaBonus: number;
+  iniciativaBonus: number;
+  resistenciaParanormal: number;
+  resistenciaDanoMentalBonus: number;
+  deslocamentoBonus: number;
+  furtividadeBonus: number;
+  percepcaoBonus: number;
+  enganacaoBonus: number;
+  diplomaciaBonus: number;
+  fortitudeBonus: number;
+}
+
+/**
+ * Calcula os bônus de trilha (PV, Defesa, perícias, etc.)
  */
 function calcularBonusTrilha(
   trilhaNome: string | undefined,
   nex: number,
   estagio: number,
   atributos: Atributos
-): { pvBonus: number; defesaBonus: number; iniciativaBonus: number } {
-  const vazio = { pvBonus: 0, defesaBonus: 0, iniciativaBonus: 0 };
+): TrilhaBonus {
+  const vazio: TrilhaBonus = {
+    pvBonus: 0,
+    defesaBonus: 0,
+    iniciativaBonus: 0,
+    resistenciaParanormal: 0,
+    resistenciaDanoMentalBonus: 0,
+    deslocamentoBonus: 0,
+    furtividadeBonus: 0,
+    percepcaoBonus: 0,
+    enganacaoBonus: 0,
+    diplomaciaBonus: 0,
+    fortitudeBonus: 0,
+  };
   if (!trilhaNome) return vazio;
 
+  // Acumular bônus que podem coexistir
+  const result = { ...vazio };
+
   switch (trilhaNome) {
+    // ===== COMBATENTE =====
     case 'Monstruoso':
       // NEX 10: Soma Força ao PV total
       if (nex >= 10) {
-        return { ...vazio, pvBonus: atributos.FOR };
+        result.pvBonus += atributos.FOR;
       }
       break;
 
     case 'Tropa de Choque':
       // NEX 10: +1 PV para cada 5% de NEX
       if (nex >= 10) {
-        return { ...vazio, pvBonus: Math.floor(nex / 5) };
+        result.pvBonus += Math.floor(nex / 5);
       }
       break;
 
-    case 'Durão':
-      // Estágio 2: +4 PV. Estágio 3+: +2 PV adicional
-      if (estagio >= 2) {
-        const bonus = estagio >= 3 ? 6 : 4;
-        return { ...vazio, pvBonus: bonus };
-      }
-      break;
-
-    case 'Técnico':
-      // NEX 10: +2 na Defesa
-      if (nex >= 10) {
-        return { ...vazio, defesaBonus: 2 };
+    case 'Caçador':
+      // NEX 65: +10 em Furtividade e Percepção
+      if (nex >= 65) {
+        result.furtividadeBonus += 10;
+        result.percepcaoBonus += 10;
       }
       break;
 
     case 'Operações Especiais':
       // NEX 10: +5 em Iniciativa
       if (nex >= 10) {
-        return { ...vazio, iniciativaBonus: 5 };
+        result.iniciativaBonus += 5;
+      }
+      break;
+
+    // ===== ESPECIALISTA =====
+    case 'Infiltrador':
+      // NEX 10: +5 em Enganação e Persuasão (Diplomacia/Intimidação)
+      if (nex >= 10) {
+        result.enganacaoBonus += 5;
+        result.diplomaciaBonus += 5;
+      }
+      break;
+
+    case 'Técnico':
+      // NEX 10: +2 na Defesa
+      if (nex >= 10) {
+        result.defesaBonus += 2;
+      }
+      break;
+
+    case 'Médico de Campo':
+      // NEX 99: +5 em Fortitude (Imunidade)
+      if (nex >= 99) {
+        result.fortitudeBonus += 5;
+      }
+      break;
+
+    // ===== OCULTISTA =====
+    case 'Intuitivo':
+      // NEX 10: +5 em testes de resistência contra efeitos paranormais
+      if (nex >= 10) {
+        result.resistenciaParanormal += 5;
+      }
+      // NEX 65: resistência a dano mental e paranormal 10
+      if (nex >= 65) {
+        result.resistenciaDanoMentalBonus += 10;
+      }
+      break;
+
+    // ===== SOBREVIVENTE =====
+    case 'Durão':
+      // Estágio 2: +4 PV. Estágio 3+: +2 PV adicional
+      if (estagio >= 2) {
+        result.pvBonus += estagio >= 3 ? 6 : 4;
       }
       break;
   }
 
-  return vazio;
+  return result;
 }
 
 export function calculateDerivedStats(
@@ -241,6 +318,14 @@ export function calculateDerivedStats(
     deslocamento: 9,
     danoCorpoACorpoBonus: bonusOrigem.danoCorpoACorpoBonus,
     danoArmaFogoBonus: bonusOrigem.danoArmaFogoBonus,
-    resistenciaDanoMental: bonusOrigem.resistenciaDanoMental,
+    resistenciaDanoMental: bonusOrigem.resistenciaDanoMental + bonusTrilha.resistenciaDanoMentalBonus,
+    // Bônus de trilha
+    iniciativaBonus: bonusTrilha.iniciativaBonus,
+    resistenciaParanormal: bonusTrilha.resistenciaParanormal,
+    furtividadeBonus: bonusTrilha.furtividadeBonus,
+    percepcaoBonus: bonusTrilha.percepcaoBonus,
+    enganacaoBonus: bonusTrilha.enganacaoBonus,
+    diplomaciaBonus: bonusTrilha.diplomaciaBonus,
+    fortitudeBonus: bonusTrilha.fortitudeBonus,
   };
 }

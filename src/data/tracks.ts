@@ -195,24 +195,84 @@ export const TRILHAS: Trilha[] = [
   // NOVAS TRILHAS DE OCULTISTA (SOBREVIVENDO AO HORROR)
   // ===================================================================
   {
-    nome: 'Psicólogo',
+    nome: 'Exorcista',
     classe: 'Ocultista',
-    descricao: 'Ocultista que usa estudos parapsicológicos e a própria Sanidade para curar e compreender os efeitos do Outro Lado na mente humana.',
+    descricao: 'Com sua fé como escudo e suas palavras como espada, você mergulha na escuridão onde a Realidade e o Outro Lado travam uma batalha pelo medo humano.',
+    habilidades: [
+      {
+        nex: 10,
+        nome: 'Revelação do Mal',
+        descricao: 'Recebe treinamento em Religião (ou +2, se já for treinado). Pode usar Religião no lugar de Investigação/Percepção para notar seres, rastros ou pistas paranormais, e no lugar de Ocultismo.'
+      },
+      {
+        nex: 40,
+        nome: 'Poder da Fé',
+        descricao: 'Se torna veterano em Religião (ou recebe +O). Quando falha em um teste de resistência, pode gastar 2 PE para repetir o teste usando Religião, aceitando o novo resultado.'
+      },
+      {
+        nex: 65,
+        nome: 'Parareligiosidade',
+        descricao: 'Quando conjura um ritual, pode gastar +2 PE para adicionar um efeito equivalente ao de um catalisador ritualístico à sua escolha.'
+      },
+      {
+        nex: 99,
+        nome: 'Chagas da Resistência',
+        descricao: 'Quando sua Sanidade é reduzida a 0, pode gastar 10 PV para ficar com SAN 1 em vez disso.'
+      }
+    ],
+    livro: 'Sobrevivendo ao Horror'
+  },
+  {
+    nome: 'Possuído',
+    classe: 'Ocultista',
+    descricao: 'O paranormal escolheu você para perseguir. Uma entidade cresce em seu interior, oferecendo poder em troca de controle gradual.',
+    habilidades: [
+      {
+        nex: 10,
+        nome: 'Poder Não Desejado',
+        descricao: 'Sempre que receber um novo poder de ocultista, recebe Transcender em vez disso. Possui Pontos de Possessão (PP) = 3 + 2 por poder Transcender. Limite de PP/turno = Presença. Para cada PP gasto, recupera 10 PV ou 2 PE. Recupera 1 PP por ação dormir.'
+      },
+      {
+        nex: 40,
+        nome: 'As Sombras Dentro de Mim',
+        descricao: 'Recuperação de PP aumenta para 2 por ação dormir. Pode gastar 2 PE para permitir que a Entidade controle seus músculos: recebe +O em Acrobacia, Atletismo e Furtividade por uma rodada. Em cena de furtividade, o aumento de visibilidade é reduzido em –1.'
+      },
+      {
+        nex: 65,
+        nome: 'Ele Me Ensina',
+        descricao: 'Escolha entre Transcender ou receber o primeiro poder de uma trilha de ocultista que não a sua. Você precisa atender os pré-requisitos do poder.'
+      },
+      {
+        nex: 99,
+        nome: 'Tornamo-nos Um',
+        descricao: 'Baseado no elemento com que tem afinidade, recebe um poder especial: Sangue (recupera 50 PV, bônus +35 em FOR/VIG/Intimidação), Morte (turno adicional), Conhecimento (poder temporário), ou Energia (teletransporte em alcance médio).',
+        escolha: {
+          tipo: 'elemento',
+          quantidade: 1
+        }
+      }
+    ],
+    livro: 'Sobrevivendo ao Horror'
+  },
+  {
+    nome: 'Parapsicólogo',
+    classe: 'Ocultista',
+    descricao: 'Você estuda os efeitos do paranormal sobre a mente humana, usando técnicas de psicologia para curar e proteger contra danos mentais.',
     habilidades: [
       {
         nex: 10,
         nome: 'Terapia',
-        descricao: 'Você pode usar Profissão (psicólogo) como Diplomacia. Uma vez por rodada, quando você ou um aliado em alcance curto falha em teste contra dano mental, pode gastar 2 PE para usar Profissão (psicólogo) no lugar.'
+        descricao: 'Pode usar Profissão (psicólogo) como Diplomacia. Uma vez por rodada, quando você ou aliado em alcance curto falha em teste contra dano mental, pode gastar 2 PE para usar Profissão (psicólogo) no lugar. Pré-requisito: treinado em Profissão (psicólogo).'
       },
       {
         nex: 40,
-        nome: 'Remoer Memórias',
-        descricao: 'Uma vez por cena, ao falhar em teste de Intuição, gasta 2 PE para rolar um teste de Intelecto (DT 15) para tentar extrair a informação.'
+        nome: 'Palavras-chave',
+        descricao: 'Quando passa em teste para acalmar, pode gastar PE até seu limite. Para cada 1 PE gasto, a pessoa recupera 1 SAN (ou 1 PD).'
       },
       {
         nex: 65,
-        nome: 'Empatia Oculta',
-        descricao: 'Recebe +10 em testes de Intuição. Uma vez por cena, pode gastar 5 PE para transferir o dano mental de um ser adjacente para si mesmo.'
+        nome: 'Reprogramação Mental',
+        descricao: 'Pode gastar 5 PE e uma ação de interlúdio para manipular pessoa voluntária em alcance curto. Até o próximo interlúdio, ela recebe um poder geral, da classe ou primeiro poder de outra trilha. Precisa cumprir pré-requisitos.'
       },
       {
         nex: 99,
