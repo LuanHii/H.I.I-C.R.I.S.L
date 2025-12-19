@@ -1565,5 +1565,875 @@ export const AMEACAS: Ameaca[] = [
     ],
     acoes: [], // Ações definidas pela tabela de Comportamento Errático
     livro: 'Regras Básicas'
+  },
+
+  // ===================================================================
+  // AMEAÇAS FALTANTES DE SOBREVIVENDO AO HORROR
+  // ===================================================================
+  {
+    nome: 'Mescla',
+    vd: 40,
+    tipo: 'Sangue',
+    tamanho: 'Médio',
+    presencaPerturbadora: {
+      dt: 16,
+      dano: '3d4 mental',
+      nexImune: 30
+    },
+    sentidos: 'Percepção O+5, Iniciativa O, Percepção às Cegas',
+    defesa: 18,
+    fortitude: '2O+5',
+    reflexos: 'O+5',
+    vontade: 'O',
+    vida: 60,
+    imunidades: [],
+    resistencias: ['Balístico 5', 'Corte 5', 'Impacto 5', 'Sangue 10'],
+    vulnerabilidades: ['Morte'],
+    atributos: {
+      AGI: 1,
+      FOR: 2,
+      INT: 1,
+      PRE: 1,
+      VIG: 2
+    },
+    pericias: {
+      Enganação: '2O+5',
+      Furtividade: 'O+5'
+    },
+    deslocamento: '9m',
+    habilidades: [
+      {
+        nome: 'Forma Humana',
+        descricao: 'A Mescla pode assumir a forma de uma pessoa humana. Ocultismo DT 20 para perceber que não é humana.'
+      },
+      {
+        nome: 'Assimilação',
+        descricao: 'Ao matar uma pessoa, pode consumir suas memórias e aparência (1 hora). Ganha +10 em Enganação para se passar pela vítima.'
+      }
+    ],
+    acoes: [
+      {
+        nome: 'Garras',
+        descricao: 'Corpo a corpo x2. Teste 2O+10, Dano 1d8+2 corte.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Abraço da Mescla',
+        descricao: 'Se acertar dois ataques na mesma rodada, pode agarrar o alvo (teste 2O+10). Alvo agarrado sofre 2d6 Sangue no início de cada turno.',
+        tipo: 'Livre'
+      }
+    ],
+    livro: 'Sobrevivendo ao Horror'
+  },
+  {
+    nome: 'Espectro Inesquecido',
+    vd: 60,
+    tipo: 'Morte',
+    tamanho: 'Médio',
+    presencaPerturbadora: {
+      dt: 18,
+      dano: '4d4 mental',
+      nexImune: 35
+    },
+    sentidos: 'Percepção 2O+5, Iniciativa 2O+5, Percepção às Cegas',
+    defesa: 20,
+    fortitude: 'O+5',
+    reflexos: '2O+10',
+    vontade: '2O+5',
+    vida: 80,
+    imunidades: ['Balístico', 'Corte', 'Impacto', 'Perfuração'],
+    resistencias: ['Morte 10'],
+    vulnerabilidades: ['Energia'],
+    atributos: {
+      AGI: 2,
+      FOR: 1,
+      INT: 2,
+      PRE: 2,
+      VIG: 1
+    },
+    pericias: {
+      Furtividade: '2O+10',
+      Intimidação: '2O+5'
+    },
+    deslocamento: '9m (Voo)',
+    habilidades: [
+      {
+        nome: 'Incorpóreo',
+        descricao: 'Pode atravessar objetos sólidos. Imune a dano físico.'
+      },
+      {
+        nome: 'Memória Persistente',
+        descricao: 'Está ligado a um local ou objeto específico. Não pode se afastar mais de 30m.'
+      }
+    ],
+    acoes: [
+      {
+        nome: 'Toque Gélido',
+        descricao: 'Corpo a corpo. Teste 2O+10, Dano 2d6 Morte + 1d6 frio.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Lamento',
+        descricao: 'Todos em alcance curto fazem Vontade DT 18 ou ficam abalados por 1 rodada e sofrem 2d4 mental.',
+        tipo: 'Padrão'
+      }
+    ],
+    livro: 'Sobrevivendo ao Horror'
+  },
+
+  // ===================================================================
+  // AMEAÇAS DA REALIDADE - SOBREVIVENDO AO HORROR
+  // ===================================================================
+  {
+    nome: 'Bêbado Local',
+    vd: 10,
+    tipo: 'Pessoa',
+    tamanho: 'Médio',
+    sentidos: 'Percepção –2O+5, Iniciativa O',
+    defesa: 12,
+    fortitude: 'O+5',
+    reflexos: 'O',
+    vontade: '–2O',
+    vida: 6,
+    imunidades: [],
+    resistencias: ['Químico 1'],
+    vulnerabilidades: [],
+    atributos: {
+      AGI: 1,
+      FOR: 1,
+      INT: 0,
+      PRE: 0,
+      VIG: 1
+    },
+    pericias: {
+      Diplomacia: 'O+5'
+    },
+    deslocamento: '6m',
+    habilidades: [
+      {
+        nome: 'Causos e Histórias',
+        descricao: 'Personagem recebe +5 em Investigação para interrogar, se DT for 20 ou menos.'
+      },
+      {
+        nome: 'Espião Involuntário',
+        descricao: 'Ao interagir, Intuição ou Vontade DT 15 ou revela informação (fornece +5 ao mestre para aumentar DT).'
+      },
+      {
+        nome: 'Invisibilidade Social',
+        descricao: 'Se não fizer ação chamativa, Percepção DT 15 para notar sua presença.'
+      }
+    ],
+    acoes: [
+      {
+        nome: 'Soco',
+        descricao: 'Corpo a corpo. Teste O, Dano 1d3+1 impacto.',
+        tipo: 'Padrão'
+      }
+    ],
+    livro: 'Sobrevivendo ao Horror'
+  },
+  {
+    nome: 'Burocrata',
+    vd: 10,
+    tipo: 'Pessoa',
+    tamanho: 'Médio',
+    sentidos: 'Percepção 2O+5, Iniciativa O',
+    defesa: 11,
+    fortitude: 'O',
+    reflexos: 'O',
+    vontade: '2O+5',
+    vida: 6,
+    imunidades: [],
+    resistencias: [],
+    vulnerabilidades: [],
+    atributos: {
+      AGI: 1,
+      FOR: 1,
+      INT: 2,
+      PRE: 2,
+      VIG: 1
+    },
+    pericias: {
+      Diplomacia: '2O+5',
+      Profissão: '2O+10'
+    },
+    deslocamento: '9m',
+    habilidades: [
+      {
+        nome: 'Atendimento Protocolar',
+        descricao: 'Atitude inicial indiferente. Enquanto indiferente ou pior, –5 em testes INT/PRE contra ele.'
+      },
+      {
+        nome: 'Burocracia Frustrante',
+        descricao: 'Falha em teste INT/PRE causa perda de 1 Sanidade.'
+      },
+      {
+        nome: 'Morosidade',
+        descricao: 'Em cena com urgência, Diplomacia DT 15 ou perde 1 rodada em discussão.'
+      }
+    ],
+    acoes: [
+      {
+        nome: 'Soco',
+        descricao: 'Corpo a corpo. Teste O, Dano 1d3+1 impacto.',
+        tipo: 'Padrão'
+      }
+    ],
+    livro: 'Sobrevivendo ao Horror'
+  },
+  {
+    nome: 'Fazendeiro Isolado',
+    vd: 20,
+    tipo: 'Pessoa',
+    tamanho: 'Médio',
+    sentidos: 'Percepção 2O+5, Iniciativa O',
+    defesa: 16,
+    fortitude: '2O+5',
+    reflexos: 'O',
+    vontade: '2O+5',
+    vida: 16,
+    imunidades: [],
+    resistencias: [],
+    vulnerabilidades: [],
+    atributos: {
+      AGI: 1,
+      FOR: 2,
+      INT: 1,
+      PRE: 2,
+      VIG: 2
+    },
+    pericias: {
+      Profissão: 'O+10'
+    },
+    deslocamento: '9m',
+    habilidades: [
+      {
+        nome: 'De Sol a Sol',
+        descricao: 'Não fica inconsciente ao ter PV reduzidos a 0.'
+      },
+      {
+        nome: 'Histórias de Pescador',
+        descricao: 'Se os personagens compartilharem investigação, pode fazer teste de revisar caso usando Profissão (fazendeiro).'
+      },
+      {
+        nome: 'Resiliência do Campo',
+        descricao: 'Pode usar Profissão (fazendeiro) no lugar de perícias FOR ou PRE.'
+      }
+    ],
+    acoes: [
+      {
+        nome: 'Peixeira',
+        descricao: 'Corpo a corpo. Teste 2O+5, crítico 19, Dano 1d8+5 corte.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Espingarda',
+        descricao: 'À distância (Curto). Teste O+5, crítico x3, Dano 4d6 balístico.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Atiçar os Cães',
+        descricao: 'Comanda cães para avançar sobre alvo em alcance curto. Próximo ataque: +1d8 perfuração e alvo caído (Luta DT 15 evita).',
+        tipo: 'Movimento'
+      }
+    ],
+    livro: 'Sobrevivendo ao Horror'
+  },
+  {
+    nome: 'Investigador',
+    vd: 40,
+    tipo: 'Pessoa',
+    tamanho: 'Médio',
+    sentidos: 'Percepção 2O+5, Iniciativa 2O+5',
+    defesa: 18,
+    fortitude: '2O',
+    reflexos: '2O+5',
+    vontade: 'O+5',
+    vida: 68,
+    imunidades: [],
+    resistencias: [],
+    vulnerabilidades: [],
+    atributos: {
+      AGI: 2,
+      FOR: 1,
+      INT: 2,
+      PRE: 1,
+      VIG: 2
+    },
+    pericias: {
+      Crime: '2O+5',
+      Diplomacia: 'O+5',
+      Furtividade: '2O+5',
+      Intuição: 'O+5',
+      Investigação: '2O+5'
+    },
+    deslocamento: '9m',
+    habilidades: [
+      {
+        nome: 'Fonte de Informações',
+        descricao: 'Se amigável, 1x/interlúdio os personagens recebem +5 em revisar caso.'
+      }
+    ],
+    acoes: [
+      {
+        nome: 'Soco',
+        descricao: 'Corpo a corpo. Teste O+10, Dano 1d3+1 impacto.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Revólver',
+        descricao: 'À distância (Curto). Teste 2O+10, crítico 19/x3, Dano 2d6+6 balístico.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Olhar do Investigador',
+        descricao: 'Investigação DT 15 para observar fraqueza de ser em alcance médio. Ataques causam +1d6 até fim da cena.',
+        tipo: 'Movimento'
+      }
+    ],
+    livro: 'Sobrevivendo ao Horror'
+  },
+  {
+    nome: 'Médico',
+    vd: 20,
+    tipo: 'Pessoa',
+    tamanho: 'Médio',
+    sentidos: 'Percepção 2O+5, Iniciativa O',
+    defesa: 13,
+    fortitude: 'O+5',
+    reflexos: 'O',
+    vontade: '2O+5',
+    vida: 14,
+    imunidades: [],
+    resistencias: [],
+    vulnerabilidades: [],
+    atributos: {
+      AGI: 1,
+      FOR: 1,
+      INT: 2,
+      PRE: 2,
+      VIG: 1
+    },
+    pericias: {
+      Ciências: '2O+5',
+      Medicina: '2O+10'
+    },
+    deslocamento: '9m',
+    habilidades: [
+      {
+        nome: 'Conhecimento Anatômico',
+        descricao: 'Acerto de bisturi deixa alvo atordoado 1 rodada e sangrando (Fortitude DT 15 evita). 1x/cena por pessoa.'
+      }
+    ],
+    acoes: [
+      {
+        nome: 'Bisturi',
+        descricao: 'Corpo a corpo. Teste 2O+5, crítico 18, Dano 1d4+1 corte.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Tratar Ferimentos',
+        descricao: 'Cura 2d10+2 PV em si ou ser adjacente. 1x/dia por ser.',
+        tipo: 'Padrão'
+      }
+    ],
+    livro: 'Sobrevivendo ao Horror'
+  },
+  {
+    nome: 'Religioso',
+    vd: 40,
+    tipo: 'Pessoa',
+    tamanho: 'Médio',
+    sentidos: 'Percepção 3O+5, Iniciativa O+5',
+    defesa: 15,
+    fortitude: 'O',
+    reflexos: 'O',
+    vontade: '3O+5',
+    vida: 32,
+    imunidades: [],
+    resistencias: [],
+    vulnerabilidades: [],
+    atributos: {
+      AGI: 1,
+      FOR: 1,
+      INT: 2,
+      PRE: 3,
+      VIG: 1
+    },
+    pericias: {
+      Diplomacia: '3O+5',
+      Intuição: '3O+5',
+      Religião: '3O+5'
+    },
+    deslocamento: '9m',
+    habilidades: [
+      {
+        nome: 'Fé Inabalável',
+        descricao: '+10 em Vontade contra efeitos paranormais.'
+      },
+      {
+        nome: 'Potência da Voz',
+        descricao: 'Com microfone: alcance +1 passo, DT +5.'
+      },
+      {
+        nome: 'Seguidores',
+        descricao: 'Sempre acompanhado por 1d4+1 devotos (iniciados).'
+      }
+    ],
+    acoes: [
+      {
+        nome: 'Pancada',
+        descricao: 'Corpo a corpo. Teste O+5, Dano 1d3+1 impacto.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Voz Guia',
+        descricao: 'Pessoa em alcance curto que ouça recebe +O no próximo teste até fim da rodada.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Voz Acusadora',
+        descricao: 'Pessoa em alcance curto sofre 3d6 mental e fica alquebrada (Vontade DT 15 reduz/evita).',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Sacrifício Sagrado',
+        descricao: '1x/rodada ao sofrer dano: troca de lugar com seguidor adjacente que sofre o dano.',
+        tipo: 'Reação'
+      }
+    ],
+    livro: 'Sobrevivendo ao Horror'
+  },
+
+  // ===================================================================
+  // SERIAL KILLERS - SOBREVIVENDO AO HORROR
+  // ===================================================================
+  {
+    nome: 'Predador Sofisticado',
+    vd: 60,
+    tipo: 'Pessoa',
+    tamanho: 'Médio',
+    sentidos: 'Percepção 3O+10, Iniciativa 3O+5',
+    defesa: 21,
+    fortitude: 'O+5',
+    reflexos: '3O+10',
+    vontade: '3O+10',
+    vida: 60,
+    imunidades: [],
+    resistencias: [],
+    vulnerabilidades: [],
+    atributos: {
+      AGI: 3,
+      FOR: 3,
+      INT: 2,
+      PRE: 3,
+      VIG: 1
+    },
+    pericias: {
+      Diplomacia: '3O+10',
+      Enganação: '3O+10',
+      Intimidação: '3O+10'
+    },
+    deslocamento: '9m',
+    habilidades: [
+      {
+        nome: 'Escondido em Plena Vista',
+        descricao: 'Em locais movimentados: usa Enganação em vez de Furtividade, sem penalidades por ações chamativas.'
+      },
+      {
+        nome: 'Recursos Abundantes',
+        descricao: 'Pode entrar em locais restritos ou cometer crimes menores sem punição.'
+      },
+      {
+        nome: 'Sorriso Sedutor',
+        descricao: 'Quem não sabe que é assassino fica desprevenido e sofre –O contra ele.'
+      }
+    ],
+    acoes: [
+      {
+        nome: 'Navalha',
+        descricao: 'Corpo a corpo x2. Teste 3O+10, crítico 19/x3, Dano 1d8+13 corte.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Machado',
+        descricao: 'Corpo a corpo x2. Teste 3O+10, crítico x3, Dano 2d8+13 corte.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Pistola Silenciada',
+        descricao: 'À distância x2 (Curto). Teste 3O+10, crítico x3, Dano 1d12+13 balístico.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Ataque Furtivo',
+        descricao: '1x/rodada: +3d6 dano corpo a corpo ou à distância curto contra desprevenido/flanqueado.',
+        tipo: 'Livre'
+      },
+      {
+        nome: 'Guarda-costas',
+        descricao: '1x/cena: chama 1d4+1 capangas que entram na próxima rodada.',
+        tipo: 'Padrão'
+      }
+    ],
+    livro: 'Sobrevivendo ao Horror'
+  },
+  {
+    nome: 'Caçador de Gente',
+    vd: 80,
+    tipo: 'Pessoa',
+    tamanho: 'Médio',
+    sentidos: 'Percepção O+5, Iniciativa 2O+10',
+    defesa: 23,
+    fortitude: '3O+10',
+    reflexos: '2O+10',
+    vontade: 'O+5',
+    vida: 80,
+    imunidades: [],
+    resistencias: ['10/paranormal (quando machucado)'],
+    vulnerabilidades: [],
+    atributos: {
+      AGI: 2,
+      FOR: 3,
+      INT: 1,
+      PRE: 1,
+      VIG: 3
+    },
+    pericias: {
+      Atletismo: '3O+10',
+      Sobrevivência: 'O+10'
+    },
+    deslocamento: '9m',
+    habilidades: [
+      {
+        nome: 'Abrutalhado',
+        descricao: 'Usa armas de duas mãos com uma mão. Usa objetos Grande sem penalidade. RD 10/paranormal quando machucado.'
+      },
+      {
+        nome: 'Área de Caça',
+        descricao: 'Na área onde vive/caça: +O em perícias.'
+      },
+      {
+        nome: 'Faro Para Humanos',
+        descricao: '+2O em Sobrevivência com pessoas. Percebe humanos pelo olfato como faro.'
+      }
+    ],
+    acoes: [
+      {
+        nome: 'Pancada',
+        descricao: 'Corpo a corpo x2. Teste 3O+15, Dano 1d4+15 impacto.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Machado',
+        descricao: 'Corpo a corpo x2. Teste 3O+15, crítico x3, Dano 2d8+15 corte.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Motosserra',
+        descricao: 'Corpo a corpo x2. Teste 3O+15, crítico x4, Dano 3d6+15 corte.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Ataque Furtivo',
+        descricao: '1x/rodada: +4d6 dano contra desprevenido/flanqueado.',
+        tipo: 'Livre'
+      },
+      {
+        nome: 'Assustar',
+        descricao: 'Causa 4d6 mental em todos que podem ver/ouvir em alcance curto (Vontade DT 20 reduz/evita).',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Fatalidade',
+        descricao: 'Ataque único de pancada: além do dano, causa ferimento debilitante. 1x/cena por ser.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Imparável',
+        descricao: 'Anula qualquer efeito que reduza deslocamento.',
+        tipo: 'Movimento'
+      }
+    ],
+    livro: 'Sobrevivendo ao Horror'
+  },
+  {
+    nome: 'Artista da Morte',
+    vd: 140,
+    tipo: 'Pessoa',
+    tamanho: 'Médio',
+    sentidos: 'Percepção 3O+15, Iniciativa 3O+15',
+    defesa: 27,
+    fortitude: 'O+5',
+    reflexos: '3O+15',
+    vontade: '3O+15',
+    vida: 150,
+    imunidades: [],
+    resistencias: [],
+    vulnerabilidades: [],
+    atributos: {
+      AGI: 3,
+      FOR: 1,
+      INT: 3,
+      PRE: 3,
+      VIG: 1
+    },
+    pericias: {
+      Artes: '3O+15',
+      Enganação: '3O+15',
+      Furtividade: '3O+15'
+    },
+    deslocamento: '9m',
+    habilidades: [
+      {
+        nome: 'Matar é uma Arte',
+        descricao: 'Usa Artes no lugar de qualquer perícia para testes com mentes/corpos humanos. Com horas de análise: substitui Investigação por Artes com +O.'
+      },
+      {
+        nome: 'Cenas Imprevisíveis',
+        descricao: 'Se parecer acidente: +5 DT para pistas. Se quiser deixar marca: quem ver fica enjoado e sofre 4d8 mental (Vontade DT 25 reduz/evita).'
+      }
+    ],
+    acoes: [
+      {
+        nome: 'Bisturi',
+        descricao: 'Corpo a corpo x2. Teste 3O+15, crítico 19/x4, Dano 1d4+17 corte.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Ataque Furtivo',
+        descricao: '1x/rodada: +7d6 dano contra desprevenido/flanqueado.',
+        tipo: 'Livre'
+      },
+      {
+        nome: 'Discurso Artístico',
+        descricao: 'Todos que podem ouvir em alcance curto: Vontade DT 25 ou ficam pasmos 1 rodada e sofrem 4d8 mental.',
+        tipo: 'Padrão'
+      }
+    ],
+    livro: 'Sobrevivendo ao Horror'
+  },
+
+  // ===================================================================
+  // ANIMAIS - SOBREVIVENDO AO HORROR
+  // ===================================================================
+  {
+    nome: 'Ariranha',
+    vd: 20,
+    tipo: 'Animal',
+    tamanho: 'Médio',
+    sentidos: 'Percepção O+5, Iniciativa O+5',
+    defesa: 16,
+    fortitude: '2O+5',
+    reflexos: '2O+5',
+    vontade: 'O',
+    vida: 20,
+    imunidades: [],
+    resistencias: [],
+    vulnerabilidades: [],
+    atributos: {
+      AGI: 2,
+      FOR: 2,
+      INT: 0,
+      PRE: 1,
+      VIG: 2
+    },
+    pericias: {
+      Atletismo: '2O+10',
+      Furtividade: '2O+5'
+    },
+    deslocamento: '6m (Natação 12m)',
+    habilidades: [
+      {
+        nome: 'Caçadora Subaquática',
+        descricao: 'Pode prender a respiração por até 8 minutos. +O em ataques debaixo dágua.'
+      }
+    ],
+    acoes: [
+      {
+        nome: 'Mordida',
+        descricao: 'Corpo a corpo. Teste 2O+10, Dano 1d8+2 perfuração.',
+        tipo: 'Padrão'
+      }
+    ],
+    livro: 'Sobrevivendo ao Horror'
+  },
+  {
+    nome: 'Lobo',
+    vd: 20,
+    tipo: 'Animal',
+    tamanho: 'Médio',
+    sentidos: 'Percepção 2O+5, Iniciativa O+5, Faro',
+    defesa: 17,
+    fortitude: '2O+5',
+    reflexos: '2O+5',
+    vontade: 'O+5',
+    vida: 24,
+    imunidades: [],
+    resistencias: [],
+    vulnerabilidades: [],
+    atributos: {
+      AGI: 2,
+      FOR: 2,
+      INT: 0,
+      PRE: 1,
+      VIG: 2
+    },
+    pericias: {
+      Atletismo: '2O+5',
+      Furtividade: '2O+5',
+      Sobrevivência: '2O+5'
+    },
+    deslocamento: '12m',
+    habilidades: [
+      {
+        nome: 'Matilha',
+        descricao: 'Recebe +O em ataques para cada aliado adjacente ao alvo (máximo +3O).'
+      }
+    ],
+    acoes: [
+      {
+        nome: 'Mordida',
+        descricao: 'Corpo a corpo. Teste 2O+10, Dano 1d8+2 perfuração. Acerto: pode derrubar (Atletismo DT 15 evita).',
+        tipo: 'Padrão'
+      }
+    ],
+    livro: 'Sobrevivendo ao Horror'
+  },
+  {
+    nome: 'Gorila',
+    vd: 40,
+    tipo: 'Animal',
+    tamanho: 'Grande',
+    sentidos: 'Percepção O+5, Iniciativa O',
+    defesa: 18,
+    fortitude: '3O+10',
+    reflexos: 'O+5',
+    vontade: 'O+5',
+    vida: 50,
+    imunidades: [],
+    resistencias: [],
+    vulnerabilidades: [],
+    atributos: {
+      AGI: 1,
+      FOR: 3,
+      INT: 0,
+      PRE: 1,
+      VIG: 3
+    },
+    pericias: {
+      Atletismo: '3O+10'
+    },
+    deslocamento: '9m (Escalada 9m)',
+    habilidades: [
+      {
+        nome: 'Exibição de Força',
+        descricao: 'Pode bater no peito e rugir: todos em alcance curto fazem Vontade DT 15 ou ficam abalados 1 rodada.'
+      }
+    ],
+    acoes: [
+      {
+        nome: 'Pancada',
+        descricao: 'Corpo a corpo x2. Teste 3O+10, Dano 2d6+8 impacto.',
+        tipo: 'Padrão'
+      }
+    ],
+    livro: 'Sobrevivendo ao Horror'
+  },
+  {
+    nome: 'Leão',
+    vd: 40,
+    tipo: 'Animal',
+    tamanho: 'Grande',
+    sentidos: 'Percepção 2O+5, Iniciativa 2O+5, Faro',
+    defesa: 20,
+    fortitude: '3O+10',
+    reflexos: '2O+10',
+    vontade: 'O+5',
+    vida: 60,
+    imunidades: [],
+    resistencias: [],
+    vulnerabilidades: [],
+    atributos: {
+      AGI: 2,
+      FOR: 3,
+      INT: 0,
+      PRE: 1,
+      VIG: 3
+    },
+    pericias: {
+      Atletismo: '3O+10',
+      Furtividade: '2O+5'
+    },
+    deslocamento: '12m',
+    habilidades: [
+      {
+        nome: 'Emboscada',
+        descricao: 'Se atacar de furtivo, causa +2d6 dano.'
+      },
+      {
+        nome: 'Investida Brutal',
+        descricao: 'Em investida, se acertar com garras, pode fazer ataque adicional de mordida.'
+      }
+    ],
+    acoes: [
+      {
+        nome: 'Mordida',
+        descricao: 'Corpo a corpo. Teste 3O+10, Dano 2d8+8 perfuração.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Garras',
+        descricao: 'Corpo a corpo x2. Teste 3O+10, Dano 1d8+8 corte.',
+        tipo: 'Padrão'
+      }
+    ],
+    livro: 'Sobrevivendo ao Horror'
+  },
+  {
+    nome: 'Urso Pardo',
+    vd: 60,
+    tipo: 'Animal',
+    tamanho: 'Grande',
+    sentidos: 'Percepção 2O+5, Iniciativa O, Faro',
+    defesa: 20,
+    fortitude: '4O+15',
+    reflexos: 'O+5',
+    vontade: '2O+5',
+    vida: 100,
+    imunidades: [],
+    resistencias: [],
+    vulnerabilidades: [],
+    atributos: {
+      AGI: 1,
+      FOR: 4,
+      INT: 0,
+      PRE: 2,
+      VIG: 4
+    },
+    pericias: {
+      Atletismo: '4O+15',
+      Sobrevivência: '2O+5'
+    },
+    deslocamento: '12m',
+    habilidades: [
+      {
+        nome: 'Abraço de Urso',
+        descricao: 'Se acertar dois ataques de garras na mesma rodada, agarra o alvo e pode causar 2d6+10 impacto automático por rodada.'
+      }
+    ],
+    acoes: [
+      {
+        nome: 'Mordida',
+        descricao: 'Corpo a corpo. Teste 4O+15, Dano 2d8+10 perfuração.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Garras',
+        descricao: 'Corpo a corpo x2. Teste 4O+15, Dano 2d6+10 corte.',
+        tipo: 'Padrão'
+      }
+    ],
+    livro: 'Sobrevivendo ao Horror'
   }
 ];
