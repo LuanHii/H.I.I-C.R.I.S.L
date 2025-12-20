@@ -13,6 +13,7 @@ interface CampanhaSectionProps {
     renderFichaCard: (registro: FichaRegistro) => React.ReactNode;
     onRenomear?: (id: string, nome: string) => void;
     onRemoverCampanha?: (id: string) => void;
+    onExportarCampanha?: (fichas: FichaRegistro[], campanhaNome: string, campanhaId?: string) => void;
 }
 
 export function CampanhaSection({
@@ -25,6 +26,7 @@ export function CampanhaSection({
     renderFichaCard,
     onRenomear,
     onRemoverCampanha,
+    onExportarCampanha,
 }: CampanhaSectionProps) {
     const [expandida, setExpandida] = useState(true);
     const [editando, setEditando] = useState(false);
@@ -90,6 +92,19 @@ export function CampanhaSection({
                 <span className="text-xs text-zinc-400 font-mono">
                     {fichas.length} ficha{fichas.length !== 1 ? 's' : ''}
                 </span>
+
+                {onExportarCampanha && fichas.length > 0 && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onExportarCampanha(fichas, nome, id);
+                        }}
+                        className="text-zinc-500 hover:text-ordem-gold transition text-xs px-2"
+                        title={`Exportar fichas da campanha "${nome}"`}
+                    >
+                        📤
+                    </button>
+                )}
 
                 {id && onRemoverCampanha && (
                     <button

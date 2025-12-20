@@ -8,7 +8,7 @@ import { normalizePersonagem } from '../../core/personagemUtils';
 import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPersonagem';
 import { saveAgentToCloud } from '../../core/firebase/firestore';
 import { ImportExportModal } from './ImportExportModal';
-import { downloadJSON, exportarFichaIndividual } from '../../core/storage/exportImportUtils';
+import { downloadJSON, exportarFichaIndividual, exportarFichasPorCampanha } from '../../core/storage/exportImportUtils';
 import { CampanhaSection, NovaCampanhaForm } from './CampanhaSection';
 import { recalcularRecursosPersonagem } from '../../logic/progression';
 
@@ -126,6 +126,19 @@ export function FichasManager() {
       .filter((f) => f.campanha === campanhaId)
       .forEach((f) => moverParaCampanha(f.id, undefined));
     removerCampanha(campanhaId);
+  };
+
+  const handleExportarCampanha = (fichasDaCampanha: FichaRegistro[], campanhaNome: string, campanhaId?: string) => {
+    try {
+      const data = exportarFichasPorCampanha(fichasDaCampanha, campanhaNome, campanhaId);
+      const timestamp = new Date().toISOString().split('T')[0];
+      const nomeArquivo = `campanha-${campanhaNome.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-${timestamp}.json`;
+      downloadJSON(data, nomeArquivo);
+      alert(`Fichas da campanha "${campanhaNome}" exportadas com sucesso!`);
+    } catch (error) {
+      console.error('Erro ao exportar campanha:', error);
+      alert('Erro ao exportar campanha. Verifique o console para mais detalhes.');
+    }
   };
 
   const renderFichaCard = (registro: FichaRegistro) => {
@@ -317,6 +330,7 @@ export function FichasManager() {
               renderFichaCard={renderFichaCard}
               onRenomear={renomearCampanha}
               onRemoverCampanha={handleRemoverCampanha}
+              onExportarCampanha={handleExportarCampanha}
             />
           ))}
 
@@ -329,6 +343,7 @@ export function FichasManager() {
             onMover={moverParaCampanha}
             campanhasDisponiveis={campanhas}
             renderFichaCard={renderFichaCard}
+            onExportarCampanha={handleExportarCampanha}
           />
 
           {/* Criar nova campanha */}

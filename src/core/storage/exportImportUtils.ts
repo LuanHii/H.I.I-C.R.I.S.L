@@ -277,6 +277,37 @@ export function exportarFichaIndividual(ficha: FichaRegistro): string {
 }
 
 /**
+ * Interface para exportação de fichas de uma campanha
+ */
+export interface ExportCampanhaData {
+  version: string;
+  exportadoEm: string;
+  tipo: 'campanha';
+  campanhaNome: string;
+  campanhaId?: string;
+  fichas: FichaRegistro[];
+}
+
+/**
+ * Exporta fichas de uma campanha específica
+ */
+export function exportarFichasPorCampanha(
+  fichas: FichaRegistro[],
+  campanhaNome: string,
+  campanhaId?: string
+): string {
+  const data: ExportCampanhaData = {
+    version: EXPORT_VERSION,
+    exportadoEm: new Date().toISOString(),
+    tipo: 'campanha',
+    campanhaNome,
+    campanhaId,
+    fichas,
+  };
+  return JSON.stringify(data, null, 2);
+}
+
+/**
  * Valida dados de importação de ficha individual
  */
 export function validarFichaIndividual(jsonString: string): ExportFichaIndividual | null {
