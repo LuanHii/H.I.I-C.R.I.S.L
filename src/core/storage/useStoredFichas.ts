@@ -1,18 +1,20 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Personagem } from '../types';
+import { saveAgentToCloud } from '../firebase/firestore';
 
 export interface FichaRegistro {
   id: string;
   personagem: Personagem;
   atualizadoEm: string;
-  campanha?: string; // ID da campanha (opcional, undefined = sem campanha)
+  campanha?: string;
+  sincronizadaNaNuvem?: boolean;
 }
 
 export interface Campanha {
   id: string;
   nome: string;
-  cor?: string; // Cor para identificar a campanha
-  ordem: number; // Para ordenar campanhas
+  cor?: string;
+  ordem: number;
 }
 
 const STORAGE_KEY = 'fichas-origem';
@@ -45,6 +47,7 @@ function normalizarRegistro(entrada: unknown): FichaRegistro | null {
       personagem: registroPossivel.personagem,
       atualizadoEm: registroPossivel.atualizadoEm ?? new Date().toISOString(),
       campanha: registroPossivel.campanha,
+      sincronizadaNaNuvem: registroPossivel.sincronizadaNaNuvem,
     };
   }
 
@@ -109,9 +112,27 @@ export function useStoredFichas() {
         personagem,
         atualizadoEm: new Date().toISOString(),
         campanha: campanha ?? fichaExistente?.campanha,
+        sincronizadaNaNuvem: fichaExistente?.sincronizadaNaNuvem,
       };
       const existentes = prev.filter((f) => f.id !== fichaId);
       const atualizadas = [registro, ...existentes];
+      gravarFichas(atualizadas);
+
+      if (fichaExistente?.sincronizadaNaNuvem) {
+        saveAgentToCloud(fichaId, personagem).catch((err) => {
+          console.error('Erro ao sincronizar ficha com a nuvem:', err);
+        });
+      }
+
+      return atualizadas;
+    });
+  }, []);
+
+  const marcarComoSincronizada = useCallback((id: string) => {
+    setFichas((prev) => {
+      const atualizadas = prev.map((f) =>
+        f.id === id ? { ...f, sincronizadaNaNuvem: true, atualizadoEm: new Date().toISOString() } : f
+      );
       gravarFichas(atualizadas);
       return atualizadas;
     });
@@ -152,8 +173,8 @@ export function useStoredFichas() {
   }, []);
 
   return useMemo(
-    () => ({ fichas, salvar, remover, duplicar, moverParaCampanha }),
-    [fichas, salvar, remover, duplicar, moverParaCampanha],
+    () => ({ fichas, salvar, remover, duplicar, moverParaCampanha, marcarComoSincronizada }),
+    [fichas, salvar, remover, duplicar, moverParaCampanha, marcarComoSincronizada],
   );
 }
 
@@ -169,7 +190,7 @@ export function useCampanhas() {
       const nova: Campanha = {
         id: crypto.randomUUID(),
         nome,
-        cor: cor || '#dc2626', // vermelho padrão (ordem-red)
+        cor: cor || '#dc2626',
         ordem: prev.length,
       };
       const atualizadas = [...prev, nova];

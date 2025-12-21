@@ -11,9 +11,10 @@ import { ImportExportModal } from './ImportExportModal';
 import { downloadJSON, exportarFichaIndividual, exportarFichasPorCampanha } from '../../core/storage/exportImportUtils';
 import { CampanhaSection, NovaCampanhaForm } from './CampanhaSection';
 import { recalcularRecursosPersonagem } from '../../logic/progression';
+import { Cloud } from 'lucide-react';
 
 export function FichasManager() {
-  const { fichas, remover, duplicar, salvar, moverParaCampanha } = useStoredFichas();
+  const { fichas, remover, duplicar, salvar, moverParaCampanha, marcarComoSincronizada } = useStoredFichas();
   const { campanhas, criarCampanha, renomearCampanha, removerCampanha } = useCampanhas();
   const [selecionada, setSelecionada] = useState<string | null>(null);
   const [busca, setBusca] = useState('');
@@ -98,9 +99,15 @@ export function FichasManager() {
     if (!registro) return;
     try {
       await saveAgentToCloud(id, registro.personagem);
+      if (!registro.sincronizadaNaNuvem) {
+        marcarComoSincronizada(id);
+      }
       const link = `${window.location.origin}/ficha/${id}`;
       await navigator.clipboard.writeText(link);
-      alert('Ficha sincronizada e link copiado!');
+      const mensagem = registro.sincronizadaNaNuvem
+        ? 'Link copiado! (A ficha já estava sincronizada e atualizada na nuvem)'
+        : 'Ficha sincronizada e link copiado! Alterações futuras serão sincronizadas automaticamente.';
+      alert(mensagem);
     } catch (e) {
       console.error(e);
       alert('Não foi possível copiar o link. Verifique permissões do navegador.');
@@ -172,6 +179,14 @@ export function FichasManager() {
         <div className="flex justify-between text-xs text-ordem-white/60 relative">
           <span>{registro.personagem.classe}</span>
           <div className="flex items-center gap-2">
+            {registro.sincronizadaNaNuvem && (
+              <span
+                className="text-ordem-green"
+                title="Ficha sincronizada na nuvem - alterações são atualizadas automaticamente"
+              >
+                <Cloud size={14} />
+              </span>
+            )}
             {summary.total > 0 && (
               <span
                 className={`px-2 py-0.5 rounded border text-[10px] font-mono tracking-widest ${summary.errors > 0

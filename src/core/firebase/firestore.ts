@@ -2,13 +2,31 @@ import { db } from './config';
 import { doc, setDoc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { Personagem } from '../types';
 
+function removeUndefinedFields<T extends object>(obj: T): T {
+    const cleaned = {} as T;
+    for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            const value = obj[key];
+            if (value === undefined) {
+                continue;
+            } else if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+                cleaned[key] = removeUndefinedFields(value as object) as T[Extract<keyof T, string>];
+            } else {
+                cleaned[key] = value;
+            }
+        }
+    }
+    return cleaned;
+}
+
 export const saveAgentToCloud = async (agentId: string, agentData: Personagem) => {
-  try {
-    await setDoc(doc(db, "agentes", agentId), agentData);
-    console.log("Agente salvo na nuvem:", agentId);
-  } catch (e) {
-    console.error("Erro ao salvar agente na nuvem: ", e);
-  }
+    try {
+        const cleanedData = removeUndefinedFields(agentData);
+        await setDoc(doc(db, "agentes", agentId), cleanedData);
+    } catch (e) {
+        console.error("Erro ao salvar agente na nuvem: ", e);
+        throw e;
+    }
 };
 
 export const updateAgentInCloud = async (agentId: string, updates: Partial<Personagem>) => {
