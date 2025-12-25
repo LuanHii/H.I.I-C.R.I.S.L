@@ -637,6 +637,154 @@ export const ITENS: Item[] = [
     descricao: 'Garrafa com líquido inflamável. Arremesso em alcance curto: 3d6 fogo em raio 1,5m, condição em chamas (Reflexos DT Agi evita).',
     livro: 'Regras Básicas'
   },
+  {
+    nome: 'Granada de Fumaça',
+    categoria: 0,
+    espaco: 1,
+    tipo: 'Explosivo',
+    descricao: 'Libera fumaça densa em raio 6m. Criaturas na área têm camuflagem total. A fumaça dura 2 rodadas ou até ser dispersada por vento forte.',
+    livro: 'Regras Básicas'
+  },
+
+  // ===================================================================
+  // ITENS GERAIS - OPERACIONAIS (REGRAS BÁSICAS)
+  // ===================================================================
+  {
+    nome: 'Algemas',
+    categoria: 0,
+    espaco: 1,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Algemas de metal. Prender uma criatura imobilizada é uma ação padrão. Escapar: Acrobacia DT 30 ou Força DT 25 para quebrar.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Arpéu',
+    categoria: 0,
+    espaco: 1,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Gancho de metal com corda. Permite escalar superfícies sem apoio. Fornece +5 em Atletismo para escalar.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Bandoleira',
+    categoria: 1,
+    espaco: 1,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Correia com suportes para armas e equipamentos. Você pode sacar ou guardar uma arma como ação livre.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Binóculos',
+    categoria: 0,
+    espaco: 1,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Permite ver objetos distantes com clareza. Fornece +5 em Percepção para observar alvos distantes.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Bloqueador de Sinal',
+    categoria: 1,
+    espaco: 1,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Dispositivo que bloqueia sinais de rádio e celular em raio de 30m. Impede comunicação sem fio na área.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Corda',
+    categoria: 0,
+    espaco: 1,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Corda de 15m. Útil para escalar, amarrar ou criar armadilhas. Fornece +2 em testes relacionados.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Equipamento de Sobrevivência',
+    categoria: 0,
+    espaco: 2,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Kit com barraca, saco de dormir, cantil e suprimentos básicos. Fornece +5 em Sobrevivência.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Lanterna Tática',
+    categoria: 1,
+    espaco: 1,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Lanterna potente e resistente. Ilumina cone de 9m. Pode ser acoplada a armas. Fornece +2 em testes contra condição ofuscado.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Mochila Militar',
+    categoria: 1,
+    espaco: 0,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Mochila grande e resistente. Aumenta sua capacidade de carga em +5 espaços.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Óculos de Visão Térmica',
+    categoria: 1,
+    espaco: 1,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Permite ver fontes de calor através de paredes finas e fumaça. Criaturas de sangue quente não têm camuflagem contra você.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Pé de Cabra',
+    categoria: 0,
+    espaco: 1,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Barra de metal para alavanca. Fornece +5 em Força para arrombar portas e objetos. Pode ser usada como clava em combate.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Pistola de Dardos',
+    categoria: 1,
+    espaco: 1,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Arma de ar comprimido com dardos tranquilizantes. Alcance curto, causa sono (Fortitude DT Agi evita). Não funciona contra criaturas não-vivas.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Pistola Sinalizadora',
+    categoria: 0,
+    espaco: 1,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Dispara um sinalizador luminoso visível a quilômetros. Também pode ser usada como arma improvisada (2d6 fogo, alcance curto).',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Soqueira',
+    categoria: 0,
+    espaco: 1,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Proteção metálica para os punhos. Seus ataques desarmados causam +2 de dano de impacto.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Spray de Pimenta',
+    categoria: 1,
+    espaco: 1,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Spray irritante. Ação padrão: alvo adjacente fica cego por 1d4 rodadas (Fortitude DT Agi reduz para 1 rodada).',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Taser',
+    categoria: 1,
+    espaco: 1,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Arma de choque elétrico. Ação padrão: alvo adjacente fica atordoado 1 rodada (Fortitude DT Agi evita). Não funciona contra criaturas imunes a eletricidade.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Traje Hazmat',
+    categoria: 1,
+    espaco: 2,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Roupa de proteção contra materiais perigosos. Fornece imunidade a venenos e doenças transmitidas pelo ar e contato. –2 em testes físicos.',
+    livro: 'Regras Básicas'
+  },
 
   // ===================================================================
   // ITENS PARANORMAIS (REGRAS BÁSICAS)

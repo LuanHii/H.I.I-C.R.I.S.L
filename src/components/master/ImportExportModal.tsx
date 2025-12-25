@@ -160,15 +160,15 @@ export function ImportExportModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 max-w-lg w-full mx-4 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ordem-black/80 backdrop-blur-sm">
+      <div className="bg-ordem-ooze border border-ordem-border rounded-xl p-6 max-w-lg w-full mx-4 shadow-2xl">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-serif text-white">
             {modo === 'exportar' ? 'EXPORTAR DADOS' : modo === 'importar' ? 'IMPORTAR DADOS' : 'IMPORTAR FICHA'}
           </h2>
           <button
             onClick={onClose}
-            className="text-zinc-400 hover:text-white transition"
+            className="text-ordem-text-secondary hover:text-white transition"
             aria-label="Fechar"
           >
             ✕
@@ -180,7 +180,7 @@ export function ImportExportModal({
             onClick={() => { setModo('exportar'); setResultadoImportacao(null); }}
             className={`flex-1 px-3 py-2 text-sm font-mono border rounded-lg transition ${modo === 'exportar'
                 ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
-                : 'border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                : 'border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted'
               }`}
           >
             EXPORTAR
@@ -189,7 +189,7 @@ export function ImportExportModal({
             onClick={() => { setModo('importar'); setResultadoImportacao(null); }}
             className={`flex-1 px-3 py-2 text-sm font-mono border rounded-lg transition ${modo === 'importar'
                 ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
-                : 'border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                : 'border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted'
               }`}
           >
             IMPORTAR
@@ -198,7 +198,7 @@ export function ImportExportModal({
             onClick={() => { setModo('importar-ficha'); setResultadoImportacao(null); }}
             className={`flex-1 px-3 py-2 text-sm font-mono border rounded-lg transition ${modo === 'importar-ficha'
                 ? 'border-amber-500 text-amber-500 bg-amber-500/10'
-                : 'border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                : 'border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted'
               }`}
           >
             + FICHA
@@ -207,7 +207,7 @@ export function ImportExportModal({
 
         {modo === 'exportar' && (
           <div className="space-y-3">
-            <div className="text-sm text-zinc-400 mb-4">
+            <div className="text-sm text-ordem-text-secondary mb-4">
               Escolha o que deseja exportar:
             </div>
             <button
@@ -215,7 +215,7 @@ export function ImportExportModal({
               className="w-full px-4 py-3 border border-ordem-red text-ordem-red hover:bg-ordem-red/10 rounded-lg transition text-left"
             >
               <div className="font-semibold">Exportar Fichas</div>
-              <div className="text-xs text-zinc-400 mt-1">
+              <div className="text-xs text-ordem-text-secondary mt-1">
                 Exporta apenas as fichas de personagens
               </div>
             </button>
@@ -224,7 +224,7 @@ export function ImportExportModal({
               className="w-full px-4 py-3 border border-ordem-green text-ordem-green hover:bg-ordem-green/10 rounded-lg transition text-left"
             >
               <div className="font-semibold">Exportar Tudo</div>
-              <div className="text-xs text-zinc-400 mt-1">
+              <div className="text-xs text-ordem-text-secondary mt-1">
                 Exporta fichas, itens customizados, armas e monstros
               </div>
             </button>
@@ -233,12 +233,12 @@ export function ImportExportModal({
 
         {modo === 'importar' && (
           <div className="space-y-4">
-            <div className="text-sm text-zinc-400 mb-4">
+            <div className="text-sm text-ordem-text-secondary mb-4">
               Selecione um arquivo JSON para importar:
             </div>
 
             <div className="space-y-2">
-              <label className="block text-xs font-mono text-zinc-500 uppercase tracking-widest">
+              <label className="block text-xs font-mono text-ordem-text-muted uppercase tracking-widest">
                 Opção de Importação
               </label>
               <div className="flex gap-2">
@@ -246,7 +246,7 @@ export function ImportExportModal({
                   onClick={() => setOpcaoImportacao('mesclar')}
                   className={`flex-1 px-3 py-2 text-sm border rounded-lg transition ${opcaoImportacao === 'mesclar'
                       ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
-                      : 'border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                      : 'border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted'
                     }`}
                 >
                   Mesclar
@@ -255,13 +255,13 @@ export function ImportExportModal({
                   onClick={() => setOpcaoImportacao('substituir')}
                   className={`flex-1 px-3 py-2 text-sm border rounded-lg transition ${opcaoImportacao === 'substituir'
                       ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
-                      : 'border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                      : 'border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted'
                     }`}
                 >
                   Substituir
                 </button>
               </div>
-              <div className="text-xs text-zinc-500 mt-1">
+              <div className="text-xs text-ordem-text-muted mt-1">
                 {opcaoImportacao === 'mesclar'
                   ? 'Adiciona novos itens e atualiza existentes'
                   : 'Substitui todos os dados existentes'}
@@ -303,14 +303,14 @@ export function ImportExportModal({
               <div className="text-sm text-amber-400 font-semibold mb-1">
                 📋 Importar Ficha de Jogador
               </div>
-              <div className="text-xs text-zinc-400">
+              <div className="text-xs text-ordem-text-secondary">
                 Use esta opção para importar fichas que jogadores enviaram para você.
                 A ficha será adicionada às suas fichas existentes.
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="block text-xs font-mono text-zinc-500 uppercase tracking-widest">
+              <label className="block text-xs font-mono text-ordem-text-muted uppercase tracking-widest">
                 Se a ficha já existir
               </label>
               <div className="flex gap-2">
@@ -318,7 +318,7 @@ export function ImportExportModal({
                   onClick={() => setOpcaoFichaIndividual('mesclar')}
                   className={`flex-1 px-3 py-2 text-sm border rounded-lg transition ${opcaoFichaIndividual === 'mesclar'
                       ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
-                      : 'border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                      : 'border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted'
                     }`}
                 >
                   Criar Nova
@@ -327,13 +327,13 @@ export function ImportExportModal({
                   onClick={() => setOpcaoFichaIndividual('substituir-se-existir')}
                   className={`flex-1 px-3 py-2 text-sm border rounded-lg transition ${opcaoFichaIndividual === 'substituir-se-existir'
                       ? 'border-amber-500 text-amber-500 bg-amber-500/10'
-                      : 'border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                      : 'border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted'
                     }`}
                 >
                   Atualizar
                 </button>
               </div>
-              <div className="text-xs text-zinc-500 mt-1">
+              <div className="text-xs text-ordem-text-muted mt-1">
                 {opcaoFichaIndividual === 'mesclar'
                   ? 'Cria uma nova ficha mesmo se já existir uma com mesmo ID'
                   : 'Atualiza a ficha existente com os novos dados'}
@@ -369,10 +369,10 @@ export function ImportExportModal({
           </div>
         )}
 
-        <div className="mt-6 pt-4 border-t border-zinc-800">
+        <div className="mt-6 pt-4 border-t border-ordem-border">
           <button
             onClick={onClose}
-            className="w-full px-4 py-2 border border-zinc-700 text-zinc-300 hover:border-zinc-600 hover:text-white rounded-lg transition"
+            className="w-full px-4 py-2 border border-ordem-border-light text-ordem-white-muted hover:border-ordem-text-muted hover:text-white rounded-lg transition"
           >
             Fechar
           </button>

@@ -47,10 +47,10 @@ export default function RecriarFichaPage({ params }: { params: Promise<{ id: str
 
   if (!registro || !draft) {
     return (
-      <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-        <div className="max-w-lg w-full bg-zinc-900/40 border border-zinc-800 rounded-xl p-6 text-center">
+      <main className="min-h-screen bg-ordem-black text-white flex items-center justify-center p-6">
+        <div className="max-w-lg w-full bg-ordem-ooze/40 border border-ordem-border rounded-xl p-6 text-center">
           <div className="text-xl font-serif mb-2">Ficha não encontrada</div>
-          <div className="text-sm text-zinc-400 mb-5">Não foi possível localizar a ficha para recriar.</div>
+          <div className="text-sm text-ordem-text-secondary mb-5">Não foi possível localizar a ficha para recriar.</div>
           <Link href="/mestre/fichas" className="text-ordem-green underline">
             Voltar para fichas
           </Link>

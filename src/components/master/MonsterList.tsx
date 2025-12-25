@@ -60,21 +60,21 @@ export const MonsterList: React.FC = () => {
           placeholder="Buscar ameaça..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="bg-black/40 border border-gray-700 text-white px-3 py-2 rounded focus:border-ordem-red focus:outline-none font-mono text-sm"
+          className="bg-ordem-black/40 border border-ordem-border-light text-white px-3 py-2 rounded focus:border-ordem-red focus:outline-none font-mono text-sm"
         />
         
         <select
           value={selectedElement}
           onChange={(e) => setSelectedElement(e.target.value)}
-          className="bg-black/40 border border-gray-700 text-white px-3 py-2 rounded focus:border-ordem-red focus:outline-none font-mono text-sm"
+          className="bg-ordem-black/40 border border-ordem-border-light text-white px-3 py-2 rounded focus:border-ordem-red focus:outline-none font-mono text-sm"
         >
           {elements.map((el) => (
             <option key={el} value={el}>{el}</option>
           ))}
         </select>
 
-        <div className="flex items-center gap-2 bg-black/40 border border-gray-700 px-3 rounded">
-            <span className="text-xs font-mono text-gray-500">VD:</span>
+        <div className="flex items-center gap-2 bg-ordem-black/40 border border-ordem-border-light px-3 rounded">
+            <span className="text-xs font-mono text-ordem-text-muted">VD:</span>
             <input 
                 type="number" 
                 min="0" 
@@ -83,7 +83,7 @@ export const MonsterList: React.FC = () => {
                 onChange={(e) => setVdRange([Number(e.target.value), vdRange[1]])}
                 className="w-16 bg-transparent text-white text-sm font-mono focus:outline-none text-center"
             />
-            <span className="text-gray-500">-</span>
+            <span className="text-ordem-text-muted">-</span>
             <input 
                 type="number" 
                 min="0" 
@@ -113,7 +113,7 @@ export const MonsterList: React.FC = () => {
           />
         ))}
         {filteredMonsters.length === 0 && (
-            <div className="text-center text-gray-500 font-mono py-8">
+            <div className="text-center text-ordem-text-muted font-mono py-8">
                 Nenhuma ameaça encontrada.
             </div>
         )}
@@ -143,18 +143,18 @@ const MonsterCard: React.FC<MonsterCardProps> = ({ monster, onEdit, onDelete, on
   const getElementColor = (type: string) => {
     switch (type) {
       case 'Sangue': return 'text-red-600 border-red-900/50 bg-red-900/10';
-      case 'Morte': return 'text-gray-400 border-gray-700 bg-gray-800/30';
+      case 'Morte': return 'text-ordem-text-secondary border-ordem-border-light bg-ordem-ooze/30';
       case 'Conhecimento': return 'text-amber-500 border-amber-900/50 bg-amber-900/10';
       case 'Energia': return 'text-purple-500 border-purple-900/50 bg-purple-900/10';
       case 'Medo': return 'text-white border-white/20 bg-white/5';
-      default: return 'text-gray-400 border-gray-800';
+      default: return 'text-ordem-text-secondary border-ordem-border';
     }
   };
 
   const styleClass = getElementColor(monster.tipo);
 
   return (
-    <div className={`border rounded transition-colors duration-300 ${expanded ? 'bg-black/80 border-gray-600' : 'bg-black/40 border-gray-800 hover:border-gray-600'}`}>
+    <div className={`border rounded transition-colors duration-300 ${expanded ? 'bg-ordem-black/80 border-ordem-border-light' : 'bg-ordem-black/40 border-ordem-border hover:border-ordem-border-light'}`}>
       <div 
         className="p-4 flex items-center justify-between cursor-pointer select-none"
         onClick={() => setExpanded(!expanded)}
@@ -168,17 +168,17 @@ const MonsterCard: React.FC<MonsterCardProps> = ({ monster, onEdit, onDelete, on
                   <h3 className="text-lg font-serif text-white">{monster.nome}</h3>
                   {monster.isCustom && <span className="text-[10px] bg-blue-900/30 text-blue-400 border border-blue-900/50 px-1 rounded uppercase">Custom</span>}
                 </div>
-                <p className="text-xs font-mono text-gray-400">{monster.tipo} &bull; {monster.tamanho}</p>
+                <p className="text-xs font-mono text-ordem-text-secondary">{monster.tipo} &bull; {monster.tamanho}</p>
             </div>
         </div>
         
         <div className="flex items-center gap-6">
             <div className="text-right hidden md:block">
-                <div className="text-[10px] font-mono text-gray-500 uppercase">Vida</div>
+                <div className="text-[10px] font-mono text-ordem-text-muted uppercase">Vida</div>
                 <div className="text-lg font-bold text-white">{monster.vida}</div>
             </div>
             <div className="text-right hidden md:block">
-                <div className="text-[10px] font-mono text-gray-500 uppercase">Defesa</div>
+                <div className="text-[10px] font-mono text-ordem-text-muted uppercase">Defesa</div>
                 <div className="text-lg font-bold text-white">{monster.defesa}</div>
             </div>
             <div className={`transform transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`}>
@@ -190,10 +190,10 @@ const MonsterCard: React.FC<MonsterCardProps> = ({ monster, onEdit, onDelete, on
       </div>
 
       {expanded && (
-        <div className="p-4 border-t border-gray-800 bg-black/20">
-            <div className="flex justify-end gap-2 mb-4 border-b border-gray-800 pb-2">
+        <div className="p-4 border-t border-ordem-border bg-ordem-black/20">
+            <div className="flex justify-end gap-2 mb-4 border-b border-ordem-border pb-2">
               {onClone && (
-                <button onClick={(e) => { e.stopPropagation(); onClone(); }} className="text-xs bg-gray-800 hover:bg-gray-700 text-white px-2 py-1 rounded border border-gray-600">
+                <button onClick={(e) => { e.stopPropagation(); onClone(); }} className="text-xs bg-ordem-ooze hover:bg-ordem-border-light text-white px-2 py-1 rounded border border-ordem-border-light">
                   Clonar / Editar Cópia
                 </button>
               )}
@@ -212,11 +212,11 @@ const MonsterCard: React.FC<MonsterCardProps> = ({ monster, onEdit, onDelete, on
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-6">
                     <div>
-                        <h4 className="text-sm font-mono text-ordem-red mb-2 uppercase border-b border-gray-800 pb-1">Atributos</h4>
+                        <h4 className="text-sm font-mono text-ordem-red mb-2 uppercase border-b border-ordem-border pb-1">Atributos</h4>
                         <div className="flex justify-between px-2">
                             {Object.entries(monster.atributos).map(([key, val]) => (
                                 <div key={key} className="text-center">
-                                    <div className="text-[10px] text-gray-500 font-mono">{key}</div>
+                                    <div className="text-[10px] text-ordem-text-muted font-mono">{key}</div>
                                     <div className="font-bold text-xl text-white">{val}</div>
                                 </div>
                             ))}
@@ -224,33 +224,33 @@ const MonsterCard: React.FC<MonsterCardProps> = ({ monster, onEdit, onDelete, on
                     </div>
 
                     <div>
-                        <h4 className="text-sm font-mono text-ordem-red mb-2 uppercase border-b border-gray-800 pb-1">Defesas & Resistências</h4>
-                        <div className="text-sm text-gray-300 space-y-1">
+                        <h4 className="text-sm font-mono text-ordem-red mb-2 uppercase border-b border-ordem-border pb-1">Defesas & Resistências</h4>
+                        <div className="text-sm text-ordem-white-muted space-y-1">
                             <div className="grid grid-cols-2 gap-2 mb-2">
-                                <p><span className="text-gray-500">Defesa:</span> {monster.defesa}</p>
-                                <p><span className="text-gray-500">Vida:</span> {monster.vida}</p>
-                                <p><span className="text-gray-500">Fortitude:</span> {monster.fortitude || '—'}</p>
-                                <p><span className="text-gray-500">Reflexos:</span> {monster.reflexos || '—'}</p>
-                                <p><span className="text-gray-500">Vontade:</span> {monster.vontade || '—'}</p>
-                                <p><span className="text-gray-500">Deslocamento:</span> {monster.deslocamento || '—'}</p>
+                                <p><span className="text-ordem-text-muted">Defesa:</span> {monster.defesa}</p>
+                                <p><span className="text-ordem-text-muted">Vida:</span> {monster.vida}</p>
+                                <p><span className="text-ordem-text-muted">Fortitude:</span> {monster.fortitude || '—'}</p>
+                                <p><span className="text-ordem-text-muted">Reflexos:</span> {monster.reflexos || '—'}</p>
+                                <p><span className="text-ordem-text-muted">Vontade:</span> {monster.vontade || '—'}</p>
+                                <p><span className="text-ordem-text-muted">Deslocamento:</span> {monster.deslocamento || '—'}</p>
                             </div>
                             
                             {monster.sentidos && (
-                                <p><span className="text-gray-500">Sentidos:</span> {monster.sentidos}</p>
+                                <p><span className="text-ordem-text-muted">Sentidos:</span> {monster.sentidos}</p>
                             )}
                             
                             {monster.pericias && Object.keys(monster.pericias).length > 0 && (
-                                <p><span className="text-gray-500">Perícias:</span> {Object.entries(monster.pericias).map(([k, v]) => `${k} ${v}`).join(', ')}</p>
+                                <p><span className="text-ordem-text-muted">Perícias:</span> {Object.entries(monster.pericias).map(([k, v]) => `${k} ${v}`).join(', ')}</p>
                             )}
 
                             {monster.resistencias && monster.resistencias.length > 0 && (
-                                <p><span className="text-gray-500">Resistências:</span> {monster.resistencias.join(', ')}</p>
+                                <p><span className="text-ordem-text-muted">Resistências:</span> {monster.resistencias.join(', ')}</p>
                             )}
                             {monster.imunidades && monster.imunidades.length > 0 && (
-                                <p><span className="text-gray-500">Imunidades:</span> {monster.imunidades.join(', ')}</p>
+                                <p><span className="text-ordem-text-muted">Imunidades:</span> {monster.imunidades.join(', ')}</p>
                             )}
                             {monster.vulnerabilidades && monster.vulnerabilidades.length > 0 && (
-                                <p><span className="text-gray-500">Vulnerabilidades:</span> {monster.vulnerabilidades.join(', ')}</p>
+                                <p><span className="text-ordem-text-muted">Vulnerabilidades:</span> {monster.vulnerabilidades.join(', ')}</p>
                             )}
                         </div>
                     </div>
@@ -258,22 +258,22 @@ const MonsterCard: React.FC<MonsterCardProps> = ({ monster, onEdit, onDelete, on
 
                 <div className="space-y-6">
                     <div>
-                        <h4 className="text-sm font-mono text-ordem-red mb-2 uppercase border-b border-gray-800 pb-1">Ações & Habilidades</h4>
+                        <h4 className="text-sm font-mono text-ordem-red mb-2 uppercase border-b border-ordem-border pb-1">Ações & Habilidades</h4>
                         <div className="space-y-4">
                             {monster.acoes?.map((acao, idx) => (
                                 <div key={`acao-${idx}`} className="text-sm bg-white/5 p-2 rounded border border-white/10">
                                     <div className="flex justify-between items-baseline mb-1">
                                         <span className="font-bold text-white">{acao.nome}</span>
-                                        {acao.tipo && <span className="text-[10px] font-mono text-gray-400 uppercase border border-gray-700 px-1 rounded">{acao.tipo}</span>}
+                                        {acao.tipo && <span className="text-[10px] font-mono text-ordem-text-secondary uppercase border border-ordem-border-light px-1 rounded">{acao.tipo}</span>}
                                     </div>
-                                    <p className="text-gray-300 text-sm leading-relaxed">{acao.descricao}</p>
+                                    <p className="text-ordem-white-muted text-sm leading-relaxed">{acao.descricao}</p>
                                 </div>
                             ))}
                             
                             {monster.habilidades?.map((hab, idx) => (
-                                <div key={`hab-${idx}`} className="text-sm pl-2 border-l-2 border-gray-700">
+                                <div key={`hab-${idx}`} className="text-sm pl-2 border-l-2 border-ordem-border-light">
                                     <span className="font-bold text-gray-200 italic">{hab.nome}: </span>
-                                    <span className="text-gray-400">{hab.descricao}</span>
+                                    <span className="text-ordem-text-secondary">{hab.descricao}</span>
                                 </div>
                             ))}
                         </div>
@@ -282,7 +282,7 @@ const MonsterCard: React.FC<MonsterCardProps> = ({ monster, onEdit, onDelete, on
                     {monster.presencaPerturbadora && (
                         <div className="p-3 bg-purple-900/10 border border-purple-900/30 rounded">
                             <h4 className="text-xs font-mono text-purple-400 uppercase mb-1">Presença Perturbadora</h4>
-                            <p className="text-sm text-gray-300">
+                            <p className="text-sm text-ordem-white-muted">
                                 <span className="text-purple-300">DT {monster.presencaPerturbadora.dt}</span> &bull; {monster.presencaPerturbadora.dano}
                                 {monster.presencaPerturbadora.nexImune && ` &bull; NEX Imune: ${monster.presencaPerturbadora.nexImune}%`}
                             </p>

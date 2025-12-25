@@ -13,21 +13,21 @@ export const SessionTab: React.FC<SessionTabProps> = ({ personagem, onUpdate }) 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div className="space-y-6">
-        <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-800">
+        <div className="bg-ordem-ooze p-4 rounded-lg border border-ordem-border">
           <h3 className="text-xl font-bold text-zinc-100 mb-4">Controle de Cena</h3>
-          <div className="flex items-center justify-between bg-zinc-950 p-4 rounded border border-zinc-800">
-            <span className="text-zinc-400">Rodada Atual</span>
+          <div className="flex items-center justify-between bg-ordem-black-deep p-4 rounded border border-ordem-border">
+            <span className="text-ordem-text-secondary">Rodada Atual</span>
             <div className="flex items-center gap-4">
               <button 
                 onClick={() => setRodada(Math.max(1, rodada - 1))}
-                className="w-8 h-8 flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 rounded text-zinc-200"
+                className="w-8 h-8 flex items-center justify-center bg-ordem-ooze hover:bg-ordem-border-light rounded text-ordem-white"
               >
                 -
               </button>
               <span className="text-2xl font-mono font-bold text-red-500">{rodada}</span>
               <button 
                 onClick={() => setRodada(rodada + 1)}
-                className="w-8 h-8 flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 rounded text-zinc-200"
+                className="w-8 h-8 flex items-center justify-center bg-ordem-ooze hover:bg-ordem-border-light rounded text-ordem-white"
               >
                 +
               </button>
@@ -39,14 +39,14 @@ export const SessionTab: React.FC<SessionTabProps> = ({ personagem, onUpdate }) 
       </div>
 
       <div className="space-y-6">
-        <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-800">
+        <div className="bg-ordem-ooze p-4 rounded-lg border border-ordem-border">
           <h3 className="text-xl font-bold text-zinc-100 mb-4">Log de Combate</h3>
-          <div className="h-96 bg-zinc-950 rounded border border-zinc-800 p-4 overflow-y-auto custom-scrollbar font-mono text-sm">
+          <div className="h-96 bg-ordem-black-deep rounded border border-ordem-border p-4 overflow-y-auto custom-scrollbar font-mono text-sm">
             {personagem.log && personagem.log.length > 0 ? (
               <div className="space-y-2">
                 {personagem.log.map((entry, index) => (
-                  <div key={index} className="flex gap-2 text-zinc-400 border-b border-zinc-900 pb-1 last:border-0">
-                    <span className="text-zinc-400 text-xs whitespace-nowrap">
+                  <div key={index} className="flex gap-2 text-ordem-text-secondary border-b border-ordem-ooze pb-1 last:border-0">
+                    <span className="text-ordem-text-secondary text-xs whitespace-nowrap">
                       {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                     </span>
                     <span className={`
@@ -61,7 +61,7 @@ export const SessionTab: React.FC<SessionTabProps> = ({ personagem, onUpdate }) 
                 ))}
               </div>
             ) : (
-              <p className="text-zinc-400 italic">Nenhum registro.</p>
+              <p className="text-ordem-text-secondary italic">Nenhum registro.</p>
             )}
           </div>
         </div>

@@ -165,6 +165,36 @@ export interface Weapow {
   livro: string;
 }
 
+export interface ModificacaoArma {
+  nome: string;
+  tipo: 'universal' | 'cac' | 'disparo' | 'fogo' | 'municao';
+  requisito?: string;
+  efeito: string;
+  stats: {
+    ataqueBonus?: number;
+    danoBonus?: number;
+    espacoReduzido?: number;
+    crimeBonus?: number;
+    margemAmeaca?: number;
+    saqueRapido?: boolean;
+    dadoDanoExtra?: number;
+    compensador?: boolean;
+    automatica?: boolean;
+    alcanceBonus?: number;
+    ataqueFurtivoLongo?: boolean;
+    silenciador?: boolean;
+    ignoraCamuflagem?: boolean;
+    multiplicadorCritico?: number;
+    danoExtraFixo?: string;
+  };
+  livro: 'Regras Básicas' | 'Sobrevivendo ao Horror';
+}
+
+export interface ArmaModificada extends Weapow {
+  modificacoes: ModificacaoArma[];
+  categoriaOriginal: 0 | 1 | 2 | 3 | 4;
+}
+
 export interface Trilha {
   nome: string;
   classe: ClasseName;

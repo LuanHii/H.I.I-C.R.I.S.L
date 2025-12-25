@@ -60,39 +60,40 @@ export function RemoteAgentView({
     <button
       type="button"
       onClick={() => setTab(id)}
-      className={`px-3 py-2 text-[10px] font-mono tracking-[0.25em] border rounded-lg transition ${
-        tab === id
+      className={`px-3 sm:px-4 py-2.5 sm:py-2 text-[10px] sm:text-xs font-mono tracking-[0.15em] sm:tracking-[0.25em] border rounded-lg transition touch-target-sm whitespace-nowrap ${tab === id
           ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
-          : 'border-ordem-white/15 text-ordem-white/60 hover:border-ordem-white/40 hover:text-ordem-white'
-      }`}
+          : 'border-ordem-white/15 text-ordem-white/60 hover:border-ordem-white/40 active:border-ordem-white/60 hover:text-ordem-white'
+        }`}
     >
       {label}
     </button>
   );
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="max-w-5xl mx-auto px-4 py-6">
+    <div className="min-h-screen bg-ordem-black text-white">
+      <div className="max-w-5xl mx-auto px-4 py-4 sm:py-6 safe-x safe-top">
         {/* Header */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between border-b border-zinc-800 pb-5 mb-6">
+        <div className="flex flex-col gap-3 sm:gap-4 border-b border-ordem-border pb-4 sm:pb-5 mb-4 sm:mb-6">
+          {/* Título e info */}
           <div className="min-w-0">
-            <div className="text-xs font-mono tracking-[0.35em] text-zinc-500 uppercase">Visualização Remota</div>
-            <div className="flex items-baseline gap-3 mt-2 min-w-0 flex-wrap">
-              <h1 className="text-3xl md:text-4xl font-serif text-white truncate">{agent.nome}</h1>
-              <span className="text-xs font-mono text-ordem-red border border-ordem-red/30 bg-ordem-red/10 px-2 py-1 rounded">
+            <div className="text-[10px] sm:text-xs font-mono tracking-[0.25em] sm:tracking-[0.35em] text-ordem-text-muted uppercase">Visualização Remota</div>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif text-white truncate mt-1 sm:mt-2">{agent.nome}</h1>
+            <div className="flex items-center gap-2 sm:gap-3 mt-2 flex-wrap">
+              <span className="text-[10px] sm:text-xs font-mono text-ordem-red border border-ordem-red/30 bg-ordem-red/10 px-2 py-1 rounded">
                 {agent.classe}
               </span>
-              <span className="text-xs font-mono text-zinc-400">{agent.nex}% NEX</span>
-              {agent.patente && <span className="text-xs font-mono text-zinc-500 uppercase">{agent.patente}</span>}
+              <span className="text-[10px] sm:text-xs font-mono text-ordem-text-secondary">{agent.nex}% NEX</span>
+              {agent.patente && <span className="text-[10px] sm:text-xs font-mono text-ordem-text-muted uppercase">{agent.patente}</span>}
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Ações e status */}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {onOpenOverlayMini && (
               <button
                 type="button"
                 onClick={onOpenOverlayMini}
-                className="px-3 py-2 text-[10px] font-mono tracking-[0.25em] border border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-white rounded-lg transition"
+                className="px-3 py-2.5 text-[10px] font-mono tracking-[0.15em] sm:tracking-[0.25em] border border-ordem-border-light text-ordem-white-muted hover:border-ordem-text-muted active:bg-ordem-ooze/50 hover:text-white rounded-lg transition touch-target-sm"
               >
                 OVERLAY MINI
               </button>
@@ -101,7 +102,7 @@ export function RemoteAgentView({
               <button
                 type="button"
                 onClick={onOpenOverlayFull}
-                className="px-3 py-2 text-[10px] font-mono tracking-[0.25em] border border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-white rounded-lg transition"
+                className="px-3 py-2.5 text-[10px] font-mono tracking-[0.15em] sm:tracking-[0.25em] border border-ordem-border-light text-ordem-white-muted hover:border-ordem-text-muted active:bg-ordem-ooze/50 hover:text-white rounded-lg transition touch-target-sm"
               >
                 OVERLAY FULL
               </button>
@@ -109,20 +110,19 @@ export function RemoteAgentView({
 
             {summary.total > 0 && (
               <div
-                className={`px-2 py-1 rounded border text-[10px] font-mono tracking-widest ${
-                  summary.errors > 0
+                className={`px-2 py-1.5 rounded border text-[10px] font-mono tracking-widest ${summary.errors > 0
                     ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
                     : 'border-ordem-gold text-ordem-gold bg-ordem-gold/10'
-                }`}
+                  }`}
                 title={issueTitle}
               >
                 {summary.errors > 0 ? 'ERRO' : 'AVISO'} {summary.total}
               </div>
             )}
 
-            <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500 animate-pulse' : 'bg-zinc-500'}`} />
-              <span className={`text-xs font-mono ${connected ? 'text-green-500' : 'text-zinc-400'}`}>
+            <div className="flex items-center gap-2 ml-auto">
+              <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500 animate-pulse' : 'bg-ordem-text-muted'}`} />
+              <span className={`text-[10px] sm:text-xs font-mono ${connected ? 'text-green-500' : 'text-ordem-text-secondary'}`}>
                 {connected ? 'CONECTADO' : 'OFFLINE'}
               </span>
             </div>
@@ -130,11 +130,11 @@ export function RemoteAgentView({
         </div>
 
         {summary.total > 0 && (
-          <div className="mb-6 bg-black/40 border border-zinc-800 rounded-xl p-4">
+          <div className="mb-6 bg-ordem-black/40 border border-ordem-border rounded-xl p-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <div className="text-xs font-mono tracking-[0.25em] text-zinc-500 uppercase mb-2">Avisos da ficha</div>
-                <ul className="text-xs text-zinc-300 space-y-1 list-disc pl-5">
+                <div className="text-xs font-mono tracking-[0.25em] text-ordem-text-muted uppercase mb-2">Avisos da ficha</div>
+                <ul className="text-xs text-ordem-white-muted space-y-1 list-disc pl-5">
                   {issues.slice(0, 6).map((i, idx) => (
                     <li key={idx}>
                       <span className={i.severity === 'erro' ? 'text-ordem-red' : 'text-ordem-gold'}>
@@ -145,18 +145,18 @@ export function RemoteAgentView({
                   ))}
                 </ul>
                 {issues.length > 6 && (
-                  <div className="mt-2 text-[11px] text-zinc-500 font-mono">
+                  <div className="mt-2 text-[11px] text-ordem-text-muted font-mono">
                     +{issues.length - 6} aviso(s) oculto(s) (passe o mouse no badge).
                   </div>
                 )}
               </div>
-              <div className="text-[11px] text-zinc-500 font-mono whitespace-nowrap">Este modo é somente leitura.</div>
+              <div className="text-[11px] text-ordem-text-muted font-mono whitespace-nowrap">Este modo é somente leitura.</div>
             </div>
           </div>
         )}
 
-        {/* Tabs */}
-        <div className="flex flex-wrap gap-2 mb-5">
+        {/* Tabs - scroll horizontal em mobile */}
+        <div className="flex gap-2 mb-4 sm:mb-5 overflow-x-auto touch-scroll -mx-4 px-4 sm:mx-0 sm:px-0 pb-2 no-select">
           <TabButton id="status" label="STATUS" />
           <TabButton id="acoes" label="AÇÕES" />
           <TabButton id="pericias" label="PERÍCIAS" />
@@ -166,52 +166,52 @@ export function RemoteAgentView({
         {/* Content */}
         {tab === 'status' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-5">
+            <div className="bg-ordem-ooze/40 border border-ordem-border rounded-xl p-5">
               <div className="flex items-center justify-between mb-4">
-                <div className="text-xs font-mono tracking-[0.25em] text-zinc-500 uppercase">Recursos</div>
-                <div className="text-xs font-mono text-zinc-400">
+                <div className="text-xs font-mono tracking-[0.25em] text-ordem-text-muted uppercase">Recursos</div>
+                <div className="text-xs font-mono text-ordem-text-secondary">
                   DEF <span className="text-white font-bold">{agent.defesa}</span>
                 </div>
               </div>
-              <StatusBar label="Vida" current={agent.pv.atual} max={agent.pv.max} color="red" onChange={() => {}} readOnly />
+              <StatusBar label="Vida" current={agent.pv.atual} max={agent.pv.max} color="red" onChange={() => { }} readOnly />
               {usarDeterminacao ? (
                 <StatusBar
                   label="Determinação"
                   current={agent.pd?.atual || 0}
                   max={agent.pd?.max || 0}
                   color="purple"
-                  onChange={() => {}}
+                  onChange={() => { }}
                   readOnly
                 />
               ) : (
                 <>
-                  <StatusBar label="Sanidade" current={agent.san.atual} max={agent.san.max} color="blue" onChange={() => {}} readOnly />
-                  <StatusBar label="Esforço" current={agent.pe.atual} max={agent.pe.max} color="gold" onChange={() => {}} readOnly />
+                  <StatusBar label="Sanidade" current={agent.san.atual} max={agent.san.max} color="blue" onChange={() => { }} readOnly />
+                  <StatusBar label="Esforço" current={agent.pe.atual} max={agent.pe.max} color="gold" onChange={() => { }} readOnly />
                 </>
               )}
             </div>
 
-            <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-5">
-              <div className="text-xs font-mono tracking-[0.25em] text-zinc-500 uppercase mb-4">Resumo</div>
+            <div className="bg-ordem-ooze/40 border border-ordem-border rounded-xl p-5">
+              <div className="text-xs font-mono tracking-[0.25em] text-ordem-text-muted uppercase mb-4">Resumo</div>
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-black/30 border border-zinc-800 rounded-lg p-3">
-                  <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Carga</div>
+                <div className="bg-ordem-black/30 border border-ordem-border rounded-lg p-3">
+                  <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">Carga</div>
                   <div className="text-lg font-bold text-white">
                     {agent.carga.atual}/{agent.carga.maxima}
                   </div>
                 </div>
-                <div className="bg-black/30 border border-zinc-800 rounded-lg p-3">
-                  <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Desloc.</div>
+                <div className="bg-ordem-black/30 border border-ordem-border rounded-lg p-3">
+                  <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">Desloc.</div>
                   <div className="text-lg font-bold text-white">{agent.deslocamento}</div>
                 </div>
               </div>
 
               {agent.efeitosAtivos?.length > 0 && (
                 <div className="mt-4">
-                  <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-2">Efeitos Ativos</div>
+                  <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest mb-2">Efeitos Ativos</div>
                   <div className="flex flex-wrap gap-2">
                     {agent.efeitosAtivos.map((e) => (
-                      <span key={e} className="text-xs text-zinc-300 border border-zinc-800 bg-black/30 px-2 py-1 rounded">
+                      <span key={e} className="text-xs text-ordem-white-muted border border-ordem-border bg-ordem-black/30 px-2 py-1 rounded">
                         {e}
                       </span>
                     ))}
@@ -223,32 +223,32 @@ export function RemoteAgentView({
         )}
 
         {tab === 'acoes' && (
-          <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-4">
+          <div className="bg-ordem-ooze/30 border border-ordem-border rounded-xl p-4">
             <ActionsTab character={agent} useSanity={!usarDeterminacao} />
           </div>
         )}
 
         {tab === 'inventario' && (
-          <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-5">
+          <div className="bg-ordem-ooze/30 border border-ordem-border rounded-xl p-5">
             <div className="flex items-center justify-between mb-4">
-              <div className="text-xs font-mono tracking-[0.25em] text-zinc-500 uppercase">Itens</div>
-              <div className="text-xs font-mono text-zinc-500">{agent.equipamentos.length} item(ns)</div>
+              <div className="text-xs font-mono tracking-[0.25em] text-ordem-text-muted uppercase">Itens</div>
+              <div className="text-xs font-mono text-ordem-text-muted">{agent.equipamentos.length} item(ns)</div>
             </div>
             <div className="space-y-2">
               {agent.equipamentos.map((it, idx) => (
-                <div key={`${it.nome}-${idx}`} className="bg-black/30 border border-zinc-800 rounded-lg p-3">
+                <div key={`${it.nome}-${idx}`} className="bg-ordem-black/30 border border-ordem-border rounded-lg p-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="font-bold text-zinc-100 truncate">{it.nome}</div>
-                      <div className="text-[11px] text-zinc-500">
+                      <div className="text-[11px] text-ordem-text-muted">
                         {it.tipo} • Cat {it.categoria} • {it.espaco} espaço
                       </div>
                     </div>
                   </div>
-                  {it.descricao && <div className="text-xs text-zinc-400 mt-2 whitespace-pre-line">{it.descricao}</div>}
+                  {it.descricao && <div className="text-xs text-ordem-text-secondary mt-2 whitespace-pre-line">{it.descricao}</div>}
                 </div>
               ))}
-              {agent.equipamentos.length === 0 && <div className="text-sm text-zinc-500 italic">Inventário vazio.</div>}
+              {agent.equipamentos.length === 0 && <div className="text-sm text-ordem-text-muted italic">Inventário vazio.</div>}
             </div>
           </div>
         )}
@@ -256,36 +256,36 @@ export function RemoteAgentView({
         {tab === 'pericias' && (
           <div className="space-y-6">
             {lastRoll && (
-              <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-4">
+              <div className="bg-ordem-ooze/30 border border-ordem-border rounded-xl p-4">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="text-xs font-mono tracking-[0.25em] text-zinc-500 uppercase">
+                  <div className="text-xs font-mono tracking-[0.25em] text-ordem-text-muted uppercase">
                     Última rolagem: <span className="text-white tracking-normal font-bold">{lastRoll.pericia}</span>
                   </div>
-                  <div className="text-xs font-mono text-zinc-400">
+                  <div className="text-xs font-mono text-ordem-text-secondary">
                     {lastRoll.result.diceCount}d20 ({lastRoll.result.criterio}){' '}
                     {lastRoll.result.bonusFixo >= 0 ? '+' : ''}{lastRoll.result.bonusFixo}
                   </div>
                 </div>
-                <div className="mt-2 text-sm text-zinc-200 font-mono">
+                <div className="mt-2 text-sm text-ordem-white font-mono">
                   Dados: [{lastRoll.result.dice.join(', ')}] • Escolhido: {lastRoll.result.chosen} • Total:{' '}
                   <span className="text-ordem-green font-bold">{lastRoll.result.total}</span>
                 </div>
               </div>
             )}
             {(Object.keys(periciasPorAtributo) as AtributoKey[]).map((attr) => (
-              <div key={attr} className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-5">
+              <div key={attr} className="bg-ordem-ooze/30 border border-ordem-border rounded-xl p-5">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="text-xs font-mono tracking-[0.25em] text-zinc-500 uppercase">{attr}</div>
-                  <div className="text-xs font-mono text-zinc-400">
+                  <div className="text-xs font-mono tracking-[0.25em] text-ordem-text-muted uppercase">{attr}</div>
+                  <div className="text-xs font-mono text-ordem-text-secondary">
                     Valor: <span className="text-white font-bold">{agent.atributos[attr]}</span>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   {periciasPorAtributo[attr].map(([nome, det]) => (
-                    <div key={nome} className="bg-black/30 border border-zinc-800 rounded-lg p-3 flex items-center justify-between gap-3">
+                    <div key={nome} className="bg-ordem-black/30 border border-ordem-border rounded-lg p-3 flex items-center justify-between gap-3">
                       <div className="min-w-0">
-                        <div className="text-sm text-zinc-200 truncate">{nome}</div>
-                        <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
+                        <div className="text-sm text-ordem-white truncate">{nome}</div>
+                        <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">
                           {det.dados}d20 • {det.grau}
                         </div>
                       </div>
@@ -293,7 +293,7 @@ export function RemoteAgentView({
                         <button
                           type="button"
                           onClick={() => setLastRoll({ pericia: nome, result: rollPericia(det) })}
-                          className="p-2 rounded border border-zinc-800 bg-black/20 text-zinc-300 hover:border-zinc-600 hover:text-white transition-colors"
+                          className="p-2 rounded border border-ordem-border bg-ordem-black/20 text-ordem-white-muted hover:border-ordem-text-muted hover:text-white transition-colors"
                           title="Rolar teste"
                         >
                           <Dices size={16} />
@@ -302,7 +302,7 @@ export function RemoteAgentView({
                           {det.bonusFixo >= 0 ? '+' : ''}
                           {det.bonusFixo}
                           {det.bonusO !== 0 && (
-                            <span className="text-xs text-zinc-500 ml-1">{det.bonusO > 0 ? `(+${det.bonusO}O)` : `(${det.bonusO}O)`}</span>
+                            <span className="text-xs text-ordem-text-muted ml-1">{det.bonusO > 0 ? `(+${det.bonusO}O)` : `(${det.bonusO}O)`}</span>
                           )}
                         </div>
                       </div>

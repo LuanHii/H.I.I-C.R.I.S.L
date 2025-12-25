@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import Link from 'next/link';
 import type { ComponentProps } from 'react';
 import { usePathname } from 'next/navigation';
+import { LogOut, Home } from 'lucide-react';
 
 type MestreTab = 'agentes' | 'ameacas' | 'inventario' | 'fichas';
 
@@ -23,10 +24,10 @@ function MestreLink({
     <Link
       href={href}
       className={classNames(
-        'px-4 py-2 font-mono text-sm border-b-2 transition-colors',
+        'px-3 sm:px-4 py-2.5 font-mono text-xs sm:text-sm border-b-2 transition-colors whitespace-nowrap touch-target-sm',
         active
           ? 'border-ordem-red text-white'
-          : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700',
+          : 'border-transparent text-ordem-text-secondary hover:text-ordem-white-muted active:text-white hover:border-ordem-border-light',
       )}
     >
       {label}
@@ -48,10 +49,10 @@ function MestreButton({
       type="button"
       onClick={onClick}
       className={classNames(
-        'px-4 py-2 font-mono text-sm border-b-2 transition-colors',
+        'px-3 sm:px-4 py-2.5 font-mono text-xs sm:text-sm border-b-2 transition-colors whitespace-nowrap touch-target-sm',
         active
           ? 'border-ordem-red text-white'
-          : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700',
+          : 'border-transparent text-ordem-text-secondary hover:text-ordem-white-muted active:text-white hover:border-ordem-border-light',
       )}
     >
       {label}
@@ -79,14 +80,30 @@ export function MestreNavbar({
   const tab: MestreTab = activeTab ?? (inFichas ? 'fichas' : 'agentes');
 
   return (
-    <header className="sticky top-0 z-50 h-16 border-b border-gray-800 bg-black/95 backdrop-blur flex items-center px-6 shrink-0 justify-between">
-      <div className="flex items-center gap-8 min-w-0">
-        <div className="flex flex-col shrink-0">
-          <h1 className="text-xl font-serif text-ordem-red tracking-wider leading-none">{title}</h1>
-          <span className="text-[10px] text-gray-400 font-mono tracking-[0.2em]">{subtitle}</span>
+    <header className="sticky top-0 z-50 min-h-[56px] sm:h-16 border-b border-ordem-border bg-ordem-black/95 backdrop-blur shrink-0 safe-top">
+      <div className="h-full flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-2 sm:py-0 gap-2 sm:gap-0">
+        {/* Logo e título + ações (mobile) */}
+        <div className="flex items-center justify-between sm:justify-start gap-4 sm:gap-8">
+          <div className="flex flex-col shrink-0">
+            <h1 className="text-lg sm:text-xl font-serif text-ordem-red tracking-wider leading-none">{title}</h1>
+            <span className="text-[9px] sm:text-[10px] text-ordem-text-secondary font-mono tracking-[0.15em] sm:tracking-[0.2em]">{subtitle}</span>
+          </div>
+
+          {/* Ações em mobile - aparecem no canto direito */}
+          <div className="flex sm:hidden items-center gap-2">
+            {rightSlot}
+            <Link
+              href="/"
+              className="p-2 text-ordem-text-secondary hover:text-white active:text-ordem-red transition-colors touch-target-sm"
+              aria-label="Sair"
+            >
+              <Home size={20} />
+            </Link>
+          </div>
         </div>
 
-        <nav className="flex items-center gap-1 overflow-x-auto custom-scrollbar">
+        {/* Navegação - scroll horizontal em mobile */}
+        <nav className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto touch-scroll custom-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 no-select">
           {onTabSelect && inMestreRoot ? (
             <>
               <MestreButton label="AGENTES" active={tab === 'agentes'} onClick={() => onTabSelect('agentes')} />
@@ -103,16 +120,19 @@ export function MestreNavbar({
             </>
           )}
         </nav>
-      </div>
 
-      <div className="flex items-center gap-3">
-        {rightSlot}
-        <Link href="/" className="text-xs font-mono text-gray-400 hover:text-white transition-colors">
-          SAIR
-        </Link>
+        {/* Ações em desktop */}
+        <div className="hidden sm:flex items-center gap-3">
+          {rightSlot}
+          <Link
+            href="/"
+            className="text-xs font-mono text-ordem-text-secondary hover:text-white active:text-ordem-red transition-colors flex items-center gap-1.5 touch-target-sm"
+          >
+            <LogOut size={14} />
+            SAIR
+          </Link>
+        </div>
       </div>
     </header>
   );
 }
-
-

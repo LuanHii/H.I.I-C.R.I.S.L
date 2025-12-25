@@ -33,7 +33,7 @@ export function CampanhaSection({
     const [novoNome, setNovoNome] = useState(campanha?.nome || '');
     const [menuAberto, setMenuAberto] = useState<string | null>(null);
 
-    const cor = campanha?.cor || '#71717a'; // zinc-500 para "sem campanha"
+    const cor = campanha?.cor || '#71717a'; // ordem-text-muted para "sem campanha"
     const nome = campanha?.nome || 'Fichas Soltas';
     const id = campanha?.id;
 
@@ -50,7 +50,7 @@ export function CampanhaSection({
         <div className="mb-4">
             {/* Header da Campanha */}
             <div
-                className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition hover:bg-zinc-800/50"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition hover:bg-ordem-ooze/50"
                 style={{ borderLeft: `3px solid ${cor}` }}
                 onClick={() => setExpandida(!expandida)}
             >
@@ -71,7 +71,7 @@ export function CampanhaSection({
                             if (e.key === 'Escape') setEditando(false);
                         }}
                         onClick={(e) => e.stopPropagation()}
-                        className="bg-zinc-800 border border-zinc-600 text-white px-2 py-1 rounded text-sm font-semibold"
+                        className="bg-ordem-ooze border border-ordem-text-muted text-white px-2 py-1 rounded text-sm font-semibold"
                         autoFocus
                     />
                 ) : (
@@ -89,7 +89,7 @@ export function CampanhaSection({
                     </span>
                 )}
 
-                <span className="text-xs text-zinc-400 font-mono">
+                <span className="text-xs text-ordem-text-secondary font-mono">
                     {fichas.length} ficha{fichas.length !== 1 ? 's' : ''}
                 </span>
 
@@ -99,7 +99,7 @@ export function CampanhaSection({
                             e.stopPropagation();
                             onExportarCampanha(fichas, nome, id);
                         }}
-                        className="text-zinc-500 hover:text-ordem-gold transition text-xs px-2"
+                        className="text-ordem-text-muted hover:text-ordem-gold transition text-xs px-2"
                         title={`Exportar fichas da campanha "${nome}"`}
                     >
                         📤
@@ -114,7 +114,7 @@ export function CampanhaSection({
                                 onRemoverCampanha(id);
                             }
                         }}
-                        className="text-zinc-500 hover:text-ordem-red transition text-xs px-2"
+                        className="text-ordem-text-muted hover:text-ordem-red transition text-xs px-2"
                         title="Remover campanha"
                     >
                         ✕
@@ -136,14 +136,14 @@ export function CampanhaSection({
                                         e.stopPropagation();
                                         setMenuAberto(menuAberto === registro.id ? null : registro.id);
                                     }}
-                                    className="text-xs px-2 py-1 bg-zinc-800 border border-zinc-700 rounded hover:border-zinc-500 text-zinc-400"
+                                    className="text-xs px-2 py-1 bg-ordem-ooze border border-ordem-border-light rounded hover:border-ordem-text-muted text-ordem-text-secondary"
                                     title="Mover para campanha"
                                 >
                                     📁
                                 </button>
 
                                 {menuAberto === registro.id && (
-                                    <div className="absolute right-0 top-full mt-1 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-50 min-w-[150px]">
+                                    <div className="absolute right-0 top-full mt-1 bg-ordem-ooze border border-ordem-border-light rounded-lg shadow-xl z-50 min-w-[150px]">
                                         <div className="py-1">
                                             <button
                                                 onClick={(e) => {
@@ -151,7 +151,7 @@ export function CampanhaSection({
                                                     onMover(registro.id, undefined);
                                                     setMenuAberto(null);
                                                 }}
-                                                className={`w-full text-left px-3 py-2 text-xs hover:bg-zinc-800 ${!registro.campanha ? 'text-ordem-green' : 'text-zinc-300'
+                                                className={`w-full text-left px-3 py-2 text-xs hover:bg-ordem-ooze ${!registro.campanha ? 'text-ordem-green' : 'text-ordem-white-muted'
                                                     }`}
                                             >
                                                 📂 Fichas Soltas
@@ -164,7 +164,7 @@ export function CampanhaSection({
                                                         onMover(registro.id, c.id);
                                                         setMenuAberto(null);
                                                     }}
-                                                    className={`w-full text-left px-3 py-2 text-xs hover:bg-zinc-800 flex items-center gap-2 ${registro.campanha === c.id ? 'text-ordem-green' : 'text-zinc-300'
+                                                    className={`w-full text-left px-3 py-2 text-xs hover:bg-ordem-ooze flex items-center gap-2 ${registro.campanha === c.id ? 'text-ordem-green' : 'text-ordem-white-muted'
                                                         }`}
                                                 >
                                                     <span
@@ -218,7 +218,7 @@ export function NovaCampanhaForm({ onCriar }: NovaCampanhaFormProps) {
         return (
             <button
                 onClick={() => setAberto(true)}
-                className="w-full px-3 py-2 text-xs font-mono border border-dashed border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:text-zinc-300 rounded-lg transition"
+                className="w-full px-3 py-2 text-xs font-mono border border-dashed border-ordem-border-light text-ordem-text-muted hover:border-ordem-text-muted hover:text-ordem-white-muted rounded-lg transition"
             >
                 + NOVA CAMPANHA
             </button>
@@ -226,12 +226,12 @@ export function NovaCampanhaForm({ onCriar }: NovaCampanhaFormProps) {
     }
 
     return (
-        <div className="border border-zinc-700 rounded-lg p-3 space-y-3 bg-zinc-900/50">
+        <div className="border border-ordem-border-light rounded-lg p-3 space-y-3 bg-ordem-ooze/50">
             <input
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 placeholder="Nome da campanha..."
-                className="w-full bg-black/40 border border-zinc-800 text-white px-3 py-2 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-sm"
+                className="w-full bg-ordem-black/40 border border-ordem-border text-white px-3 py-2 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-sm"
                 autoFocus
                 onKeyDown={(e) => {
                     if (e.key === 'Enter') handleCriar();
@@ -261,7 +261,7 @@ export function NovaCampanhaForm({ onCriar }: NovaCampanhaFormProps) {
                 </button>
                 <button
                     onClick={() => setAberto(false)}
-                    className="px-3 py-2 text-xs font-mono border border-zinc-700 text-zinc-400 hover:border-zinc-500 rounded-lg transition"
+                    className="px-3 py-2 text-xs font-mono border border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted rounded-lg transition"
                 >
                     CANCELAR
                 </button>

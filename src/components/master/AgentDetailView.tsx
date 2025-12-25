@@ -335,7 +335,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     };
 
     return (
-        <div className="flex flex-col gap-4 p-4 overflow-y-auto custom-scrollbar max-h-full">
+        <div className="flex flex-col gap-3 sm:gap-4 p-3 sm:p-4 overflow-y-auto custom-scrollbar touch-scroll max-h-full">
             {hasPendingStuff && isPendingChoiceModalSuppressed && !disableInteractionModals && (
                 <button
                     onClick={() => setIsPendingChoiceModalSuppressed(false)}
@@ -384,63 +384,70 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                     onDefer={() => setIsPendingChoiceModalSuppressed(true)}
                 />
             )}
-            <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-6 relative overflow-hidden shadow-lg">
+            <div className="bg-ordem-ooze border border-ordem-border-light rounded-xl p-4 sm:p-6 relative overflow-hidden shadow-lg">
+                {/* Botão de modo PD - reposicionado para não sobrepor em mobile */}
                 {!readOnly && (
                     <button
                         onClick={togglePdMode}
-                        className="absolute top-4 left-4 p-2 bg-zinc-800/50 hover:bg-zinc-700 rounded-full text-zinc-400 hover:text-white transition-colors z-20"
+                        className="absolute top-2 right-2 sm:top-4 sm:left-4 sm:right-auto p-2 bg-ordem-ooze/50 hover:bg-ordem-border-light rounded-full text-ordem-text-secondary hover:text-white transition-colors z-20"
                         title={agent.usarPd ? "Desativar Regra de Determinação" : "Ativar Regra de Determinação"}
                     >
-                        {agent.usarPd ? <Flame size={20} className="text-violet-300" /> : <Brain size={20} className="text-blue-300" />}
+                        {agent.usarPd ? <Flame size={18} className="text-violet-300" /> : <Brain size={18} className="text-blue-300" />}
                     </button>
                 )}
-                <div className="absolute bottom-0 right-0 p-4 opacity-10 pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1" /><circle cx="15" cy="12" r="1" /><path d="M8 20v2h8v-2" /><path d="m12.5 17-.5-1-.5 1h1z" /><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20" /></svg>
+                {/* Ilustração de fundo - menor em mobile */}
+                <div className="absolute bottom-0 right-0 p-2 sm:p-4 opacity-10 pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-[120px] sm:h-[120px]"><circle cx="9" cy="12" r="1" /><circle cx="15" cy="12" r="1" /><path d="M8 20v2h8v-2" /><path d="m12.5 17-.5-1-.5 1h1z" /><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20" /></svg>
                 </div>
 
-                <div className="relative z-10 flex justify-between items-start">
-                    <div>
-                        <h2 className="text-4xl font-bold text-white tracking-tight mb-1">{agent.nome}</h2>
-                        <div className="flex items-center gap-3 text-zinc-300 font-mono text-sm">
-                            <span className="bg-zinc-800 px-2 py-1 rounded border border-zinc-600">{agent.classe}</span>
-                            <div className="flex items-center bg-zinc-800 rounded border border-zinc-600 overflow-hidden">
+                {/* Header: Nome, classe, defesa */}
+                <div className="relative z-10">
+                    {/* Nome e info básica */}
+                    <div className="mb-3 sm:mb-0">
+                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tight mb-2 pr-10 sm:pr-0">{agent.nome}</h2>
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-ordem-white-muted font-mono text-[10px] sm:text-xs">
+                            <span className="bg-ordem-ooze px-2 py-1 rounded border border-ordem-text-muted">{agent.classe}</span>
+                            <div className="flex items-center bg-ordem-ooze rounded border border-ordem-text-muted overflow-hidden">
                                 {!readOnly && (
                                     <button
                                         onClick={handleLevelDown}
-                                        className="px-2 py-1 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors border-r border-zinc-600"
+                                        className="px-2 py-1 hover:bg-ordem-border-light text-ordem-text-secondary hover:text-white active:bg-ordem-border-light transition-colors border-r border-ordem-text-muted touch-target-sm"
                                         title="Diminuir Nível"
                                     >
                                         -
                                     </button>
                                 )}
                                 <span className="px-2 py-1 text-zinc-100">
-                                    {agent.classe === 'Sobrevivente' ? `Estágio ${agent.estagio || 1}` : `${agent.nex}% NEX`}
+                                    {agent.classe === 'Sobrevivente' ? `Est. ${agent.estagio || 1}` : `${agent.nex}%`}
                                 </span>
                                 {!readOnly && (
                                     <button
                                         onClick={handleLevelUp}
-                                        className="px-2 py-1 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors border-l border-zinc-600"
+                                        className="px-2 py-1 hover:bg-ordem-border-light text-ordem-text-secondary hover:text-white active:bg-ordem-border-light transition-colors border-l border-ordem-text-muted touch-target-sm"
                                         title="Aumentar Nível"
                                     >
                                         +
                                     </button>
                                 )}
                             </div>
-                            <span className="bg-zinc-800 px-2 py-1 rounded border border-zinc-600">{agent.origem || 'Sem Origem'}</span>
+                            <span className="bg-ordem-ooze px-2 py-1 rounded border border-ordem-text-muted truncate max-w-[120px] sm:max-w-none">{agent.origem || 'Sem Origem'}</span>
                         </div>
                     </div>
 
-                    <div className="text-right">
-                        <div className="text-xs text-zinc-400 uppercase tracking-widest mb-1">Defesa</div>
-                        <div className="text-3xl font-bold text-zinc-100 flex items-center justify-end gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /></svg>
-                            {calcularDefesaEfetiva(agent)}
+                    {/* Defesa - inline em mobile */}
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-ordem-border/50 sm:absolute sm:top-0 sm:right-0 sm:mt-0 sm:pt-0 sm:border-0">
+                        <div className="flex items-center gap-2 sm:flex-col sm:items-end">
+                            <div className="text-[10px] sm:text-xs text-ordem-text-secondary uppercase tracking-widest">Defesa</div>
+                            <div className="text-2xl sm:text-3xl font-bold text-zinc-100 flex items-center gap-1.5 sm:gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-secondary sm:w-6 sm:h-6"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /></svg>
+                                {calcularDefesaEfetiva(agent)}
+                            </div>
                         </div>
                         {auditSummary.total > 0 && (
                             <div
-                                className={`mt-2 inline-flex items-center justify-end px-2 py-1 rounded border text-[10px] font-mono tracking-widest ${auditSummary.errors > 0
-                                        ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
-                                        : 'border-ordem-gold text-ordem-gold bg-ordem-gold/10'
+                                className={`px-2 py-1 rounded border text-[10px] font-mono tracking-widest ${auditSummary.errors > 0
+                                    ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
+                                    : 'border-ordem-gold text-ordem-gold bg-ordem-gold/10'
                                     }`}
                                 title={auditTitle}
                             >
@@ -451,9 +458,9 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 </div>
 
                 {auditSummary.total > 0 && (
-                    <div className="mt-6 bg-black/30 border border-zinc-800 rounded p-4">
-                        <div className="text-xs font-mono tracking-[0.25em] text-zinc-500 uppercase mb-2">Avisos da ficha</div>
-                        <ul className="text-xs text-zinc-200 space-y-1 list-disc pl-5">
+                    <div className="mt-6 bg-ordem-black/30 border border-ordem-border rounded p-4">
+                        <div className="text-xs font-mono tracking-[0.25em] text-ordem-text-muted uppercase mb-2">Avisos da ficha</div>
+                        <ul className="text-xs text-ordem-white space-y-1 list-disc pl-5">
                             {auditIssues.slice(0, 6).map((i, idx) => (
                                 <li key={idx}>
                                     <span className={i.severity === 'erro' ? 'text-ordem-red' : 'text-ordem-gold'}>
@@ -464,7 +471,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                             ))}
                         </ul>
                         {auditIssues.length > 6 && (
-                            <div className="mt-2 text-[11px] text-zinc-500 font-mono">
+                            <div className="mt-2 text-[11px] text-ordem-text-muted font-mono">
                                 +{auditIssues.length - 6} aviso(s) oculto(s) (passe o mouse no badge).
                             </div>
                         )}
@@ -478,7 +485,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                 <div className="text-xs font-bold text-ordem-red uppercase tracking-widest mb-2">
                                     Avisos de consistência
                                 </div>
-                                <ul className="text-xs text-zinc-200 space-y-1 list-disc pl-5">
+                                <ul className="text-xs text-ordem-white space-y-1 list-disc pl-5">
                                     {warnings.map((w, idx) => (
                                         <li key={idx}>{w}</li>
                                     ))}
@@ -498,7 +505,8 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                {/* Barras de status - empilhadas em mobile */}
+                <div className="grid grid-cols-1 gap-4 sm:gap-6 mt-6 sm:mt-8">
                     <StatusBar
                         label="Pontos de Vida"
                         current={agent.pv.atual}
@@ -519,7 +527,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                             readOnly={readOnly}
                         />
                     ) : (
-                        <div className="grid grid-cols-2 gap-4">
+                        <>
                             <StatusBar
                                 label="Sanidade"
                                 current={agent.san.atual}
@@ -538,26 +546,26 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                 onMaxChange={isEditingMode ? (v) => updateMaxStat('pe', v) : undefined}
                                 readOnly={readOnly}
                             />
-                        </div>
+                        </>
                     )}
                 </div>
             </div>
 
-            <div className="bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden shadow-lg">
+            <div className="bg-ordem-ooze border border-ordem-border-light rounded-xl overflow-hidden shadow-lg">
                 <button
                     onClick={() => toggleSection('attributes')}
-                    className="w-full flex items-center justify-between p-4 bg-zinc-800/50 hover:bg-zinc-800 transition-colors border-b border-zinc-700"
+                    className="w-full flex items-center justify-between p-4 bg-ordem-ooze/50 hover:bg-ordem-ooze transition-colors border-b border-ordem-border-light"
                 >
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-zinc-700 rounded text-zinc-300">
+                        <div className="p-2 bg-ordem-border-light rounded text-ordem-white-muted">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
                         </div>
                         <span className="font-bold text-zinc-100">Atributos & Perícias</span>
                     </div>
                     {openSections['attributes'] ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="m6 9 6 6 6-6" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-secondary"><path d="m6 9 6 6 6-6" /></svg>
                     ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="m9 18 6-6-6-6" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-secondary"><path d="m9 18 6-6-6-6" /></svg>
                     )}
                 </button>
 
@@ -568,8 +576,8 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                 <button
                                     onClick={() => setIsEditingMode(!isEditingMode)}
                                     className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold transition-colors ${isEditingMode
-                                            ? 'bg-ordem-red text-white shadow-lg shadow-ordem-red/50 animate-pulse'
-                                            : 'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:bg-zinc-700 hover:text-zinc-200'
+                                        ? 'bg-ordem-red text-white shadow-lg shadow-ordem-red/50 animate-pulse'
+                                        : 'bg-ordem-ooze text-ordem-text-secondary border border-ordem-border-light hover:bg-ordem-border-light hover:text-ordem-white'
                                         }`}
                                 >
                                     {isEditingMode ? (
@@ -594,22 +602,23 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                             </div>
                         ) : null}
 
-                        <div className="flex justify-between gap-4 mb-8">
+                        {/* Grid de atributos - scroll horizontal em mobile */}
+                        <div className="flex gap-2 sm:gap-4 mb-6 sm:mb-8 overflow-x-auto touch-scroll pb-2 -mx-2 px-2 sm:mx-0 sm:px-0">
                             {Object.entries(agent.atributos).map(([key, val]) => {
                                 const canIncrease = isEditingMode || (!readOnly && agent.pontosAtributoPendentes && agent.pontosAtributoPendentes > 0 && (agent.classe !== 'Sobrevivente' || val < 3));
                                 const canDecrease = isEditingMode || (!readOnly && agent.pontosAtributoPendentes && agent.pontosAtributoPendentes < 0 && val > 0);
 
                                 return (
-                                    <div key={key} className="flex flex-col items-center flex-1 bg-zinc-950/50 p-3 rounded border border-zinc-700 relative group">
-                                        <span className="text-xs font-mono text-zinc-400 uppercase mb-1">{key}</span>
-                                        <span className="text-2xl font-bold text-zinc-100">{val}</span>
+                                    <div key={key} className="flex flex-col items-center flex-shrink-0 w-16 sm:w-auto sm:flex-1 bg-ordem-black-deep/50 p-2 sm:p-3 rounded-lg border border-ordem-border-light relative group">
+                                        <span className="text-[10px] sm:text-xs font-mono text-ordem-text-secondary uppercase mb-1">{key}</span>
+                                        <span className="text-xl sm:text-2xl font-bold text-zinc-100">{val}</span>
 
                                         {canIncrease && (
                                             <button
                                                 onClick={() => handleAttributeChange(key as AtributoKey, true)}
                                                 className={`absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center shadow-lg transition-colors ${isEditingMode
-                                                        ? 'bg-ordem-red hover:bg-red-700 text-white'
-                                                        : 'bg-green-600 hover:bg-green-500 text-white'
+                                                    ? 'bg-ordem-red hover:bg-red-700 text-white'
+                                                    : 'bg-green-600 hover:bg-green-500 text-white'
                                                     }`}
                                                 title={isEditingMode ? "Override (+)" : "Aumentar Atributo"}
                                             >
@@ -620,8 +629,8 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                             <button
                                                 onClick={() => handleAttributeChange(key as AtributoKey, false)}
                                                 className={`absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center shadow-lg transition-colors ${isEditingMode
-                                                        ? 'bg-zinc-700 hover:bg-zinc-600 text-white right-auto -left-2'
-                                                        : 'bg-red-600 hover:bg-red-500 text-white'
+                                                    ? 'bg-ordem-border-light hover:bg-ordem-text-muted text-white right-auto -left-2'
+                                                    : 'bg-red-600 hover:bg-red-500 text-white'
                                                     }`}
                                                 title={isEditingMode ? "Override (-)" : "Diminuir Atributo"}
                                             >
@@ -635,17 +644,17 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
 
                         <div className="space-y-6">
                             {lastRoll && (
-                                <div className="bg-black/30 border border-zinc-800 rounded p-3">
+                                <div className="bg-ordem-black/30 border border-ordem-border rounded p-3">
                                     <div className="flex items-center justify-between gap-3">
-                                        <div className="text-xs font-mono text-zinc-400">
+                                        <div className="text-xs font-mono text-ordem-text-secondary">
                                             ÚLTIMA ROLAGEM: <span className="text-white font-bold">{lastRoll.pericia}</span>
                                         </div>
-                                        <div className="text-xs font-mono text-zinc-500">
+                                        <div className="text-xs font-mono text-ordem-text-muted">
                                             {lastRoll.result.diceCount}d20 ({lastRoll.result.criterio}){' '}
                                             {lastRoll.result.bonusFixo >= 0 ? '+' : ''}{lastRoll.result.bonusFixo}
                                         </div>
                                     </div>
-                                    <div className="mt-2 text-sm text-zinc-200 font-mono">
+                                    <div className="mt-2 text-sm text-ordem-white font-mono">
                                         Dados: [{lastRoll.result.dice.join(', ')}] • Escolhido: {lastRoll.result.chosen} • Total:{' '}
                                         <span className="text-ordem-green font-bold">{lastRoll.result.total}</span>
                                     </div>
@@ -657,27 +666,31 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
 
                                 return (
                                     <div key={attr}>
-                                        <h4 className="text-zinc-400 font-bold text-xs uppercase tracking-widest mb-2 border-b border-zinc-800 pb-1 flex items-center gap-2">
-                                            <span className="w-2 h-2 bg-zinc-500 rotate-45 inline-block"></span>
-                                            {attr} <span className="text-zinc-400">({agent.atributos[attr]})</span>
+                                        <h4 className="text-ordem-text-secondary font-bold text-xs uppercase tracking-widest mb-2 border-b border-ordem-border pb-1 flex items-center gap-2">
+                                            <span className="w-2 h-2 bg-ordem-text-muted rotate-45 inline-block"></span>
+                                            {attr} <span className="text-ordem-text-secondary">({agent.atributos[attr]})</span>
                                         </h4>
-                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                                        {/* Grid responsivo - 1 coluna em mobile, mais em desktop */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                                             {skills.map(([nome, detalhe]) => (
                                                 <div
                                                     key={nome}
-                                                    className={`flex justify-between items-center p-2 bg-zinc-950/30 rounded border transition-colors ${isEditingMode
-                                                            ? 'border-zinc-700 hover:border-zinc-500'
-                                                            : 'border-zinc-700/50 hover:border-zinc-600'
+                                                    className={`flex justify-between items-center p-2.5 sm:p-2 bg-ordem-black-deep/30 rounded-lg border transition-colors gap-2 ${isEditingMode
+                                                        ? 'border-ordem-border-light hover:border-ordem-text-muted'
+                                                        : 'border-ordem-border-light/50 hover:border-ordem-text-muted'
                                                         }`}
                                                 >
+                                                    {/* Nome da perícia */}
                                                     <div
-                                                        className={`flex items-center gap-1.5 ${isEditingMode ? 'cursor-pointer hover:text-white' : ''}`}
+                                                        className={`flex-1 min-w-0 ${isEditingMode ? 'cursor-pointer hover:text-white' : ''}`}
                                                         onClick={() => isEditingMode && toggleSkillGrade(nome as PericiaName)}
                                                         title={isEditingMode ? "Clique para alterar o grau de treinamento" : ""}
                                                     >
-                                                        <span className="text-sm text-zinc-300">{nome}</span>
+                                                        <span className="text-sm text-ordem-white-muted truncate block">{nome}</span>
                                                     </div>
-                                                    <div className="flex items-center gap-2">
+                                                    {/* Ações e info - não encolhem */}
+                                                    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                                                        {/* Botão de rolar - maior em mobile */}
                                                         <button
                                                             type="button"
                                                             onClick={() => {
@@ -686,21 +699,23 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                                                 if (!det) return;
                                                                 setLastRoll({ pericia, result: rollPericia(det) });
                                                             }}
-                                                            className="p-1 rounded border border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-white transition-colors"
+                                                            className="p-2 sm:p-1.5 rounded-lg sm:rounded border border-ordem-border-light text-ordem-white-muted hover:border-ordem-text-muted hover:text-white active:bg-ordem-ooze/50 transition-colors touch-target-sm"
                                                             title="Rolar teste desta perícia"
                                                         >
-                                                            <Dices size={14} />
+                                                            <Dices size={16} className="sm:w-[14px] sm:h-[14px]" />
                                                         </button>
+                                                        {/* Badge de grau */}
                                                         <span
                                                             onClick={() => isEditingMode && toggleSkillGrade(nome as PericiaName)}
-                                                            className={`text-[10px] px-1 rounded border ${isEditingMode ? 'cursor-pointer hover:opacity-80' : ''} ${(detalhe.grau || 'Destreinado') === 'Destreinado' ? 'border-zinc-800 text-zinc-400' :
-                                                                    detalhe.grau === 'Treinado' ? 'border-green-900 text-green-500' :
-                                                                        detalhe.grau === 'Veterano' ? 'border-blue-900 text-blue-500' :
-                                                                            'border-purple-900 text-purple-500'
+                                                            className={`text-[10px] px-1.5 py-0.5 rounded border ${isEditingMode ? 'cursor-pointer hover:opacity-80' : ''} ${(detalhe.grau || 'Destreinado') === 'Destreinado' ? 'border-ordem-border text-ordem-text-secondary' :
+                                                                detalhe.grau === 'Treinado' ? 'border-green-900 text-green-500' :
+                                                                    detalhe.grau === 'Veterano' ? 'border-blue-900 text-blue-500' :
+                                                                        'border-purple-900 text-purple-500'
                                                                 }`}>
                                                             {(detalhe.grau || 'Destreinado').substring(0, 3).toUpperCase()}
                                                         </span>
 
+                                                        {/* Bônus numérico */}
                                                         {isEditingMode && editingSkill === nome ? (
                                                             <input
                                                                 type="number"
@@ -709,12 +724,12 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                                                 onBlur={() => handleManualSkillBonusChange(nome as PericiaName, parseInt(tempSkillBonus) || 0)}
                                                                 onKeyDown={(e) => e.key === 'Enter' && handleManualSkillBonusChange(nome as PericiaName, parseInt(tempSkillBonus) || 0)}
                                                                 autoFocus
-                                                                className="w-10 bg-zinc-800 text-white text-center font-mono text-xs border border-ordem-red rounded focus:outline-none"
+                                                                className="w-12 bg-ordem-ooze text-white text-center font-mono text-xs border border-ordem-red rounded focus:outline-none"
                                                             />
                                                         ) : (
                                                             <span
                                                                 onClick={() => isEditingMode && startEditingSkill(nome as PericiaName, detalhe.bonusFixo)}
-                                                                className={`font-mono text-zinc-100 font-bold ${isEditingMode ? 'cursor-pointer hover:text-ordem-red underline decoration-dashed underline-offset-4' : ''}`}
+                                                                className={`font-mono text-zinc-100 font-bold text-sm ${isEditingMode ? 'cursor-pointer hover:text-ordem-red underline decoration-dashed underline-offset-4' : ''}`}
                                                                 title={isEditingMode ? "Clique para editar o bônus numérico manualmente" : ""}
                                                             >
                                                                 +{detalhe.bonusFixo || 0}
@@ -735,24 +750,24 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
             {/* ... Inventory, Abilities, Actions, Progression sections ... */}
 
             {/* Re-adding Inventory, Abilities, Actions, Progression which were truncated in previous edit block logic */}
-            <div className="bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden shadow-lg">
+            <div className="bg-ordem-ooze border border-ordem-border-light rounded-xl overflow-hidden shadow-lg">
                 <button
                     onClick={() => toggleSection('inventory')}
-                    className="w-full flex items-center justify-between p-4 bg-zinc-800/50 hover:bg-zinc-800 transition-colors border-b border-zinc-700"
+                    className="w-full flex items-center justify-between p-4 bg-ordem-ooze/50 hover:bg-ordem-ooze transition-colors border-b border-ordem-border-light"
                 >
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-zinc-700 rounded text-zinc-300">
+                        <div className="p-2 bg-ordem-border-light rounded text-ordem-white-muted">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V10" /><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" /><path d="M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5" /><path d="M8 10h8" /><path d="M8 18h8" /></svg>
                         </div>
                         <span className="font-bold text-zinc-100">Inventário</span>
-                        <span className="text-xs font-mono bg-zinc-800 px-2 py-0.5 rounded text-zinc-400 border border-zinc-600">
+                        <span className="text-xs font-mono bg-ordem-ooze px-2 py-0.5 rounded text-ordem-text-secondary border border-ordem-text-muted">
                             {agent.carga.atual}/{agent.carga.maxima}
                         </span>
                     </div>
                     {openSections['inventory'] ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="m6 9 6 6 6-6" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-secondary"><path d="m6 9 6 6 6-6" /></svg>
                     ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="m9 18 6-6-6-6" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-secondary"><path d="m9 18 6-6-6-6" /></svg>
                     )}
                 </button>
 
@@ -760,15 +775,15 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                     <div className="p-6 animate-in slide-in-from-top-2">
                         <div className="space-y-2">
                             {agent.equipamentos.map((item, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-3 bg-zinc-950/50 rounded border border-zinc-700 hover:border-zinc-500 group">
+                                <div key={idx} className="flex items-center justify-between p-3 bg-ordem-black-deep/50 rounded border border-ordem-border-light hover:border-ordem-text-muted group">
                                     <div>
-                                        <div className="font-bold text-zinc-200">{item.nome}</div>
-                                        <div className="text-xs text-zinc-400">{item.categoria} • {item.espaco} espaço</div>
+                                        <div className="font-bold text-ordem-white">{item.nome}</div>
+                                        <div className="text-xs text-ordem-text-secondary">{item.categoria} • {item.espaco} espaço</div>
                                     </div>
                                     {!readOnly && (
                                         <button
                                             onClick={() => handleRemoveItem(idx)}
-                                            className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-900/30 rounded text-zinc-400 hover:text-red-400 transition-all"
+                                            className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-900/30 rounded text-ordem-text-secondary hover:text-red-400 transition-all"
                                             title="Remover Item"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
@@ -779,7 +794,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                             {!readOnly && (
                                 <button
                                     onClick={() => setIsItemModalOpen(true)}
-                                    className="w-full py-3 border border-dashed border-zinc-700 rounded text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 hover:bg-zinc-800/50 transition-all flex items-center justify-center gap-2 text-sm"
+                                    className="w-full py-3 border border-dashed border-ordem-border-light rounded text-ordem-text-secondary hover:text-ordem-white hover:border-ordem-text-muted hover:bg-ordem-ooze/50 transition-all flex items-center justify-center gap-2 text-sm"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Adicionar Item
                                 </button>
@@ -789,34 +804,34 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 )}
             </div>
 
-            <div className="bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden shadow-lg">
+            <div className="bg-ordem-ooze border border-ordem-border-light rounded-xl overflow-hidden shadow-lg">
                 <button
                     onClick={() => toggleSection('abilities')}
-                    className="w-full flex items-center justify-between p-4 bg-zinc-800/50 hover:bg-zinc-800 transition-colors border-b border-zinc-700"
+                    className="w-full flex items-center justify-between p-4 bg-ordem-ooze/50 hover:bg-ordem-ooze transition-colors border-b border-ordem-border-light"
                 >
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-zinc-700 rounded text-zinc-300">
+                        <div className="p-2 bg-ordem-border-light rounded text-ordem-white-muted">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
                         </div>
                         <span className="font-bold text-zinc-100">Habilidades & Poderes</span>
                     </div>
                     {openSections['abilities'] ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="m6 9 6 6 6-6" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-secondary"><path d="m6 9 6 6 6-6" /></svg>
                     ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="m9 18 6-6-6-6" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-secondary"><path d="m9 18 6-6-6-6" /></svg>
                     )}
                 </button>
 
                 {openSections['abilities'] && (
                     <div className="p-6 animate-in slide-in-from-top-2 space-y-4">
                         {agent.poderes.map((poder, idx) => (
-                            <div key={idx} className="bg-zinc-950/50 p-4 rounded border border-zinc-700 group relative">
+                            <div key={idx} className="bg-ordem-black-deep/50 p-4 rounded border border-ordem-border-light group relative">
                                 <h4 className="font-bold text-zinc-100 mb-1">{poder.nome}</h4>
-                                <p className="text-sm text-zinc-300">{poder.descricao}</p>
+                                <p className="text-sm text-ordem-white-muted">{poder.descricao}</p>
                                 {!readOnly && (
                                     <button
                                         onClick={() => handleRemoveAbility(idx)}
-                                        className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 hover:bg-red-900/30 rounded text-zinc-400 hover:text-red-400 transition-all"
+                                        className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 hover:bg-red-900/30 rounded text-ordem-text-secondary hover:text-red-400 transition-all"
                                         title="Remover Habilidade"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
@@ -827,7 +842,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                         {!readOnly && (
                             <button
                                 onClick={() => setIsAbilityModalOpen(true)}
-                                className="w-full py-3 border border-dashed border-zinc-700 rounded text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 hover:bg-zinc-800/50 transition-all flex items-center justify-center gap-2 text-sm"
+                                className="w-full py-3 border border-dashed border-ordem-border-light rounded text-ordem-text-secondary hover:text-ordem-white hover:border-ordem-text-muted hover:bg-ordem-ooze/50 transition-all flex items-center justify-center gap-2 text-sm"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Adicionar Habilidade
                             </button>
@@ -836,21 +851,21 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 )}
             </div>
 
-            <div className="bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden shadow-lg">
+            <div className="bg-ordem-ooze border border-ordem-border-light rounded-xl overflow-hidden shadow-lg">
                 <button
                     onClick={() => toggleSection('actions')}
-                    className="w-full flex items-center justify-between p-4 bg-zinc-800/50 hover:bg-zinc-800 transition-colors border-b border-zinc-700"
+                    className="w-full flex items-center justify-between p-4 bg-ordem-ooze/50 hover:bg-ordem-ooze transition-colors border-b border-ordem-border-light"
                 >
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-zinc-700 rounded text-zinc-300">
+                        <div className="p-2 bg-ordem-border-light rounded text-ordem-white-muted">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polygon points="10 8 16 12 10 16 10 8" /></svg>
                         </div>
                         <span className="font-bold text-zinc-100">Ações Disponíveis</span>
                     </div>
                     {openSections['actions'] ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="m6 9 6 6 6-6" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-secondary"><path d="m6 9 6 6 6-6" /></svg>
                     ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="m9 18 6-6-6-6" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-secondary"><path d="m9 18 6-6-6-6" /></svg>
                     )}
                 </button>
 
@@ -861,21 +876,21 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 )}
             </div>
 
-            <div className="bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden shadow-lg">
+            <div className="bg-ordem-ooze border border-ordem-border-light rounded-xl overflow-hidden shadow-lg">
                 <button
                     onClick={() => toggleSection('progression')}
-                    className="w-full flex items-center justify-between p-4 bg-zinc-800/50 hover:bg-zinc-800 transition-colors border-b border-zinc-700"
+                    className="w-full flex items-center justify-between p-4 bg-ordem-ooze/50 hover:bg-ordem-ooze transition-colors border-b border-ordem-border-light"
                 >
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-zinc-700 rounded text-zinc-300">
+                        <div className="p-2 bg-ordem-border-light rounded text-ordem-white-muted">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
                         </div>
                         <span className="font-bold text-zinc-100">Progressão & Trilha</span>
                     </div>
                     {openSections['progression'] ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="m6 9 6 6 6-6" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-secondary"><path d="m6 9 6 6 6-6" /></svg>
                     ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="m9 18 6-6-6-6" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-secondary"><path d="m9 18 6-6-6-6" /></svg>
                     )}
                 </button>
 

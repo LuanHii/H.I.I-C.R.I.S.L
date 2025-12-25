@@ -92,7 +92,7 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
           if (escolha.quantidade === 1) {
               return (
                   <select 
-                    className="w-full bg-zinc-800 border border-zinc-700 p-2 rounded text-white"
+                    className="w-full bg-ordem-ooze border border-ordem-border-light p-2 rounded text-white"
                     value={selectedOption}
                     onChange={e => setSelectedOption(e.target.value)}
                   >
@@ -130,7 +130,7 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
           const rituals = RITUAIS.filter(r => r.circulo === 1);
           return (
               <select 
-                className="w-full bg-zinc-800 border border-zinc-700 p-2 rounded text-white"
+                className="w-full bg-ordem-ooze border border-ordem-border-light p-2 rounded text-white"
                 value={selectedOption}
                 onChange={e => setSelectedOption(e.target.value)}
               >
@@ -148,7 +148,7 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
                       <button
                         key={el}
                         onClick={() => setSelectedOption(el)}
-                        className={`px-4 py-2 rounded border ${selectedOption === el ? 'bg-ordem-red border-ordem-red' : 'border-zinc-700 hover:bg-zinc-800'}`}
+                        className={`px-4 py-2 rounded border ${selectedOption === el ? 'bg-ordem-red border-ordem-red' : 'border-ordem-border-light hover:bg-ordem-ooze'}`}
                       >
                           {el}
                       </button>
@@ -164,7 +164,7 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
                       <button
                         key={op}
                         onClick={() => setSelectedOption(op)}
-                        className={`px-4 py-2 rounded border text-left ${selectedOption === op ? 'bg-ordem-red border-ordem-red' : 'border-zinc-700 hover:bg-zinc-800'}`}
+                        className={`px-4 py-2 rounded border text-left ${selectedOption === op ? 'bg-ordem-red border-ordem-red' : 'border-ordem-border-light hover:bg-ordem-ooze'}`}
                       >
                           {op}
                       </button>
@@ -178,7 +178,7 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
                <input 
                  type="text" 
                  placeholder="Digite o nome da arma..."
-                 className="w-full bg-zinc-800 border border-zinc-700 p-2 rounded text-white"
+                 className="w-full bg-ordem-ooze border border-ordem-border-light p-2 rounded text-white"
                  value={selectedOption}
                  onChange={e => setSelectedOption(e.target.value)}
                />
@@ -194,10 +194,10 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-6 max-w-md w-full shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ordem-black/80 backdrop-blur-sm p-4">
+      <div className="bg-ordem-ooze border border-ordem-border-light rounded-xl p-6 max-w-md w-full shadow-2xl">
         <h2 className="text-xl font-serif text-ordem-red mb-2">ESCOLHA NECESSÁRIA</h2>
-        <p className="text-zinc-400 mb-4">
+        <p className="text-ordem-text-secondary mb-4">
             A habilidade <span className="text-white font-bold">{habilidade}</span> requer uma escolha.
         </p>
         
@@ -209,7 +209,7 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
             {onDefer && (
                 <button 
                     onClick={onDefer}
-                    className="px-4 py-2 border border-zinc-600 text-zinc-400 rounded hover:text-white hover:border-white transition-colors font-mono text-sm"
+                    className="px-4 py-2 border border-ordem-text-muted text-ordem-text-secondary rounded hover:text-white hover:border-white transition-colors font-mono text-sm"
                 >
                     ESCOLHER DEPOIS
                 </button>

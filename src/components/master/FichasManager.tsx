@@ -11,7 +11,8 @@ import { ImportExportModal } from './ImportExportModal';
 import { downloadJSON, exportarFichaIndividual, exportarFichasPorCampanha } from '../../core/storage/exportImportUtils';
 import { CampanhaSection, NovaCampanhaForm } from './CampanhaSection';
 import { recalcularRecursosPersonagem } from '../../logic/progression';
-import { Cloud } from 'lucide-react';
+import { Cloud, X, ChevronLeft, Menu, Plus, Download, Settings } from 'lucide-react';
+import { WeaponModsButton } from './WeaponModsModal';
 
 export function FichasManager() {
   const { fichas, remover, duplicar, salvar, moverParaCampanha, marcarComoSincronizada } = useStoredFichas();
@@ -20,6 +21,8 @@ export function FichasManager() {
   const [busca, setBusca] = useState('');
   const [ordem, setOrdem] = useState<'atualizado' | 'nome' | 'nex'>('atualizado');
   const [modalAberto, setModalAberto] = useState(false);
+  // Mobile: controla se o painel de detalhes está visível
+  const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
 
   const registroAtual = fichas.find((ficha) => ficha.id === selecionada);
   const fichaAtual = registroAtual?.personagem;
@@ -148,6 +151,17 @@ export function FichasManager() {
     }
   };
 
+  // Selecionar ficha e abrir detalhes (mobile)
+  const handleSelectFicha = (id: string) => {
+    setSelecionada(id);
+    setMobileDetailOpen(true);
+  };
+
+  // Fechar detalhes (mobile)
+  const handleCloseDetail = () => {
+    setMobileDetailOpen(false);
+  };
+
   const renderFichaCard = (registro: FichaRegistro) => {
     const issues = auditPersonagem(registro.personagem);
     const summary = summarizeIssues(issues);
@@ -163,26 +177,28 @@ export function FichasManager() {
         key={registro.id}
         role="button"
         tabIndex={0}
-        onClick={() => setSelecionada(registro.id)}
+        onClick={() => handleSelectFicha(registro.id)}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
-            setSelecionada(registro.id);
+            handleSelectFicha(registro.id);
           }
         }}
-        className={`w-full text-left border rounded-xl p-3 transition relative overflow-hidden ${selecionada === registro.id
+        className={`w-full text-left border rounded-xl p-4 transition relative overflow-hidden touch-active ${selecionada === registro.id
           ? 'border-ordem-red bg-ordem-red/10'
-          : 'border-zinc-800 bg-black/40 hover:border-zinc-600'
+          : 'border-ordem-border bg-ordem-black/40 hover:border-ordem-text-muted active:bg-ordem-ooze/50'
           }`}
       >
         <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_20%_0%,rgba(220,38,38,0.08),transparent_55%)]" />
-        <div className="flex justify-between text-xs text-ordem-white/60 relative">
-          <span>{registro.personagem.classe}</span>
+
+        {/* Header com classe e indicadores */}
+        <div className="flex justify-between items-start text-xs text-ordem-white/60 relative mb-2">
+          <span className="font-medium">{registro.personagem.classe}</span>
           <div className="flex items-center gap-2">
             {registro.sincronizadaNaNuvem && (
               <span
                 className="text-ordem-green"
-                title="Ficha sincronizada na nuvem - alterações são atualizadas automaticamente"
+                title="Ficha sincronizada na nuvem"
               >
                 <Cloud size={14} />
               </span>
@@ -195,37 +211,46 @@ export function FichasManager() {
                   }`}
                 title={title}
               >
-                {summary.errors > 0 ? 'ERRO' : 'AVISO'} {summary.total}
+                {summary.errors > 0 ? 'ERRO' : 'AVISO'}
               </span>
             )}
-            <span>{new Date(registro.atualizadoEm as any).toLocaleDateString()}</span>
           </div>
         </div>
-        <p className="text-lg font-semibold text-white relative">{registro.personagem.nome}</p>
-        <p className="text-xs text-zinc-400 relative">
-          NEX {registro.personagem.nex}% · Patente {registro.personagem.patente}
+
+        {/* Nome do personagem */}
+        <p className="text-lg font-semibold text-white relative truncate">{registro.personagem.nome}</p>
+
+        {/* Info secundária */}
+        <p className="text-sm text-ordem-text-secondary relative mt-1">
+          NEX {registro.personagem.nex}% · {registro.personagem.patente}
         </p>
-        <div className="mt-2 flex gap-2 text-[10px] text-zinc-400 relative">
-          <span>
+
+        {/* Stats compactos */}
+        <div className="mt-3 flex gap-3 text-xs text-ordem-text-secondary relative">
+          <span className="bg-ordem-ooze/50 px-2 py-1 rounded">
             PV {registro.personagem.pv.atual}/{registro.personagem.pv.max}
           </span>
-          <span>
+          <span className="bg-ordem-ooze/50 px-2 py-1 rounded">
             PE {registro.personagem.pe.atual}/{registro.personagem.pe.max}
           </span>
-          <span>
+          <span className="bg-ordem-ooze/50 px-2 py-1 rounded">
             SAN {registro.personagem.san.atual}/{registro.personagem.san.max}
           </span>
         </div>
-        <div className="mt-3 flex flex-wrap gap-2 relative">
+
+        {/* Botões de ação - grid responsivo */}
+        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 relative">
           <button
             type="button"
             onClick={(event) => {
               event.stopPropagation();
               void handleShare(registro.id);
             }}
-            className="text-xs px-2 py-1 border border-ordem-green text-ordem-green hover:bg-ordem-green/10 rounded"
+            className="text-xs px-3 py-2.5 border border-ordem-green text-ordem-green hover:bg-ordem-green/10 active:bg-ordem-green/20 rounded-lg touch-target-sm flex items-center justify-center gap-1"
           >
-            COMPARTILHAR
+            <Cloud size={14} />
+            <span className="hidden sm:inline">COMPARTILHAR</span>
+            <span className="sm:hidden">SHARE</span>
           </button>
           <button
             type="button"
@@ -233,26 +258,34 @@ export function FichasManager() {
               event.stopPropagation();
               handleExportarFicha(registro.id);
             }}
-            className="text-xs px-2 py-1 border border-ordem-gold text-ordem-gold hover:bg-ordem-gold/10 rounded"
+            className="text-xs px-3 py-2.5 border border-ordem-gold text-ordem-gold hover:bg-ordem-gold/10 active:bg-ordem-gold/20 rounded-lg touch-target-sm flex items-center justify-center gap-1"
             title="Exportar esta ficha"
           >
-            EXPORTAR
+            <Download size={14} />
+            <span>EXPORT</span>
           </button>
+          <div onClick={(e) => e.stopPropagation()}>
+            <WeaponModsButton
+              personagem={registro.personagem}
+              onUpdate={(updated) => salvar(updated, registro.id)}
+              className="text-xs px-3 py-2.5"
+            />
+          </div>
           <button
             type="button"
             onClick={(event) => {
               event.stopPropagation();
               handleRecalcular(registro.id);
             }}
-            className="text-xs px-2 py-1 border border-cyan-500 text-cyan-500 hover:bg-cyan-500/10 rounded"
-            title="Recalcular PV, PE, SAN, Defesa (aplica bônus de origem e trilha)"
+            className="text-xs px-3 py-2.5 border border-cyan-500 text-cyan-500 hover:bg-cyan-500/10 active:bg-cyan-500/20 rounded-lg touch-target-sm flex items-center justify-center"
+            title="Recalcular PV, PE, SAN, Defesa"
           >
-            ♻ RECALCULAR
+            ♻ RECALC
           </button>
           <Link
             href={`/agente/recriar/${registro.id}`}
             onClick={(event) => event.stopPropagation()}
-            className="text-xs px-2 py-1 border border-zinc-700 text-zinc-300 hover:border-zinc-400 hover:text-white rounded"
+            className="text-xs px-3 py-2.5 border border-ordem-border-light text-ordem-white-muted hover:border-ordem-text-secondary hover:text-white active:bg-ordem-ooze/50 rounded-lg touch-target-sm flex items-center justify-center"
           >
             RECRIAR
           </Link>
@@ -262,7 +295,7 @@ export function FichasManager() {
               event.stopPropagation();
               duplicar(registro.id);
             }}
-            className="text-xs px-2 py-1 border border-zinc-700 hover:border-zinc-400 rounded"
+            className="text-xs px-3 py-2.5 border border-ordem-border-light hover:border-ordem-text-secondary active:bg-ordem-ooze/50 rounded-lg touch-target-sm flex items-center justify-center"
           >
             DUPLICAR
           </button>
@@ -270,10 +303,15 @@ export function FichasManager() {
             type="button"
             onClick={(event) => {
               event.stopPropagation();
-              remover(registro.id);
-              if (selecionada === registro.id) setSelecionada(null);
+              if (confirm('Tem certeza que deseja remover esta ficha?')) {
+                remover(registro.id);
+                if (selecionada === registro.id) {
+                  setSelecionada(null);
+                  setMobileDetailOpen(false);
+                }
+              }
             }}
-            className="text-xs px-2 py-1 border border-ordem-red text-ordem-red hover:bg-ordem-red/10 rounded"
+            className="text-xs px-3 py-2.5 border border-ordem-red text-ordem-red hover:bg-ordem-red/10 active:bg-ordem-red/20 rounded-lg touch-target-sm flex items-center justify-center"
           >
             REMOVER
           </button>
@@ -283,45 +321,59 @@ export function FichasManager() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 h-[calc(100vh-64px)]">
-      <section className="border-r border-zinc-800 p-6 space-y-4 overflow-hidden flex flex-col">
+    <div className="flex flex-col lg:grid lg:grid-cols-3 h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)] overflow-hidden">
+      {/* Lista de fichas - Sempre visível em mobile, lado esquerdo em desktop */}
+      <section
+        className={`
+          flex-1 lg:flex-none lg:border-r border-ordem-border 
+          p-4 lg:p-6 space-y-4 overflow-hidden flex flex-col
+          ${mobileDetailOpen ? 'hidden lg:flex' : 'flex'}
+        `}
+      >
+        {/* Header */}
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <div className="text-xs font-mono tracking-[0.35em] text-zinc-500 uppercase">Arquivo</div>
-            <h2 className="text-2xl font-serif text-white truncate">Fichas</h2>
-            <div className="text-xs font-mono text-zinc-500 mt-1">
+            <div className="text-xs font-mono tracking-[0.35em] text-ordem-text-muted uppercase">Arquivo</div>
+            <h2 className="text-xl lg:text-2xl font-serif text-white truncate">Fichas</h2>
+            <div className="text-xs font-mono text-ordem-text-muted mt-1">
               {fichasFiltradas.length} de {fichas.length} ficha(s)
             </div>
           </div>
           <div className="flex gap-2 shrink-0">
             <button
               onClick={() => setModalAberto(true)}
-              className="px-3 py-2 text-[10px] font-mono tracking-[0.25em] border border-ordem-gold text-ordem-gold hover:bg-ordem-gold/10 rounded-lg transition"
+              className="px-3 py-2.5 text-[10px] font-mono tracking-[0.15em] border border-ordem-gold text-ordem-gold hover:bg-ordem-gold/10 active:bg-ordem-gold/20 rounded-lg transition touch-target-sm"
+              aria-label="Exportar ou Importar fichas"
             >
-              EXP/IMP
+              <span className="hidden sm:inline">EXP/IMP</span>
+              <Download size={16} className="sm:hidden" />
             </button>
             <Link
               href="/agente/novo"
-              className="px-3 py-2 text-[10px] font-mono tracking-[0.25em] border border-ordem-green text-ordem-green hover:bg-ordem-green/10 rounded-lg transition"
+              className="px-3 py-2.5 text-[10px] font-mono tracking-[0.15em] border border-ordem-green text-ordem-green hover:bg-ordem-green/10 active:bg-ordem-green/20 rounded-lg transition touch-target-sm flex items-center gap-1"
             >
-              NOVA
+              <Plus size={16} />
+              <span className="hidden sm:inline">NOVA</span>
             </Link>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-2">
+        {/* Busca e filtros */}
+        <div className="space-y-2">
           <input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar por nome, classe, NEX, patente..."
-            className="w-full bg-black/40 border border-zinc-800 text-white px-3 py-2 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-sm"
+            placeholder="Buscar fichas..."
+            className="w-full bg-ordem-black/40 border border-ordem-border text-white px-4 py-3 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-sm touch-target"
+            aria-label="Buscar por nome, classe, NEX ou patente"
           />
           <div className="flex items-center justify-between gap-2">
-            <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Ordenar</div>
+            <span className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">Ordenar</span>
             <select
               value={ordem}
               onChange={(e) => setOrdem(e.target.value as any)}
-              className="bg-black/40 border border-zinc-800 text-white px-2 py-2 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-xs"
+              className="bg-ordem-black/40 border border-ordem-border text-white px-3 py-2 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-xs touch-target-sm"
+              aria-label="Ordenar fichas"
             >
               <option value="atualizado">Mais recente</option>
               <option value="nome">Nome (A→Z)</option>
@@ -330,8 +382,8 @@ export function FichasManager() {
           </div>
         </div>
 
-        {/* Campanhas */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2">
+        {/* Lista de campanhas e fichas */}
+        <div className="flex-1 overflow-y-auto touch-scroll custom-scrollbar -mx-4 px-4 lg:mx-0 lg:px-0 lg:pr-2 space-y-3">
           {/* Campanhas existentes */}
           {campanhas.map((campanha) => (
             <CampanhaSection
@@ -339,7 +391,7 @@ export function FichasManager() {
               campanha={campanha}
               fichas={fichasPorCampanha.get(campanha.id) || []}
               selecionada={selecionada}
-              onSelecionar={setSelecionada}
+              onSelecionar={handleSelectFicha}
               onMover={moverParaCampanha}
               campanhasDisponiveis={campanhas}
               renderFichaCard={renderFichaCard}
@@ -354,7 +406,7 @@ export function FichasManager() {
             campanha={null}
             fichas={fichasPorCampanha.get(undefined) || []}
             selecionada={selecionada}
-            onSelecionar={setSelecionada}
+            onSelecionar={handleSelectFicha}
             onMover={moverParaCampanha}
             campanhasDisponiveis={campanhas}
             renderFichaCard={renderFichaCard}
@@ -365,25 +417,60 @@ export function FichasManager() {
           <NovaCampanhaForm onCriar={criarCampanha} />
 
           {fichas.length === 0 && (
-            <p className="text-sm text-ordem-white/60">
-              Nenhuma ficha salva ainda. Gere um agente em{' '}
-              <Link href="/agente/novo" className="text-ordem-green underline">
-                /agente/novo
-              </Link>{' '}
-              para começar.
-            </p>
+            <div className="text-center py-8">
+              <p className="text-sm text-ordem-white/60 mb-4">
+                Nenhuma ficha salva ainda.
+              </p>
+              <Link
+                href="/agente/novo"
+                className="inline-flex items-center gap-2 px-4 py-3 bg-ordem-green/10 border border-ordem-green text-ordem-green rounded-lg touch-target"
+              >
+                <Plus size={18} />
+                Criar primeiro agente
+              </Link>
+            </div>
           )}
         </div>
       </section>
 
-      <section className="lg:col-span-2 p-6 bg-zinc-950 overflow-y-auto">
+      {/* Painel de detalhes - Fullscreen em mobile, lado direito em desktop */}
+      <section
+        className={`
+          lg:col-span-2 bg-ordem-black-deep overflow-hidden
+          ${mobileDetailOpen ? 'flex flex-col absolute inset-0 z-50 lg:relative lg:z-auto' : 'hidden lg:block'}
+        `}
+      >
         {fichaAtual ? (
-          <div className="rounded-xl border border-zinc-800 overflow-hidden">
-            <AgentDetailView agent={fichaAtual} onUpdate={handleUpdate} readOnly={false} />
+          <div className="h-full flex flex-col">
+            {/* Header mobile com botão voltar */}
+            <div className="lg:hidden flex items-center gap-3 p-4 border-b border-ordem-border bg-ordem-black safe-top">
+              <button
+                onClick={handleCloseDetail}
+                className="p-2 -ml-2 rounded-lg hover:bg-ordem-ooze/50 active:bg-ordem-ooze touch-target"
+                aria-label="Voltar para lista"
+              >
+                <ChevronLeft size={24} />
+              </button>
+              <div className="flex-1 min-w-0">
+                <h2 className="font-semibold text-white truncate">{fichaAtual.nome}</h2>
+                <p className="text-xs text-ordem-text-secondary">{fichaAtual.classe} · NEX {fichaAtual.nex}%</p>
+              </div>
+            </div>
+
+            {/* Conteúdo da ficha */}
+            <div className="flex-1 overflow-y-auto touch-scroll p-4 lg:p-6 safe-bottom">
+              <div className="rounded-xl border border-ordem-border overflow-hidden">
+                <AgentDetailView agent={fichaAtual} onUpdate={handleUpdate} readOnly={false} />
+              </div>
+            </div>
           </div>
         ) : (
-          <div className="h-full flex flex-col items-center justify-center text-center text-ordem-white/60">
-            <p>Selecione uma ficha para visualizar/editar.</p>
+          <div className="h-full flex flex-col items-center justify-center text-center text-ordem-white/60 p-6">
+            <div className="w-16 h-16 rounded-full bg-ordem-ooze/50 flex items-center justify-center mb-4">
+              <Menu size={24} className="text-ordem-text-muted" />
+            </div>
+            <p className="text-lg mb-2">Nenhuma ficha selecionada</p>
+            <p className="text-sm text-ordem-text-muted">Selecione uma ficha na lista para visualizar ou editar.</p>
           </div>
         )}
       </section>

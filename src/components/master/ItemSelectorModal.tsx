@@ -52,21 +52,21 @@ export const ItemSelectorModal: React.FC<ItemSelectorModalProps> = ({ isOpen, on
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="bg-gray-900 border border-gray-700 rounded-lg w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ordem-black/80 backdrop-blur-sm p-4">
+      <div className="bg-ordem-ooze border border-ordem-border-light rounded-lg w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl">
         
-        <div className="p-4 border-b border-gray-800 flex justify-between items-center">
+        <div className="p-4 border-b border-ordem-border flex justify-between items-center">
           <h2 className="text-xl font-serif text-white">Adicionar Item</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">✕</button>
+          <button onClick={onClose} className="text-ordem-text-secondary hover:text-white">✕</button>
         </div>
 
-        <div className="p-4 space-y-3 bg-gray-900/50">
+        <div className="p-4 space-y-3 bg-ordem-ooze/50">
           <input
             type="text"
             placeholder="Pesquisar item..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-black/40 border border-gray-700 text-white px-3 py-2 rounded focus:border-ordem-red outline-none"
+            className="w-full bg-ordem-black/40 border border-ordem-border-light text-white px-3 py-2 rounded focus:border-ordem-red outline-none"
             autoFocus
           />
           
@@ -74,7 +74,7 @@ export const ItemSelectorModal: React.FC<ItemSelectorModalProps> = ({ isOpen, on
             <select 
               value={categoryFilter} 
               onChange={(e) => setCategoryFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-              className="bg-black/40 border border-gray-700 text-white text-xs px-2 py-1 rounded outline-none"
+              className="bg-ordem-black/40 border border-ordem-border-light text-white text-xs px-2 py-1 rounded outline-none"
             >
               <option value="all">Todas Categorias</option>
               {[0, 1, 2, 3, 4].map(cat => (
@@ -85,7 +85,7 @@ export const ItemSelectorModal: React.FC<ItemSelectorModalProps> = ({ isOpen, on
             <select 
               value={typeFilter} 
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="bg-black/40 border border-gray-700 text-white text-xs px-2 py-1 rounded outline-none max-w-[200px]"
+              className="bg-ordem-black/40 border border-ordem-border-light text-white text-xs px-2 py-1 rounded outline-none max-w-[200px]"
             >
               <option value="all">Todos Tipos</option>
               {uniqueTypes.map(type => (
@@ -95,28 +95,28 @@ export const ItemSelectorModal: React.FC<ItemSelectorModalProps> = ({ isOpen, on
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar bg-black/20">
+        <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar bg-ordem-black/20">
           {filteredItems.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">Nenhum item encontrado.</div>
+            <div className="text-center text-ordem-text-muted py-8">Nenhum item encontrado.</div>
           ) : (
             filteredItems.map((item, idx) => (
               <button
                 key={`${item.nome}-${idx}`}
                 onClick={() => onSelect(item)}
-                className="w-full text-left p-3 rounded hover:bg-gray-800 border border-transparent hover:border-gray-700 transition-colors group"
+                className="w-full text-left p-3 rounded hover:bg-ordem-ooze border border-transparent hover:border-ordem-border-light transition-colors group"
               >
                 <div className="flex justify-between items-start">
                   <span className="font-bold text-gray-200 group-hover:text-white">{item.nome}</span>
-                  <span className="text-xs font-mono text-gray-500 bg-gray-900 px-1.5 py-0.5 rounded border border-gray-800">
+                  <span className="text-xs font-mono text-ordem-text-muted bg-ordem-ooze px-1.5 py-0.5 rounded border border-ordem-border">
                     Cat {item.categoria} | {item.espaco} espaço(s)
                   </span>
                 </div>
-                <div className="text-xs text-gray-500 mt-1 flex justify-between">
+                <div className="text-xs text-ordem-text-muted mt-1 flex justify-between">
                     <span>{item.tipo}</span>
                     <span className="italic opacity-50">{item.livro}</span>
                 </div>
                 {item.descricao && (
-                    <p className="text-xs text-gray-600 mt-1 line-clamp-2 group-hover:text-gray-400 transition-colors">
+                    <p className="text-xs text-ordem-text-muted mt-1 line-clamp-2 group-hover:text-ordem-text-secondary transition-colors">
                         {item.descricao}
                     </p>
                 )}
@@ -125,8 +125,8 @@ export const ItemSelectorModal: React.FC<ItemSelectorModalProps> = ({ isOpen, on
           )}
         </div>
 
-        <div className="p-3 border-t border-gray-800 text-right">
-            <button onClick={onClose} className="text-sm text-gray-400 hover:text-white px-4 py-2">
+        <div className="p-3 border-t border-ordem-border text-right">
+            <button onClick={onClose} className="text-sm text-ordem-text-secondary hover:text-white px-4 py-2">
                 Cancelar
             </button>
         </div>

@@ -17,7 +17,7 @@ export const AbilityCard: React.FC<AbilityCardProps> = ({ data, type, useSanity 
       case 'Conhecimento': return 'text-ordem-gold border-ordem-gold';
       case 'Energia': return 'text-ordem-purple border-ordem-purple';
       case 'Medo': return 'text-white border-white';
-      default: return 'text-gray-400 border-gray-600';
+      default: return 'text-ordem-text-secondary border-ordem-border-light';
     }
   };
 
@@ -42,7 +42,7 @@ export const AbilityCard: React.FC<AbilityCardProps> = ({ data, type, useSanity 
 
   return (
     <div 
-      className={`w-full mb-2 border-l-2 bg-black/40 hover:bg-white/5 transition-all cursor-pointer overflow-hidden ${isOpen ? 'border-l-4' : ''} ${elementColorClass.split(' ')[1]}`}
+      className={`w-full mb-2 border-l-2 bg-ordem-black/40 hover:bg-white/5 transition-all cursor-pointer overflow-hidden ${isOpen ? 'border-l-4' : ''} ${elementColorClass.split(' ')[1]}`}
       onClick={() => setIsOpen(!isOpen)}
     >
       <div className="flex justify-between items-center p-3">
@@ -57,16 +57,16 @@ export const AbilityCard: React.FC<AbilityCardProps> = ({ data, type, useSanity 
             </span>
           )}
         </div>
-        <div className="text-xs font-mono text-gray-400">
+        <div className="text-xs font-mono text-ordem-text-secondary">
           {getCost()}
         </div>
       </div>
 
       <div className={`transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
-        <div className="p-3 pt-0 text-sm text-gray-300 border-t border-white/10 mt-1">
+        <div className="p-3 pt-0 text-sm text-ordem-white-muted border-t border-white/10 mt-1">
           
           {type === 'ritual' && (
-            <div className="grid grid-cols-2 gap-2 mb-2 text-xs text-gray-500 font-mono">
+            <div className="grid grid-cols-2 gap-2 mb-2 text-xs text-ordem-text-muted font-mono">
               <div>Exec: {(data as Ritual).execucao}</div>
               <div>Alcance: {(data as Ritual).alcance}</div>
               <div>Alvo: {(data as Ritual).alvo}</div>
@@ -78,7 +78,7 @@ export const AbilityCard: React.FC<AbilityCardProps> = ({ data, type, useSanity 
           <p className="leading-relaxed mb-2">{data.descricao}</p>
 
           {type === 'ritual' && (data as Ritual).efeito && (
-            <div className="space-y-1 mt-2 bg-black/20 p-2 rounded">
+            <div className="space-y-1 mt-2 bg-ordem-black/20 p-2 rounded">
               <div className="text-xs"><strong className="text-ordem-white">Padrão:</strong> {(data as Ritual).efeito.padrao}</div>
               {(data as Ritual).efeito.discente && (
                 <div className="text-xs"><strong className="text-ordem-gold">Discente:</strong> {(data as Ritual).efeito.discente}</div>
@@ -90,7 +90,7 @@ export const AbilityCard: React.FC<AbilityCardProps> = ({ data, type, useSanity 
           )}
           
           {type === 'poder' && (data as Poder).requisitos && (
-            <div className="text-xs text-gray-500 mt-2">
+            <div className="text-xs text-ordem-text-muted mt-2">
               Requisitos: {(data as Poder).requisitos}
             </div>
           )}

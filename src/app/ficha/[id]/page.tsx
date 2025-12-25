@@ -36,8 +36,8 @@ function PlayerAgentContent() {
   }, [id]);
 
   const handleUpdate = async (updatedAgent: Personagem) => {
-      setAgent(updatedAgent);
-      await saveAgentToCloud(id, updatedAgent);
+    setAgent(updatedAgent);
+    await saveAgentToCloud(id, updatedAgent);
   };
 
   const openOverlay = () => {
@@ -57,22 +57,22 @@ function PlayerAgentContent() {
   if (loading) {
     if (isOverlay) return null; // Silent load for overlay
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center font-mono">
+      <div className="min-h-screen bg-ordem-black text-white flex items-center justify-center font-mono">
         <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 border-4 border-ordem-red border-t-transparent rounded-full animate-spin"></div>
-            <div className="animate-pulse tracking-widest">CARREGANDO DADOS DA ORDEM...</div>
+          <div className="w-12 h-12 border-4 border-ordem-red border-t-transparent rounded-full animate-spin"></div>
+          <div className="animate-pulse tracking-widest">CARREGANDO DADOS DA ORDEM...</div>
         </div>
       </div>
     );
   }
 
   if (error || !agent) {
-    if (isOverlay) return <div className="text-red-500 font-bold p-4 bg-black/50">ERRO: {error || 'Agente não encontrado'}</div>;
+    if (isOverlay) return <div className="text-red-500 font-bold p-4 bg-ordem-black/50">ERRO: {error || 'Agente não encontrado'}</div>;
     return (
-      <div className="min-h-screen bg-black text-ordem-red flex flex-col items-center justify-center font-mono p-6 text-center">
-        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="mb-4 opacity-50"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div className="min-h-screen bg-ordem-black text-ordem-red flex flex-col items-center justify-center font-mono p-6 text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="mb-4 opacity-50"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
         <h2 className="text-xl font-bold mb-2">ERRO DE CONEXÃO</h2>
-        <p className="text-zinc-400 max-w-md">{error || 'Agente não encontrado.'}</p>
+        <p className="text-ordem-text-secondary max-w-md">{error || 'Agente não encontrado.'}</p>
       </div>
     );
   }
@@ -94,7 +94,7 @@ function PlayerAgentContent() {
 export default function PlayerAgentPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-black text-white flex items-center justify-center font-mono">
+      <div className="min-h-screen bg-ordem-black text-white flex items-center justify-center font-mono">
         <div className="animate-pulse">INICIALIZANDO...</div>
       </div>
     }>

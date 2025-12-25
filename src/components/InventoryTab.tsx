@@ -33,8 +33,8 @@ export const InventoryTab: React.FC<InventoryTabProps> = ({ character }) => {
     const isExceeded = count > limit;
 
     return (
-      <div key={cat} className="flex flex-col items-center p-2 bg-black/20 rounded border border-gray-800">
-        <span className="text-[10px] text-gray-500 uppercase">{label}</span>
+      <div key={cat} className="flex flex-col items-center p-2 bg-ordem-black/20 rounded border border-ordem-border">
+        <span className="text-[10px] text-ordem-text-muted uppercase">{label}</span>
         <span className={`font-mono font-bold ${isExceeded ? 'text-ordem-red' : 'text-white'}`}>
           {count}/{limit}
         </span>
@@ -44,14 +44,14 @@ export const InventoryTab: React.FC<InventoryTabProps> = ({ character }) => {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full flex flex-col gap-4">
-      <div className="bg-black/40 p-4 rounded border border-gray-800">
+      <div className="bg-ordem-black/40 p-4 rounded border border-ordem-border">
         <div className="flex justify-between items-end mb-2">
-          <span className="text-sm text-gray-400 uppercase tracking-widest">Capacidade de Carga</span>
+          <span className="text-sm text-ordem-text-secondary uppercase tracking-widest">Capacidade de Carga</span>
           <span className={`font-mono font-bold ${cargaAtual > cargaMaxima ? 'text-ordem-red animate-pulse' : 'text-ordem-white'}`}>
             {cargaAtual} / {cargaMaxima}
           </span>
         </div>
-        <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+        <div className="w-full h-2 bg-ordem-ooze rounded-full overflow-hidden">
           <div 
             className={`h-full transition-all duration-500 ${cargaAtual > cargaMaxima ? 'bg-ordem-red' : 'bg-ordem-white'}`}
             style={{ width: `${Math.min(100, (cargaAtual / cargaMaxima) * 100)}%` }}
@@ -63,7 +63,7 @@ export const InventoryTab: React.FC<InventoryTabProps> = ({ character }) => {
           </div>
         )}
         
-        <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-gray-800">
+        <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-ordem-border">
             {renderLimit(1, 'Cat I')}
             {renderLimit(2, 'Cat II')}
             {renderLimit(3, 'Cat III')}
@@ -73,37 +73,37 @@ export const InventoryTab: React.FC<InventoryTabProps> = ({ character }) => {
 
       <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4">
         {items.length === 0 ? (
-            <div className="text-center text-gray-600 py-8 italic">Inventário vazio.</div>
+            <div className="text-center text-ordem-text-muted py-8 italic">Inventário vazio.</div>
         ) : (
             Object.entries(itemsByCat).map(([catStr, catItems]) => {
                 const cat = Number(catStr);
                 if (catItems.length === 0) return null;
                 return (
                     <div key={cat}>
-                        <h3 className="text-xs text-ordem-gold uppercase tracking-widest mb-2 sticky top-0 bg-black/80 backdrop-blur py-1 z-10">
+                        <h3 className="text-xs text-ordem-gold uppercase tracking-widest mb-2 sticky top-0 bg-ordem-black/80 backdrop-blur py-1 z-10">
                             Categoria {cat === 0 ? '0' : ['I', 'II', 'III', 'IV'][cat - 1]}
                         </h3>
                         <div className="space-y-2">
                             {catItems.map((item, idx) => (
-                                <div key={idx} className={`p-3 bg-black/20 border ${isCursed(item.tipo) ? 'border-purple-900/50 bg-purple-900/10' : 'border-gray-800'} hover:border-gray-600 transition-colors rounded group`}>
+                                <div key={idx} className={`p-3 bg-ordem-black/20 border ${isCursed(item.tipo) ? 'border-purple-900/50 bg-purple-900/10' : 'border-ordem-border'} hover:border-ordem-border-light transition-colors rounded group`}>
                                     <div className="flex justify-between items-start">
                                     <div>
                                         <div className={`font-bold ${isCursed(item.tipo) ? 'text-purple-300' : 'text-gray-200'} group-hover:text-white`}>
                                             {item.nome}
                                         </div>
-                                        <div className="text-xs text-gray-500 uppercase flex gap-2">
+                                        <div className="text-xs text-ordem-text-muted uppercase flex gap-2">
                                             <span>{item.tipo}</span>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs font-mono text-gray-600 border border-gray-800 px-2 py-0.5 rounded">
+                                        <span className="text-xs font-mono text-ordem-text-muted border border-ordem-border px-2 py-0.5 rounded">
                                         {item.espaco} slots
                                         </span>
                                     </div>
                                     </div>
                                     
                                     {item.stats && (
-                                        <div className="mt-2 flex gap-3 text-xs font-mono text-gray-300">
+                                        <div className="mt-2 flex gap-3 text-xs font-mono text-ordem-white-muted">
                                             {item.stats.dano && <span>Dano: {item.stats.dano}</span>}
                                             {item.stats.critico && <span>Crit: {item.stats.critico}</span>}
                                             {item.stats.defesa && <span>Def: +{item.stats.defesa}</span>}
@@ -111,7 +111,7 @@ export const InventoryTab: React.FC<InventoryTabProps> = ({ character }) => {
                                     )}
 
                                     {item.descricao && (
-                                    <div className="mt-2 text-xs text-gray-400 border-t border-gray-800 pt-2 leading-relaxed">
+                                    <div className="mt-2 text-xs text-ordem-text-secondary border-t border-ordem-border pt-2 leading-relaxed">
                                         {item.descricao}
                                     </div>
                                     )}

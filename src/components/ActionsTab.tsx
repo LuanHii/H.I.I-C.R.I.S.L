@@ -66,13 +66,13 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
 
     const displayCost = formatCost(cost);
     
-    let borderColor = "border-gray-800";
+    let borderColor = "border-ordem-border";
     let hoverColor = "hover:border-ordem-red/50";
     
     if (isRitual) {
         const el = (action as Ritual).elemento;
         if (el === 'Sangue') { borderColor = "border-red-900/30"; hoverColor = "hover:border-red-600"; }
-        if (el === 'Morte') { borderColor = "border-gray-800"; hoverColor = "hover:border-gray-400"; }
+        if (el === 'Morte') { borderColor = "border-ordem-border"; hoverColor = "hover:border-ordem-text-secondary"; }
         if (el === 'Conhecimento') { borderColor = "border-yellow-900/30"; hoverColor = "hover:border-yellow-500"; }
         if (el === 'Energia') { borderColor = "border-purple-900/30"; hoverColor = "hover:border-purple-500"; }
         if (el === 'Medo') { borderColor = "border-white/10"; hoverColor = "hover:border-white"; }
@@ -100,17 +100,17 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
             : 'DT —';
 
     const badgeClass = isAttack
-      ? 'text-zinc-300 border-zinc-700'
+      ? 'text-ordem-white-muted border-ordem-border-light'
       : badgeText.startsWith('DT ') && badgeText !== 'DT —'
         ? 'text-ordem-green border-ordem-green/30'
-        : 'text-zinc-400 border-zinc-700';
+        : 'text-ordem-text-secondary border-ordem-border-light';
 
     const numericCost = parseNumericCost(displayCost);
     const limit = character.pe?.rodada ?? 1;
     const costExceedsLimit = numericCost !== null && numericCost > limit;
 
     return (
-      <div key={action.nome} className={`bg-black/40 border ${borderColor} p-3 rounded ${hoverColor} transition-colors group relative overflow-hidden`}>
+      <div key={action.nome} className={`bg-ordem-black/40 border ${borderColor} p-3 rounded ${hoverColor} transition-colors group relative overflow-hidden`}>
         {isRitual && (
             <div className={`absolute top-0 right-0 w-16 h-16 opacity-10 pointer-events-none -mr-4 -mt-4 rounded-full blur-xl
                 ${(action as Ritual).elemento === 'Sangue' ? 'bg-red-600' : ''}
@@ -124,21 +124,21 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
         <div className="flex justify-between items-start mb-1 relative z-10">
           <h4 className="font-bold text-gray-200 group-hover:text-ordem-red transition-colors">{action.nome}</h4>
           <div className="flex items-center gap-2">
-            <span className={`text-xs font-mono bg-gray-900 px-2 py-0.5 rounded border ${badgeClass}`}>
+            <span className={`text-xs font-mono bg-ordem-ooze px-2 py-0.5 rounded border ${badgeClass}`}>
               {badgeText}
             </span>
             {displayCost && (
-              <span className="text-xs font-mono bg-gray-900 px-2 py-0.5 rounded text-ordem-gold border border-ordem-gold/30">
+              <span className="text-xs font-mono bg-ordem-ooze px-2 py-0.5 rounded text-ordem-gold border border-ordem-gold/30">
                 {displayCost}
               </span>
             )}
           </div>
         </div>
         
-        <div className="flex flex-wrap gap-2 text-xs text-gray-500 mb-2 relative z-10">
+        <div className="flex flex-wrap gap-2 text-xs text-ordem-text-muted mb-2 relative z-10">
             {source && <span className="uppercase tracking-wider">{source}</span>}
             {'tipo' in action && !isRitual && <span className="uppercase tracking-wider">{(action as any).tipo}</span>}
-            {'acao' in action && (action as any).acao && <span className="text-gray-400">• {(action as any).acao}</span>}
+            {'acao' in action && (action as any).acao && <span className="text-ordem-text-secondary">• {(action as any).acao}</span>}
             {'teste' in action && (
                 <span className="text-ordem-green font-mono font-bold border border-ordem-green/30 px-1 rounded">
                     {(action as any).teste}
@@ -154,48 +154,48 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
                 <>
                     <span className={`uppercase tracking-wider font-bold
                         ${(action as Ritual).elemento === 'Sangue' ? 'text-red-700' : ''}
-                        ${(action as Ritual).elemento === 'Morte' ? 'text-gray-400' : ''}
+                        ${(action as Ritual).elemento === 'Morte' ? 'text-ordem-text-secondary' : ''}
                         ${(action as Ritual).elemento === 'Conhecimento' ? 'text-yellow-600' : ''}
                         ${(action as Ritual).elemento === 'Energia' ? 'text-purple-500' : ''}
                         ${(action as Ritual).elemento === 'Medo' ? 'text-white' : ''}
                     `}>{(action as Ritual).elemento} {(action as Ritual).circulo}</span>
-                    <span className="text-gray-400">• {(action as Ritual).execucao}</span>
-                    <span className="text-gray-400">• {(action as Ritual).alcance}</span>
+                    <span className="text-ordem-text-secondary">• {(action as Ritual).execucao}</span>
+                    <span className="text-ordem-text-secondary">• {(action as Ritual).alcance}</span>
                 </>
             )}
         </div>
 
-        <p className="text-sm text-gray-400 leading-relaxed relative z-10">
+        <p className="text-sm text-ordem-text-secondary leading-relaxed relative z-10">
           {action.descricao}
         </p>
 
         {isRitual && (
-            <div className="mt-3 pt-3 border-t border-gray-800/50 space-y-3 text-xs relative z-10">
-                <div className="grid grid-cols-2 gap-y-1 gap-x-4 text-gray-400">
-                    <div><span className="font-bold text-gray-500 uppercase tracking-wider text-[10px]">Execução:</span> {(action as Ritual).execucao}</div>
-                    <div><span className="font-bold text-gray-500 uppercase tracking-wider text-[10px]">Alcance:</span> {(action as Ritual).alcance}</div>
-                    <div><span className="font-bold text-gray-500 uppercase tracking-wider text-[10px]">Alvo:</span> {(action as Ritual).alvo}</div>
-                    <div><span className="font-bold text-gray-500 uppercase tracking-wider text-[10px]">Duração:</span> {(action as Ritual).duracao}</div>
+            <div className="mt-3 pt-3 border-t border-ordem-border/50 space-y-3 text-xs relative z-10">
+                <div className="grid grid-cols-2 gap-y-1 gap-x-4 text-ordem-text-secondary">
+                    <div><span className="font-bold text-ordem-text-muted uppercase tracking-wider text-[10px]">Execução:</span> {(action as Ritual).execucao}</div>
+                    <div><span className="font-bold text-ordem-text-muted uppercase tracking-wider text-[10px]">Alcance:</span> {(action as Ritual).alcance}</div>
+                    <div><span className="font-bold text-ordem-text-muted uppercase tracking-wider text-[10px]">Alvo:</span> {(action as Ritual).alvo}</div>
+                    <div><span className="font-bold text-ordem-text-muted uppercase tracking-wider text-[10px]">Duração:</span> {(action as Ritual).duracao}</div>
                     {(action as Ritual).resistencia && (
-                        <div className="col-span-2"><span className="font-bold text-gray-500 uppercase tracking-wider text-[10px]">Resistência:</span> {(action as Ritual).resistencia}</div>
+                        <div className="col-span-2"><span className="font-bold text-ordem-text-muted uppercase tracking-wider text-[10px]">Resistência:</span> {(action as Ritual).resistencia}</div>
                     )}
                 </div>
                 
                 <div className="space-y-2">
-                    <div className="bg-black/20 p-2 rounded border border-gray-800/50">
+                    <div className="bg-ordem-black/20 p-2 rounded border border-ordem-border/50">
                         <span className="text-ordem-white font-bold block mb-1 text-[10px] uppercase tracking-widest">Padrão</span>
-                        <p className="text-gray-400">{(action as Ritual).efeito.padrao}</p>
+                        <p className="text-ordem-text-secondary">{(action as Ritual).efeito.padrao}</p>
                     </div>
                     {(action as Ritual).efeito.discente && (
-                        <div className="bg-black/20 p-2 rounded border border-gray-800/50">
+                        <div className="bg-ordem-black/20 p-2 rounded border border-ordem-border/50">
                             <span className="text-ordem-gold font-bold block mb-1 text-[10px] uppercase tracking-widest">Discente</span>
-                            <p className="text-gray-400">{(action as Ritual).efeito.discente}</p>
+                            <p className="text-ordem-text-secondary">{(action as Ritual).efeito.discente}</p>
                         </div>
                     )}
                     {(action as Ritual).efeito.verdadeiro && (
-                        <div className="bg-black/20 p-2 rounded border border-gray-800/50">
+                        <div className="bg-ordem-black/20 p-2 rounded border border-ordem-border/50">
                             <span className="text-ordem-red font-bold block mb-1 text-[10px] uppercase tracking-widest">Verdadeiro</span>
-                            <p className="text-gray-400">{(action as Ritual).efeito.verdadeiro}</p>
+                            <p className="text-ordem-text-secondary">{(action as Ritual).efeito.verdadeiro}</p>
                         </div>
                     )}
                 </div>
@@ -252,14 +252,14 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Buscar ações, rituais, poderes..."
-          className="w-full bg-black/40 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-ordem-red"
+          className="w-full bg-ordem-black/40 border border-ordem-border rounded-lg px-3 py-2 text-sm text-ordem-white placeholder:text-ordem-text-muted focus:outline-none focus:border-ordem-red"
         />
 
-        <div className="flex gap-2 border-b border-gray-800 pb-2 overflow-x-auto custom-scrollbar">
+        <div className="flex gap-2 border-b border-ordem-border pb-2 overflow-x-auto custom-scrollbar">
         <button 
           onClick={() => setFilter('todos')}
           className={`px-3 py-1.5 text-xs font-mono rounded-lg whitespace-nowrap border ${
-            filter === 'todos' ? 'bg-ordem-white text-black border-ordem-white' : 'border-zinc-800 text-gray-400 hover:text-white hover:border-zinc-600'
+            filter === 'todos' ? 'bg-ordem-white text-black border-ordem-white' : 'border-ordem-border text-ordem-text-secondary hover:text-white hover:border-ordem-text-muted'
           }`}
         >
           TODOS
@@ -267,7 +267,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
         <button 
           onClick={() => setFilter('universais')}
           className={`px-3 py-1.5 text-xs font-mono rounded-lg whitespace-nowrap border ${
-            filter === 'universais' ? 'bg-ordem-white text-black border-ordem-white' : 'border-zinc-800 text-gray-400 hover:text-white hover:border-zinc-600'
+            filter === 'universais' ? 'bg-ordem-white text-black border-ordem-white' : 'border-ordem-border text-ordem-text-secondary hover:text-white hover:border-ordem-text-muted'
           }`}
         >
           UNIVERSAIS <span className="text-[10px] opacity-70">({filteredUniversal.length})</span>
@@ -275,7 +275,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
         <button 
           onClick={() => setFilter('ataques')}
           className={`px-3 py-1.5 text-xs font-mono rounded-lg whitespace-nowrap border ${
-            filter === 'ataques' ? 'bg-ordem-white text-black border-ordem-white' : 'border-zinc-800 text-gray-400 hover:text-white hover:border-zinc-600'
+            filter === 'ataques' ? 'bg-ordem-white text-black border-ordem-white' : 'border-ordem-border text-ordem-text-secondary hover:text-white hover:border-ordem-text-muted'
           }`}
         >
           ATAQUES <span className="text-[10px] opacity-70">({filteredWeaponActions.length})</span>
@@ -283,7 +283,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
         <button 
           onClick={() => setFilter('habilidades')}
           className={`px-3 py-1.5 text-xs font-mono rounded-lg whitespace-nowrap border ${
-            filter === 'habilidades' ? 'bg-ordem-white text-black border-ordem-white' : 'border-zinc-800 text-gray-400 hover:text-white hover:border-zinc-600'
+            filter === 'habilidades' ? 'bg-ordem-white text-black border-ordem-white' : 'border-ordem-border text-ordem-text-secondary hover:text-white hover:border-ordem-text-muted'
           }`}
         >
           HABILIDADES
@@ -291,7 +291,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
         <button 
           onClick={() => setFilter('rituais')}
           className={`px-3 py-1.5 text-xs font-mono rounded-lg whitespace-nowrap border ${
-            filter === 'rituais' ? 'bg-ordem-white text-black border-ordem-white' : 'border-zinc-800 text-gray-400 hover:text-white hover:border-zinc-600'
+            filter === 'rituais' ? 'bg-ordem-white text-black border-ordem-white' : 'border-ordem-border text-ordem-text-secondary hover:text-white hover:border-ordem-text-muted'
           }`}
         >
           RITUAIS <span className="text-[10px] opacity-70">({filteredRituais.length})</span>
@@ -299,7 +299,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
         <button 
           onClick={() => setFilter('cenarios')}
           className={`px-3 py-1.5 text-xs font-mono rounded-lg whitespace-nowrap border ${
-            filter === 'cenarios' ? 'bg-ordem-white text-black border-ordem-white' : 'border-zinc-800 text-gray-400 hover:text-white hover:border-zinc-600'
+            filter === 'cenarios' ? 'bg-ordem-white text-black border-ordem-white' : 'border-ordem-border text-ordem-text-secondary hover:text-white hover:border-ordem-text-muted'
           }`}
         >
           CENÁRIOS <span className="text-[10px] opacity-70">({filteredInv.length + filteredChase.length + filteredStealth.length})</span>
@@ -313,7 +313,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
       {/* Section: Weapons & Attacks */}
       {(filter === 'todos' || filter === 'ataques') && filteredWeaponActions.length > 0 && (
         <section>
-            <h3 className="text-lg font-serif text-ordem-red border-b border-gray-800 pb-2 mb-4 flex items-center gap-2 sticky top-0 bg-black/90 py-2 z-10">
+            <h3 className="text-lg font-serif text-ordem-red border-b border-ordem-border pb-2 mb-4 flex items-center gap-2 sticky top-0 bg-ordem-black/90 py-2 z-10">
             <span className="w-2 h-2 bg-ordem-red rotate-45 inline-block"></span>
             Armas & Ataques
             </h3>
@@ -326,7 +326,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
       {/* Section: Universal Actions */}
       {(filter === 'todos' || filter === 'universais') && (
         <section>
-            <h3 className="text-lg font-serif text-ordem-red border-b border-gray-800 pb-2 mb-4 flex items-center gap-2 sticky top-0 bg-black/90 py-2 z-10">
+            <h3 className="text-lg font-serif text-ordem-red border-b border-ordem-border pb-2 mb-4 flex items-center gap-2 sticky top-0 bg-ordem-black/90 py-2 z-10">
             <span className="w-2 h-2 bg-ordem-red rotate-45 inline-block"></span>
             Ações Universais
             </h3>
@@ -339,7 +339,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
       {/* Section: Character Abilities (Class, Origin, Powers) */}
       {(filter === 'todos' || filter === 'habilidades') && (
         <section>
-            <h3 className="text-lg font-serif text-ordem-red border-b border-gray-800 pb-2 mb-4 flex items-center gap-2 sticky top-0 bg-black/90 py-2 z-10">
+            <h3 className="text-lg font-serif text-ordem-red border-b border-ordem-border pb-2 mb-4 flex items-center gap-2 sticky top-0 bg-ordem-black/90 py-2 z-10">
             <span className="w-2 h-2 bg-ordem-red rotate-45 inline-block"></span>
             Habilidades & Poderes
             </h3>
@@ -372,7 +372,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
                 {activePowers.map(p => renderActionCard(p))}
                 
                 {!originPower && classAbilities.length === 0 && trackAbilities.length === 0 && activePowers.length === 0 && (
-                    <div className="col-span-2 text-gray-600 italic text-sm py-2">
+                    <div className="col-span-2 text-ordem-text-muted italic text-sm py-2">
                         Nenhuma habilidade ativa registrada.
                     </div>
                 )}
@@ -383,7 +383,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
       {/* Section: Rituals */}
       {(filter === 'todos' || filter === 'rituais') && filteredRituais.length > 0 && (
         <section>
-            <h3 className="text-lg font-serif text-purple-500 border-b border-gray-800 pb-2 mb-4 flex items-center gap-2 sticky top-0 bg-black/90 py-2 z-10">
+            <h3 className="text-lg font-serif text-purple-500 border-b border-ordem-border pb-2 mb-4 flex items-center gap-2 sticky top-0 bg-ordem-black/90 py-2 z-10">
             <span className="w-2 h-2 bg-purple-500 rotate-45 inline-block"></span>
             Rituais
             </h3>
@@ -396,28 +396,28 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
       {/* Section: Scenario Actions */}
       {(filter === 'todos' || filter === 'cenarios') && (
         <section>
-            <h3 className="text-lg font-serif text-gray-400 border-b border-gray-800 pb-2 mb-4 flex items-center gap-2 sticky top-0 bg-black/90 py-2 z-10">
-            <span className="w-2 h-2 bg-gray-600 rotate-45 inline-block"></span>
+            <h3 className="text-lg font-serif text-ordem-text-secondary border-b border-ordem-border pb-2 mb-4 flex items-center gap-2 sticky top-0 bg-ordem-black/90 py-2 z-10">
+            <span className="w-2 h-2 bg-ordem-border-light rotate-45 inline-block"></span>
             Cenários Específicos
             </h3>
             
             <div className="space-y-6">
                 <div>
-                    <h4 className="text-sm font-bold text-gray-500 mb-2 uppercase tracking-widest">Investigação</h4>
+                    <h4 className="text-sm font-bold text-ordem-text-muted mb-2 uppercase tracking-widest">Investigação</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {filteredInv.map(a => renderActionCard(a))}
                     </div>
                 </div>
 
                 <div>
-                    <h4 className="text-sm font-bold text-gray-500 mb-2 uppercase tracking-widest">Perseguição</h4>
+                    <h4 className="text-sm font-bold text-ordem-text-muted mb-2 uppercase tracking-widest">Perseguição</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {filteredChase.map(a => renderActionCard(a))}
                     </div>
                 </div>
 
                 <div>
-                    <h4 className="text-sm font-bold text-gray-500 mb-2 uppercase tracking-widest">Furtividade</h4>
+                    <h4 className="text-sm font-bold text-ordem-text-muted mb-2 uppercase tracking-widest">Furtividade</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {filteredStealth.map(a => renderActionCard(a))}
                     </div>

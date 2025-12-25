@@ -33,10 +33,10 @@ export const SkillSelectorModal: React.FC<SkillSelectorModalProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-      <div className="bg-zinc-900 border border-zinc-700 rounded-xl max-w-md w-full p-6 shadow-2xl">
+    <div className="fixed inset-0 bg-ordem-black/80 flex items-center justify-center z-50 p-4">
+      <div className="bg-ordem-ooze border border-ordem-border-light rounded-xl max-w-md w-full p-6 shadow-2xl">
         <h3 className="text-xl font-bold text-white mb-2">{title ?? 'Nova Perícia Treinada'}</h3>
-        <p className="text-zinc-400 text-sm mb-4">
+        <p className="text-ordem-text-secondary text-sm mb-4">
           {description ?? 'Seu Intelecto aumentou! Escolha uma nova perícia para se tornar Treinado.'}
         </p>
 
@@ -47,8 +47,8 @@ export const SkillSelectorModal: React.FC<SkillSelectorModalProps> = ({
               onClick={() => setSelected(skill)}
               className={`w-full text-left p-3 rounded border transition-all ${
                 selected === skill
-                  ? 'bg-zinc-800 border-green-500 text-white'
-                  : 'bg-zinc-950/50 border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
+                  ? 'bg-ordem-ooze border-green-500 text-white'
+                  : 'bg-ordem-black-deep/50 border-ordem-border text-ordem-text-secondary hover:bg-ordem-ooze hover:text-ordem-white'
               }`}
             >
               {skill}
@@ -60,7 +60,7 @@ export const SkillSelectorModal: React.FC<SkillSelectorModalProps> = ({
           {onDefer && (
             <button
               onClick={onDefer}
-              className="w-1/3 py-3 border border-zinc-600 text-zinc-400 hover:text-white hover:border-white rounded transition-colors font-bold"
+              className="w-1/3 py-3 border border-ordem-text-muted text-ordem-text-secondary hover:text-white hover:border-white rounded transition-colors font-bold"
             >
               Depois
             </button>

@@ -10,9 +10,9 @@ export const AgentList: React.FC = () => {
 
   if (fichas.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+      <div className="flex flex-col items-center justify-center h-64 text-ordem-text-muted">
         <p className="font-mono text-lg">Nenhum agente registrado.</p>
-        <p className="text-xs text-gray-600 mt-2">Crie fichas na aba &quot;Agente&quot; para vê-las aqui.</p>
+        <p className="text-xs text-ordem-text-muted mt-2">Crie fichas na aba &quot;Agente&quot; para vê-las aqui.</p>
       </div>
     );
   }
@@ -30,7 +30,7 @@ export const AgentList: React.FC = () => {
 
   return (
     <div className="p-4 pb-20 space-y-4">
-      <div className="text-xs font-mono text-zinc-500 uppercase tracking-widest">
+      <div className="text-xs font-mono text-ordem-text-muted uppercase tracking-widest">
         {ordenadas.length} ficha(s)
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -106,7 +106,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
 
   return (
     <>
-    <div className="border p-4 rounded transition-all duration-300 group relative overflow-hidden flex flex-col gap-4 bg-black/60 border-gray-800 hover:border-gray-600">
+    <div className="border p-4 rounded transition-all duration-300 group relative overflow-hidden flex flex-col gap-4 bg-ordem-black/60 border-ordem-border hover:border-ordem-border-light">
       {issueSummary.total > 0 && (
         <div
           className={`absolute top-3 right-3 px-2 py-1 rounded border text-[10px] font-mono tracking-widest z-20 ${
@@ -123,12 +123,12 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
       <div className="flex justify-between items-start">
         <div>
             <h3 className="text-lg font-serif leading-tight truncate text-gray-200" title={nome}>{nome}</h3>
-            <p className="text-xs font-mono text-gray-500">
-                {classe} <span className="text-gray-700">|</span> {nex}% <span className="text-gray-700">|</span> {patente}
+            <p className="text-xs font-mono text-ordem-text-muted">
+                {classe} <span className="text-ordem-border-light">|</span> {nex}% <span className="text-ordem-border-light">|</span> {patente}
             </p>
         </div>
-        <div className="text-right bg-gray-900/50 px-2 py-1 rounded border border-gray-800">
-            <div className="text-[10px] font-mono text-gray-500 uppercase">DEFESA</div>
+        <div className="text-right bg-ordem-ooze/50 px-2 py-1 rounded border border-ordem-border">
+            <div className="text-[10px] font-mono text-ordem-text-muted uppercase">DEFESA</div>
             <div className="text-xl font-bold text-white leading-none">{defesa}</div>
         </div>
       </div>
@@ -136,7 +136,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
       {/* Stats Grid */}
       <div className="grid grid-cols-3 gap-2">
         {/* PV */}
-        <div className="relative overflow-hidden bg-black/40 border border-red-900/30 p-2 rounded flex flex-col items-center justify-between group/stat h-20">
+        <div className="relative overflow-hidden bg-ordem-black/40 border border-red-900/30 p-2 rounded flex flex-col items-center justify-between group/stat h-20">
           {/* Bar Background */}
           <div className="absolute bottom-0 left-0 w-full bg-red-900/20 h-full z-0" />
           {/* Bar Fill */}
@@ -148,49 +148,49 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
           <div className="relative z-10 flex flex-col items-center w-full">
             <div className="text-[10px] font-mono text-red-400 uppercase mb-1">PV</div>
             <div className="font-bold text-white leading-none text-xl">
-                {pv.atual}<span className="text-xs text-gray-500">/{pv.max}</span>
+                {pv.atual}<span className="text-xs text-ordem-text-muted">/{pv.max}</span>
             </div>
           </div>
           
           {/* Quick Actions */}
           <div className="relative z-10 flex gap-1 mt-1">
-            <button onClick={() => adjustStat('pv', -1)} className="w-6 h-6 flex items-center justify-center bg-black/60 hover:bg-red-900/80 text-red-200 rounded text-xs border border-red-900/50 transition-colors">-1</button>
-            <button onClick={() => adjustStat('pv', 1)} className="w-6 h-6 flex items-center justify-center bg-black/60 hover:bg-red-900/80 text-red-200 rounded text-xs border border-red-900/50 transition-colors">+1</button>
+            <button onClick={() => adjustStat('pv', -1)} className="w-6 h-6 flex items-center justify-center bg-ordem-black/60 hover:bg-red-900/80 text-red-200 rounded text-xs border border-red-900/50 transition-colors">-1</button>
+            <button onClick={() => adjustStat('pv', 1)} className="w-6 h-6 flex items-center justify-center bg-ordem-black/60 hover:bg-red-900/80 text-red-200 rounded text-xs border border-red-900/50 transition-colors">+1</button>
           </div>
         </div>
 
         {/* SAN / PD */}
-        <div className={`relative overflow-hidden bg-black/40 border p-2 rounded flex flex-col items-center justify-between h-20 ${usesPd ? 'border-gray-700' : 'border-blue-900/30'}`}>
+        <div className={`relative overflow-hidden bg-ordem-black/40 border p-2 rounded flex flex-col items-center justify-between h-20 ${usesPd ? 'border-ordem-border-light' : 'border-blue-900/30'}`}>
           {/* Bar Background */}
-          <div className={`absolute bottom-0 left-0 w-full h-full z-0 ${usesPd ? 'bg-gray-800/20' : 'bg-blue-900/20'}`} />
+          <div className={`absolute bottom-0 left-0 w-full h-full z-0 ${usesPd ? 'bg-ordem-ooze/20' : 'bg-blue-900/20'}`} />
           {/* Bar Fill */}
           <div 
-            className={`absolute bottom-0 left-0 w-full transition-all duration-500 ease-out z-0 border-t ${usesPd ? 'bg-gray-500/20 border-gray-400/30' : 'bg-blue-600/20 border-blue-500/30'}`}
+            className={`absolute bottom-0 left-0 w-full transition-all duration-500 ease-out z-0 border-t ${usesPd ? 'bg-ordem-text-muted/20 border-ordem-text-secondary/30' : 'bg-blue-600/20 border-blue-500/30'}`}
             style={{ height: `${usesPd ? `${Math.min(100, ((pd?.atual ?? 0) / (pdMax || 1)) * 100)}%` : `${Math.min(100, (san.atual / san.max) * 100)}%`}` }}
           />
 
           <div className="relative z-10 flex flex-col items-center w-full">
-            <div className={`text-[10px] font-mono uppercase mb-1 ${usesPd ? 'text-gray-400' : 'text-blue-400'}`}>
+            <div className={`text-[10px] font-mono uppercase mb-1 ${usesPd ? 'text-ordem-text-secondary' : 'text-blue-400'}`}>
                 {usesPd ? 'PD' : 'SAN'}
             </div>
             <div className="font-bold text-white leading-none text-xl">
                 {usesPd ? (pd?.atual ?? 0) : san.atual}
-                <span className="text-xs text-gray-500">/{usesPd ? pdMax : san.max}</span>
+                <span className="text-xs text-ordem-text-muted">/{usesPd ? pdMax : san.max}</span>
             </div>
           </div>
 
           <div className="relative z-10 flex gap-1 mt-1">
             <button 
                 onClick={() => adjustStat(usesPd ? 'pd' : 'san', -1)} 
-                className={`w-6 h-6 flex items-center justify-center rounded text-xs border transition-colors bg-black/60
-                    ${usesPd ? 'hover:bg-gray-700 text-gray-300 border-gray-600' : 'hover:bg-blue-900/80 text-blue-200 border-blue-900/50'}`}
+                className={`w-6 h-6 flex items-center justify-center rounded text-xs border transition-colors bg-ordem-black/60
+                    ${usesPd ? 'hover:bg-ordem-border-light text-ordem-white-muted border-ordem-border-light' : 'hover:bg-blue-900/80 text-blue-200 border-blue-900/50'}`}
             >
                 -1
             </button>
             <button 
                 onClick={() => adjustStat(usesPd ? 'pd' : 'san', 1)} 
-                className={`w-6 h-6 flex items-center justify-center rounded text-xs border transition-colors bg-black/60
-                    ${usesPd ? 'hover:bg-gray-700 text-gray-300 border-gray-600' : 'hover:bg-blue-900/80 text-blue-200 border-blue-900/50'}`}
+                className={`w-6 h-6 flex items-center justify-center rounded text-xs border transition-colors bg-ordem-black/60
+                    ${usesPd ? 'hover:bg-ordem-border-light text-ordem-white-muted border-ordem-border-light' : 'hover:bg-blue-900/80 text-blue-200 border-blue-900/50'}`}
             >
                 +1
             </button>
@@ -199,7 +199,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
 
         {/* PE (Hidden if using PD) */}
         {!usesPd && (
-        <div className="relative overflow-hidden bg-black/40 border border-yellow-900/30 p-2 rounded flex flex-col items-center justify-between h-20">
+        <div className="relative overflow-hidden bg-ordem-black/40 border border-yellow-900/30 p-2 rounded flex flex-col items-center justify-between h-20">
           {/* Bar Background */}
           <div className="absolute bottom-0 left-0 w-full bg-yellow-900/20 h-full z-0" />
           {/* Bar Fill */}
@@ -211,33 +211,33 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
           <div className="relative z-10 flex flex-col items-center w-full">
             <div className="text-[10px] font-mono text-yellow-400 uppercase mb-1">PE</div>
             <div className="font-bold text-white leading-none text-xl">
-                {pe.atual}<span className="text-xs text-gray-500">/{pe.max}</span>
+                {pe.atual}<span className="text-xs text-ordem-text-muted">/{pe.max}</span>
             </div>
           </div>
 
           <div className="relative z-10 flex gap-1 mt-1">
-            <button onClick={() => adjustStat('pe', -1)} className="w-6 h-6 flex items-center justify-center bg-black/60 hover:bg-yellow-900/80 text-yellow-200 rounded text-xs border border-yellow-900/50 transition-colors">-1</button>
-            <button onClick={() => adjustStat('pe', 1)} className="w-6 h-6 flex items-center justify-center bg-black/60 hover:bg-yellow-900/80 text-yellow-200 rounded text-xs border border-yellow-900/50 transition-colors">+1</button>
+            <button onClick={() => adjustStat('pe', -1)} className="w-6 h-6 flex items-center justify-center bg-ordem-black/60 hover:bg-yellow-900/80 text-yellow-200 rounded text-xs border border-yellow-900/50 transition-colors">-1</button>
+            <button onClick={() => adjustStat('pe', 1)} className="w-6 h-6 flex items-center justify-center bg-ordem-black/60 hover:bg-yellow-900/80 text-yellow-200 rounded text-xs border border-yellow-900/50 transition-colors">+1</button>
           </div>
         </div>
         )}
       </div>
 
       {/* Attributes Mini */}
-      <div className="flex justify-between border-t border-gray-800 pt-3 mt-auto">
+      <div className="flex justify-between border-t border-ordem-border pt-3 mt-auto">
         {Object.entries(atributos).map(([key, value]) => (
           <div key={key} className="flex flex-col items-center">
-            <span className="text-[10px] font-mono text-gray-500">{key}</span>
-            <span className="text-sm font-bold text-gray-300">{value}</span>
+            <span className="text-[10px] font-mono text-ordem-text-muted">{key}</span>
+            <span className="text-sm font-bold text-ordem-white-muted">{value}</span>
           </div>
         ))}
       </div>
 
       {/* Inventory Quick View */}
-      <div className="border-t border-gray-800 pt-2">
+      <div className="border-t border-ordem-border pt-2">
         <button 
             onClick={() => setShowInventory(!showInventory)}
-            className="w-full text-xs font-mono text-gray-500 hover:text-white flex items-center justify-between"
+            className="w-full text-xs font-mono text-ordem-text-muted hover:text-white flex items-center justify-between"
         >
             <span>INVENTÁRIO ({equipamentos.length})</span>
             <span>{showInventory ? '▲' : '▼'}</span>
@@ -247,16 +247,16 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
             <div className="mt-2 animate-in slide-in-from-top-2 duration-200">
                 <div className="max-h-32 overflow-y-auto custom-scrollbar mb-2 space-y-1">
                     {equipamentos.map((item, idx) => (
-                        <div key={idx} className="text-xs text-gray-400 flex justify-between border-b border-gray-800 pb-1">
+                        <div key={idx} className="text-xs text-ordem-text-secondary flex justify-between border-b border-ordem-border pb-1">
                             <span>{item.nome}</span>
-                            <span className="text-gray-600">Cat {item.categoria}</span>
+                            <span className="text-ordem-text-muted">Cat {item.categoria}</span>
                         </div>
                     ))}
-                    {equipamentos.length === 0 && <p className="text-xs text-gray-600 italic">Vazio</p>}
+                    {equipamentos.length === 0 && <p className="text-xs text-ordem-text-muted italic">Vazio</p>}
                 </div>
                 <button 
                     onClick={() => setIsItemModalOpen(true)}
-                    className="w-full bg-gray-800 hover:bg-gray-700 text-white text-xs py-1 rounded border border-gray-700 transition-colors"
+                    className="w-full bg-ordem-ooze hover:bg-ordem-border-light text-white text-xs py-1 rounded border border-ordem-border-light transition-colors"
                 >
                     + Adicionar Item
                 </button>

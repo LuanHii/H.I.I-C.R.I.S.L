@@ -62,14 +62,14 @@ export const ItemManager: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col p-6 max-w-7xl mx-auto w-full">
-      <div className="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
+      <div className="flex justify-between items-center mb-6 border-b border-ordem-border pb-4">
         <div className="flex gap-4">
           <button
             onClick={() => setActiveTab('items')}
             className={`px-4 py-2 font-mono text-sm transition-colors ${
               activeTab === 'items' 
                 ? 'text-ordem-red border-b-2 border-ordem-red' 
-                : 'text-gray-500 hover:text-gray-300'
+                : 'text-ordem-text-muted hover:text-ordem-white-muted'
             }`}
           >
             ITENS GERAIS
@@ -79,7 +79,7 @@ export const ItemManager: React.FC = () => {
             className={`px-4 py-2 font-mono text-sm transition-colors ${
               activeTab === 'weapons' 
                 ? 'text-ordem-red border-b-2 border-ordem-red' 
-                : 'text-gray-500 hover:text-gray-300'
+                : 'text-ordem-text-muted hover:text-ordem-white-muted'
             }`}
           >
             ARMAS
@@ -97,15 +97,15 @@ export const ItemManager: React.FC = () => {
         {activeTab === 'items' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {allItems.map((item, idx) => (
-              <div key={idx} className="bg-black/40 border border-gray-800 p-4 rounded hover:border-gray-600 transition-colors group relative">
+              <div key={idx} className="bg-ordem-black/40 border border-ordem-border p-4 rounded hover:border-ordem-border-light transition-colors group relative">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-bold text-gray-200 group-hover:text-white">{item.nome}</h3>
-                  <span className="text-xs font-mono text-gray-500 border border-gray-800 px-1 rounded">
+                  <span className="text-xs font-mono text-ordem-text-muted border border-ordem-border px-1 rounded">
                     Cat {item.categoria}
                   </span>
                 </div>
-                <p className="text-sm text-gray-400 mb-3 line-clamp-2">{item.descricao}</p>
-                <div className="flex gap-2 text-xs text-gray-500 font-mono">
+                <p className="text-sm text-ordem-text-secondary mb-3 line-clamp-2">{item.descricao}</p>
+                <div className="flex gap-2 text-xs text-ordem-text-muted font-mono">
                   <span>{item.tipo}</span>
                   <span>•</span>
                   <span>{item.espaco} slots</span>
@@ -125,19 +125,19 @@ export const ItemManager: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {allWeapons.map((weapon, idx) => (
-              <div key={idx} className="bg-black/40 border border-gray-800 p-4 rounded hover:border-gray-600 transition-colors group relative">
+              <div key={idx} className="bg-ordem-black/40 border border-ordem-border p-4 rounded hover:border-ordem-border-light transition-colors group relative">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-bold text-gray-200 group-hover:text-white">{weapon.nome}</h3>
-                  <span className="text-xs font-mono text-gray-500 border border-gray-800 px-1 rounded">
+                  <span className="text-xs font-mono text-ordem-text-muted border border-ordem-border px-1 rounded">
                     Cat {weapon.categoria}
                   </span>
                 </div>
-                <p className="text-sm text-gray-400 mb-3 line-clamp-2">{weapon.descricao}</p>
-                <div className="grid grid-cols-2 gap-2 text-xs text-gray-500 font-mono bg-black/20 p-2 rounded">
-                  <div>Dano: <span className="text-gray-300">{weapon.stats.Dano_Base}</span></div>
-                  <div>Crítico: <span className="text-gray-300">{weapon.stats.Critico}</span></div>
-                  <div>Tipo: <span className="text-gray-300">{weapon.stats.Dano_Tipo}</span></div>
-                  <div>Alcance: <span className="text-gray-300">{weapon.stats.Alcance}</span></div>
+                <p className="text-sm text-ordem-text-secondary mb-3 line-clamp-2">{weapon.descricao}</p>
+                <div className="grid grid-cols-2 gap-2 text-xs text-ordem-text-muted font-mono bg-ordem-black/20 p-2 rounded">
+                  <div>Dano: <span className="text-ordem-white-muted">{weapon.stats.Dano_Base}</span></div>
+                  <div>Crítico: <span className="text-ordem-white-muted">{weapon.stats.Critico}</span></div>
+                  <div>Tipo: <span className="text-ordem-white-muted">{weapon.stats.Dano_Tipo}</span></div>
+                  <div>Alcance: <span className="text-ordem-white-muted">{weapon.stats.Alcance}</span></div>
                 </div>
                 {customWeapons.some(w => w.nome === weapon.nome) && (
                   <button 
@@ -155,9 +155,9 @@ export const ItemManager: React.FC = () => {
       </div>
 
       {isCreating && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-gray-700 p-6 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-serif text-white mb-6 border-b border-gray-800 pb-2">
+        <div className="fixed inset-0 bg-ordem-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-ordem-ooze border border-ordem-border-light p-6 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-serif text-white mb-6 border-b border-ordem-border pb-2">
               Criar Novo {activeTab === 'items' ? 'Item' : 'Arma'}
             </h2>
             
@@ -165,41 +165,41 @@ export const ItemManager: React.FC = () => {
               {activeTab === 'items' ? (
                 <>
                   <div>
-                    <label className="block text-xs text-gray-500 uppercase mb-1">Nome</label>
+                    <label className="block text-xs text-ordem-text-muted uppercase mb-1">Nome</label>
                     <input 
                       type="text" 
                       value={newItem.nome || ''} 
                       onChange={e => setNewItem({...newItem, nome: e.target.value})}
-                      className="w-full bg-black/50 border border-gray-700 rounded p-2 text-white focus:border-ordem-red outline-none"
+                      className="w-full bg-ordem-black/50 border border-ordem-border-light rounded p-2 text-white focus:border-ordem-red outline-none"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs text-gray-500 uppercase mb-1">Categoria</label>
+                      <label className="block text-xs text-ordem-text-muted uppercase mb-1">Categoria</label>
                       <select 
                         value={newItem.categoria} 
                         onChange={e => setNewItem({...newItem, categoria: Number(e.target.value) as any})}
-                        className="w-full bg-black/50 border border-gray-700 rounded p-2 text-white focus:border-ordem-red outline-none"
+                        className="w-full bg-ordem-black/50 border border-ordem-border-light rounded p-2 text-white focus:border-ordem-red outline-none"
                       >
                         {[0, 1, 2, 3, 4].map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-500 uppercase mb-1">Espaço</label>
+                      <label className="block text-xs text-ordem-text-muted uppercase mb-1">Espaço</label>
                       <input 
                         type="number" 
                         value={newItem.espaco} 
                         onChange={e => setNewItem({...newItem, espaco: Number(e.target.value)})}
-                        className="w-full bg-black/50 border border-gray-700 rounded p-2 text-white focus:border-ordem-red outline-none"
+                        className="w-full bg-ordem-black/50 border border-ordem-border-light rounded p-2 text-white focus:border-ordem-red outline-none"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 uppercase mb-1">Tipo</label>
+                    <label className="block text-xs text-ordem-text-muted uppercase mb-1">Tipo</label>
                     <select 
                       value={newItem.tipo} 
                       onChange={e => setNewItem({...newItem, tipo: e.target.value as any})}
-                      className="w-full bg-black/50 border border-gray-700 rounded p-2 text-white focus:border-ordem-red outline-none"
+                      className="w-full bg-ordem-black/50 border border-ordem-border-light rounded p-2 text-white focus:border-ordem-red outline-none"
                     >
                       <option value="Geral">Geral</option>
                       <option value="Acessório">Acessório</option>
@@ -210,126 +210,126 @@ export const ItemManager: React.FC = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 uppercase mb-1">Descrição</label>
+                    <label className="block text-xs text-ordem-text-muted uppercase mb-1">Descrição</label>
                     <textarea 
                       value={newItem.descricao || ''} 
                       onChange={e => setNewItem({...newItem, descricao: e.target.value})}
-                      className="w-full bg-black/50 border border-gray-700 rounded p-2 text-white focus:border-ordem-red outline-none h-32"
+                      className="w-full bg-ordem-black/50 border border-ordem-border-light rounded p-2 text-white focus:border-ordem-red outline-none h-32"
                     />
                   </div>
                 </>
               ) : (
                 <>
                   <div>
-                    <label className="block text-xs text-gray-500 uppercase mb-1">Nome</label>
+                    <label className="block text-xs text-ordem-text-muted uppercase mb-1">Nome</label>
                     <input 
                       type="text" 
                       value={newWeapon.nome || ''} 
                       onChange={e => setNewWeapon({...newWeapon, nome: e.target.value})}
-                      className="w-full bg-black/50 border border-gray-700 rounded p-2 text-white focus:border-ordem-red outline-none"
+                      className="w-full bg-ordem-black/50 border border-ordem-border-light rounded p-2 text-white focus:border-ordem-red outline-none"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs text-gray-500 uppercase mb-1">Categoria</label>
+                      <label className="block text-xs text-ordem-text-muted uppercase mb-1">Categoria</label>
                       <select 
                         value={newWeapon.categoria} 
                         onChange={e => setNewWeapon({...newWeapon, categoria: Number(e.target.value) as any})}
-                        className="w-full bg-black/50 border border-gray-700 rounded p-2 text-white focus:border-ordem-red outline-none"
+                        className="w-full bg-ordem-black/50 border border-ordem-border-light rounded p-2 text-white focus:border-ordem-red outline-none"
                       >
                         {[0, 1, 2, 3, 4].map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-500 uppercase mb-1">Espaço</label>
+                      <label className="block text-xs text-ordem-text-muted uppercase mb-1">Espaço</label>
                       <input 
                         type="number" 
                         value={newWeapon.espaco} 
                         onChange={e => setNewWeapon({...newWeapon, espaco: Number(e.target.value)})}
-                        className="w-full bg-black/50 border border-gray-700 rounded p-2 text-white focus:border-ordem-red outline-none"
+                        className="w-full bg-ordem-black/50 border border-ordem-border-light rounded p-2 text-white focus:border-ordem-red outline-none"
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs text-gray-500 uppercase mb-1">Tipo</label>
+                      <label className="block text-xs text-ordem-text-muted uppercase mb-1">Tipo</label>
                       <input 
                         type="text" 
                         value={newWeapon.tipo} 
                         onChange={e => setNewWeapon({...newWeapon, tipo: e.target.value})}
-                        className="w-full bg-black/50 border border-gray-700 rounded p-2 text-white focus:border-ordem-red outline-none"
+                        className="w-full bg-ordem-black/50 border border-ordem-border-light rounded p-2 text-white focus:border-ordem-red outline-none"
                         placeholder="Ex: Tática"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-500 uppercase mb-1">Proficiência</label>
+                      <label className="block text-xs text-ordem-text-muted uppercase mb-1">Proficiência</label>
                       <input 
                         type="text" 
                         value={newWeapon.proficiencia} 
                         onChange={e => setNewWeapon({...newWeapon, proficiencia: e.target.value})}
-                        className="w-full bg-black/50 border border-gray-700 rounded p-2 text-white focus:border-ordem-red outline-none"
+                        className="w-full bg-ordem-black/50 border border-ordem-border-light rounded p-2 text-white focus:border-ordem-red outline-none"
                         placeholder="Ex: Armas Táticas"
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 bg-black/20 p-4 rounded border border-gray-800">
+                  <div className="grid grid-cols-2 gap-4 bg-ordem-black/20 p-4 rounded border border-ordem-border">
                     <div>
-                      <label className="block text-xs text-gray-500 uppercase mb-1">Dano</label>
+                      <label className="block text-xs text-ordem-text-muted uppercase mb-1">Dano</label>
                       <input 
                         type="text" 
                         value={newWeapon.stats?.Dano_Base || ''} 
                         onChange={e => setNewWeapon({...newWeapon, stats: {...newWeapon.stats!, Dano_Base: e.target.value}})}
-                        className="w-full bg-black/50 border border-gray-700 rounded p-2 text-white focus:border-ordem-red outline-none"
+                        className="w-full bg-ordem-black/50 border border-ordem-border-light rounded p-2 text-white focus:border-ordem-red outline-none"
                         placeholder="Ex: 1d8"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-500 uppercase mb-1">Crítico</label>
+                      <label className="block text-xs text-ordem-text-muted uppercase mb-1">Crítico</label>
                       <input 
                         type="text" 
                         value={newWeapon.stats?.Critico || ''} 
                         onChange={e => setNewWeapon({...newWeapon, stats: {...newWeapon.stats!, Critico: e.target.value}})}
-                        className="w-full bg-black/50 border border-gray-700 rounded p-2 text-white focus:border-ordem-red outline-none"
+                        className="w-full bg-ordem-black/50 border border-ordem-border-light rounded p-2 text-white focus:border-ordem-red outline-none"
                         placeholder="Ex: 19/x2"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-500 uppercase mb-1">Tipo Dano</label>
+                      <label className="block text-xs text-ordem-text-muted uppercase mb-1">Tipo Dano</label>
                       <input 
                         type="text" 
                         value={newWeapon.stats?.Dano_Tipo || ''} 
                         onChange={e => setNewWeapon({...newWeapon, stats: {...newWeapon.stats!, Dano_Tipo: e.target.value}})}
-                        className="w-full bg-black/50 border border-gray-700 rounded p-2 text-white focus:border-ordem-red outline-none"
+                        className="w-full bg-ordem-black/50 border border-ordem-border-light rounded p-2 text-white focus:border-ordem-red outline-none"
                         placeholder="Ex: Corte"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-500 uppercase mb-1">Alcance</label>
+                      <label className="block text-xs text-ordem-text-muted uppercase mb-1">Alcance</label>
                       <input 
                         type="text" 
                         value={newWeapon.stats?.Alcance || ''} 
                         onChange={e => setNewWeapon({...newWeapon, stats: {...newWeapon.stats!, Alcance: e.target.value}})}
-                        className="w-full bg-black/50 border border-gray-700 rounded p-2 text-white focus:border-ordem-red outline-none"
+                        className="w-full bg-ordem-black/50 border border-ordem-border-light rounded p-2 text-white focus:border-ordem-red outline-none"
                         placeholder="Ex: Curto"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 uppercase mb-1">Descrição</label>
+                    <label className="block text-xs text-ordem-text-muted uppercase mb-1">Descrição</label>
                     <textarea 
                       value={newWeapon.descricao || ''} 
                       onChange={e => setNewWeapon({...newWeapon, descricao: e.target.value})}
-                      className="w-full bg-black/50 border border-gray-700 rounded p-2 text-white focus:border-ordem-red outline-none h-32"
+                      className="w-full bg-ordem-black/50 border border-ordem-border-light rounded p-2 text-white focus:border-ordem-red outline-none h-32"
                     />
                   </div>
                 </>
               )}
             </div>
 
-            <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-gray-800">
+            <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-ordem-border">
               <button 
                 onClick={() => setIsCreating(false)}
-                className="px-4 py-2 text-gray-400 hover:text-white transition-colors font-mono text-sm"
+                className="px-4 py-2 text-ordem-text-secondary hover:text-white transition-colors font-mono text-sm"
               >
                 CANCELAR
               </button>

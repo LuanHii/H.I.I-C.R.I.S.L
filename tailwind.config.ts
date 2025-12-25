@@ -10,16 +10,28 @@ const config: Config = {
     extend: {
       colors: {
         ordem: {
-          black: "#0A0A0A", // Preto Óptico
-          white: "#F0F0F0", // Branco Gélido
+          black: "#1A1A1A", // Fundo escuro (mais claro para legibilidade)
+          "black-deep": "#121212", // Fundo mais profundo para contraste
+          white: "#F5F5F5", // Branco principal
+          "white-muted": "#E0E0E0", // Branco secundário
           green: "#00FF00", // Verde Terminal
-          red: "#8B0000",   // Vermelho Sangue
+          "green-muted": "#66FF66", // Verde mais suave
+          red: "#DC2626",   // Vermelho Sangue (mais vibrante)
+          "red-dark": "#8B0000",   // Vermelho escuro original
           yellow: "#FFFFCC", // Amarelo Estático
           gold: "#FFD700",   // Dourado PE
-          purple: "#9D00FF", // Roxo Ocultista
-          blue: "#00BFFF",   // Azul Sanidade
-          cyan: "#00FFFF",  // Ciano Elétrico
-          ooze: "#2E2E2E",  // Lodo
+          purple: "#A855F7", // Roxo Ocultista (mais vibrante)
+          blue: "#3B82F6",   // Azul Sanidade (mais vibrante)
+          cyan: "#22D3EE",  // Ciano Elétrico
+          ooze: "#3A3A3A",  // Lodo (mais claro)
+          "ooze-light": "#4A4A4A", // Lodo claro para bordas
+          // Cores de texto para melhor contraste
+          "text-primary": "#FFFFFF", // Texto principal
+          "text-secondary": "#B0B0B0", // Texto secundário (mais claro que zinc-400)
+          "text-muted": "#888888", // Texto sutil
+          // Cores de borda
+          "border": "#404040", // Borda padrão
+          "border-light": "#505050", // Borda mais clara
         },
       },
       fontFamily: {
