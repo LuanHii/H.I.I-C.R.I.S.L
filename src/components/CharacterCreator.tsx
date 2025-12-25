@@ -231,6 +231,7 @@ export default function CharacterCreator({
       contagem[catEfetiva]++;
     }
     return contagem;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [equipamentosSelecionados, modificacoesArmas]);
 
   // Verifica se pode adicionar mais uma modificação a uma arma
@@ -1340,7 +1341,7 @@ export default function CharacterCreator({
                     return (
                       <div className="col-span-2 text-center py-8 text-ordem-text-muted">
                         <p className="text-sm">Nenhuma arma selecionada.</p>
-                        <p className="text-xs mt-2">Adicione armas na aba "Armas" para aplicar modificações.</p>
+                        <p className="text-xs mt-2">Adicione armas na aba &quot;Armas&quot; para aplicar modificações.</p>
                       </div>
                     );
                   }
