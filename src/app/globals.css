@@ -154,6 +154,26 @@ body {
   [role="button"]:active {
     transform: scale(0.98);
   }
+
+  /* Prevent text overflow on mobile */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  span,
+  div {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Container padding for mobile */
+  .mobile-container {
+    padding-left: max(0.75rem, var(--safe-area-inset-left));
+    padding-right: max(0.75rem, var(--safe-area-inset-right));
+  }
 }
 
 /* Classes utilitárias para melhor contraste */

@@ -609,14 +609,14 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                 const canDecrease = isEditingMode || (!readOnly && agent.pontosAtributoPendentes && agent.pontosAtributoPendentes < 0 && val > 0);
 
                                 return (
-                                    <div key={key} className="flex flex-col items-center flex-shrink-0 w-16 sm:w-auto sm:flex-1 bg-ordem-black-deep/50 p-2 sm:p-3 rounded-lg border border-ordem-border-light relative group">
+                                    <div key={key} className="flex flex-col items-center flex-shrink-0 w-20 sm:w-auto sm:flex-1 bg-ordem-black-deep/50 p-2 sm:p-3 rounded-lg border border-ordem-border-light relative group">
                                         <span className="text-[10px] sm:text-xs font-mono text-ordem-text-secondary uppercase mb-1">{key}</span>
                                         <span className="text-xl sm:text-2xl font-bold text-zinc-100">{val}</span>
 
                                         {canIncrease && (
                                             <button
                                                 onClick={() => handleAttributeChange(key as AtributoKey, true)}
-                                                className={`absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center shadow-lg transition-colors ${isEditingMode
+                                                className={`absolute -top-3 -right-3 w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-colors z-10 touch-target ${isEditingMode
                                                     ? 'bg-ordem-red hover:bg-red-700 text-white'
                                                     : 'bg-green-600 hover:bg-green-500 text-white'
                                                     }`}
@@ -628,8 +628,8 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                         {canDecrease && (
                                             <button
                                                 onClick={() => handleAttributeChange(key as AtributoKey, false)}
-                                                className={`absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center shadow-lg transition-colors ${isEditingMode
-                                                    ? 'bg-ordem-border-light hover:bg-ordem-text-muted text-white right-auto -left-2'
+                                                className={`absolute -top-3 -right-3 w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-colors z-10 touch-target ${isEditingMode
+                                                    ? 'bg-ordem-border-light hover:bg-ordem-text-muted text-white right-auto -left-3'
                                                     : 'bg-red-600 hover:bg-red-500 text-white'
                                                     }`}
                                                 title={isEditingMode ? "Override (-)" : "Diminuir Atributo"}
@@ -671,11 +671,11 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                             {attr} <span className="text-ordem-text-secondary">({agent.atributos[attr]})</span>
                                         </h4>
                                         {/* Grid responsivo - 1 coluna em mobile, mais em desktop */}
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2">
                                             {skills.map(([nome, detalhe]) => (
                                                 <div
                                                     key={nome}
-                                                    className={`flex justify-between items-center p-2.5 sm:p-2 bg-ordem-black-deep/30 rounded-lg border transition-colors gap-2 ${isEditingMode
+                                                    className={`flex justify-between items-center p-3 sm:p-2 bg-ordem-black-deep/30 rounded-lg border transition-colors gap-3 ${isEditingMode
                                                         ? 'border-ordem-border-light hover:border-ordem-text-muted'
                                                         : 'border-ordem-border-light/50 hover:border-ordem-text-muted'
                                                         }`}

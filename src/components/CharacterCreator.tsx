@@ -817,16 +817,18 @@ export default function CharacterCreator({
                             : 'border-ordem-border bg-ordem-black/20 hover:border-ordem-border-light'
                             }`}
                         >
-                          <div className="relative z-10">
-                            <h3 className={`text-lg sm:text-xl font-serif mb-1 sm:mb-2 ${classeSelecionada === nomeClasse ? 'text-white' : 'text-ordem-text-secondary group-hover:text-white'}`}>
-                              {nomeClasse}
-                            </h3>
-                            <ul className="text-[11px] sm:text-xs text-ordem-text-secondary space-y-0.5 sm:space-y-1 font-mono mb-2">
-                              <li>PV: {stats.pvInicial} (+{stats.pvPorNivel})</li>
-                              <li>PE: {stats.peInicial} (+{stats.pePorNivel})</li>
-                              <li>SAN: {stats.sanInicial} (+{stats.sanPorNivel})</li>
-                            </ul>
-                            <p className="text-[10px] text-ordem-text-muted leading-relaxed">
+                          <div className="relative z-10 flex flex-col h-full justify-between">
+                            <div>
+                              <h3 className={`text-base sm:text-lg font-serif mb-1 ${classeSelecionada === nomeClasse ? 'text-white' : 'text-ordem-text-secondary group-hover:text-white'}`}>
+                                {nomeClasse}
+                              </h3>
+                              <ul className="text-[10px] sm:text-xs text-ordem-text-secondary space-y-0.5 font-mono mb-1 sm:mb-2">
+                                <li>PV: {stats.pvInicial} (+{stats.pvPorNivel})</li>
+                                <li>PE: {stats.peInicial} (+{stats.pePorNivel})</li>
+                                <li>SAN: {stats.sanInicial} (+{stats.sanPorNivel})</li>
+                              </ul>
+                            </div>
+                            <p className="hidden md:block text-[10px] text-ordem-text-muted leading-relaxed mt-2">
                               {CLASSE_DESCRICOES[nomeClasse]}
                             </p>
                           </div>
@@ -884,39 +886,44 @@ export default function CharacterCreator({
                     )}
                   </div>
 
-                  {/* Seletor de NEX - largura fixa em desktop, largura total em mobile */}
-                  <div className="w-full lg:w-48 space-y-2">
-                    <label className="text-xs font-bold text-ordem-text-secondary uppercase tracking-widest">NEX Inicial</label>
-                    <select
-                      value={nivelSelecionado}
-                      onChange={(e) => setNivelSelecionado(Number(e.target.value))}
-                      className="w-full bg-ordem-black/50 border border-ordem-border-light p-4 text-white focus:border-ordem-red focus:outline-none focus:ring-1 focus:ring-ordem-red/50 transition-all font-mono rounded-lg touch-target"
-                    >
-                      {[5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 99].map(nex => (
-                        <option key={nex} value={nex}>{nex}%</option>
-                      ))}
-                    </select>
+                  {/* Seletor de NEX e Patente - grid em mobile */}
+                  <div className="w-full lg:w-48 space-y-2 mt-4 lg:mt-0">
+                    <div className="grid grid-cols-1 gap-3">
+                      <div>
+                        <label className="text-xs font-bold text-ordem-text-secondary uppercase tracking-widest block mb-2">NEX</label>
+                        <select
+                          value={nivelSelecionado}
+                          onChange={(e) => setNivelSelecionado(Number(e.target.value))}
+                          className="w-full bg-ordem-black/50 border border-ordem-border-light p-3 text-white focus:border-ordem-red focus:outline-none transition-all font-mono rounded-lg"
+                        >
+                          {[5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 99].map(nex => (
+                            <option key={nex} value={nex}>{nex}%</option>
+                          ))}
+                        </select>
+                      </div>
 
-                    {/* Seletor de Patente */}
-                    <label className="text-xs font-bold text-ordem-text-secondary uppercase tracking-widest mt-3 block">Patente</label>
-                    <select
-                      value={patenteSelecionada}
-                      onChange={(e) => setPatenteSelecionada(e.target.value as typeof patenteSelecionada)}
-                      className="w-full bg-ordem-black/50 border border-ordem-border-light p-3 text-white focus:border-ordem-red focus:outline-none focus:ring-1 focus:ring-ordem-red/50 transition-all font-mono rounded-lg touch-target text-sm"
-                    >
-                      {PATENTES.map(p => (
-                        <option key={p.nome} value={p.nome}>{p.icone} {p.nome}</option>
-                      ))}
-                    </select>
+                      <div>
+                        <label className="text-xs font-bold text-ordem-text-secondary uppercase tracking-widest block mb-2">Patente</label>
+                        <select
+                          value={patenteSelecionada}
+                          onChange={(e) => setPatenteSelecionada(e.target.value as typeof patenteSelecionada)}
+                          className="w-full bg-ordem-black/50 border border-ordem-border-light p-3 text-white focus:border-ordem-red focus:outline-none transition-all font-mono rounded-lg text-sm"
+                        >
+                          {PATENTES.map(p => (
+                            <option key={p.nome} value={p.nome}>{p.icone} {p.nome}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
 
                     {/* Info da patente selecionada */}
                     <div className={`text-center p-2 border rounded-lg bg-ordem-black/30 ${PATENTES.find(p => p.nome === patenteSelecionada)?.cor.replace('text-', 'border-') || 'border-ordem-border'
                       }`}>
-                      <div className="text-[10px] text-ordem-text-muted">
-                        {patenteSelecionada === 'Agente de Elite' ? 'Cat I-II: ∞ | Cat III: 3 | Cat IV: 1' :
-                          patenteSelecionada === 'Oficial de Operações' ? 'Cat I-II: ∞ | Cat III: 2' :
-                            patenteSelecionada === 'Agente Especial' ? 'Cat I: ∞ | Cat II: 2 | Cat III: 1' :
-                              patenteSelecionada === 'Operador' ? 'Cat I: 5 | Cat II: 1' :
+                      <div className="text-[9px] sm:text-[10px] text-ordem-text-muted">
+                        {patenteSelecionada === 'Agente de Elite' ? 'Cat I-II: ∞ | III: 3 | IV: 1' :
+                          patenteSelecionada === 'Oficial de Operações' ? 'Cat I-II: ∞ | III: 2' :
+                            patenteSelecionada === 'Agente Especial' ? 'Cat I: ∞ | II: 2 | III: 1' :
+                              patenteSelecionada === 'Operador' ? 'Cat I: 5 | II: 1' :
                                 'Cat I: 3'}
                       </div>
                     </div>
@@ -961,27 +968,27 @@ export default function CharacterCreator({
             </div>
 
             {/* Grid de atributos - responsível para mobile */}
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-4 md:gap-6 justify-items-center">
+            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-4 md:gap-6 justify-items-center">
               {(Object.entries(atributosTemp) as [keyof Atributos, number][]).map(([chave, valor]) => (
-                <div key={chave} className="flex flex-col items-center gap-2 w-full max-w-[100px]">
+                <div key={chave} className="flex sm:flex-col items-center gap-4 sm:gap-2 w-full max-w-sm sm:max-w-[100px] p-2 sm:p-0 bg-ordem-black/20 sm:bg-transparent rounded-lg border border-ordem-border/50 sm:border-0">
                   {/* Card do atributo */}
-                  <div className="w-full aspect-square sm:aspect-auto sm:h-28 bg-ordem-ooze/80 border border-ordem-border-light rounded-lg flex flex-col items-center justify-center relative">
+                  <div className="shrink-0 w-20 h-20 sm:w-full sm:h-28 aspect-square sm:aspect-auto bg-ordem-ooze/80 border border-ordem-border-light rounded-lg flex flex-col items-center justify-center relative">
                     <span className="text-[10px] sm:text-xs font-bold text-ordem-text-muted uppercase tracking-widest mb-1">{chave}</span>
                     <span className="text-3xl sm:text-4xl font-mono text-white">{valor}</span>
                   </div>
 
                   {/* Botões sempre visíveis e com tamanho adequado para touch */}
-                  <div className="flex gap-2 w-full">
+                  <div className="flex sm:flex-row flex-1 sm:flex-initial gap-2 w-full justify-between items-center sm:justify-center">
                     <button
                       onClick={() => atualizarAtributo(chave, -1)}
-                      className="flex-1 h-10 sm:h-9 bg-ordem-black border border-ordem-border-light text-ordem-text-secondary hover:text-white hover:border-white active:bg-ordem-ooze rounded-lg flex items-center justify-center text-lg font-bold touch-target-sm"
+                      className="flex-1 h-12 sm:h-9 bg-ordem-black border border-ordem-border-light text-ordem-text-secondary hover:text-white hover:border-white active:bg-ordem-ooze rounded-lg flex items-center justify-center text-xl sm:text-lg font-bold touch-target"
                       aria-label={`Diminuir ${chave}`}
                     >
                       −
                     </button>
                     <button
                       onClick={() => atualizarAtributo(chave, 1)}
-                      className="flex-1 h-10 sm:h-9 bg-ordem-black border border-ordem-border-light text-ordem-text-secondary hover:text-white hover:border-white active:bg-ordem-ooze rounded-lg flex items-center justify-center text-lg font-bold touch-target-sm"
+                      className="flex-1 h-12 sm:h-9 bg-ordem-black border border-ordem-border-light text-ordem-text-secondary hover:text-white hover:border-white active:bg-ordem-ooze rounded-lg flex items-center justify-center text-xl sm:text-lg font-bold touch-target"
                       aria-label={`Aumentar ${chave}`}
                     >
                       +
@@ -1005,21 +1012,21 @@ export default function CharacterCreator({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto custom-scrollbar pr-2 max-h-[400px]">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto custom-scrollbar pr-2 max-h-[60vh] sm:max-h-[400px]">
               {ORIGENS.map((origem) => (
                 <button
                   key={origem.nome}
                   onClick={() => setOrigemSelecionada(origem.nome)}
-                  className={`p-4 border text-left transition-all duration-200 rounded group ${origemSelecionada === origem.nome
+                  className={`p-4 border text-left transition-all duration-200 rounded-lg group ${origemSelecionada === origem.nome
                     ? 'border-ordem-gold bg-ordem-gold/10 shadow-[0_0_15px_rgba(255,215,0,0.1)]'
                     : 'border-ordem-border bg-ordem-black/40 hover:border-ordem-border-light'
                     }`}
                 >
-                  <div className={`font-bold mb-2 font-serif ${origemSelecionada === origem.nome ? 'text-ordem-gold' : 'text-ordem-white-muted group-hover:text-white'}`}>
+                  <div className={`font-bold mb-2 font-serif text-lg ${origemSelecionada === origem.nome ? 'text-ordem-gold' : 'text-ordem-white-muted group-hover:text-white'}`}>
                     {origem.nome}
                   </div>
                   <div className="text-xs text-ordem-text-muted space-y-2">
-                    <p className="line-clamp-2">{origem.pericias.join(', ')}</p>
+                    <p className="line-clamp-3">{origem.pericias.join(', ')}</p>
                     {origemSelecionada === origem.nome && (
                       <div className="pt-2 border-t border-ordem-gold/20 text-ordem-gold/80 italic">
                         Selecionado
@@ -1068,7 +1075,7 @@ export default function CharacterCreator({
               </div>
             )}
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {TODAS_PERICIAS.filter(p => !periciaMeta?.obrigatorias.includes(p)).map((pericia) => {
                 const isSelected = periciasSelecionadas.includes(pericia);
                 return (
@@ -1081,7 +1088,7 @@ export default function CharacterCreator({
                           : [...prev, pericia]
                       );
                     }}
-                    className={`p-3 text-xs font-mono border rounded transition-all ${isSelected
+                    className={`p-4 sm:p-3 text-sm sm:text-xs font-mono border rounded transition-all touch-target ${isSelected
                       ? 'border-ordem-green bg-ordem-green/20 text-white'
                       : 'border-ordem-border text-ordem-text-muted hover:border-ordem-border-light'
                       }`}
@@ -1111,7 +1118,7 @@ export default function CharacterCreator({
             </div>
 
             {/* Lista de trilhas dispon\u00edveis */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 overflow-y-auto custom-scrollbar pr-2 max-h-[60vh] sm:max-h-none lg:grid-cols-3">
               {trilhasDisponiveis.map((trilha) => {
                 const isSelected = trilhaSelecionada?.nome === trilha.nome;
                 return (
@@ -1254,7 +1261,7 @@ export default function CharacterCreator({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto custom-scrollbar pr-2 max-h-[400px]">
+            <div className="grid grid-cols-1 gap-4 overflow-y-auto custom-scrollbar pr-2 max-h-[60vh] sm:max-h-[400px] lg:grid-cols-3">
               {rituaisDisponiveis.map((ritual) => {
                 const isSelected = rituaisSelecionados.some(r => r.nome === ritual.nome);
                 return (
@@ -1331,7 +1338,7 @@ export default function CharacterCreator({
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 overflow-y-auto custom-scrollbar pr-2 max-h-[400px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 overflow-y-auto custom-scrollbar pr-2 max-h-[60vh] sm:max-h-[400px]">
               {activeTab === 'mods' ? (
                 // Aba de modificações
                 (() => {
@@ -1555,10 +1562,10 @@ export default function CharacterCreator({
           onClick={handleReset}
           className="order-3 sm:order-1 text-xs text-ordem-text-muted hover:text-ordem-red active:text-ordem-red transition-colors uppercase tracking-widest py-3 touch-target-sm"
         >
-          Cancelar Protocolo
+          Cancelar
         </button>
 
-        <div className="flex gap-3 order-1 sm:order-2">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 order-1 sm:order-2">
           {/* Botão Voltar - só aparece se não estiver no primeiro step */}
           {state.step > 0 && (
             <button
@@ -1576,7 +1583,7 @@ export default function CharacterCreator({
 
                 setState(prev => ({ ...prev, step: prevStep }));
               }}
-              className="px-4 sm:px-6 py-4 font-bold tracking-[0.15em] sm:tracking-[0.2em] transition-all text-sm uppercase rounded-lg touch-target border border-ordem-border-light text-ordem-text-secondary hover:text-white hover:border-white active:bg-ordem-ooze"
+              className="w-full sm:w-auto px-4 sm:px-6 py-3 sm:py-4 font-bold tracking-wider sm:tracking-[0.2em] transition-all text-sm uppercase rounded-lg touch-target border border-ordem-border-light text-ordem-text-secondary hover:text-white hover:border-white active:bg-ordem-ooze"
             >
               ← VOLTAR
             </button>
@@ -1585,12 +1592,12 @@ export default function CharacterCreator({
           <button
             onClick={handleNextStep}
             disabled={isNextDisabled}
-            className={`flex-1 sm:flex-none px-6 sm:px-8 py-4 font-bold tracking-[0.15em] sm:tracking-[0.2em] transition-all text-sm uppercase rounded-lg touch-target ${isNextDisabled
+            className={`w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 font-bold tracking-wider sm:tracking-[0.2em] transition-all text-sm uppercase rounded-lg touch-target ${isNextDisabled
               ? 'bg-ordem-ooze text-ordem-text-muted cursor-not-allowed'
               : 'bg-white text-black hover:bg-ordem-red hover:text-white active:bg-ordem-red active:text-white shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(220,38,38,0.4)]'
               }`}
           >
-            {(temStepTrilha && state.step === 7) || (!temStepTrilha && state.step === 6) ? 'FINALIZAR' : 'PRÓXIMA ETAPA →'}
+            {(temStepTrilha && state.step === 7) || (!temStepTrilha && state.step === 6) ? 'FINALIZAR' : 'PRÓXIMO →'}
           </button>
         </div>
       </div>
