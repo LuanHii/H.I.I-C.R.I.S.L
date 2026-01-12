@@ -284,6 +284,8 @@ export interface Personagem {
       opcoes?: string[];
     };
   }[];
+  // Quantidade de poderes de classe pendentes para escolher (nos marcos de NEX 15/30/45/60/75/90)
+  poderesClassePendentes?: number;
   trilha?: string;
   afinidade?: Elemento;
   atributos: Atributos;

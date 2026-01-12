@@ -1,12 +1,16 @@
 import { Personagem, AtributoKey, Trilha, Poder } from '../core/types';
 import { calculateDerivedStats } from '../core/rules/derivedStats';
 import { TRILHAS } from '../data/tracks';
+import { PODERES, verificarRequisitos } from '../data/powers';
 
 const NEX_ATRIBUTO = [20, 50, 80, 95];
 const ESTAGIO_ATRIBUTO = [3];
 
 const NEX_HABILIDADE = [10, 40, 65, 99];
 const ESTAGIO_HABILIDADE = [2, 4];
+
+// Marcos de NEX para poderes de classe
+const NEX_PODER = [15, 30, 45, 60, 75, 90];
 
 export function levelUp(character: Personagem): Personagem {
   const newChar = { ...character };
@@ -65,6 +69,11 @@ export function levelUp(character: Personagem): Personagem {
       } else if (newChar.trilha) {
         addTrackAbility(newChar, newNex, false);
       }
+    }
+
+    // Poder de classe nos marcos 15/30/45/60/75/90
+    if (NEX_PODER.includes(newNex)) {
+      newChar.poderesClassePendentes = (newChar.poderesClassePendentes || 0) + 1;
     }
   }
 
@@ -329,4 +338,45 @@ function removeTrackAbility(char: Personagem, level: number, isStage: boolean) {
       char.habilidadesTrilhaPendentes = char.habilidadesTrilhaPendentes.filter(p => p.habilidade !== habilidade.nome);
     }
   }
+}
+
+/**
+ * Aplica a escolha de um poder de classe ao personagem.
+ * Verifica requisitos e decrementa a contagem de poderes pendentes.
+ */
+export function choosePower(character: Personagem, poderNome: string): Personagem {
+  const newChar = { ...character };
+
+  // Verifica se tem poderes pendentes
+  if (!newChar.poderesClassePendentes || newChar.poderesClassePendentes <= 0) {
+    throw new Error('Não há poderes de classe pendentes para escolher.');
+  }
+
+  // Busca o poder no catálogo
+  const poder = PODERES.find(p => p.nome === poderNome);
+  if (!poder) {
+    throw new Error(`Poder "${poderNome}" não encontrado.`);
+  }
+
+  // Verifica se já possui o poder
+  if (newChar.poderes.some(p => p.nome === poderNome)) {
+    throw new Error(`Você já possui o poder "${poderNome}".`);
+  }
+
+  // Verifica requisitos
+  const { elegivel, motivo } = verificarRequisitos(poder, newChar);
+  if (!elegivel) {
+    throw new Error(`Requisito não atendido: ${motivo}`);
+  }
+
+  // Adiciona o poder
+  newChar.poderes = [...newChar.poderes, poder];
+
+  // Decrementa pendência
+  newChar.poderesClassePendentes = (newChar.poderesClassePendentes || 1) - 1;
+  if (newChar.poderesClassePendentes <= 0) {
+    newChar.poderesClassePendentes = undefined;
+  }
+
+  return newChar;
 }

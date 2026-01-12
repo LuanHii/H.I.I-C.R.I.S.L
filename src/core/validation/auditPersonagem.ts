@@ -234,6 +234,13 @@ export function auditPersonagem(personagem: Personagem): PersonagemIssue[] {
       message: `Promoção de perícia pendente: ${personagem.periciasPromocaoPendentes.restante}x para ${personagem.periciasPromocaoPendentes.alvo}.`,
     });
   }
+  if (personagem.poderesClassePendentes && personagem.poderesClassePendentes > 0) {
+    issues.push({
+      severity: 'aviso',
+      code: 'pending_class_powers',
+      message: `Faltam escolher ${personagem.poderesClassePendentes} poder(es) de classe.`,
+    });
+  }
 
   return issues;
 }

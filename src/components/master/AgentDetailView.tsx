@@ -7,10 +7,11 @@ import { ActionsTab } from '../ActionsTab';
 import { ItemSelectorModal } from './ItemSelectorModal';
 import { AbilitySelectorModal } from './AbilitySelectorModal';
 import { SkillSelectorModal } from './SkillSelectorModal';
-import { levelUp, levelDown, applyAttributePoint, removeAttributePoint, chooseTrack } from '../../logic/progression';
+import { levelUp, levelDown, applyAttributePoint, removeAttributePoint, chooseTrack, choosePower } from '../../logic/progression';
 import { ProgressionTab } from '../ProgressionTab';
 import { PendingChoiceModal } from '../PendingChoiceModal';
 import { TrackSelectorModal } from '../TrackSelectorModal';
+import { PowerChoiceModal } from '../PowerChoiceModal';
 import { calculateDerivedStats } from '../../core/rules/derivedStats';
 import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPersonagem';
 import { Brain, Flame, Dices } from 'lucide-react';
@@ -300,6 +301,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
         pendingChoice ||
         (agent.periciasTreinadasPendentes && agent.periciasTreinadasPendentes > 0) ||
         (agent.periciasPromocaoPendentes && agent.periciasPromocaoPendentes.restante > 0) ||
+        (agent.poderesClassePendentes && agent.poderesClassePendentes > 0) ||
         agent.escolhaTrilhaPendente;
 
     const derivedPreview = calculateDerivedStats(agent.classe, agent.atributos, agent.nex, agent.estagio);
@@ -383,6 +385,20 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                     pendingChoice={pendingChoice}
                     onConfirm={onUpdate}
                     onDefer={() => setIsPendingChoiceModalSuppressed(true)}
+                />
+            )}
+            {!disableInteractionModals && !isPendingChoiceModalSuppressed && agent.poderesClassePendentes && agent.poderesClassePendentes > 0 && (
+                <PowerChoiceModal
+                    agent={agent}
+                    onSelect={(poderNome) => {
+                        try {
+                            const updated = choosePower(agent, poderNome);
+                            onUpdate(updated);
+                        } catch (error: any) {
+                            console.error('Erro ao escolher poder:', error.message);
+                        }
+                    }}
+                    onClose={() => setIsPendingChoiceModalSuppressed(true)}
                 />
             )}
             <div className="bg-ordem-ooze border border-ordem-border-light rounded-xl p-4 sm:p-6 relative overflow-hidden shadow-lg">

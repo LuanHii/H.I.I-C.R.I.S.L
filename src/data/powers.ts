@@ -997,3 +997,159 @@ export const PODERES: Poder[] = [
     livro: 'Sobrevivendo ao Horror'
   }
 ];
+
+// ===================================================================
+// FUNÇÕES AUXILIARES PARA PODERES DE CLASSE
+// ===================================================================
+
+import { ClasseName, Personagem, Atributos, PericiaName, GrauTreinamento } from '../core/types';
+
+/**
+ * Mapeamento de poderes por classe.
+ * Baseado nos comentários do arquivo e na estrutura do sistema OPRPG.
+ */
+const PODERES_POR_CLASSE: Record<ClasseName, string[]> = {
+  Combatente: [
+    'Apego Angustiado', 'Caminho para Forca', 'Ciente das Cicatrizes', 'Correria Desesperada',
+    'Engolir o Choro', 'Instinto de Fuga', 'Mochileiro', 'Paranoia Defensiva',
+    'Sacrificar os Joelhos', 'Sem Tempo, Irmão', 'Surto Adrenalínico', 'Valentão',
+    'Armamento Pesado', 'Ataque de Oportunidade', 'Combate Defensivo', 'Golpe Demolidor',
+    'Golpe Pesado', 'Incansável', 'Presteza Atlética', 'Proteção Pesada', 'Reflexos Defensivos',
+    'Segurar o Gatilho', 'Sentido Tático', 'Tanque de Guerra', 'Tiro de Cobertura',
+    'Transcender', 'Treinamento em Perícia', 'Aumento de Atributo', 'Versatilidade'
+  ],
+  Especialista: [
+    'Acolher o Terror', 'Contatos Oportunos', 'Esconderijo Desesperado', 'Especialista Diletante',
+    'Flashback', 'Leitura Fria', 'Mãos Firmes', 'Plano de Fuga', 'Remoer Memórias',
+    'Resistir à Pressão', 'Balística Avançada', 'Conhecimento Aplicado', 'Hacker',
+    'Mãos Rápidas', 'Mochila de Utilidades', 'Movimento Tático', 'Na Trilha Certa', 'Nerd',
+    'Treinamento em Perícia', 'Aumento de Atributo', 'Versatilidade'
+  ],
+  Ocultista: [
+    'Deixe os Sussurros Guiarem', 'Domínio Esotérico', 'Minha Dor me Impulsiona',
+    'Nos Olhos do Monstro', 'Olhar Sinistro', 'Sentido Premonitório', 'Sincronia Paranormal',
+    'Traçado Conjuratório', 'Criar Selo', 'Envolto em Mistério', 'Especialista em Elemento',
+    'Ferramentas Paranormais', 'Fluxo de Poder', 'Guiado pelo Paranormal',
+    'Identificação Paranormal', 'Improvisar Componentes', 'Intuição Paranormal',
+    'Mestre em Elemento', 'Ritual Potente', 'Ritual Predileto', 'Tatuagem Ritualística',
+    'Transcender', 'Treinamento em Perícia', 'Aumento de Atributo', 'Versatilidade'
+  ],
+  Sobrevivente: [
+    // Sobrevivente usa sistema de estágios diferente, poderes são mais limitados
+    'Cicatrizado', 'Apego Angustiado', 'Correria Desesperada', 'Engolir o Choro',
+    'Instinto de Fuga', 'Mochileiro', 'Paranoia Defensiva', 'Sacrificar os Joelhos',
+    'Treinamento em Perícia', 'Aumento de Atributo'
+  ]
+};
+
+/**
+ * Retorna todos os poderes de classe disponíveis para uma classe específica.
+ */
+export function getPoderesClasse(classe: ClasseName): Poder[] {
+  const nomesPoderes = PODERES_POR_CLASSE[classe] || [];
+  return PODERES.filter(p =>
+    (p.tipo === 'Classe' || p.tipo === 'Geral') &&
+    nomesPoderes.includes(p.nome)
+  );
+}
+
+/**
+ * Retorna todos os poderes gerais (disponíveis para qualquer classe).
+ */
+export function getPoderesGerais(): Poder[] {
+  return PODERES.filter(p => p.tipo === 'Geral');
+}
+
+/**
+ * Verifica se um personagem atende aos requisitos de um poder.
+ */
+export function verificarRequisitos(
+  poder: Poder,
+  personagem: Personagem
+): { elegivel: boolean; motivo?: string } {
+  if (!poder.requisitos) {
+    return { elegivel: true };
+  }
+
+  const req = poder.requisitos.toLowerCase();
+  const atributos = personagem.atributos;
+
+  // Verificar requisitos de atributos (ex: "For 2", "Agi 3")
+  const atributoMatch = req.match(/(for|agi|vig|int|pre)\s*(\d+)/gi);
+  if (atributoMatch) {
+    for (const match of atributoMatch) {
+      const [, attr, valor] = match.match(/(for|agi|vig|int|pre)\s*(\d+)/i) || [];
+      if (attr && valor) {
+        const attrKey = attr.toUpperCase() as keyof Atributos;
+        if (atributos[attrKey] < parseInt(valor)) {
+          return {
+            elegivel: false,
+            motivo: `Requer ${attrKey} ${valor} (você tem ${atributos[attrKey]})`
+          };
+        }
+      }
+    }
+  }
+
+  // Verificar requisitos de treinamento (ex: "Treinado em Luta")
+  const treinadoMatch = req.match(/treinado em (\w+)/gi);
+  if (treinadoMatch) {
+    for (const match of treinadoMatch) {
+      const pericia = match.replace(/treinado em /i, '').trim();
+      const periciaKey = pericia as PericiaName;
+      if (personagem.pericias[periciaKey] === 'Destreinado') {
+        return {
+          elegivel: false,
+          motivo: `Requer treinamento em ${pericia}`
+        };
+      }
+    }
+  }
+
+  // Verificar requisitos de NEX (ex: "NEX 30%", "NEX 60%")
+  const nexMatch = req.match(/nex\s*(\d+)%?/i);
+  if (nexMatch) {
+    const nexReq = parseInt(nexMatch[1]);
+    if (personagem.nex < nexReq) {
+      return {
+        elegivel: false,
+        motivo: `Requer NEX ${nexReq}% (você tem ${personagem.nex}%)`
+      };
+    }
+  }
+
+  return { elegivel: true };
+}
+
+/**
+ * Retorna poderes elegíveis para um personagem escolher.
+ * Exclui poderes já possuídos e verifica requisitos.
+ */
+export function getPoderesElegiveis(personagem: Personagem): Poder[] {
+  const poderesClasse = getPoderesClasse(personagem.classe);
+  const poderesGerais = getPoderesGerais();
+  const todosPoderes = [...poderesClasse, ...poderesGerais];
+
+  // Remover duplicatas
+  const poderesUnicos = todosPoderes.filter((p, idx, arr) =>
+    arr.findIndex(x => x.nome === p.nome) === idx
+  );
+
+  // Filtrar poderes já possuídos
+  const nomesPossuidos = new Set(personagem.poderes.map(p => p.nome));
+
+  return poderesUnicos.filter(p => {
+    if (nomesPossuidos.has(p.nome)) return false;
+    const { elegivel } = verificarRequisitos(p, personagem);
+    return elegivel;
+  });
+}
+
+/**
+ * Conta quantos poderes de classe o personagem pode escolher com base no NEX.
+ * Marcos: 15%, 30%, 45%, 60%, 75%, 90%
+ */
+export function contarPoderesDisponiveis(nex: number): number {
+  const marcos = [15, 30, 45, 60, 75, 90];
+  return marcos.filter(m => nex >= m).length;
+}
