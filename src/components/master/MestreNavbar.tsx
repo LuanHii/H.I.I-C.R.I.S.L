@@ -1,15 +1,13 @@
-﻿"use client";
+﻿'use client';
 
 import Link from 'next/link';
 import type { ComponentProps } from 'react';
 import { usePathname } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { LogOut, Home } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-type MestreTab = 'agentes' | 'ameacas' | 'inventario' | 'fichas';
-
-function classNames(...parts: Array<string | false | undefined | null>) {
-  return parts.filter(Boolean).join(' ');
-}
+type MestreTab = 'agentes' | 'ameacas' | 'inventario' | 'fichas' | 'guia';
 
 function MestreLink({
   href,
@@ -23,14 +21,21 @@ function MestreLink({
   return (
     <Link
       href={href}
-      className={classNames(
-        'px-3 sm:px-4 py-2.5 font-mono text-xs sm:text-sm border-b-2 transition-colors whitespace-nowrap touch-target-sm',
+      className={cn(
+        'relative px-3 sm:px-4 py-2.5 font-mono text-xs sm:text-sm transition-colors whitespace-nowrap touch-target-sm',
         active
-          ? 'border-ordem-red text-white'
-          : 'border-transparent text-ordem-text-secondary hover:text-ordem-white-muted active:text-white hover:border-ordem-border-light',
+          ? 'text-white'
+          : 'text-ordem-text-secondary hover:text-ordem-white-muted active:text-white',
       )}
     >
       {label}
+      {active && (
+        <motion.div
+          layoutId="nav-indicator"
+          className="absolute bottom-0 left-0 right-0 h-0.5 bg-ordem-red"
+          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+        />
+      )}
     </Link>
   );
 }
@@ -45,18 +50,27 @@ function MestreButton({
   onClick: () => void;
 }) {
   return (
-    <button
+    <motion.button
       type="button"
       onClick={onClick}
-      className={classNames(
-        'px-3 sm:px-4 py-2.5 font-mono text-xs sm:text-sm border-b-2 transition-colors whitespace-nowrap touch-target-sm',
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className={cn(
+        'relative px-3 sm:px-4 py-2.5 font-mono text-xs sm:text-sm transition-colors whitespace-nowrap touch-target-sm',
         active
-          ? 'border-ordem-red text-white'
-          : 'border-transparent text-ordem-text-secondary hover:text-ordem-white-muted active:text-white hover:border-ordem-border-light',
+          ? 'text-white'
+          : 'text-ordem-text-secondary hover:text-ordem-white-muted active:text-white',
       )}
     >
       {label}
-    </button>
+      {active && (
+        <motion.div
+          layoutId="nav-indicator"
+          className="absolute bottom-0 left-0 right-0 h-0.5 bg-ordem-red"
+          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+        />
+      )}
+    </motion.button>
   );
 }
 
@@ -84,10 +98,15 @@ export function MestreNavbar({
       <div className="h-full flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-2 sm:py-0 gap-2 sm:gap-0">
         {/* Logo e título + ações (mobile) */}
         <div className="flex items-center justify-between sm:justify-start gap-4 sm:gap-8">
-          <div className="flex flex-col shrink-0">
+          <motion.div
+            className="flex flex-col shrink-0"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+          >
             <h1 className="text-lg sm:text-xl font-serif text-ordem-red tracking-wider leading-none">{title}</h1>
             <span className="text-[9px] sm:text-[10px] text-ordem-text-secondary font-mono tracking-[0.15em] sm:tracking-[0.2em]">{subtitle}</span>
-          </div>
+          </motion.div>
 
           {/* Ações em mobile - aparecem no canto direito */}
           <div className="flex sm:hidden items-center gap-2">
@@ -109,6 +128,7 @@ export function MestreNavbar({
               <MestreButton label="AGENTES" active={tab === 'agentes'} onClick={() => onTabSelect('agentes')} />
               <MestreButton label="AMEAÇAS" active={tab === 'ameacas'} onClick={() => onTabSelect('ameacas')} />
               <MestreButton label="INVENTÁRIO" active={tab === 'inventario'} onClick={() => onTabSelect('inventario')} />
+              <MestreButton label="GUIA" active={tab === 'guia'} onClick={() => onTabSelect('guia')} />
               <MestreLink href="/mestre/fichas" label="FICHAS" active={false} />
             </>
           ) : (
@@ -116,6 +136,7 @@ export function MestreNavbar({
               <MestreLink href={{ pathname: '/mestre', query: { tab: 'agentes' } }} label="AGENTES" active={inMestreRoot && tab === 'agentes'} />
               <MestreLink href={{ pathname: '/mestre', query: { tab: 'ameacas' } }} label="AMEAÇAS" active={inMestreRoot && tab === 'ameacas'} />
               <MestreLink href={{ pathname: '/mestre', query: { tab: 'inventario' } }} label="INVENTÁRIO" active={inMestreRoot && tab === 'inventario'} />
+              <MestreLink href={{ pathname: '/mestre', query: { tab: 'guia' } }} label="GUIA" active={inMestreRoot && tab === 'guia'} />
               <MestreLink href="/mestre/fichas" label="FICHAS" active={inFichas} />
             </>
           )}
@@ -124,13 +145,15 @@ export function MestreNavbar({
         {/* Ações em desktop */}
         <div className="hidden sm:flex items-center gap-3">
           {rightSlot}
-          <Link
-            href="/"
-            className="text-xs font-mono text-ordem-text-secondary hover:text-white active:text-ordem-red transition-colors flex items-center gap-1.5 touch-target-sm"
-          >
-            <LogOut size={14} />
-            SAIR
-          </Link>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Link
+              href="/"
+              className="text-xs font-mono text-ordem-text-secondary hover:text-white active:text-ordem-red transition-colors flex items-center gap-1.5 touch-target-sm"
+            >
+              <LogOut size={14} />
+              SAIR
+            </Link>
+          </motion.div>
         </div>
       </div>
     </header>

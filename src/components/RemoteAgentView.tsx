@@ -8,6 +8,7 @@ import { PERICIA_ATRIBUTO } from '../logic/rulesEngine';
 import { auditPersonagem, summarizeIssues } from '../core/validation/auditPersonagem';
 import { rollPericia, type DiceRollResult } from '../logic/diceRoller';
 import { Dices } from 'lucide-react';
+import { ActiveConditionsDisplay, ConditionsSummary } from './ConditionBadge';
 
 type RemoteTab = 'status' | 'acoes' | 'pericias' | 'inventario';
 
@@ -61,8 +62,8 @@ export function RemoteAgentView({
       type="button"
       onClick={() => setTab(id)}
       className={`px-3 sm:px-4 py-2.5 sm:py-2 text-[10px] sm:text-xs font-mono tracking-[0.15em] sm:tracking-[0.25em] border rounded-lg transition touch-target-sm whitespace-nowrap ${tab === id
-          ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
-          : 'border-ordem-white/15 text-ordem-white/60 hover:border-ordem-white/40 active:border-ordem-white/60 hover:text-ordem-white'
+        ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
+        : 'border-ordem-white/15 text-ordem-white/60 hover:border-ordem-white/40 active:border-ordem-white/60 hover:text-ordem-white'
         }`}
     >
       {label}
@@ -111,8 +112,8 @@ export function RemoteAgentView({
             {summary.total > 0 && (
               <div
                 className={`px-2 py-1.5 rounded border text-[10px] font-mono tracking-widest ${summary.errors > 0
-                    ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
-                    : 'border-ordem-gold text-ordem-gold bg-ordem-gold/10'
+                  ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
+                  : 'border-ordem-gold text-ordem-gold bg-ordem-gold/10'
                   }`}
                 title={issueTitle}
               >
@@ -208,13 +209,10 @@ export function RemoteAgentView({
 
               {agent.efeitosAtivos?.length > 0 && (
                 <div className="mt-4">
-                  <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest mb-2">Efeitos Ativos</div>
-                  <div className="flex flex-wrap gap-2">
-                    {agent.efeitosAtivos.map((e) => (
-                      <span key={e} className="text-xs text-ordem-white-muted border border-ordem-border bg-ordem-black/30 px-2 py-1 rounded">
-                        {e}
-                      </span>
-                    ))}
+                  <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest mb-2">Condições Ativas</div>
+                  <ActiveConditionsDisplay efeitosAtivos={agent.efeitosAtivos} compact />
+                  <div className="mt-3">
+                    <ConditionsSummary efeitosAtivos={agent.efeitosAtivos} />
                   </div>
                 </div>
               )}

@@ -15,6 +15,7 @@ import { calculateDerivedStats } from '../../core/rules/derivedStats';
 import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPersonagem';
 import { Brain, Flame, Dices } from 'lucide-react';
 import { rollPericia, type DiceRollResult } from '../../logic/diceRoller';
+import { ConditionsManager } from '../ConditionsManager';
 
 interface AgentDetailViewProps {
     agent: Personagem;
@@ -549,6 +550,41 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                         </>
                     )}
                 </div>
+            </div>
+
+            {/* Seção de Condições */}
+            <div className="bg-ordem-ooze border border-ordem-border-light rounded-xl overflow-hidden shadow-lg">
+                <button
+                    onClick={() => toggleSection('conditions')}
+                    className="w-full flex items-center justify-between p-4 bg-ordem-ooze/50 hover:bg-ordem-ooze transition-colors border-b border-ordem-border-light"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-ordem-border-light rounded text-ordem-white-muted">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="m9 12 2 2 4-4" /></svg>
+                        </div>
+                        <span className="font-bold text-zinc-100">Condições & Status</span>
+                        {agent.efeitosAtivos?.length > 0 && (
+                            <span className="text-xs font-mono bg-red-900/30 px-2 py-0.5 rounded text-red-400 border border-red-800/50">
+                                {agent.efeitosAtivos.length} ativa(s)
+                            </span>
+                        )}
+                    </div>
+                    {openSections['conditions'] ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-secondary"><path d="m6 9 6 6 6-6" /></svg>
+                    ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-secondary"><path d="m9 18 6-6-6-6" /></svg>
+                    )}
+                </button>
+
+                {openSections['conditions'] && (
+                    <div className="p-6 animate-in slide-in-from-top-2">
+                        <ConditionsManager
+                            personagem={agent}
+                            onUpdate={onUpdate}
+                            readOnly={readOnly}
+                        />
+                    </div>
+                )}
             </div>
 
             <div className="bg-ordem-ooze border border-ordem-border-light rounded-xl overflow-hidden shadow-lg">
