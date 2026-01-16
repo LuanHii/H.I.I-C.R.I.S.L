@@ -1,6 +1,6 @@
 import { Weapow } from '../core/types';
 
-export const WEAPOWS: Weapow[] = [
+export const WEAPONS: Weapow[] = [
   // ===================================================================
   // ARMAS IMPROVISADAS (REGRAS BÁSICAS)
   // ===================================================================

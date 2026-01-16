@@ -12,7 +12,7 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 10,
         nome: 'Carteirada',
-        descricao: 'Escolha Diplomacia ou Enganação. Você recebe treinamento na perícia escolhida ou, se já for treinado, recebe +2 nela. No início de cada missão, recebe documentos para auxiliar em testes de perícia social.',
+        descricao: 'Escolha Diplomacia ou Enganação. Você recebe treinamento na perícia escolhida ou, se já for treinado, recebe +2 nela. No início de cada missão, recebe documentos que fornecem privilégios jurídicos especiais.',
         escolha: {
           tipo: 'custom',
           quantidade: 1,
@@ -21,18 +21,18 @@ export const TRILHAS: Trilha[] = [
       },
       {
         nex: 40,
-        nome: 'Guerreiro Fantasma',
-        descricao: 'Você pode gastar 5 PE para fazer um ataque furtivo com uma arma tática, mesmo sem estar furtivo ou o alvo desprevenido.'
+        nome: 'O Sorriso',
+        descricao: 'Recebe +2 em Diplomacia e Enganação. Quando falha em um teste dessas perícias, pode gastar 2 PE para repetir (apenas 1x por teste). Uma vez por cena, pode fazer Diplomacia para acalmar a si mesmo.'
       },
       {
         nex: 65,
-        nome: 'Golpe de Misericórdia',
-        descricao: 'Quando acerta um Ataque Especial em um alvo desprevenido ou que não pode reagir, você pode gastar 3 PE para triplicar o dano rolado.'
+        nome: 'Método Investigativo',
+        descricao: 'A urgência de cenas de investigação aumenta em 1 rodada. Quando o mestre rola na tabela de eventos, pode gastar 2 PE para transformar em "sem evento". Custo aumenta em +2 PE a cada uso adicional.'
       },
       {
         nex: 99,
-        nome: 'Agente Implacável',
-        descricao: 'Quando reduz um ser a 0 PV, pode fazer imediatamente um Ataque Especial contra um novo alvo.'
+        nome: 'Multifacetado',
+        descricao: 'Uma vez por cena, gasta 5 SAN para receber todas as habilidades até NEX 65% de uma trilha de combatente ou especialista. Dura até o fim da cena. Não pode escolher a mesma trilha mais de 1x por missão. SAN gastos só recuperam ao fim da missão.'
       }
     ],
     livro: 'Sobrevivendo ao Horror'
@@ -45,22 +45,22 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 10,
         nome: 'Rastrear o Paranormal',
-        descricao: 'Recebe treinamento em Sobrevivência (ou +2, se já for treinado). Pode usar Sobrevivência no lugar de Ocultismo para identificar criaturas.'
+        descricao: 'Recebe treinamento em Sobrevivência (ou +2, se já for treinado). Pode usar Sobrevivência no lugar de Ocultismo para identificar criaturas e no lugar de Investigação e Percepção para rastros e pistas paranormais.'
       },
       {
         nex: 40,
-        nome: 'Caçada Implacável',
-        descricao: 'Quando busca uma criatura, pode gastar 2 PE (Padrão) para seguir o rastro. Se encontrar uma pista, recebe uma informação útil sobre o ser e +1 em testes contra a criatura até o fim da missão. O bônus é cumulativo com cada pista.'
+        nome: 'Estudar Fraquezas',
+        descricao: 'Gasta ação de interlúdio estudando fraquezas de um ser (precisa de pista ligada a ele). Recebe informação útil e +1 em testes contra a criatura até o fim da missão. Bônus cumulativo por pista.'
       },
       {
         nex: 65,
-        nome: 'Instinto de Sobrevivência',
-        descricao: 'Recebe +10 em Furtividade e Percepção. Não pode ser surpreendido.'
+        nome: 'Atacar das Sombras',
+        descricao: 'Não sofre –O em Furtividade por se mover ao deslocamento normal. Penalidade por atacar com arma silenciosa reduzida para –O. Visibilidade inicial em cenas de furtividade é 1 ponto abaixo (pode ser negativa).'
       },
       {
         nex: 99,
-        nome: 'Predador Perfeito',
-        descricao: 'Quando faz um ataque contra a criatura caçada e acerta, pode gastar 3 PE para receber +1 no multiplicador de crítico e +2 na margem de ameaça.'
+        nome: 'Estudar a Presa',
+        descricao: 'Quando usa Estudar Fraquezas contra criatura paranormal ou cultista, pode transformar o tipo em sua "presa". Contra presas: +O em testes, +1 margem e multiplicador de crítico, RD 5. Só pode ter um tipo de presa ao mesmo tempo.'
       }
     ],
     livro: 'Sobrevivendo ao Horror'
@@ -68,12 +68,12 @@ export const TRILHAS: Trilha[] = [
   {
     nome: 'Monstruoso',
     classe: 'Combatente',
-    descricao: 'O combatente que abraça o paranormal, recebendo mutações elementais em troca de sua humanidade.',
+    descricao: 'O combatente que abraça o paranormal, recebendo mutações elementais em troca de sua humanidade. Especial: usa a Progressão de NEX da regra opcional.',
     habilidades: [
       {
         nex: 10,
-        nome: 'Traços da Entidade',
-        descricao: 'Escolha um elemento paranormal. Recebe +2 em testes de ataque e rolagens de dano C.a.C, resistência 5 ao elemento e resistência 5 a três tipos de dano físico (balístico, corte, impacto ou perfuração). Soma Força ao PV total. Sofre –O em uma perícia social.',
+        nome: 'Ser Amaldiçoado',
+        descricao: 'Treinado em Ocultismo (ou +2). Escolha elemento. Uma vez por dia, execute etapa ritualística. Recebe RD 5 ao elemento e bônus por elemento (Sangue: RD balístico, faro, +Vig dano contra-ataque, –O Ciências/Intuição; Morte: RD perfuração, imune fadiga, +For PV, –O Diplomacia/Enganação; Conhecimento: RD balístico, visão no escuro, +Int Defesa, –O Atletismo/Acrobacia; Energia: RD corte/eletr./fogo, +Agi bloqueio, –O Investigação/Percepção).',
         escolha: {
           tipo: 'elemento',
           quantidade: 1
@@ -81,18 +81,18 @@ export const TRILHAS: Trilha[] = [
       },
       {
         nex: 40,
-        nome: 'Metamorfose Involuntária',
-        descricao: 'Recebe novos benefícios conforme o elemento, como Cura Acelerada 5/Morte (Sangue) ou Deslocamento 12m e Escalar 12m (Morte).'
+        nome: 'Ser Macabro',
+        descricao: 'RD aumenta para 10, penalidade em perícias aumenta para –2O. Efeitos adicionais por elemento (Sangue: usa For para PE, gasta 1+ PE para curar 1d8 PV por PE; Morte: +O Intimidação, usa Vig para PE, 4 turnos morrendo, não come/bebe; Conhecimento: +1 Int, usa Int para Enganação e PE; Energia: usa Agi para PE, +1d6 dano Energia por PE em C.a.C).'
       },
       {
         nex: 65,
         nome: 'Ser Assustador',
-        descricao: 'A resistência a dano que você recebe por executar a etapa ritualística de seu elemento aumenta para 15, mas sua Presença é reduzida permanentemente em 1.'
+        descricao: 'RD aumenta para 15, Presença reduzida permanentemente em 1. Efeitos por elemento (Sangue: 50% ignorar crítico/furtivo, mordida 1d8, +1 PE ataque mordida extra; Morte: teste Vig DT 15 para encerrar morrendo, +2 PE por crítico/KO; Conhecimento: perde treinamento em perícia para ganhar dados bônus=Int; Energia: RD também aplica a químico, extrair PE de fontes elétricas).'
       },
       {
         nex: 99,
-        nome: 'Ascensão do Horror',
-        descricao: 'Recebe benefícios drásticos conforme o elemento, como +1 em Intelecto e Percepção às Cegas (Conhecimento) ou o ritual Deflagração de Energia (Energia).'
+        nome: 'Ser Aterrorizante',
+        descricao: 'Efeitos ritualísticos permanentes, considerado criatura paranormal. RD aumenta para 20. Efeitos finais por elemento (Sangue: –1 Int, +1 For, recupera 5 PV por mordida, aprende Forma Monstruosa; Morte: –1 Pre, +1 Vig, imune dano Morte, imortal (volta no dia seguinte), aprende Fim Inevitável; Conhecimento: –1 For, +1 Int, Percepção às Cegas, aprende ritual 4º círculo Conhecimento; Energia: –1 For, +1 Agi, paira 1,5m, desl. 12m, passa por espaços Minúsculos, imune paralisia física, aprende Deflagração de Energia).'
       }
     ],
     livro: 'Sobrevivendo ao Horror'
@@ -132,22 +132,22 @@ export const TRILHAS: Trilha[] = [
   {
     nome: 'Perseverante',
     classe: 'Especialista',
-    descricao: 'Um sobrevivente nato que usa sua resiliência para escapar de situações mortais e resistir a efeitos físicos.',
+    descricao: 'Um sobrevivente nato que usa sua resiliência para escapar de situações mortais.',
     habilidades: [
       {
         nex: 10,
-        nome: 'Vontade Indomável',
-        descricao: 'Ao sofrer uma condição de medo ou mental, você pode gastar 2 PE para rolar Vontade e encerrar imediatamente a condição.'
+        nome: 'Soluções Improvisadas',
+        descricao: 'Pode gastar 2 PE para rolar novamente 1 dos dados de um teste recém-realizado (apenas 1x por teste) e ficar com o melhor resultado entre as duas rolagens.'
       },
       {
         nex: 40,
-        nome: 'Corpo Resiliente',
-        descricao: 'Você pode gastar 2 PE (Padrão) para encerrar as condições debilitado, enjoado, envenenado, exausto e fatigado. Algumas condições, como paralisia por doença, não podem ser removidas.'
+        nome: 'Fuga Obstinada',
+        descricao: 'Recebe +O em testes de perícia para fugir de um inimigo (perseguição ou não). Em cenas de perseguição, se for a presa, pode acumular até 4 falhas antes de ser pego.'
       },
       {
         nex: 65,
-        nome: 'O Pior Ainda Está por Vir',
-        descricao: 'Você pode gastar 5 PE para não cair inconsciente ao atingir 0 PV.'
+        nome: 'Determinação Inquestionável',
+        descricao: 'Uma vez por cena, gasta 5 PE e Ação Padrão para remover uma condição de medo, mental ou de paralisia que esteja lhe afligindo. Certas condições (como paralisia por doença) não podem ser removidas.'
       },
       {
         nex: 99,
@@ -508,27 +508,27 @@ export const TRILHAS: Trilha[] = [
   {
     nome: 'Atirador de Elite',
     classe: 'Especialista',
-    descricao: 'Focado em precisão e dano à distância.',
+    descricao: 'Perito em neutralizar ameaças de longe, terminando uma briga antes mesmo que ela comece.',
     habilidades: [
       {
         nex: 10,
-        nome: 'Disparo Impactante',
-        descricao: 'Quando usa uma arma de disparo, soma seu Intelecto nas rolagens de dano.'
+        nome: 'Mira de Elite',
+        descricao: 'Recebe proficiência com armas de fogo que usam balas longas e soma seu Intelecto em rolagens de dano com essas armas.'
       },
       {
         nex: 40,
-        nome: 'Mira de Elite',
-        descricao: 'Quando usa a ação mirar, soma seu Intelecto no teste de Pontaria.'
+        nome: 'Disparo Letal',
+        descricao: 'Quando faz a ação mirar, pode gastar 1 PE para aumentar em +2 a margem de ameaça do próximo ataque que fizer até o final de seu próximo turno.'
       },
       {
         nex: 65,
-        nome: 'Assassinar',
-        descricao: 'Gasta Ação de Movimento e 3 PE para analisar alvo. Seu primeiro Ataque Furtivo que causar dano tem seus dados de dano extras dobrados. O alvo fica inconsciente ou morrendo (Fortitude DT Agi evita).'
+        nome: 'Disparo Impactante',
+        descricao: 'Se estiver usando uma arma de fogo com calibre grosso, pode gastar 2 PE para fazer as manobras derrubar, desarmar, empurrar e quebrar usando um ataque a distância.'
       },
       {
         nex: 99,
         nome: 'Atirar para Matar',
-        descricao: 'Quando faz um acerto crítico, o dano é maximizado.'
+        descricao: 'Quando faz um acerto crítico com uma arma de fogo, você causa dano máximo, sem precisar rolar dados.'
       }
     ],
     livro: 'Regras Básicas'
@@ -536,55 +536,55 @@ export const TRILHAS: Trilha[] = [
   {
     nome: 'Infiltrador',
     classe: 'Especialista',
-    descricao: 'Especialista em Furtividade, Enganação e manipulação.',
+    descricao: 'Perito em infiltração, sabe neutralizar alvos desprevenidos sem causar alarde.',
     habilidades: [
       {
         nex: 10,
-        nome: 'Primeira Impressão',
-        descricao: 'Recebe +5 em testes de Enganação e Persuasão (Diplomacia ou Intimidação).'
+        nome: 'Ataque Furtivo',
+        descricao: 'Sabe atingir os pontos vitais de um inimigo distraído. Uma vez por rodada, ao atingir alvo desprevenido com ataque corpo a corpo ou em alcance curto, ou alvo que esteja flanqueando, gasta 1 PE para causar +1d6 de dano. Em NEX 40% o dano aumenta para +2d6, em NEX 65% para +3d6 e em NEX 99% para +4d6.'
       },
       {
         nex: 40,
         nome: 'Gatuno',
-        descricao: 'Não sofre penalidade por se mover em seu deslocamento normal em Furtividade. Quando faz um ataque furtivo, causa +1d6 de dano.'
+        descricao: 'Recebe +5 em Atletismo e Crime e pode percorrer seu deslocamento normal quando se esconder sem penalidade.'
       },
       {
         nex: 65,
-        nome: 'Eloquência',
-        descricao: 'Pode gastar 2 PE para se livrar de ser agarrado, imobilizado ou paralisado. Se for por efeito mental, usa Enganação no lugar de Vontade.'
+        nome: 'Assassinar',
+        descricao: 'Gasta Ação de Movimento e 3 PE para analisar alvo em alcance curto. Até o fim do próximo turno, seu primeiro Ataque Furtivo que causar dano tem seus dados de dano extras dobrados. O alvo fica inconsciente ou morrendo (Fortitude DT Agi evita).'
       },
       {
         nex: 99,
-        nome: 'Truque de Mestre',
-        descricao: 'Pode gastar 5 PE para fazer um teste de Enganação oposto à Percepção do alvo. Se vencer, fica invisível para o alvo.'
+        nome: 'Sombra Fugaz',
+        descricao: 'Quando faz um teste de Furtividade após atacar ou fazer outra ação chamativa, pode gastar 3 PE para não sofrer a penalidade de –15 no teste.'
       }
     ],
     livro: 'Regras Básicas'
   },
   {
-    nome: 'Inventor',
+    nome: 'Negociador',
     classe: 'Especialista',
-    descricao: 'Focado em Tecnologia e a criação de itens.',
+    descricao: 'Diplomata habilidoso que consegue influenciar outras pessoas, seja por lábia ou intimidação.',
     habilidades: [
       {
         nex: 10,
-        nome: 'Faz-Tudo',
-        descricao: 'Recebe proficiência com armas táticas de corpo a corpo. Soma Intelecto nas rolagens de dano.'
+        nome: 'Eloquência',
+        descricao: 'Gasta Ação Completa e 1 PE por alvo em alcance curto. Faça Diplomacia, Enganação ou Intimidação vs Vontade. Se vencer, alvos ficam fascinados enquanto você se concentrar (Ação Padrão por rodada). Alvo hostil ou em combate recebe +5 no teste.'
       },
       {
         nex: 40,
-        nome: 'Perito em Explosivos',
-        descricao: 'Recebe proficiência com explosivos. Ao usar uma Granada de Fragmentação, o dano aumenta em +1 dado. Pode modificar explosivos com Tecnologia (DT 25) para aumentar o raio de explosão.'
+        nome: 'Discurso Motivador',
+        descricao: 'Gasta Ação Padrão e 4 PE para inspirar aliados. Você e aliados em alcance curto ganham +O em testes de perícia até o fim da cena. A partir de NEX 65%, pode gastar 8 PE para fornecer +OO.'
       },
       {
         nex: 65,
-        nome: 'Remendão',
-        descricao: 'Pode usar Ação de Movimento para consertar item danificado adjacente. Cura 4d8 PV do item (Tecnologia DT 20).'
+        nome: 'Eu Conheço um Cara',
+        descricao: 'Uma vez por missão, ativa sua rede de contatos para um favor: trocar equipamento (como segunda fase de preparação), local de descanso, ou resgate de uma cena. Mestre tem palavra final.'
       },
       {
         nex: 99,
-        nome: 'Colecionadora',
-        descricao: 'Pode gastar 5 PE para conjurar um ritual de 1º círculo de Sangue, Morte, Conhecimento ou Energia (Tecnologia DT 35).'
+        nome: 'Truque de Mestre',
+        descricao: 'Acostumado a fingimento e manipulação, gasta 5 PE para simular o efeito de qualquer habilidade que viu um aliado usar na cena. Ignora pré-requisitos, mas paga todos os custos e usa seus parâmetros.'
       }
     ],
     livro: 'Regras Básicas'
@@ -592,27 +592,27 @@ export const TRILHAS: Trilha[] = [
   {
     nome: 'Médico de Campo',
     classe: 'Especialista',
-    descricao: 'Focado em cura e suporte em situações de combate.',
+    descricao: 'Treinado em técnicas de primeiros socorros e tratamento de emergência. Especial: para escolher esta trilha, precisa ser treinado em Medicina e possuir kit de medicina para usar as habilidades.',
     habilidades: [
       {
         nex: 10,
-        nome: 'Resgate',
-        descricao: 'Pode usar Ação de Movimento para aplicar cicatrizantes ou medicamentos em si ou em alvo adjacente.'
+        nome: 'Paramédico',
+        descricao: 'Gasta Ação Padrão e 2 PE para curar 2d10 PV de um aliado adjacente. +1d10 PV em NEX 40%, 65% e 99%, gastando +1 PE por dado adicional de cura.'
       },
       {
         nex: 40,
-        nome: 'Socorrista',
-        descricao: 'Soma Intelecto nas rolagens de cura. Pode usar Ação Padrão e 2 PE para remover condição negativa (exceto morrendo) de aliado adjacente.'
+        nome: 'Equipe de Trauma',
+        descricao: 'Gasta Ação Padrão e 2 PE para remover uma condição negativa (exceto morrendo) de aliado adjacente.'
       },
       {
         nex: 65,
-        nome: 'Preparado para Tudo',
-        descricao: 'Recebe 3 kits de primeiros socorros de categoria I.'
+        nome: 'Resgate',
+        descricao: 'Uma vez por rodada, se estiver em alcance curto de aliado machucado ou morrendo, pode se aproximar dele com ação livre. Ao curar PV ou remover condições, você e o aliado recebem +5 na Defesa até seu próximo turno. Total de espaços para carregar um personagem é reduzido pela metade.'
       },
       {
         nex: 99,
-        nome: 'Imunidade',
-        descricao: 'Recebe +5 em testes de Fortitude. Imune a doenças e venenos.'
+        nome: 'Reanimação',
+        descricao: 'Uma vez por cena, gasta Ação Completa e 10 PE para trazer de volta à vida um personagem que tenha morrido na mesma cena (exceto morte por dano massivo).'
       }
     ],
     livro: 'Regras Básicas'
@@ -620,27 +620,27 @@ export const TRILHAS: Trilha[] = [
   {
     nome: 'Técnico',
     classe: 'Especialista',
-    descricao: 'Focado em equipamentos, perícias, tecnologia e desarmar armadilhas.',
+    descricao: 'Focado em manutenção e reparo de equipamento, improvisação de ferramentas e sabotagem de itens inimigos.',
     habilidades: [
       {
         nex: 10,
-        nome: 'Ferramentas de Trabalho',
-        descricao: 'Recebe proficiência com armas táticas de disparo e +2 na Defesa.'
+        nome: 'Inventário Otimizado',
+        descricao: 'Soma seu Intelecto à sua Força para calcular sua capacidade de carga. Por exemplo, se você tem Força 1 e Intelecto 3, seu inventário tem 20 espaços.'
       },
       {
         nex: 40,
-        nome: 'Especialista em Armadilhas',
-        descricao: 'Recebe +10 em testes para desarmar armadilhas. Pode desarmar armadilha como Ação de Movimento.'
+        nome: 'Remendão',
+        descricao: 'Gasta Ação Completa e 1 PE para remover a condição quebrado de um equipamento adjacente até o final da cena. Qualquer equipamento geral tem sua categoria reduzida em I para você.'
       },
       {
         nex: 65,
-        nome: 'Incansável',
-        descricao: 'Uma vez por cena, gasta 2 PE para realizar Ação de Investigação adicional. Deve usar Intelecto.'
+        nome: 'Improvisar',
+        descricao: 'Pode improvisar equipamentos com materiais ao seu redor. Escolha um equipamento geral e gaste Ação Completa e 2 PE, mais 2 PE por categoria. Você cria uma versão funcional que dura até o fim da cena.'
       },
       {
         nex: 99,
-        nome: 'Detecção',
-        descricao: 'Imune à condição surpreendido. No início da cena, faz Percepção DT 20 para encontrar todas as armadilhas na cena.'
+        nome: 'Preparado para Tudo',
+        descricao: 'Você sempre tem o que precisa. Sempre que precisar de um item (exceto armas), gasta Ação de Movimento e 3 PE por categoria do item para lembrar que colocou ele no fundo da bolsa! Depois de encontrado, o item segue normalmente as regras de inventário.'
       }
     ],
     livro: 'Regras Básicas'

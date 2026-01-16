@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ITENS } from '../../data/items';
-import { WEAPOWS } from '../../data/weapows';
+import { WEAPONS } from '../../data/weapons';
 import { useStoredItems } from '../../core/storage/useStoredItems';
 import { Item } from '../../core/types';
 
@@ -17,7 +17,7 @@ export const ItemSelectorModal: React.FC<ItemSelectorModalProps> = ({ isOpen, on
   const { customItems, customWeapons } = useStoredItems();
 
   const allItems = useMemo(() => {
-    const allWeaponsSource = [...WEAPOWS, ...customWeapons];
+    const allWeaponsSource = [...WEAPONS, ...customWeapons];
     const weaponsAsItems: Item[] = allWeaponsSource.map(w => ({
       nome: w.nome,
       categoria: w.categoria,
@@ -54,7 +54,7 @@ export const ItemSelectorModal: React.FC<ItemSelectorModalProps> = ({ isOpen, on
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ordem-black/80 backdrop-blur-sm p-4">
       <div className="bg-ordem-ooze border border-ordem-border-light rounded-lg w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl">
-        
+
         <div className="p-4 border-b border-ordem-border flex justify-between items-center">
           <h2 className="text-xl font-serif text-white">Adicionar Item</h2>
           <button onClick={onClose} className="text-ordem-text-secondary hover:text-white">✕</button>
@@ -69,10 +69,10 @@ export const ItemSelectorModal: React.FC<ItemSelectorModalProps> = ({ isOpen, on
             className="w-full bg-ordem-black/40 border border-ordem-border-light text-white px-3 py-2 rounded focus:border-ordem-red outline-none"
             autoFocus
           />
-          
+
           <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
-            <select 
-              value={categoryFilter} 
+            <select
+              value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}
               className="bg-ordem-black/40 border border-ordem-border-light text-white text-xs px-2 py-1 rounded outline-none"
             >
@@ -82,8 +82,8 @@ export const ItemSelectorModal: React.FC<ItemSelectorModalProps> = ({ isOpen, on
               ))}
             </select>
 
-            <select 
-              value={typeFilter} 
+            <select
+              value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
               className="bg-ordem-black/40 border border-ordem-border-light text-white text-xs px-2 py-1 rounded outline-none max-w-[200px]"
             >
@@ -112,13 +112,13 @@ export const ItemSelectorModal: React.FC<ItemSelectorModalProps> = ({ isOpen, on
                   </span>
                 </div>
                 <div className="text-xs text-ordem-text-muted mt-1 flex justify-between">
-                    <span>{item.tipo}</span>
-                    <span className="italic opacity-50">{item.livro}</span>
+                  <span>{item.tipo}</span>
+                  <span className="italic opacity-50">{item.livro}</span>
                 </div>
                 {item.descricao && (
-                    <p className="text-xs text-ordem-text-muted mt-1 line-clamp-2 group-hover:text-ordem-text-secondary transition-colors">
-                        {item.descricao}
-                    </p>
+                  <p className="text-xs text-ordem-text-muted mt-1 line-clamp-2 group-hover:text-ordem-text-secondary transition-colors">
+                    {item.descricao}
+                  </p>
                 )}
               </button>
             ))
@@ -126,9 +126,9 @@ export const ItemSelectorModal: React.FC<ItemSelectorModalProps> = ({ isOpen, on
         </div>
 
         <div className="p-3 border-t border-ordem-border text-right">
-            <button onClick={onClose} className="text-sm text-ordem-text-secondary hover:text-white px-4 py-2">
-                Cancelar
-            </button>
+          <button onClick={onClose} className="text-sm text-ordem-text-secondary hover:text-white px-4 py-2">
+            Cancelar
+          </button>
         </div>
       </div>
     </div>

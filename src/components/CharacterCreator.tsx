@@ -18,7 +18,7 @@ import { CLASSES } from '../data/classes';
 import { ORIGENS } from '../data/origins';
 import { RITUAIS } from '../data/rituals';
 import { ITENS } from '../data/items';
-import { WEAPOWS } from '../data/weapows';
+import { WEAPONS } from '../data/weapons';
 import { TRILHAS } from '../data/tracks';
 import { MODIFICACOES_ARMAS, getModificacoesParaArma } from '../data/modifications';
 import { Atributos, ClasseName, ClasseStats, Personagem, PericiaName, Ritual, Item, Elemento, Trilha, Poder, ModificacaoArma, Patente } from '../core/types';
@@ -195,7 +195,7 @@ export default function CharacterCreator({
   const limiteRituais = 3;
 
   const itensDisponiveis = useMemo(() => ITENS.filter(i => i.categoria <= 1), []);
-  const armasDisponiveis = useMemo(() => WEAPOWS.filter(w => w.categoria <= 1), []);
+  const armasDisponiveis = useMemo(() => WEAPONS.filter(w => w.categoria <= 1), []);
 
   // Limites por categoria baseado em patente selecionada
   const limitesCategoria = useMemo(() => {
