@@ -2,21 +2,30 @@
 
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Search, Star, Lock, Check, Zap } from 'lucide-react';
-import { Personagem, Poder } from '../core/types';
-import { getPoderesClasse, getPoderesGerais, verificarRequisitos } from '../data/powers';
+import { X, Search, Star, Lock, Check, Zap, Sparkles } from 'lucide-react';
+import { Personagem, Poder, Ritual } from '../core/types';
+import { getPoderesClasse, getPoderesGerais, verificarRequisitos, PODERES } from '../data/powers';
 import { cn } from '../lib/utils';
+import { ParanormalPowerModal } from './ParanormalPowerModal';
 
 interface PowerChoiceModalProps {
     agent: Personagem;
     onSelect: (poderNome: string) => void;
     onClose?: () => void;
+    /** Callback quando Transcender é escolhido e o poder paranormal é selecionado */
+    onTranscenderComplete?: (poderParanormal: Poder, ritual?: Ritual) => void;
 }
 
-export function PowerChoiceModal({ agent, onSelect, onClose }: PowerChoiceModalProps) {
+export function PowerChoiceModal({
+    agent,
+    onSelect,
+    onClose,
+    onTranscenderComplete
+}: PowerChoiceModalProps) {
     const [busca, setBusca] = useState('');
     const [filtro, setFiltro] = useState<'todos' | 'classe' | 'gerais'>('todos');
     const [poderSelecionado, setPoderSelecionado] = useState<string | null>(null);
+    const [showParanormalModal, setShowParanormalModal] = useState(false);
 
     const pendentes = agent.poderesClassePendentes || 0;
 
@@ -39,9 +48,14 @@ export function PowerChoiceModal({ agent, onSelect, onClose }: PowerChoiceModalP
             filtro === 'gerais' ? poderesGerais :
                 todosPoderes;
 
-        // Filtrar já possuídos
+        // Filtrar já possuídos (exceto Transcender que pode ser escolhido várias vezes)
         const nomesPossuidos = new Set(agent.poderes.map(p => p.nome));
-        lista = lista.filter(p => !nomesPossuidos.has(p.nome));
+        lista = lista.filter(p => {
+            if (p.nome === 'Transcender') return true; // Sempre disponível
+            if (p.nome === 'Treinamento em Perícia') return true; // Pode repetir
+            if (p.nome === 'Aumento de Atributo') return true; // Pode repetir
+            return !nomesPossuidos.has(p.nome);
+        });
 
         // Busca
         if (busca.trim()) {
@@ -61,10 +75,41 @@ export function PowerChoiceModal({ agent, onSelect, onClose }: PowerChoiceModalP
     }, [filtro, busca, poderesClasse, poderesGerais, todosPoderes, agent]);
 
     const handleConfirm = () => {
-        if (poderSelecionado) {
-            onSelect(poderSelecionado);
+        if (!poderSelecionado) return;
+
+        // Verificar se é Transcender
+        if (poderSelecionado === 'Transcender') {
+            setShowParanormalModal(true);
+            return;
+        }
+
+        onSelect(poderSelecionado);
+    };
+
+    const handleParanormalSelect = (poderParanormal: Poder, ritual?: Ritual) => {
+        setShowParanormalModal(false);
+
+        // Notificar que Transcender foi escolhido junto com o poder paranormal
+        if (onTranscenderComplete) {
+            onTranscenderComplete(poderParanormal, ritual);
+        } else {
+            console.error("Erro: Callback onTranscenderComplete não fornecido.");
         }
     };
+
+    const isTranscender = (nome: string) => nome === 'Transcender';
+
+    // Se o modal de poderes paranormais estiver aberto
+    if (showParanormalModal) {
+        return (
+            <ParanormalPowerModal
+                agent={agent}
+                onSelect={handleParanormalSelect}
+                onClose={() => setShowParanormalModal(false)}
+                title="Escolher Poder Paranormal (Transcender)"
+            />
+        );
+    }
 
     return (
         <motion.div
@@ -159,12 +204,16 @@ export function PowerChoiceModal({ agent, onSelect, onClose }: PowerChoiceModalP
                                         !poder.elegivel && 'opacity-50 cursor-not-allowed',
                                         poderSelecionado === poder.nome
                                             ? 'border-ordem-red bg-ordem-red/10'
-                                            : 'border-ordem-border hover:border-ordem-border-light bg-ordem-bg/50'
+                                            : 'border-ordem-border hover:border-ordem-border-light bg-ordem-bg/50',
+                                        isTranscender(poder.nome) && 'border-purple-500/50 bg-purple-900/20'
                                     )}
                                 >
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2">
+                                                {isTranscender(poder.nome) && (
+                                                    <Sparkles size={16} className="text-purple-400" />
+                                                )}
                                                 <h3 className="font-semibold text-ordem-text">{poder.nome}</h3>
                                                 {!poder.elegivel && (
                                                     <Lock size={14} className="text-ordem-text-muted" />
@@ -174,7 +223,12 @@ export function PowerChoiceModal({ agent, onSelect, onClose }: PowerChoiceModalP
                                                 )}
                                             </div>
                                             <p className="text-sm text-ordem-text-muted mt-1">{poder.descricao}</p>
-                                            {poder.requisitos && (
+                                            {isTranscender(poder.nome) && (
+                                                <p className="text-xs text-purple-400 mt-1">
+                                                    ⚠ Escolher Transcender abrirá seleção de poder paranormal
+                                                </p>
+                                            )}
+                                            {poder.requisitos && !isTranscender(poder.nome) && (
                                                 <p className={cn(
                                                     'text-xs mt-1',
                                                     poder.elegivel ? 'text-green-400' : 'text-red-400'
@@ -218,11 +272,13 @@ export function PowerChoiceModal({ agent, onSelect, onClose }: PowerChoiceModalP
                         className={cn(
                             'px-4 py-2 rounded-lg font-medium transition-colors',
                             poderSelecionado
-                                ? 'bg-ordem-red text-white hover:bg-ordem-red/80'
+                                ? poderSelecionado === 'Transcender'
+                                    ? 'bg-purple-600 text-white hover:bg-purple-500'
+                                    : 'bg-ordem-red text-white hover:bg-ordem-red/80'
                                 : 'bg-ordem-border text-ordem-text-muted cursor-not-allowed'
                         )}
                     >
-                        Confirmar Escolha
+                        {poderSelecionado === 'Transcender' ? 'Escolher Poder Paranormal' : 'Confirmar Escolha'}
                     </button>
                 </div>
             </motion.div>
@@ -231,3 +287,4 @@ export function PowerChoiceModal({ agent, onSelect, onClose }: PowerChoiceModalP
 }
 
 export default PowerChoiceModal;
+

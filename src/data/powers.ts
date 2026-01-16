@@ -12,7 +12,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Caminho para Forca',
-    descricao: 'Quando usa a ação sacrifício em perseguição, gasta 1 PE para fornecer +O extra (total +2d20) nos testes dos aliados. Quando usa chamar atenção em furtividade, gasta 1 PE para diminuir a visibilidade de todos os aliados próximos em –2 (em vez de –1).',
+    descricao: 'Quando usa a ação sacrifício em perseguição, gasta 1 PE para fornecer +1d20 extra (total +2d20) nos testes dos aliados. Quando usa chamar atenção em furtividade, gasta 1 PE para diminuir a visibilidade de todos os aliados próximos em –2 (em vez de –1).',
     tipo: 'Classe',
     livro: 'Sobrevivendo ao Horror'
   },
@@ -25,7 +25,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Correria Desesperada',
-    descricao: 'Você recebe +3m em seu deslocamento e +O em testes de perícia para fugir em uma perseguição.',
+    descricao: 'Você recebe +3m em seu deslocamento e +1d20 em testes de perícia para fugir em uma perseguição.',
     tipo: 'Classe',
     livro: 'Sobrevivendo ao Horror'
   },
@@ -138,7 +138,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Presteza Atlética',
-    descricao: 'Quando faz um teste de facilitar a investigação, gasta 1 PE para usar Força ou Agilidade no lugar do atributo-base da perícia. Se passar, o próximo aliado que usar seu bônus também recebe +O no teste.',
+    descricao: 'Quando faz um teste de facilitar a investigação, gasta 1 PE para usar Força ou Agilidade no lugar do atributo-base da perícia. Se passar, o próximo aliado que usar seu bônus também recebe +1d20 no teste.',
     tipo: 'Classe',
     livro: 'Regras Básicas'
   },
@@ -266,7 +266,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Mãos Firmes',
-    descricao: 'Gasta 2 PE para receber +O em testes de Furtividade para esconder-se ou para executar uma ação discreta que envolva manipular um objeto.',
+    descricao: 'Gasta 2 PE para receber +1d20 em testes de Furtividade para esconder-se ou para executar uma ação discreta que envolva manipular um objeto.',
     tipo: 'Classe',
     requisitos: 'Treinado em Furtividade',
     livro: 'Sobrevivendo ao Horror'
@@ -336,7 +336,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Na Trilha Certa',
-    descricao: 'Sempre que tiver sucesso em um teste para procurar pistas, você pode gastar 1 PE para receber +O no próximo teste. Os custos e bônus são cumulativos.',
+    descricao: 'Sempre que tiver sucesso em um teste para procurar pistas, você pode gastar 1 PE para receber +1d20 no próximo teste. Os custos e bônus são cumulativos.',
     tipo: 'Classe',
     livro: 'Regras Básicas'
   },
@@ -511,7 +511,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Pancada Forte (Trilha Durão Estágio 4)',
-    descricao: 'Quando faz um ataque, você pode gastar 1 PE para receber +O no teste de ataque.',
+    descricao: 'Quando faz um ataque, você pode gastar 1 PE para receber +1d20 no teste de ataque.',
     tipo: 'Trilha',
     livro: 'Sobrevivendo ao Horror'
   },
@@ -581,7 +581,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Foco em Perícia',
-    descricao: 'Escolha uma perícia (exceto Luta/Pontaria). Rola +O quando faz teste dessa perícia. Pode ser escolhido várias vezes.',
+    descricao: 'Escolha uma perícia (exceto Luta/Pontaria). Rola +1d20 quando faz teste dessa perícia. Pode ser escolhido várias vezes.',
     tipo: 'Geral',
     requisitos: 'Treinado na perícia escolhida',
     livro: 'Sobrevivendo ao Horror'
@@ -630,7 +630,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Pai de Pet',
-    descricao: 'Você possui um Aliado Animal de Categoria II, que fornece +O em testes. Pode ser substituído em interlúdio.',
+    descricao: 'Você possui um Aliado Animal de Categoria II, que fornece +1d20 em testes. Pode ser substituído em interlúdio.',
     tipo: 'Geral',
     requisitos: 'Pre 2',
     livro: 'Sobrevivendo ao Horror'
@@ -651,7 +651,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Pensamento Tático',
-    descricao: 'Recebe treinamento em Tática (+2 se já treinado). No início do combate, você e aliados em alcance médio recebem +O em Iniciativa.',
+    descricao: 'Recebe treinamento em Tática (+2 se já treinado). No início do combate, você e aliados em alcance médio recebem +1d20 em Iniciativa.',
     tipo: 'Geral',
     requisitos: 'Int 2',
     livro: 'Sobrevivendo ao Horror'
@@ -773,34 +773,92 @@ export const PODERES: Poder[] = [
     tipo: 'Geral',
     livro: 'Regras Básicas' // Classificado como Geral em SaH
   },
+  {
+    nome: 'Transcender',
+    descricao: 'Escolha um poder paranormal. Você recebe o poder escolhido, mas não ganha Sanidade neste aumento de NEX. Você pode escolher este poder várias vezes.',
+    tipo: 'Geral',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Treinamento em Perícia',
+    descricao: 'Escolha duas perícias. Você se torna treinado nessas perícias. A partir de NEX 35%, você pode escolher perícias nas quais já é treinado para se tornar veterano. A partir de NEX 70%, pode escolher perícias nas quais já é veterano para se tornar expert.',
+    tipo: 'Geral',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Aumento de Atributo',
+    descricao: 'Aumenta um atributo em +1 (até o máximo de 5).',
+    tipo: 'Geral',
+    livro: 'Regras Básicas'
+  },
 
   // ===================================================================
   // PODERES PARANORMAIS (SOBREVIVENDO AO HORROR E REGRAS BÁSICAS)
   // ===================================================================
 
-  // Morte
+  // Gerais
   {
-    nome: 'Antecipar Vitalidade',
-    descricao: 'Pode acumular 1 carga de antecipação para adicionar +O a um teste (limite: Vig). Perde 1 carga ao dormir. Afinidade: limite +2 cargas, perde 2 cargas ao dormir.',
+    nome: 'Aprender Ritual',
+    descricao: 'Aprende e pode conjurar um ritual de 1º círculo. Pode substituir ritual que já conhece. A partir de NEX 45%, aprende ritual de 2º círculo. A partir de NEX 75%, aprende ritual de 3º círculo. Pode ser escolhido várias vezes.',
     tipo: 'Paranormal',
     livro: 'Regras Básicas'
   },
   {
-    nome: 'Aura de Pavor',
-    descricao: 'Gasta 2 PE (Movimento) para apavorar 1 pessoa/animal (Vontade DT Pre reduz para abalado). Afinidade: DT +5, múltiplos alvos.',
+    nome: 'Resistir a Sangue',
+    descricao: 'Você recebe resistência 10 contra o elemento Sangue. Afinidade: aumenta a resistência para 20.',
     tipo: 'Paranormal',
+    elemento: 'Sangue',
     livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Resistir a Morte',
+    descricao: 'Você recebe resistência 10 contra o elemento Morte. Afinidade: aumenta a resistência para 20.',
+    tipo: 'Paranormal',
+    elemento: 'Morte',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Resistir a Conhecimento',
+    descricao: 'Você recebe resistência 10 contra o elemento Conhecimento. Afinidade: aumenta a resistência para 20.',
+    tipo: 'Paranormal',
+    elemento: 'Conhecimento',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Resistir a Energia',
+    descricao: 'Você recebe resistência 10 contra o elemento Energia. Afinidade: aumenta a resistência para 20.',
+    tipo: 'Paranormal',
+    elemento: 'Energia',
+    livro: 'Regras Básicas'
+  },
+
+  // Morte
+  {
+    nome: 'Antecipar Vitalidade',
+    descricao: 'Quando faz um teste, pode acumular 1 carga de antecipação para adicionar +1d20 (limite de cargas: Vigor). Enquanto tiver cargas, na próxima ação dormir em vez de recuperar PV você perde 1 carga. Afinidade: limite +2 cargas, perde 2 cargas por ação dormir.',
+    tipo: 'Paranormal',
+    elemento: 'Morte',
+    livro: 'Sobrevivendo ao Horror'
+  },
+  {
+    nome: 'Aura de Pavor',
+    descricao: 'Gasta 2 PE e ação de movimento para apavorar 1 pessoa/animal em alcance médio (Vontade DT Pre reduz para abalado). Não precisa ver o alvo. Condição termina no fim da cena ou se o alvo se afastar além de alcance médio. Afinidade: DT +5, múltiplos alvos no alcance.',
+    tipo: 'Paranormal',
+    elemento: 'Morte',
+    livro: 'Sobrevivendo ao Horror'
   },
   {
     nome: 'Encarar a Morte',
     descricao: 'Durante cenas de ação, seu limite de gasto de PE aumenta em +1. Afinidade: limite de gasto de PE aumenta para +3 total.',
     tipo: 'Paranormal',
+    elemento: 'Morte',
     livro: 'Regras Básicas'
   },
   {
     nome: 'Escapar da Morte',
-    descricao: 'Uma vez por cena, ao receber dano que o deixaria com 0 PV, fica com 1 PV (não funciona contra dano massivo).',
+    descricao: 'Uma vez por cena, ao receber dano que o deixaria com 0 PV, fica com 1 PV (não funciona contra dano massivo). Afinidade: evita completamente o dano.',
     tipo: 'Paranormal',
+    elemento: 'Morte',
     requisitos: 'Morte 1',
     livro: 'Regras Básicas'
   },
@@ -808,12 +866,14 @@ export const PODERES: Poder[] = [
     nome: 'Potencial Aprimorado',
     descricao: 'Recebe +1 PE por NEX. Afinidade: recebe +2 PE por NEX (total de +2 PE por NEX).',
     tipo: 'Paranormal',
+    elemento: 'Morte',
     livro: 'Regras Básicas'
   },
   {
     nome: 'Potencial Reaproveitado',
     descricao: 'Uma vez por rodada, ao passar em teste de resistência, ganha 2 PE temporários cumulativos (desaparecem ao fim da cena). Afinidade: ganha 3 PE temporários.',
     tipo: 'Paranormal',
+    elemento: 'Morte',
     requisitos: 'Morte 1',
     livro: 'Regras Básicas'
   },
@@ -821,6 +881,7 @@ export const PODERES: Poder[] = [
     nome: 'Surto Temporal',
     descricao: 'Uma vez por cena, durante seu turno, pode gastar 3 PE para realizar uma ação padrão adicional. Afinidade: pode usar 1x por turno.',
     tipo: 'Paranormal',
+    elemento: 'Morte',
     requisitos: 'Morte 2',
     livro: 'Regras Básicas'
   },
@@ -830,6 +891,7 @@ export const PODERES: Poder[] = [
     nome: 'Anatomia Insana',
     descricao: 'Tem 50% de chance (resultado par em 1d4) de ignorar o dano adicional de acerto crítico ou ataque furtivo. Afinidade: imune a acertos críticos e ataques furtivos.',
     tipo: 'Paranormal',
+    elemento: 'Sangue',
     requisitos: 'Sangue 2',
     livro: 'Regras Básicas'
   },
@@ -837,24 +899,28 @@ export const PODERES: Poder[] = [
     nome: 'Arma de Sangue',
     descricao: 'Gasta 2 PE (Movimento) para produzir arma simples leve (1d6 Sangue). Gasta 1 PE para ataque C.a.C. adicional (1x/turno). Afinidade: arma se torna permanente, causa 1d10 Sangue.',
     tipo: 'Paranormal',
+    elemento: 'Sangue',
     livro: 'Regras Básicas'
   },
   {
     nome: 'Espreitar da Besta',
-    descricao: 'Você recebe +O em testes de Furtividade. Afinidade: não sofre penalidade de Furtividade por se mover ao seu deslocamento normal.',
+    descricao: 'Você recebe +5 em Furtividade. Em perseguições (como caçador), pode usar Furtividade em vez de Atletismo. Em cenas de furtividade, pode fazer ações discretas sem sofrer –O de penalidade. Afinidade: o bônus em Furtividade aumenta para +10.',
     tipo: 'Paranormal',
-    livro: 'Regras Básicas'
+    elemento: 'Sangue',
+    livro: 'Sobrevivendo ao Horror'
   },
   {
     nome: 'Instintos Sanguinários',
-    descricao: 'Seus ataques corpo a corpo e desarmados causam +1d4 pontos de dano de Sangue. Afinidade: o dano adicional aumenta para +1d8.',
+    descricao: 'Ao se conectar com o Sangue do Outro Lado, você desperta instintos animalescos paranormais. Você recebe visão no escuro e faro. Afinidade: você não pode mais ser flanqueado, não fica desprevenido e recebe +5 em testes de resistência contra armadilhas.',
     tipo: 'Paranormal',
-    livro: 'Regras Básicas'
+    elemento: 'Sangue',
+    livro: 'Sobrevivendo ao Horror'
   },
   {
     nome: 'Sangue de Ferro',
     descricao: 'Recebe +2 PV por NEX. Afinidade: +5 em Fortitude, imune a venenos e doenças.',
     tipo: 'Paranormal',
+    elemento: 'Sangue',
     requisitos: 'Sangue 1',
     livro: 'Regras Básicas'
   },
@@ -862,6 +928,7 @@ export const PODERES: Poder[] = [
     nome: 'Sangue Fervente',
     descricao: 'Enquanto estiver machucado, recebe +1 em Agilidade ou Força (à sua escolha) no início do turno. Afinidade: o bônus aumenta para +2.',
     tipo: 'Paranormal',
+    elemento: 'Sangue',
     requisitos: 'Sangue 2',
     livro: 'Regras Básicas'
   },
@@ -869,27 +936,47 @@ export const PODERES: Poder[] = [
     nome: 'Sangue Vivo',
     descricao: 'Na primeira vez que ficar machucado por cena, recebe cura acelerada 2. Afinidade: cura acelerada aumenta para 5.',
     tipo: 'Paranormal',
+    elemento: 'Sangue',
     requisitos: 'Sangue 1',
     livro: 'Regras Básicas'
   },
 
   // Conhecimento
   {
-    nome: 'Absorver Conhecimento',
-    descricao: 'Quando aprende um ritual (Aprender Ritual), pode sacrificar redução no dano do ritual (por NEX) para mudar o tipo de dado de dano. Afinidade: custo de ritual de Conhecimento (alvo 1 pessoa) reduz em –1 PE se puder tocar o alvo.',
+    nome: 'Expansão de Conhecimento',
+    descricao: 'Você se conecta com o Conhecimento do Outro Lado e aprende um poder de classe que não pertença à sua classe (precisa atender pré-requisitos). Afinidade: aprende um segundo poder de classe que não pertença à sua classe.',
     tipo: 'Paranormal',
+    elemento: 'Conhecimento',
+    requisitos: 'Conhecimento 1',
     livro: 'Regras Básicas'
   },
   {
-    nome: 'Aprender Ritual',
-    descricao: 'Aprende e pode conjurar um ritual de 1º círculo. Pode substituir ritual que já conhece. A partir de NEX 45%, aprende ritual de 2º círculo. Pode ser escolhido várias vezes.',
+    nome: 'Percepção Paranormal',
+    descricao: 'O Conhecimento sussurra em sua mente. Em cenas de investigação, quando faz um teste para procurar pistas, você pode rolar novamente um dado com resultado menor que 10. Afinidade: pode rolar novamente até dois dados com resultado menor que 10.',
     tipo: 'Paranormal',
+    elemento: 'Conhecimento',
     livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Precognição',
+    descricao: 'Você possui um sexto sentido que o avisa do perigo antes que ele aconteça. Recebe +2 em Defesa e em testes de resistência. Afinidade: fica imune à condição desprevenido.',
+    tipo: 'Paranormal',
+    elemento: 'Conhecimento',
+    requisitos: 'Conhecimento 1',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Absorver Conhecimento',
+    descricao: 'Empunhando uma fonte de conhecimento escrito (livro, texto no celular, etc.), gasta 1 PE e ação completa para fazer uma pergunta à fonte. Se a resposta estiver armazenada, você a obtém automaticamente. Com a ação de interlúdio ler, aumenta o dado de bônus em um passo. Afinidade: custo de rituais de Conhecimento (alvo 1 pessoa) reduz em –1 PE se puder tocar o alvo.',
+    tipo: 'Paranormal',
+    elemento: 'Conhecimento',
+    livro: 'Sobrevivendo ao Horror'
   },
   {
     nome: 'Apatia Herege',
-    descricao: 'Gasta 2 PE para rolar novamente um teste contra condição de medo (deve aceitar o segundo resultado). Afinidade: pode escolher a melhor rolagem e usar depois de saber se passou. ',
+    descricao: 'Quando faz um teste contra condição de medo, gasta 2 PE para rolar o teste novamente. Deve aceitar o segundo resultado. Afinidade: pode usar depois de saber se passou e escolher a melhor rolagem.',
     tipo: 'Paranormal',
+    elemento: 'Conhecimento',
     requisitos: 'Conhecimento 1',
     livro: 'Sobrevivendo ao Horror'
   },
@@ -897,12 +984,14 @@ export const PODERES: Poder[] = [
     nome: 'Sensitivo',
     descricao: 'Você recebe +5 em testes de Diplomacia, Intimidação e Intuição. Afinidade: quando faz teste oposto, o oponente sofre –O.',
     tipo: 'Paranormal',
+    elemento: 'Conhecimento',
     livro: 'Regras Básicas'
   },
   {
     nome: 'Visão do Oculto',
     descricao: 'Você recebe +5 em testes de Percepção e enxerga no escuro. Afinidade: ignora camuflagem.',
     tipo: 'Paranormal',
+    elemento: 'Conhecimento',
     requisitos: 'Conhecimento 1',
     livro: 'Regras Básicas'
   },
@@ -912,12 +1001,14 @@ export const PODERES: Poder[] = [
     nome: 'Afortunado',
     descricao: 'Uma vez por rolagem, pode rolar novamente um resultado 1 em qualquer dado que não seja d20. Afinidade: uma vez por teste, pode rolar novamente um resultado 1 em d20.',
     tipo: 'Paranormal',
+    elemento: 'Energia',
     livro: 'Regras Básicas'
   },
   {
     nome: 'Campo Protetor',
     descricao: 'Quando usa a ação esquiva, gasta 1 PE para receber +5 em Defesa. Afinidade: também recebe +5 em Reflexo e não sofre dano se passar no teste de Reflexo.',
     tipo: 'Paranormal',
+    elemento: 'Energia',
     requisitos: 'Energia 1',
     livro: 'Regras Básicas'
   },
@@ -925,12 +1016,14 @@ export const PODERES: Poder[] = [
     nome: 'Causalidade Fortuita',
     descricao: 'Em cenas de investigação, a DT para procurar pistas diminui em –5 para você até você encontrar uma pista. Afinidade: a DT sempre diminui em –5 para você.',
     tipo: 'Paranormal',
+    elemento: 'Energia',
     livro: 'Regras Básicas'
   },
   {
     nome: 'Conexão Empática',
-    descricao: 'Gasta 2 PE (Completa) para tocar objeto elétrico ligado e conversar com ele (até fim da cena). Afinidade: +5 em testes Int/Pre com o item.',
+    descricao: 'Gasta 2 PE e ação completa para tocar objeto elétrico ligado e conversar com ele até o fim da cena. O objeto tem percepção limitada e memórias baseadas em seus arquivos/programas. Atitude inicial indiferente (pode persuadir com Diplomacia). Quando o efeito termina, se usar novamente sua atitude será hostil. Afinidade: +5 em testes de Intelecto ou Presença com o item.',
     tipo: 'Paranormal',
+    elemento: 'Energia',
     requisitos: 'Energia 1',
     livro: 'Sobrevivendo ao Horror'
   },
@@ -938,6 +1031,7 @@ export const PODERES: Poder[] = [
     nome: 'Golpe de Sorte',
     descricao: 'Seus ataques recebem +1 na margem de ameaça. Afinidade: seus ataques recebem +1 no multiplicador de crítico.',
     tipo: 'Paranormal',
+    elemento: 'Energia',
     requisitos: 'Energia 1',
     livro: 'Regras Básicas'
   },
@@ -945,14 +1039,15 @@ export const PODERES: Poder[] = [
     nome: 'Manipular Entropia',
     descricao: 'Gasta 2 PE para fazer alvo em alcance curto (exceto você) rolar novamente um dos dados em um teste de perícia. Afinidade: o alvo rola novamente todos os dados que você escolher.',
     tipo: 'Paranormal',
+    elemento: 'Energia',
     requisitos: 'Energia 1',
     livro: 'Regras Básicas'
   },
   {
     nome: 'Valer-se do Caos',
-    descricao: 'Pode gastar 2 PE para fazer alvo em alcance curto rolar novamente um dado em teste de perícia. Afinidade: rola novamente todos os dados que escolher.',
+    descricao: 'Quando faz um teste, pode escolher controlar o caos. Se fizer isso, recebe +1d20 nesse teste. Porém, se falhar no teste ou o d20 adicional tirar 5 ou menos, perde 1d4 pontos de Sanidade. Afinidade: só perde Sanidade se falhar ou se o d20 extra tirar 1 ou 2.',
     tipo: 'Paranormal',
-    requisitos: 'Energia 1',
+    elemento: 'Energia',
     livro: 'Sobrevivendo ao Horror'
   },
 
@@ -1023,7 +1118,7 @@ const PODERES_POR_CLASSE: Record<ClasseName, string[]> = {
     'Flashback', 'Leitura Fria', 'Mãos Firmes', 'Plano de Fuga', 'Remoer Memórias',
     'Resistir à Pressão', 'Balística Avançada', 'Conhecimento Aplicado', 'Hacker',
     'Mãos Rápidas', 'Mochila de Utilidades', 'Movimento Tático', 'Na Trilha Certa', 'Nerd',
-    'Treinamento em Perícia', 'Aumento de Atributo', 'Versatilidade'
+    'Transcender', 'Treinamento em Perícia', 'Aumento de Atributo', 'Versatilidade'
   ],
   Ocultista: [
     'Deixe os Sussurros Guiarem', 'Domínio Esotérico', 'Minha Dor me Impulsiona',
@@ -1038,7 +1133,7 @@ const PODERES_POR_CLASSE: Record<ClasseName, string[]> = {
     // Sobrevivente usa sistema de estágios diferente, poderes são mais limitados
     'Cicatrizado', 'Apego Angustiado', 'Correria Desesperada', 'Engolir o Choro',
     'Instinto de Fuga', 'Mochileiro', 'Paranoia Defensiva', 'Sacrificar os Joelhos',
-    'Treinamento em Perícia', 'Aumento de Atributo'
+    'Transcender', 'Treinamento em Perícia', 'Aumento de Atributo'
   ]
 };
 
@@ -1152,4 +1247,93 @@ export function getPoderesElegiveis(personagem: Personagem): Poder[] {
 export function contarPoderesDisponiveis(nex: number): number {
   const marcos = [15, 30, 45, 60, 75, 90];
   return marcos.filter(m => nex >= m).length;
+}
+
+// ===================================================================
+// FUNÇÕES PARA PODERES PARANORMAIS (usadas com Transcender)
+// ===================================================================
+
+import { Elemento } from '../core/types';
+
+/**
+ * Retorna todos os poderes paranormais disponíveis.
+ */
+export function getPoderesParanormais(): Poder[] {
+  return PODERES.filter(p => p.tipo === 'Paranormal');
+}
+
+/**
+ * Conta quantos poderes paranormais de um elemento o personagem possui.
+ * Usado para verificar requisitos como "Morte 1", "Sangue 2", etc.
+ */
+export function contarPoderesElemento(personagem: Personagem, elemento: Elemento): number {
+  return personagem.poderes.filter(p =>
+    p.tipo === 'Paranormal' && p.elemento === elemento
+  ).length;
+}
+
+/**
+ * Verifica se um personagem atende aos requisitos de um poder paranormal.
+ * Requisitos de elemento (ex: "Morte 1", "Sangue 2") verificam quantos
+ * poderes paranormais daquele elemento o personagem já possui.
+ */
+export function verificarRequisitosParanormal(
+  poder: Poder,
+  personagem: Personagem
+): { elegivel: boolean; motivo?: string } {
+  if (!poder.requisitos) {
+    return { elegivel: true };
+  }
+
+  const req = poder.requisitos.toLowerCase();
+
+  // Verificar requisitos de elemento (ex: "Morte 1", "Sangue 2", "Conhecimento 1", "Energia 1")
+  const elementoMatch = req.match(/(morte|sangue|conhecimento|energia|medo)\s*(\d+)/i);
+  if (elementoMatch) {
+    const [, elemStr, qtdStr] = elementoMatch;
+    const elemento = (elemStr.charAt(0).toUpperCase() + elemStr.slice(1).toLowerCase()) as Elemento;
+    const qtdReq = parseInt(qtdStr);
+    const qtdAtual = contarPoderesElemento(personagem, elemento);
+
+    if (qtdAtual < qtdReq) {
+      return {
+        elegivel: false,
+        motivo: `Requer ${qtdReq} poder(es) de ${elemento} (você tem ${qtdAtual})`
+      };
+    }
+  }
+
+  // Também verificar requisitos padrão (atributos, NEX, etc.)
+  return verificarRequisitos(poder, personagem);
+}
+
+/**
+ * Retorna poderes paranormais elegíveis para um personagem escolher.
+ * Usado quando o personagem escolhe Transcender.
+ */
+export function getPoderesParanormaisElegiveis(personagem: Personagem): (Poder & { elegivel: boolean; motivo?: string })[] {
+  const paranormais = getPoderesParanormais();
+  const nomesPossuidos = new Set(personagem.poderes.map(p => p.nome));
+
+  return paranormais.map(p => {
+    // "Aprender Ritual" pode ser escolhido várias vezes
+    const podeRepetir = p.nome === 'Aprender Ritual';
+    const jaPossui = nomesPossuidos.has(p.nome);
+
+    if (jaPossui && !podeRepetir) {
+      return { ...p, elegivel: false, motivo: 'Você já possui este poder' };
+    }
+
+    const { elegivel, motivo } = verificarRequisitosParanormal(p, personagem);
+    return { ...p, elegivel, motivo };
+  });
+}
+
+/**
+ * Retorna os poderes paranormais filtrados por elemento.
+ */
+export function getPoderesParanormaisPorElemento(elemento?: Elemento): Poder[] {
+  const paranormais = getPoderesParanormais();
+  if (!elemento) return paranormais;
+  return paranormais.filter(p => p.elemento === elemento || !p.elemento);
 }

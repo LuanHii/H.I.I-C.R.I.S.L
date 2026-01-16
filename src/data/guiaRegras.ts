@@ -46,7 +46,7 @@ export const REGRAS: Regra[] = [
         tabela: {
             cabecalho: ['Treino', 'Bônus'],
             linhas: [
-                ['Leigo', '+0'],
+                ['Leigo', '+1d20'],
                 ['Treinado', '+5'],
                 ['Veterano', '+10'],
                 ['Expert', '+15'],
@@ -76,13 +76,13 @@ export const REGRAS: Regra[] = [
         id: 'modificadores-dados',
         titulo: 'Modificadores de Dados',
         categoria: 'testes',
-        resumo: '+O = +1d20 (melhor), -O = -1d20 (pior).',
+        resumo: '+1d20 = +1d20 (melhor), -O = -1d20 (pior).',
         detalhes: 'Se penalidade reduzir dados para menos de 1, role a quantidade como bônus mas escolha o PIOR resultado.',
         tabela: {
             cabecalho: ['Modificador', 'Efeito'],
             linhas: [
-                ['+O', 'Rola +1d20 extra, escolhe o melhor'],
-                ['+OO', 'Rola +2d20 extras'],
+                ['+1d20', 'Rola +1d20 extra, escolhe o melhor'],
+                ['+1d20O', 'Rola +2d20 extras'],
                 ['-O', 'Rola -1d20, escolhe o pior'],
                 ['-OO', 'Rola -2d20'],
             ]
@@ -215,7 +215,7 @@ export const REGRAS: Regra[] = [
         titulo: 'Ação: Investida',
         categoria: 'manobras',
         resumo: 'Ação completa. Move 2x deslocamento + ataque corpo a corpo.',
-        detalhes: 'Bônus: +O no ataque\nPenalidade: -5 DEF até próximo turno\n\nNão funciona em terreno difícil!',
+        detalhes: 'Bônus: +1d20 no ataque\nPenalidade: -5 DEF até próximo turno\n\nNão funciona em terreno difícil!',
         dica: 'Durante investida, pode Atropelar como ação livre!',
         tags: ['investida', 'movimento', 'ataque']
     },
@@ -237,9 +237,9 @@ export const REGRAS: Regra[] = [
         tabela: {
             cabecalho: ['Situação', 'Efeito'],
             linhas: [
-                ['Flanqueando', '+O no ataque'],
-                ['Posição elevada', '+O no ataque'],
-                ['Invisível', '+OO no ataque'],
+                ['Flanqueando', '+1d20 no ataque'],
+                ['Posição elevada', '+1d20 no ataque'],
+                ['Invisível', '+1d20O no ataque'],
                 ['Caído (atacando)', '-OO no ataque'],
                 ['Alvo desprevenido', '-5 DEF'],
                 ['Alvo caído (corpo a corpo)', '-5 DEF'],
@@ -407,9 +407,9 @@ export const REGRAS: Regra[] = [
         id: 'auxiliar',
         titulo: 'Ação: Auxiliar',
         categoria: 'investigacao',
-        resumo: 'Ajude um aliado: ele ganha +O no teste.',
+        resumo: 'Ajude um aliado: ele ganha +1d20 no teste.',
         detalhes: 'Fora de combate: Sem custo\nEm combate: Gasta ação padrão\n\nVocê deve estar perto do aliado e descrever como ajuda.',
-        dica: 'Múltiplos auxílios se acumulam! 3 ajudando = +OOO',
+        dica: 'Múltiplos auxílios se acumulam! 3 ajudando = +1d20OO',
         tags: ['auxiliar', 'ajudar', 'bônus', 'grupo']
     },
     {
@@ -465,7 +465,7 @@ export const REGRAS: Regra[] = [
         titulo: 'Bônus Temporários',
         categoria: 'testes',
         resumo: 'Modifidadores que duram até o fim da cena ou efeito.',
-        detalhes: 'Fontes comuns:\n• Rituais (+X em perícia)\n• Poderes de classe\n• Itens consumo (poções)\n• Auxiliar (+O)\n\nBônus do mesmo tipo não acumulam (usar o maior).',
+        detalhes: 'Fontes comuns:\n• Rituais (+X em perícia)\n• Poderes de classe\n• Itens consumo (poções)\n• Auxiliar (+1d20)\n\nBônus do mesmo tipo não acumulam (usar o maior).',
         tags: ['bônus', 'temporário', 'modificador']
     },
     {

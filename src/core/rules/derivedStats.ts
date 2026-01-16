@@ -31,6 +31,7 @@ export interface DerivedStatsInput {
   origemNome?: string;
   trilhaNome?: string;
   sobreviventeBeneficioOrigem?: 'pericias' | 'poder' | 'ambos';
+  qtdTranscender?: number;
 }
 
 /**
@@ -248,6 +249,7 @@ export function calculateDerivedStats(
   let origemNome: string | undefined;
   let trilhaNome: string | undefined;
   let sobreviventeBeneficioOrigem: 'pericias' | 'poder' | 'ambos' | undefined;
+  let qtdTranscender = 0;
 
   if (typeof classeOrInput === 'object') {
     classe = classeOrInput.classe;
@@ -257,6 +259,7 @@ export function calculateDerivedStats(
     origemNome = classeOrInput.origemNome;
     trilhaNome = classeOrInput.trilhaNome;
     sobreviventeBeneficioOrigem = classeOrInput.sobreviventeBeneficioOrigem;
+    qtdTranscender = classeOrInput.qtdTranscender ?? 0;
   } else {
     classe = classeOrInput;
     attrs = atributos!;
@@ -302,7 +305,7 @@ export function calculateDerivedStats(
 
     pvMax = stats.pvInicial + attrs.VIG + (growthSteps * (stats.pvPorNivel + attrs.VIG)) + bonusOrigem.pvBonus + bonusTrilha.pvBonus;
     peMax = stats.peInicial + attrs.PRE + (growthSteps * (stats.pePorNivel + attrs.PRE)) + bonusOrigem.peBonus;
-    sanMax = stats.sanInicial + (growthSteps * stats.sanPorNivel) + bonusOrigem.sanBonus;
+    sanMax = stats.sanInicial + (growthSteps * stats.sanPorNivel) + bonusOrigem.sanBonus - (qtdTranscender * stats.sanPorNivel);
   }
 
   // Defesa base (inclui bônus de origem e trilha)

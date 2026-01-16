@@ -186,6 +186,7 @@ function recalculateStats(char: Personagem) {
     estagio: char.estagio,
     origemNome: char.origem,
     trilhaNome: char.trilha,
+    qtdTranscender: char.qtdTranscender,
   });
 
   const targetPvMax = char.overrides?.pvMax ?? derived.pvMax;
@@ -243,6 +244,7 @@ export function recalcularRecursosPersonagem(personagem: Personagem): Personagem
     estagio: char.estagio,
     origemNome: char.origem,
     trilhaNome: char.trilha,
+    qtdTranscender: char.qtdTranscender,
   });
 
   // Aplicar PV

@@ -60,7 +60,7 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 99,
         nome: 'Estudar a Presa',
-        descricao: 'Quando usa Estudar Fraquezas contra criatura paranormal ou cultista, pode transformar o tipo em sua "presa". Contra presas: +O em testes, +1 margem e multiplicador de crítico, RD 5. Só pode ter um tipo de presa ao mesmo tempo.'
+        descricao: 'Quando usa Estudar Fraquezas contra criatura paranormal ou cultista, pode transformar o tipo em sua "presa". Contra presas: +1d20 em testes, +1 margem e multiplicador de crítico, RD 5. Só pode ter um tipo de presa ao mesmo tempo.'
       }
     ],
     livro: 'Sobrevivendo ao Horror'
@@ -82,7 +82,7 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 40,
         nome: 'Ser Macabro',
-        descricao: 'RD aumenta para 10, penalidade em perícias aumenta para –2O. Efeitos adicionais por elemento (Sangue: usa For para PE, gasta 1+ PE para curar 1d8 PV por PE; Morte: +O Intimidação, usa Vig para PE, 4 turnos morrendo, não come/bebe; Conhecimento: +1 Int, usa Int para Enganação e PE; Energia: usa Agi para PE, +1d6 dano Energia por PE em C.a.C).'
+        descricao: 'RD aumenta para 10, penalidade em perícias aumenta para –2O. Efeitos adicionais por elemento (Sangue: usa For para PE, gasta 1+ PE para curar 1d8 PV por PE; Morte: +1d20 Intimidação, usa Vig para PE, 4 turnos morrendo, não come/bebe; Conhecimento: +1 Int, usa Int para Enganação e PE; Energia: usa Agi para PE, +1d6 dano Energia por PE em C.a.C).'
       },
       {
         nex: 65,
@@ -142,7 +142,7 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 40,
         nome: 'Fuga Obstinada',
-        descricao: 'Recebe +O em testes de perícia para fugir de um inimigo (perseguição ou não). Em cenas de perseguição, se for a presa, pode acumular até 4 falhas antes de ser pego.'
+        descricao: 'Recebe +1d20 em testes de perícia para fugir de um inimigo (perseguição ou não). Em cenas de perseguição, se for a presa, pode acumular até 4 falhas antes de ser pego.'
       },
       {
         nex: 65,
@@ -207,7 +207,7 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 40,
         nome: 'Poder da Fé',
-        descricao: 'Se torna veterano em Religião (ou recebe +O). Quando falha em um teste de resistência, pode gastar 2 PE para repetir o teste usando Religião, aceitando o novo resultado.'
+        descricao: 'Se torna veterano em Religião (ou recebe +1d20). Quando falha em um teste de resistência, pode gastar 2 PE para repetir o teste usando Religião, aceitando o novo resultado.'
       },
       {
         nex: 65,
@@ -235,7 +235,7 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 40,
         nome: 'As Sombras Dentro de Mim',
-        descricao: 'Recuperação de PP aumenta para 2 por ação dormir. Pode gastar 2 PE para permitir que a Entidade controle seus músculos: recebe +O em Acrobacia, Atletismo e Furtividade por uma rodada. Em cena de furtividade, o aumento de visibilidade é reduzido em –1.'
+        descricao: 'Recuperação de PP aumenta para 2 por ação dormir. Pode gastar 2 PE para permitir que a Entidade controle seus músculos: recebe +1d20 em Acrobacia, Atletismo e Furtividade por uma rodada. Em cena de furtividade, o aumento de visibilidade é reduzido em –1.'
       },
       {
         nex: 65,
@@ -300,7 +300,7 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 4, // Estágio 4
         nome: 'Pancada Forte',
-        descricao: 'Quando faz um ataque, você pode gastar 1 PE para receber +O no teste de ataque. Se você se tornar um combatente, perde esta habilidade, mas reduz o custo de ativação de Ataque Especial em –1 PE.'
+        descricao: 'Quando faz um ataque, você pode gastar 1 PE para receber +1d20 no teste de ataque. Se você se tornar um combatente, perde esta habilidade, mas reduz o custo de ativação de Ataque Especial em –1 PE.'
       }
     ],
     livro: 'Sobrevivendo ao Horror'
@@ -574,7 +574,7 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 40,
         nome: 'Discurso Motivador',
-        descricao: 'Gasta Ação Padrão e 4 PE para inspirar aliados. Você e aliados em alcance curto ganham +O em testes de perícia até o fim da cena. A partir de NEX 65%, pode gastar 8 PE para fornecer +OO.'
+        descricao: 'Gasta Ação Padrão e 4 PE para inspirar aliados. Você e aliados em alcance curto ganham +1d20 em testes de perícia até o fim da cena. A partir de NEX 65%, pode gastar 8 PE para fornecer +1d20O.'
       },
       {
         nex: 65,

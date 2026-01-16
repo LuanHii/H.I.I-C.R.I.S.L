@@ -373,7 +373,7 @@ export const RITUAIS: Ritual[] = [
     alvo: 'Você',
     duracao: 'Cena',
     resistencia: 'Nenhuma',
-    descricao: 'Potencializa seus sentidos, recebendo +O em Investigação, Luta, Percepção e Pontaria.',
+    descricao: 'Potencializa seus sentidos, recebendo +1d20 em Investigação, Luta, Percepção e Pontaria.',
     efeito: {
       padrao: 'Recebe +1d20 em Investigação, Luta, Percepção e Pontaria.',
       discente: 'Seus inimigos sofrem –O em testes de ataque contra você. Requer 2º círculo (+2 PE).',
@@ -1358,7 +1358,7 @@ export const RITUAIS: Ritual[] = [
     efeito: {
       padrao: 'Objeto emite luz em 9m de raio.',
       discente: 'Muda o alcance para longo e cria 4 esferas flutuantes, cada uma iluminando 6m de raio. Requer 2º círculo (+2 PE).',
-      verdadeiro: 'A luz é cálida. Aliados recebem +O em Vontade e inimigos ficam ofuscados. Requer 3º círculo (+5 PE).'
+      verdadeiro: 'A luz é cálida. Aliados recebem +1d20 em Vontade e inimigos ficam ofuscados. Requer 3º círculo (+5 PE).'
     },
     livro: 'Regras Básicas'
   },

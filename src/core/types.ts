@@ -235,6 +235,24 @@ export interface NexEvento {
   desbloqueado: boolean;
 }
 
+/**
+ * Representa uma pendência gerada durante o level-up de NEX.
+ * Cada pendência requer uma escolha do jogador antes de ser resolvida.
+ */
+export interface PendenciaNex {
+  id: string;
+  tipo: 'poder' | 'atributo' | 'trilha' | 'trilhaHabilidade' | 'pericia' | 'afinidade' | 'versatilidade' | 'transcenderPoder';
+  descricao: string;
+  nex: number;
+  resolvida: boolean;
+  /** Para pendências que requerem múltiplas escolhas (ex: perícias) */
+  quantidade?: number;
+  /** Opções pré-definidas quando aplicável */
+  opcoes?: string[];
+  /** Valor escolhido após resolução */
+  valorEscolhido?: string | string[];
+}
+
 export interface EfeitoCondicao {
   defesa?: number;
   pericias?: {
@@ -265,6 +283,7 @@ export interface Personagem {
   origem: string;
   nex: number;
   estagio?: number;
+  qtdTranscender?: number;
   patente?: Patente;
   pontosAtributoPendentes?: number;
   periciasTreinadasPendentes?: number;
@@ -307,6 +326,8 @@ export interface Personagem {
   rituais: Ritual[];
   proficiencias: string[];
   efeitosAtivos: string[];
+  /** Pendências de escolha geradas durante level-up de NEX */
+  pendenciasNex?: PendenciaNex[];
   log?: LogEntry[];
   // Overrides persistentes (modo Mestre/Operador) para ajustes pontuais fora da regra padrão.
   // Sempre que possível, o sistema deve calcular derivados automaticamente; overrides existem

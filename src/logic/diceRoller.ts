@@ -27,7 +27,7 @@ export function rollPericia(detalhe: PericiaDetalhada): DiceRollResult {
   const bonusO = Number.isFinite(detalhe.bonusO) ? detalhe.bonusO : 0;
 
   // Regra do livro (docs/Sistema-Ordem-Paranormal.md):
-  // +O = +1d20; -OO = -2d20; se cair abaixo de 1 dado, role como se fosse bônus e escolha o pior.
+  // +1d20 = +1d20; -OO = -2d20; se cair abaixo de 1 dado, role como se fosse bônus e escolha o pior.
   const wouldBe = baseDice + bonusO;
   const belowOne = wouldBe < 1;
   const diceCount = belowOne ? baseDice + Math.abs(bonusO) : Math.max(1, wouldBe);

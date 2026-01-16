@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Personagem, AtributoKey, PericiaName, Item, Poder } from '../../core/types';
+import { Personagem, AtributoKey, PericiaName, Item, Poder, Ritual } from '../../core/types';
 import { StatusBar } from '../StatusBar';
 import { calcularDefesaEfetiva } from '../../logic/combatUtils';
 import { PERICIA_ATRIBUTO, calcularPericiasDetalhadas } from '../../logic/rulesEngine';
@@ -7,7 +7,7 @@ import { ActionsTab } from '../ActionsTab';
 import { ItemSelectorModal } from './ItemSelectorModal';
 import { AbilitySelectorModal } from './AbilitySelectorModal';
 import { SkillSelectorModal } from './SkillSelectorModal';
-import { levelUp, levelDown, applyAttributePoint, removeAttributePoint, chooseTrack, choosePower } from '../../logic/progression';
+import { levelUp, levelDown, applyAttributePoint, removeAttributePoint, chooseTrack, choosePower, recalcularRecursosPersonagem } from '../../logic/progression';
 import { ProgressionTab } from '../ProgressionTab';
 import { PendingChoiceModal } from '../PendingChoiceModal';
 import { TrackSelectorModal } from '../TrackSelectorModal';
@@ -397,6 +397,33 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                         } catch (error: any) {
                             console.error('Erro ao escolher poder:', error.message);
                         }
+                    }}
+                    onTranscenderComplete={(poderParanormal: Poder, ritual?: Ritual) => {
+                        const updated = { ...agent };
+
+                        // Adicionar poder paranormal
+                        updated.poderes = [...updated.poderes, poderParanormal];
+
+                        // Adicionar ritual se houver
+                        if (ritual) {
+                            updated.rituais = [...updated.rituais, ritual];
+                        }
+
+                        // Reduzir pendência de poder de classe
+                        if (updated.poderesClassePendentes && updated.poderesClassePendentes > 0) {
+                            updated.poderesClassePendentes -= 1;
+                            if (updated.poderesClassePendentes <= 0) updated.poderesClassePendentes = undefined;
+                        }
+
+                        // Incrementar contador de transcender
+                        updated.qtdTranscender = (updated.qtdTranscender || 0) + 1;
+
+                        // Recalcular recursos para aplicar penalidade de Sanidade automaticamente
+                        const finalAgent = recalcularRecursosPersonagem(updated);
+
+                        onUpdate(finalAgent);
+                        // Fechar o modal (suprimir aviso temporariamente)
+                        setIsPendingChoiceModalSuppressed(true);
                     }}
                     onClose={() => setIsPendingChoiceModalSuppressed(true)}
                 />

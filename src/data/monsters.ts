@@ -1988,7 +1988,7 @@ export const AMEACAS: Ameaca[] = [
       },
       {
         nome: 'Voz Guia',
-        descricao: 'Pessoa em alcance curto que ouça recebe +O no próximo teste até fim da rodada.',
+        descricao: 'Pessoa em alcance curto que ouça recebe +1d20 no próximo teste até fim da rodada.',
         tipo: 'Padrão'
       },
       {
@@ -2111,7 +2111,7 @@ export const AMEACAS: Ameaca[] = [
       },
       {
         nome: 'Área de Caça',
-        descricao: 'Na área onde vive/caça: +O em perícias.'
+        descricao: 'Na área onde vive/caça: +1d20 em perícias.'
       },
       {
         nome: 'Faro Para Humanos',
@@ -2187,7 +2187,7 @@ export const AMEACAS: Ameaca[] = [
     habilidades: [
       {
         nome: 'Matar é uma Arte',
-        descricao: 'Usa Artes no lugar de qualquer perícia para testes com mentes/corpos humanos. Com horas de análise: substitui Investigação por Artes com +O.'
+        descricao: 'Usa Artes no lugar de qualquer perícia para testes com mentes/corpos humanos. Com horas de análise: substitui Investigação por Artes com +1d20.'
       },
       {
         nome: 'Cenas Imprevisíveis',
@@ -2246,7 +2246,7 @@ export const AMEACAS: Ameaca[] = [
     habilidades: [
       {
         nome: 'Caçadora Subaquática',
-        descricao: 'Pode prender a respiração por até 8 minutos. +O em ataques debaixo dágua.'
+        descricao: 'Pode prender a respiração por até 8 minutos. +1d20 em ataques debaixo dágua.'
       }
     ],
     acoes: [
@@ -2288,7 +2288,7 @@ export const AMEACAS: Ameaca[] = [
     habilidades: [
       {
         nome: 'Matilha',
-        descricao: 'Recebe +O em ataques para cada aliado adjacente ao alvo (máximo +3d20).'
+        descricao: 'Recebe +1d20 em ataques para cada aliado adjacente ao alvo (máximo +3d20).'
       }
     ],
     acoes: [
