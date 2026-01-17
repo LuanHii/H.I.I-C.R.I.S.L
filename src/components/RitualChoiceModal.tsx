@@ -50,7 +50,7 @@ export function RitualChoiceModal({
     const circuloMaximo = circuloMaximoProp ?? calcularCirculoMaximo(agent.nex);
 
     // Rituais já conhecidos
-    const rituaisConhecidos = new Set(agent.rituais.map(r => r.nome));
+    const rituaisConhecidos = useMemo(() => new Set(agent.rituais.map(r => r.nome)), [agent.rituais]);
 
     // Filtrar rituais
     const rituaisFiltrados = useMemo(() => {

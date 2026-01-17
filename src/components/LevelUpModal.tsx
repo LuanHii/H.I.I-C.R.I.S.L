@@ -104,7 +104,7 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
         const qtdTranscender = (personagemAtualizado.qtdTranscender || 0) + 1;
 
         // Aplicar alterações iniciais
-        let atualizado = {
+        let atualizado: Personagem = {
             ...resolverPendencia(personagemAtualizado, pendenciaSelecionada.id, infoPendencia),
             poderes: novosPoderes,
             rituais: novosRituais,
