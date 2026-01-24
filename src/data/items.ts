@@ -37,6 +37,14 @@ export const ITENS: Item[] = [
     livro: 'Sobrevivendo ao Horror'
   },
   {
+    nome: 'Punhos Enraivecidos',
+    categoria: 2,
+    espaco: 1,
+    tipo: 'Amaldiçoado (Sangue)',
+    descricao: 'Um par de soqueiras de metal vermelho vivo. Seus ataques desarmados causam +1d8 de dano de Sangue e seu dano se torna letal. Sempre que acerta um ataque desarmado, pode fazer outro ataque desarmado contra o mesmo alvo, pagando 2 PE por cada ataque já realizado no turno.',
+    livro: 'Regras Básicas'
+  },
+  {
     nome: 'Ligação Direta Infernal',
     categoria: 2,
     espaco: 1,
@@ -294,7 +302,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 1,
     tipo: 'Geral (Acessório)',
-    descricao: 'Permite enxergar no escuro como se tivesse visão no escuro. Recebe –O contra condição ofuscado e efeitos de luz.',
+    descricao: 'Permite enxergar no escuro como se tivesse visão no escuro. Recebe -1d20 contra condição ofuscado e efeitos de luz.',
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -506,7 +514,7 @@ export const ITENS: Item[] = [
     categoria: 0,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Peças metálicas pontiagudas. Ação padrão: cobre 1,5m. Quem pisar: 1d4 perfuração, lento 1 dia. Em perseguição: –O nos testes. Reflexos DT Agi evita.',
+    descricao: 'Peças metálicas pontiagudas. Ação padrão: cobre 1,5m. Quem pisar: 1d4 perfuração, lento 1 dia. Em perseguição: -1d20 nos testes. Reflexos DT Agi evita.',
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -591,7 +599,7 @@ export const ITENS: Item[] = [
   },
   {
     nome: 'Cicatrizante',
-    categoria: 0,
+    categoria: 1,
     espaco: 1,
     tipo: 'Geral (Operacional)',
     descricao: 'Ação padrão: cura 2d8+2 PV em você ou ser adjacente.',
@@ -607,7 +615,7 @@ export const ITENS: Item[] = [
   },
   {
     nome: 'Granada de Fragmentação',
-    categoria: 0,
+    categoria: 1,
     espaco: 1,
     tipo: 'Explosivo',
     descricao: 'Espalha fragmentos. Seres na área: 8d6 perfuração (Reflexos DT Agi reduz à metade).',
@@ -718,7 +726,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 0,
     tipo: 'Geral (Operacional)',
-    descricao: 'Mochila grande e resistente. Aumenta sua capacidade de carga em +5 espaços.',
+    descricao: 'Mochila leve e resistente. Não ocupa espaço e aumenta sua capacidade de carga em +2 espaços.',
     livro: 'Regras Básicas'
   },
   {
@@ -862,14 +870,6 @@ export const ITENS: Item[] = [
     livro: 'Regras Básicas'
   },
   {
-    nome: 'Componentes Ritualísticos de Medo',
-    categoria: 0,
-    espaco: 1,
-    tipo: 'Paranormal',
-    descricao: 'Conjunto de objetos necessários para conjuração de rituais de Medo.',
-    livro: 'Regras Básicas'
-  },
-  {
     nome: 'Emissor de Pulsos Paranormais',
     categoria: 2,
     espaco: 1,
@@ -883,6 +883,14 @@ export const ITENS: Item[] = [
     espaco: 1,
     tipo: 'Paranormal',
     descricao: 'Ação completa + 2 PE: grava ruídos paranormais (até 24h). Ouvir fornece +5 em Ocultismo para identificar criatura.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Medidor de Estabilidade da Membrana',
+    categoria: 1,
+    espaco: 1,
+    tipo: 'Paranormal',
+    descricao: 'Agente treinado em Ocultismo pode usar o medidor para avaliar o estado da Membrana em uma área, indicando a chance de uma entidade se manifestar.',
     livro: 'Regras Básicas'
   },
   {

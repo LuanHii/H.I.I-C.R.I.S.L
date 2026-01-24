@@ -7,12 +7,16 @@ import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPer
 
 export const AgentList: React.FC = () => {
   const { fichas, salvar } = useStoredFichas();
+  const [search, setSearch] = useState('');
+  const [classe, setClasse] = useState<'Todas' | 'Combatente' | 'Especialista' | 'Ocultista' | 'Sobrevivente'>('Todas');
+  const [ordem, setOrdem] = useState<'nome' | 'nex' | 'atualizado'>('nome');
+  const [somenteComProblemas, setSomenteComProblemas] = useState(false);
 
   if (fichas.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-ordem-text-muted">
         <p className="font-mono text-lg">Nenhum agente registrado.</p>
-        <p className="text-xs text-ordem-text-muted mt-2">Crie fichas na aba &quot;Agente&quot; para vê-las aqui.</p>
+        <p className="text-xs text-ordem-text-muted mt-2">Crie fichas em &quot;Novo Agente&quot; para vê-las aqui.</p>
       </div>
     );
   }
@@ -25,16 +29,103 @@ export const AgentList: React.FC = () => {
     }
   };
 
-  // Sem gerenciamento de sessão/tático: listagem única de fichas.
-  const ordenadas = [...fichas].sort((a, b) => a.personagem.nome.localeCompare(b.personagem.nome));
+  const toMs = (value: unknown): number => {
+    if (typeof value === 'number') return value;
+    if (value instanceof Date) return value.getTime();
+    if (typeof value === 'string') {
+      const t = new Date(value).getTime();
+      return Number.isFinite(t) ? t : 0;
+    }
+    return 0;
+  };
+
+  const filtradas = useMemo(() => {
+    const text = search.trim().toLowerCase();
+    const base = fichas.filter((f) => {
+      const p = f.personagem;
+      const matchTexto =
+        !text ||
+        p.nome.toLowerCase().includes(text) ||
+        p.classe.toLowerCase().includes(text) ||
+        (p.patente || '').toLowerCase().includes(text) ||
+        String(p.nex).includes(text);
+      const matchClasse = classe === 'Todas' || p.classe === classe;
+      if (!matchTexto || !matchClasse) return false;
+      if (!somenteComProblemas) return true;
+      return summarizeIssues(auditPersonagem(p)).total > 0;
+    });
+
+    return [...base].sort((a, b) => {
+      if (ordem === 'nex') return (b.personagem.nex ?? 0) - (a.personagem.nex ?? 0);
+      if (ordem === 'atualizado') return toMs(b.atualizadoEm) - toMs(a.atualizadoEm);
+      return a.personagem.nome.localeCompare(b.personagem.nome);
+    });
+  }, [fichas, search, classe, ordem, somenteComProblemas]);
 
   return (
     <div className="p-4 pb-20 space-y-4">
-      <div className="text-xs font-mono text-ordem-text-muted uppercase tracking-widest">
-        {ordenadas.length} ficha(s)
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div className="text-xs font-mono text-ordem-text-muted uppercase tracking-widest">
+          {filtradas.length} ficha(s)
+        </div>
+        <div className="flex flex-wrap gap-2 items-center">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar agente..."
+            className="bg-ordem-black/40 border border-ordem-border-light text-white px-3 py-2 rounded focus:border-ordem-red focus:outline-none font-mono text-xs w-full md:w-48"
+            aria-label="Buscar agente"
+          />
+          <select
+            value={classe}
+            onChange={(e) => setClasse(e.target.value as any)}
+            className="bg-ordem-black/40 border border-ordem-border-light text-white px-3 py-2 rounded focus:border-ordem-red focus:outline-none font-mono text-xs"
+            aria-label="Filtrar por classe"
+          >
+            <option value="Todas">Todas</option>
+            <option value="Combatente">Combatente</option>
+            <option value="Especialista">Especialista</option>
+            <option value="Ocultista">Ocultista</option>
+            <option value="Sobrevivente">Sobrevivente</option>
+          </select>
+          <select
+            value={ordem}
+            onChange={(e) => setOrdem(e.target.value as any)}
+            className="bg-ordem-black/40 border border-ordem-border-light text-white px-3 py-2 rounded focus:border-ordem-red focus:outline-none font-mono text-xs"
+            aria-label="Ordenar agentes"
+          >
+            <option value="nome">Nome (A→Z)</option>
+            <option value="nex">NEX (↓)</option>
+            <option value="atualizado">Mais recente</option>
+          </select>
+          <button
+            type="button"
+            onClick={() => setSomenteComProblemas((prev) => !prev)}
+            className={`px-3 py-2 rounded border font-mono text-[10px] uppercase tracking-widest ${
+              somenteComProblemas
+                ? 'border-ordem-gold text-ordem-gold bg-ordem-gold/10'
+                : 'border-ordem-border text-ordem-text-muted bg-ordem-black/40'
+            }`}
+          >
+            {somenteComProblemas ? 'Com alertas' : 'Todos'}
+          </button>
+          {(search || classe !== 'Todas' || somenteComProblemas) && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearch('');
+                setClasse('Todas');
+                setSomenteComProblemas(false);
+              }}
+              className="px-3 py-2 rounded border border-ordem-border text-ordem-text-muted font-mono text-[10px] uppercase tracking-widest"
+            >
+              Limpar
+            </button>
+          )}
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {ordenadas.map((registro) => (
+        {filtradas.map((registro) => (
           <AgentCard
             key={registro.id}
             id={registro.id}
@@ -43,6 +134,11 @@ export const AgentList: React.FC = () => {
           />
         ))}
       </div>
+      {filtradas.length === 0 && (
+        <div className="text-center text-ordem-text-muted font-mono py-10">
+          Nenhum agente encontrado com os filtros atuais.
+        </div>
+      )}
     </div>
   );
 };

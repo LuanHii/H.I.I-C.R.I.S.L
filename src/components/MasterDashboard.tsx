@@ -2,38 +2,64 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AgentList } from './master/AgentList';
 import { MonsterList } from './master/MonsterList';
 import { ItemManager } from './master/ItemManager';
 import { FichasManager } from './master/FichasManager';
 import { GuiaMestre } from './master/GuiaMestre';
+import { CombatManager } from './master/CombatManager';
 import { MestreNavbar } from './master/MestreNavbar';
+import { useStoredFichas } from '../core/storage/useStoredFichas';
 
-type TabId = 'agentes' | 'inventario' | 'ameacas' | 'fichas' | 'guia';
+type TabId = 'inventario' | 'ameacas' | 'fichas' | 'guia' | 'combate';
 
 export const MasterDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>('fichas');
+  const { fichas, salvar } = useStoredFichas();
 
-  // Permite navegação por URL: /mestre?tab=agentes|ameacas|inventario|guia
+  const getTabFromUrl = (): TabId | null => {
+    if (typeof window === 'undefined') return null;
+    const tab = new URLSearchParams(window.location.search).get('tab');
+    if (tab === 'inventario' || tab === 'ameacas' || tab === 'guia' || tab === 'combate' || tab === 'fichas') {
+      return tab;
+    }
+    return null;
+  };
+
+  // Permite navegação por URL e restaura última aba usada
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const tab = new URLSearchParams(window.location.search).get('tab');
-    if (tab === 'agentes' || tab === 'inventario' || tab === 'ameacas' || tab === 'guia') {
-      setActiveTab(tab);
+    const tabFromUrl = getTabFromUrl();
+    if (tabFromUrl) {
+      setActiveTab(tabFromUrl);
+    } else {
+      const stored = window.localStorage.getItem('mestre.tab') as TabId | null;
+      if (stored && ['inventario', 'ameacas', 'fichas', 'guia', 'combate'].includes(stored)) {
+        setActiveTab(stored);
+      }
     }
+
+    const handlePopState = () => {
+      const nextTab = getTabFromUrl();
+      if (nextTab) setActiveTab(nextTab);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const setTab = (tab: TabId) => {
     setActiveTab(tab);
-    if (typeof window !== 'undefined') window.history.replaceState({}, '', `/mestre?tab=${tab}`);
+    if (typeof window !== 'undefined') {
+      window.history.replaceState({}, '', `/mestre?tab=${tab}`);
+      window.localStorage.setItem('mestre.tab', tab);
+    }
   };
 
   const getGlowColor = () => {
     switch (activeTab) {
       case 'fichas': return 'rgba(220,38,38,0.3)';
-      case 'agentes': return 'rgba(0,255,0,0.2)';
       case 'ameacas': return 'rgba(168,85,247,0.2)';
       case 'guia': return 'rgba(59,130,246,0.2)';
+      case 'combate': return 'rgba(239,68,68,0.3)';
       default: return 'rgba(234,179,8,0.2)';
     }
   };
@@ -74,27 +100,6 @@ export const MasterDashboard: React.FC = () => {
                 transition={{ duration: 0.3 }}
               >
                 <FichasManager />
-              </motion.div>
-            )}
-
-            {activeTab === 'agentes' && (
-              <motion.div
-                key="agentes"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
-                className="max-w-7xl mx-auto p-6"
-              >
-                <motion.h2
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="text-2xl font-serif text-white mb-6 border-b border-ordem-border pb-2"
-                >
-                  Agentes da Ordem
-                </motion.h2>
-                <AgentList />
               </motion.div>
             )}
 
@@ -142,7 +147,22 @@ export const MasterDashboard: React.FC = () => {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
               >
-                <GuiaMestre />
+                <GuiaMestre
+                  fichas={fichas}
+                  onUpdateFicha={(id, p) => salvar(p, id)}
+                />
+              </motion.div>
+            )}
+
+            {activeTab === 'combate' && (
+              <motion.div
+                key="combate"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+              >
+                <CombatManager />
               </motion.div>
             )}
           </AnimatePresence>

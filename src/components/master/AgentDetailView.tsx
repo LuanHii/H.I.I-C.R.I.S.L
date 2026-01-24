@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import { Personagem, AtributoKey, PericiaName, Item, Poder, Ritual } from '../../core/types';
+import { Personagem, AtributoKey, PericiaName, Item, Poder, Ritual, Patente } from '../../core/types';
 import { StatusBar } from '../StatusBar';
 import { calcularDefesaEfetiva } from '../../logic/combatUtils';
-import { PERICIA_ATRIBUTO, calcularPericiasDetalhadas } from '../../logic/rulesEngine';
+import { PERICIA_ATRIBUTO, calcularPericiasDetalhadas, getPatenteConfig } from '../../logic/rulesEngine';
 import { ActionsTab } from '../ActionsTab';
 import { ItemSelectorModal } from './ItemSelectorModal';
 import { AbilitySelectorModal } from './AbilitySelectorModal';
@@ -12,11 +12,13 @@ import { ProgressionTab } from '../ProgressionTab';
 import { PendingChoiceModal } from '../PendingChoiceModal';
 import { TrackSelectorModal } from '../TrackSelectorModal';
 import { PowerChoiceModal } from '../PowerChoiceModal';
+import { RitualChoiceModal } from '../RitualChoiceModal';
 import { calculateDerivedStats } from '../../core/rules/derivedStats';
 import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPersonagem';
-import { Brain, Flame, Dices } from 'lucide-react';
+import { Brain, Flame, Dices, Edit2 } from 'lucide-react';
 import { rollPericia, type DiceRollResult } from '../../logic/diceRoller';
 import { ConditionsManager } from '../ConditionsManager';
+import { PatenteSelectorModal } from './PatenteSelectorModal';
 
 interface AgentDetailViewProps {
     agent: Personagem;
@@ -32,17 +34,20 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
         attributes: !!readOnly ? false : true,
         inventory: false,
         abilities: false,
+        rituals: false,
         actions: !!readOnly ? true : false,
         progression: false,
     });
 
     const [isItemModalOpen, setIsItemModalOpen] = useState(false);
     const [isAbilityModalOpen, setIsAbilityModalOpen] = useState(false);
+    const [isRitualModalOpen, setIsRitualModalOpen] = useState(false);
     const [isPendingChoiceModalSuppressed, setIsPendingChoiceModalSuppressed] = useState(false);
     const [isEditingMode, setIsEditingMode] = useState(false);
     const [editingSkill, setEditingSkill] = useState<PericiaName | null>(null);
     const [tempSkillBonus, setTempSkillBonus] = useState<string>('');
     const [lastRoll, setLastRoll] = useState<{ pericia: PericiaName; result: DiceRollResult } | null>(null);
+    const [isPatenteModalOpen, setIsPatenteModalOpen] = useState(false);
 
     const auditIssues = useMemo(() => auditPersonagem(agent), [agent]);
     const auditSummary = useMemo(() => summarizeIssues(auditIssues), [auditIssues]);
@@ -265,6 +270,19 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
         onUpdate(updated);
     };
 
+    const handleAddRitual = (ritual: Ritual) => {
+        const updated = { ...agent };
+        updated.rituais = [...updated.rituais, ritual];
+        onUpdate(updated);
+        setIsRitualModalOpen(false);
+    };
+
+    const handleRemoveRitual = (index: number) => {
+        const updated = { ...agent };
+        updated.rituais = updated.rituais.filter((_, i) => i !== index);
+        onUpdate(updated);
+    };
+
     const handleTrackSelection = (trackName: string) => {
         const updated = chooseTrack(agent, trackName);
         onUpdate(updated);
@@ -290,6 +308,16 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
         const restante = Math.max(0, (pending.restante || 0) - 1);
         updated.periciasPromocaoPendentes = restante > 0 ? { ...pending, restante } : undefined;
         updated.periciasDetalhadas = recalcularPericias(updated);
+        onUpdate(updated);
+    };
+
+    const handlePatenteChange = (newPatente: Patente) => {
+        const config = getPatenteConfig(newPatente);
+        const updated = {
+            ...agent,
+            patente: newPatente,
+            limiteItens: config.limiteItens,
+        };
         onUpdate(updated);
     };
 
@@ -475,6 +503,19 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                 )}
                             </div>
                             <span className="bg-ordem-ooze px-2 py-1 rounded border border-ordem-text-muted truncate max-w-[120px] sm:max-w-none">{agent.origem || 'Sem Origem'}</span>
+                            {!readOnly && (
+                                <button
+                                    onClick={() => setIsPatenteModalOpen(true)}
+                                    className="bg-ordem-ooze px-2 py-1 rounded border border-ordem-gold/50 text-ordem-gold hover:bg-ordem-gold/10 transition-colors flex items-center gap-1"
+                                    title="Alterar Patente"
+                                >
+                                    {agent.patente || 'Recruta'}
+                                    <Edit2 size={10} className="opacity-60" />
+                                </button>
+                            )}
+                            {readOnly && (
+                                <span className="bg-ordem-ooze px-2 py-1 rounded border border-ordem-gold/50 text-ordem-gold">{agent.patente || 'Recruta'}</span>
+                            )}
                         </div>
                     </div>
 
@@ -907,7 +948,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                             <div key={idx} className="bg-ordem-black-deep/50 p-4 rounded border border-ordem-border-light group relative">
                                 <h4 className="font-bold text-zinc-100 mb-1">{poder.nome}</h4>
                                 <p className="text-sm text-ordem-white-muted">{poder.descricao}</p>
-                                {!readOnly && (
+                                {isEditingMode && (
                                     <button
                                         onClick={() => handleRemoveAbility(idx)}
                                         className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 hover:bg-red-900/30 rounded text-ordem-text-secondary hover:text-red-400 transition-all"
@@ -918,12 +959,64 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                 )}
                             </div>
                         ))}
-                        {!readOnly && (
+                        {agent.poderes.length === 0 && <div className="text-sm text-ordem-text-muted italic text-center py-4">Nenhuma habilidade.</div>}
+                        {isEditingMode && (
                             <button
                                 onClick={() => setIsAbilityModalOpen(true)}
                                 className="w-full py-3 border border-dashed border-ordem-border-light rounded text-ordem-text-secondary hover:text-ordem-white hover:border-ordem-text-muted hover:bg-ordem-ooze/50 transition-all flex items-center justify-center gap-2 text-sm"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Adicionar Habilidade
+                            </button>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            <div className="bg-ordem-ooze border border-ordem-border-light rounded-xl overflow-hidden shadow-lg">
+                <button
+                    onClick={() => toggleSection('rituals')}
+                    className="w-full flex items-center justify-between p-4 bg-ordem-ooze/50 hover:bg-ordem-ooze transition-colors border-b border-ordem-border-light"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-ordem-border-light rounded text-ordem-white-muted">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m14.31 8-5.74 9.94" /><path d="M9.69 8h11.48" /></svg>
+                        </div>
+                        <span className="font-bold text-zinc-100">Rituais</span>
+                    </div>
+                    {openSections['rituals'] ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-secondary"><path d="m6 9 6 6 6-6" /></svg>
+                    ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-secondary"><path d="m9 18 6-6-6-6" /></svg>
+                    )}
+                </button>
+
+                {openSections['rituals'] && (
+                    <div className="p-6 animate-in slide-in-from-top-2 space-y-4">
+                        {agent.rituais.map((ritual, idx) => (
+                            <div key={idx} className="bg-ordem-black-deep/50 p-4 rounded border border-ordem-border-light group relative">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <h4 className="font-bold text-zinc-100">{ritual.nome}</h4>
+                                    <span className="text-[10px] bg-ordem-border px-1.5 py-0.5 rounded text-ordem-text-secondary uppercase">{ritual.elemento} {ritual.circulo}</span>
+                                </div>
+                                <p className="text-sm text-ordem-white-muted line-clamp-2">{ritual.descricao}</p>
+                                {isEditingMode && (
+                                    <button
+                                        onClick={() => handleRemoveRitual(idx)}
+                                        className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 hover:bg-red-900/30 rounded text-ordem-text-secondary hover:text-red-400 transition-all"
+                                        title="Remover Ritual"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
+                                    </button>
+                                )}
+                            </div>
+                        ))}
+                        {agent.rituais.length === 0 && <div className="text-sm text-ordem-text-muted italic text-center py-4">Nenhum ritual conhecido.</div>}
+                        {isEditingMode && (
+                            <button
+                                onClick={() => setIsRitualModalOpen(true)}
+                                className="w-full py-3 border border-dashed border-ordem-border-light rounded text-ordem-text-secondary hover:text-ordem-white hover:border-ordem-text-muted hover:bg-ordem-ooze/50 transition-all flex items-center justify-center gap-2 text-sm"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg> Adicionar Ritual
                             </button>
                         )}
                     </div>
@@ -991,6 +1084,25 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 onClose={() => setIsAbilityModalOpen(false)}
                 onSelect={handleAddAbility}
             />
+
+            <PatenteSelectorModal
+                isOpen={isPatenteModalOpen}
+                currentPatente={agent.patente || 'Recruta'}
+                onSelect={handlePatenteChange}
+                onClose={() => setIsPatenteModalOpen(false)}
+            />
+
+            {isRitualModalOpen && (
+                <RitualChoiceModal
+                    agent={agent}
+                    onSelect={handleAddRitual}
+                    onClose={() => setIsRitualModalOpen(false)}
+                    circuloMaximo={4} // Mestre pode adicionar qualquer ciclo no modo override? Ou segue o NEX?
+                // Se for override, geralmente é irrestrito. 
+                // Vou colocar 4 para permitir tudo.
+                />
+            )}
         </div>
+
     );
 };

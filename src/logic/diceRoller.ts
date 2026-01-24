@@ -45,3 +45,4 @@ export function rollPericia(detalhe: PericiaDetalhada): DiceRollResult {
 
 
 
+

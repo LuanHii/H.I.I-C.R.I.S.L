@@ -9,7 +9,7 @@ export default function MainLayout({
   return (
     <>
       <NavBar />
-      <main className="relative z-10 max-w-6xl mx-auto px-4 pb-8 pt-28">
+      <main id="conteudo-principal" className="relative z-10 max-w-6xl mx-auto px-4 pb-8 pt-28">
         {children}
       </main>
     </>

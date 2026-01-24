@@ -55,7 +55,7 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 65,
         nome: 'Atacar das Sombras',
-        descricao: 'Não sofre –O em Furtividade por se mover ao deslocamento normal. Penalidade por atacar com arma silenciosa reduzida para –O. Visibilidade inicial em cenas de furtividade é 1 ponto abaixo (pode ser negativa).'
+        descricao: 'Não sofre -1d20 em Furtividade por se mover ao deslocamento normal. Penalidade por atacar com arma silenciosa reduzida para -1d20. Visibilidade inicial em cenas de furtividade é 1 ponto abaixo (pode ser negativa).'
       },
       {
         nex: 99,
@@ -73,7 +73,7 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 10,
         nome: 'Ser Amaldiçoado',
-        descricao: 'Treinado em Ocultismo (ou +2). Escolha elemento. Uma vez por dia, execute etapa ritualística. Recebe RD 5 ao elemento e bônus por elemento (Sangue: RD balístico, faro, +Vig dano contra-ataque, –O Ciências/Intuição; Morte: RD perfuração, imune fadiga, +For PV, –O Diplomacia/Enganação; Conhecimento: RD balístico, visão no escuro, +Int Defesa, –O Atletismo/Acrobacia; Energia: RD corte/eletr./fogo, +Agi bloqueio, –O Investigação/Percepção).',
+        descricao: 'Treinado em Ocultismo (ou +2). Escolha elemento. Uma vez por dia, execute etapa ritualística. Recebe RD 5 ao elemento e bônus por elemento (Sangue: RD balístico, faro, +Vig dano contra-ataque, -1d20 Ciências/Intuição; Morte: RD perfuração, imune fadiga, +For PV, -1d20 Diplomacia/Enganação; Conhecimento: RD balístico, visão no escuro, +Int Defesa, -1d20 Atletismo/Acrobacia; Energia: RD corte/eletr./fogo, +Agi bloqueio, -1d20 Investigação/Percepção).',
         escolha: {
           tipo: 'elemento',
           quantidade: 1
@@ -523,7 +523,7 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 65,
         nome: 'Disparo Impactante',
-        descricao: 'Se estiver usando uma arma de fogo com calibre grosso, pode gastar 2 PE para fazer as manobras derrubar, desarmar, empurrar e quebrar usando um ataque a distância.'
+        descricao: 'Quando ataca com uma arma de fogo, pode gastar 2 PE e, em vez de causar dano, fazer uma manobra entre derrubar, desarmar, empurrar ou quebrar.'
       },
       {
         nex: 99,
@@ -769,7 +769,7 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 10,
         nome: 'Lâmina Maldita',
-        descricao: 'Aprende o ritual Amaldiçoar Arma (se já conhece, custo reduz em –1 PE). Pode usar Ocultismo em vez de Luta/Pontaria para testes de ataque com a arma amaldiçoada.'
+        descricao: 'Aprende o ritual Amaldiçoar Arma. Se já o conhece, pode gastar +1 PE quando o lança para reduzir seu tempo de conjuração para ação de movimento. Pode usar Ocultismo em vez de Luta/Pontaria para testes de ataque com a arma amaldiçoada.'
       },
       {
         nex: 40,

@@ -376,7 +376,7 @@ export const RITUAIS: Ritual[] = [
     descricao: 'Potencializa seus sentidos, recebendo +1d20 em Investigação, Luta, Percepção e Pontaria.',
     efeito: {
       padrao: 'Recebe +1d20 em Investigação, Luta, Percepção e Pontaria.',
-      discente: 'Seus inimigos sofrem –O em testes de ataque contra você. Requer 2º círculo (+2 PE).',
+      discente: 'Seus inimigos sofrem -1d20 em testes de ataque contra você. Requer 2º círculo (+2 PE).',
       verdadeiro: 'Fica imune às condições surpreendido e desprevenido e recebe +10 em Defesa e Reflexos. Requer 4º círculo e afinidade (+5 PE).'
     },
     livro: 'Regras Básicas'
@@ -475,7 +475,7 @@ export const RITUAIS: Ritual[] = [
     alvo: '1 ser',
     duracao: 'Instantânea',
     resistencia: 'Nenhuma',
-    descricao: 'Transfere até 30 PV de você para o alvo (você não pode ficar com menos de 1 PV).',
+    descricao: 'Transfere até 30 PV de você para outro ser (você não pode ficar com menos de 1 PV).',
     efeito: {
       padrao: 'Transfere até 30 PV para o alvo.',
       discente: 'Pode transferir até 50 PV. Requer 3º círculo (+3 PE).',
@@ -738,7 +738,7 @@ export const RITUAIS: Ritual[] = [
     efeito: {
       padrao: '4d8 dano químico e condição enjoado.',
       discente: 'Muda o dano para 6d8 de Morte (+3 PE).',
-      verdadeiro: 'Muda o dano para 6d8 de Morte. Seres reduzidos a 0 PV pelo dano do Paradoxo devem fazer um teste de Fortitude. Se falharem, são reduzidas a cinzas (morrem imediatamente). Requer 4º círculo (+7 PE).'
+      verdadeiro: 'Como a versão discente, muda o dano para 6d8 de Morte. Seres reduzidos a 0 PV pelo dano do Paradoxo devem fazer um teste de Fortitude. Se falharem, são reduzidas a cinzas (morrem imediatamente). Requer 4º círculo (+7 PE).'
     },
     livro: 'Regras Básicas'
   },

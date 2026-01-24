@@ -732,6 +732,59 @@ export const AMEACAS: Ameaca[] = [
     livro: 'Regras Básicas'
   },
   {
+    nome: 'Titã de Sangue',
+    vd: 220,
+    tipo: 'Sangue',
+    tamanho: 'Enorme',
+    presencaPerturbadora: {
+      dt: 30,
+      dano: '7d6 mental',
+      nexImune: 70
+    },
+    sentidos: 'Percepção 2d20+15, Iniciativa 2d20+10, Percepção às Cegas',
+    defesa: 35,
+    fortitude: '4d20+15',
+    reflexos: '2d20+10',
+    vontade: '2d20+10',
+    vida: 550,
+    imunidades: [],
+    resistencias: ['Balístico 20', 'Impacto 20', 'Perfuração 20', 'Sangue 20'],
+    vulnerabilidades: ['Morte'],
+    atributos: {
+      AGI: 2,
+      FOR: 5,
+      INT: 0,
+      PRE: 2,
+      VIG: 4
+    },
+    pericias: {},
+    deslocamento: '12m',
+    habilidades: [
+      {
+        nome: 'Sede de Sangue',
+        descricao: 'Ataques causam +4d6 de dano de Sangue contra personagens machucados ou sangrando.'
+      }
+    ],
+    acoes: [
+      {
+        nome: 'Mordida',
+        descricao: 'Corpo a corpo. Teste 5d20+25, Dano 4d12+10 perfuração.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Garras',
+        descricao: 'Corpo a corpo x2. Teste 5d20+25, Dano 4d8+10 corte.',
+        tipo: 'Padrão'
+      },
+      {
+        nome: 'Estraçalhar',
+        descricao: 'Se acertar um ser com a mordida, o alvo sofre 4d12+10 perfuração e fica sangrando até o final da cena (Reflexos DT 30 reduz o dano à metade e evita a condição).',
+        tipo: 'Livre'
+      }
+    ],
+    livro: 'Regras Básicas'
+  },
+  {
     nome: 'Zumbi de Sangue',
     vd: 20,
     tipo: 'Sangue',
@@ -1205,7 +1258,7 @@ export const AMEACAS: Ameaca[] = [
       },
       {
         nome: 'Transformar a Morte',
-        descricao: 'Única coisa capaz de resolver o Enigma de Medo do Deus da Morte.'
+        descricao: 'Única coisa capaz de resolver o Enigma de Medo do Deus da Morte. Resolver seu Enigma de Medo remove a imunidade a dano do Anfitrião.'
       }
     ],
     acoes: [
@@ -1307,7 +1360,7 @@ export const AMEACAS: Ameaca[] = [
     habilidades: [
       {
         nome: 'Aura Manifestada',
-        descricao: 'Cercado por aura dourada de faces flutuantes. Personagens em alcance curto sofrem –OO em todos os testes.'
+        descricao: 'Cercado por aura dourada de faces flutuantes. Personagens em alcance curto sofrem -1d20O em todos os testes.'
       }
     ],
     acoes: [
@@ -1387,7 +1440,7 @@ export const AMEACAS: Ameaca[] = [
       dano: '8d8 mental',
       nexImune: 95
     },
-    sentidos: 'Percepção 5d20+20, Iniciativa 5d20+25',
+    sentidos: 'Percepção 5d20+20, Iniciativa 5d20+25, Percepção às Cegas',
     defesa: 53,
     fortitude: '4d20+20',
     reflexos: '5d20+30',
@@ -2046,7 +2099,7 @@ export const AMEACAS: Ameaca[] = [
       },
       {
         nome: 'Sorriso Sedutor',
-        descricao: 'Quem não sabe que é assassino fica desprevenido e sofre –O contra ele.'
+        descricao: 'Quem não sabe que é assassino fica desprevenido e sofre -1d20 contra ele.'
       }
     ],
     acoes: [

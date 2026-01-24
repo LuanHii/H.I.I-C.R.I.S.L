@@ -37,7 +37,7 @@ export const UNIVERSAL_ACTIONS: ActionDefinition[] = [
   {
     nome: 'Mirar',
     tipo: 'Movimento',
-    descricao: 'Anula a penalidade de -5 no teste de Pontaria contra alvo engajado.',
+    descricao: 'Anula a penalidade de -1d20 no teste de Pontaria contra alvo engajado.',
     pericia: 'Pontaria'
   },
   {

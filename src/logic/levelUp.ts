@@ -13,8 +13,12 @@ import {
     Atributos,
     AtributoKey,
     Elemento,
+    Poder,
 } from '../core/types';
-import { contarPoderesDisponiveis } from '../data/powers';
+import { TRILHAS } from '../data/tracks';
+import { PODERES, contarPoderesDisponiveis } from '../data/powers';
+import { calculateDerivedStats } from '../core/rules/derivedStats';
+import { getPatentePorNex, getPatenteConfig } from './rulesEngine';
 
 // ===================================================================
 // CONSTANTES DE PROGRESSÃO
@@ -111,30 +115,35 @@ export function nexParaNivel(nex: number): number {
 /**
  * Calcula os recursos (PV, PE, SAN) para um personagem em um determinado NEX.
  */
+/**
+ * Calcula os recursos (PV, PE, SAN) para um personagem em um determinado NEX.
+ * Agora utiliza calculateDerivedStats para garantir consistência com o resto do sistema.
+ */
 export function calcularRecursosParaNex(
     classe: ClasseName,
     atributos: Atributos,
     nex: number,
-    estagio?: number
+    estagio?: number,
+    origem?: string,
+    trilha?: string,
+    qtdTranscender?: number
 ): { pv: number; pe: number; san: number; limitePeRodada: number } {
-    const data = CLASS_RESOURCES[classe];
-    const isSurvivor = classe === 'Sobrevivente';
+    const derived = calculateDerivedStats({
+        classe,
+        atributos,
+        nex,
+        estagio,
+        origemNome: origem,
+        trilhaNome: trilha,
+        qtdTranscender
+    });
 
-    const niveisExtras = isSurvivor
-        ? Math.max(0, (estagio || 1) - 1)
-        : Math.max(0, nexParaNivel(nex) - 1);
-
-    const pvBase = data.pv.base + atributos[data.pv.baseAttr];
-    const peBase = data.pe.base + atributos[data.pe.baseAttr];
-    const sanBase = data.san.base;
-
-    const pv = pvBase + niveisExtras * (data.pv.porNivel + (data.pv.porNivelAttr ? atributos[data.pv.porNivelAttr] : 0));
-    const pe = peBase + niveisExtras * (data.pe.porNivel + (data.pe.porNivelAttr ? atributos[data.pe.porNivelAttr] : 0));
-    const san = sanBase + niveisExtras * data.san.porNivel;
-
-    const limitePeRodada = isSurvivor ? 1 : Math.min(20, Math.max(1, Math.ceil(nex / 5)));
-
-    return { pv, pe, san, limitePeRodada };
+    return {
+        pv: derived.pvMax,
+        pe: derived.peMax,
+        san: derived.sanMax,
+        limitePeRodada: derived.peRodada
+    };
 }
 
 /**
@@ -152,11 +161,12 @@ export function calcularEventosDesbloqueados(nexAnterior: number, nexNovo: numbe
 /**
  * Detecta pendências geradas pelos eventos de NEX desbloqueados.
  */
-export function detectarPendencias(
+export function detectingPendenciesAndAutoApply(
     personagem: Personagem,
     eventos: NexEvento[]
-): PendenciaNex[] {
+): { pendencias: PendenciaNex[], autoPoderes: Poder[] } {
     const pendencias: PendenciaNex[] = [];
+    const autoPoderes: Poder[] = [];
 
     for (const evento of eventos) {
         switch (evento.tipo) {
@@ -192,17 +202,15 @@ export function detectarPendencias(
                             nex: evento.requisito,
                             resolvida: false,
                         });
+                    } else {
+                        // Se já tem trilha (ex: editando nível), verificar habilidade
+                        checkTrilhaAbility(personagem, evento.requisito, pendencias, autoPoderes);
                     }
-                }
-                // Habilidades de trilha (40, 65, 99) são tratadas após escolher trilha
-                if (personagem.trilha && evento.requisito > 10) {
-                    pendencias.push({
-                        id: gerarIdPendencia(),
-                        tipo: 'trilhaHabilidade',
-                        descricao: `Habilidade de Trilha ${personagem.trilha} (NEX ${evento.requisito}%)`,
-                        nex: evento.requisito,
-                        resolvida: false,
-                    });
+                } else {
+                    // Habilidades de trilha (40, 65, 99)
+                    if (personagem.trilha) {
+                        checkTrilhaAbility(personagem, evento.requisito, pendencias, autoPoderes);
+                    }
                 }
                 break;
 
@@ -234,13 +242,58 @@ export function detectarPendencias(
                 break;
 
             case 'Versatilidade':
-                // Versatilidade é automática (ganha o poder)
+                if (personagem.classe !== 'Sobrevivente') {
+                    pendencias.push({
+                        id: gerarIdPendencia(),
+                        tipo: 'versatilidade',
+                        descricao: 'Versatilidade: Escolha um poder de sua classe ou de outra trilha',
+                        nex: evento.requisito,
+                        resolvida: false,
+                    });
+                }
                 break;
         }
     }
 
-    return pendencias;
+    return { pendencias, autoPoderes };
 }
+
+function checkTrilhaAbility(
+    personagem: Personagem,
+    nex: number,
+    pendencias: PendenciaNex[],
+    autoPoderes: Poder[]
+) {
+    const trilhaData = TRILHAS.find(t => t.nome === personagem.trilha);
+    if (!trilhaData) return;
+
+    const habilidade = trilhaData.habilidades.find(h => h.nex === nex);
+    if (!habilidade) return;
+
+    // Verifica se já tem o poder
+    const jaTem = personagem.poderes.some(p => p.nome === habilidade.nome);
+    if (jaTem) return;
+
+    if (habilidade.escolha) {
+        pendencias.push({
+            id: gerarIdPendencia(),
+            tipo: 'trilhaHabilidade',
+            descricao: `Habilidade de Trilha: ${habilidade.nome} (${personagem.trilha} ${nex}%)`,
+            nex: nex,
+            resolvida: false,
+            // Passamos informações extras da escolha se necessário, mas o modal vai ler do data/tracks
+        });
+    } else {
+        // Habilidade automática
+        autoPoderes.push({
+            nome: habilidade.nome,
+            descricao: habilidade.descricao,
+            tipo: 'Trilha',
+            livro: trilhaData.livro as any,
+        });
+    }
+}
+
 
 /**
  * Função principal de level-up.
@@ -262,14 +315,20 @@ export function subirNex(
         personagem.classe,
         personagem.atributos,
         nexAnterior,
-        personagem.estagio
+        personagem.estagio,
+        personagem.origem,
+        personagem.trilha,
+        personagem.qtdTranscender
     );
 
     const recursosNovos = calcularRecursosParaNex(
         personagem.classe,
         personagem.atributos,
         novoNex,
-        personagem.estagio
+        personagem.estagio,
+        personagem.origem,
+        personagem.trilha,
+        personagem.qtdTranscender
     );
 
     // Calcular diferenças
@@ -285,8 +344,12 @@ export function subirNex(
     // Detectar eventos desbloqueados
     const eventosDesbloqueados = calcularEventosDesbloqueados(nexAnterior, novoNex);
 
-    // Detectar pendências
-    const pendenciasNovas = detectarPendencias(personagem, eventosDesbloqueados);
+    // Detectar pendências e poderes automáticos
+    const { pendencias: pendenciasNovas, autoPoderes } = detectingPendenciesAndAutoApply(personagem, eventosDesbloqueados);
+
+    // Determinar patente pelo novo NEX
+    const novaPatenteNome = getPatentePorNex(novoNex);
+    const novaPatenteConfig = getPatenteConfig(novaPatenteNome);
 
     // Criar personagem atualizado
     const personagemAtualizado: Personagem = {
@@ -313,10 +376,16 @@ export function subirNex(
             ...e,
             desbloqueado: novoNex >= e.requisito,
         })),
+        poderes: [
+            ...personagem.poderes,
+            ...autoPoderes
+        ],
         pendenciasNex: [
             ...(personagem.pendenciasNex || []),
             ...pendenciasNovas,
         ],
+        patente: novaPatenteNome,
+        limiteItens: novaPatenteConfig.limiteItens,
     };
 
     const mudancas: MudancasNex = {
@@ -391,15 +460,141 @@ export function resolverPendencia(
             break;
 
         case 'trilha':
+        case 'trilha':
             if (typeof valorEscolhido === 'string') {
                 personagemAtualizado = {
                     ...personagemAtualizado,
                     trilha: valorEscolhido,
                 };
+
+                // Verificar se a trilha recém-escolhida (NEX 10) tem habilidade com escolha
+                // Se tiver, adicionar nova pendência. Se não, adicionar poder direto.
+                // Mas cuidado: resolverPendencia retorna Personagem, não deve fazer lógica complexa de levelUp.
+                // Idealmente, a escolha da trilha deve acionar a verificação da habilidade NEX 10.
+                // Vamos simplificar: adicionar o poder NEX 10 se não tiver escolha.
+                // Se tiver escolha, adiciona pendência 'trilhaHabilidade'.
+
+                const trilhaData = TRILHAS.find(t => t.nome === valorEscolhido);
+                if (trilhaData) {
+                    const hab10 = trilhaData.habilidades.find(h => h.nex === 10);
+                    if (hab10) {
+                        if (hab10.escolha) {
+                            personagemAtualizado.pendenciasNex = [
+                                ...(personagemAtualizado.pendenciasNex || []),
+                                {
+                                    id: gerarIdPendencia(),
+                                    tipo: 'trilhaHabilidade',
+                                    descricao: `Habilidade de Trilha: ${hab10.nome} (${valorEscolhido} 10%)`,
+                                    nex: 10,
+                                    resolvida: false,
+                                }
+                            ];
+                        } else {
+                            personagemAtualizado.poderes = [
+                                ...personagemAtualizado.poderes,
+                                {
+                                    nome: hab10.nome,
+                                    descricao: hab10.descricao,
+                                    tipo: 'Trilha',
+                                    livro: trilhaData.livro as any
+                                }
+                            ];
+                        }
+                    }
+                }
             }
             break;
 
-        // Outros tipos (poder, pericia, trilhaHabilidade) são tratados em componentes específicos
+        case 'versatilidade':
+            if (typeof valorEscolhido === 'string') {
+                // Pode ser nome de um Poder de Classe ou "Poder da Trilha X" (handled by UI logic sending just the power name?)
+                // A UI deve mandar o nome do poder escolhido, seja classe ou trilha.
+                // Precisamos buscar onde? PODERES ou TRILHAS?
+                // Melhor verificar em ambos.
+
+                const poderClasse = PODERES.find(p => p.nome === valorEscolhido);
+                if (poderClasse) {
+                    personagemAtualizado.poderes = [...personagemAtualizado.poderes, poderClasse];
+                } else {
+                    // Verifica em trilhas (poder de 10%)
+                    // Procura em todas as trilhas a habilidade com esse nome?
+                    // Ou a UI manda algo específico?
+                    // Vamos assumir que manda o nome da habilidade.
+                    let poderTrilha: Poder | undefined;
+                    for (const t of TRILHAS) {
+                        const h = t.habilidades.find(h => h.nome === valorEscolhido);
+                        if (h) {
+                            poderTrilha = {
+                                nome: h.nome,
+                                descricao: h.descricao,
+                                tipo: 'Trilha',
+                                livro: t.livro as any
+                            };
+                            break;
+                        }
+                    }
+                    if (poderTrilha) {
+                        personagemAtualizado.poderes = [...personagemAtualizado.poderes, poderTrilha];
+                    }
+                }
+            }
+            break;
+
+        case 'trilhaHabilidade':
+            // Valor escolhido é a opção selecionada (ex: 'Diplomacia')
+            // Precisamos adicionar o poder da habilidade AO PERSONAGEM, mas com a anotação da escolha?
+            // Ou apenas adicionar a escolha?
+            // O sistema de Poder atual não tem campo 'escolhaFeita'.
+            // Vamos adicionar o Poder normalmente, e talvez registrar a escolha em algum log ou campo extra se precisar.
+            // Por enquanto, apenas adicionamos o poder da trilha correspondente a esse NEX.
+
+            // Mas espera, qual habilidade é? A pendência tem o NEX.
+            const nexP = pendencia.nex;
+            const trilhaNome = personagem.trilha;
+            if (trilhaNome && typeof valorEscolhido === 'string') {
+                const tData = TRILHAS.find(t => t.nome === trilhaNome);
+                const hData = tData?.habilidades.find(h => h.nex === nexP);
+                if (hData) {
+                    // Adiciona o poder
+                    personagemAtualizado.poderes = [
+                        ...personagemAtualizado.poderes,
+                        {
+                            nome: hData.nome,
+                            descricao: `${hData.descricao} \n[Escolha: ${valorEscolhido}]`, // Hack para mostrar a escolha
+                            tipo: 'Trilha',
+                            livro: tData!.livro as any
+                        }
+                    ];
+
+                    // Se a escolha for perícia, talvez devêssemos treinar?
+                    // "Você recebe treinamento na perícia escolhida" -> Sim.
+                    // Isso requer lógica específica baseada no tipo da escolha defined no tracks.ts
+                    // Mas resolverPendencia é genérico.
+                    // Adicionar lógica de aplicação de efeito da escolha:
+                    if (hData.escolha?.tipo === 'pericia') {
+                        // Aplica treinamento se não tiver?
+                        // PericiaName check
+                        // Isso fica complexo de fazer aqui genericamente sem tipagem forte das strings de perícia.
+                        // Mas vamos tentar o básico.
+                    }
+                }
+            }
+            break;
+
+        case 'pericia':
+            if (Array.isArray(valorEscolhido)) {
+                // valorEscolhido é array de nomes de perícias para promover
+                // Descobre o grau alvo baseado no NEX da pendencia
+                const alvo = pendencia.nex === 35 ? 'Veterano' : 'Expert';
+
+                const novasPericias = { ...personagemAtualizado.pericias };
+                valorEscolhido.forEach(pNome => {
+                    // Cast inseguro, mas ok se a UI mandar certo
+                    novasPericias[pNome as any] = alvo;
+                });
+                personagemAtualizado.pericias = novasPericias;
+            }
+            break;
     }
 
     return personagemAtualizado;

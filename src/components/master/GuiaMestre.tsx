@@ -12,8 +12,20 @@ import {
     type RegraCategoria
 } from '@/data/guiaRegras';
 import { cn } from '@/lib/utils';
+import { InvestigationManager } from './InvestigationManager';
+import { InterludeManager } from './InterludeManager';
+import { Personagem } from '../../core/types';
+import { FichaRegistro } from '../../core/storage/useStoredFichas';
 
-export function GuiaMestre() {
+interface GuiaMestreProps {
+    fichas: FichaRegistro[];
+    onUpdateFicha: (id: string, personagem: Personagem) => void;
+}
+
+type TabMestre = 'regras' | 'investigacao' | 'interludio';
+
+export function GuiaMestre({ fichas, onUpdateFicha }: GuiaMestreProps) {
+    const [activeTab, setActiveTab] = useState<TabMestre>('regras');
     const [busca, setBusca] = useState('');
     const [categoriaAtiva, setCategoriaAtiva] = useState<RegraCategoria | 'todas'>('todas');
     const [expandidos, setExpandidos] = useState<Set<string>>(new Set());
@@ -70,105 +82,161 @@ export function GuiaMestre() {
             <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-6"
+                className="mb-6 flex flex-col md:flex-row md:justify-between md:items-end gap-4"
             >
-                <h1 className="text-2xl font-serif text-white mb-2">
-                    📖 Guia Rápido do Mestre
-                </h1>
-                <p className="text-ordem-text-secondary text-sm">
-                    Consulta rápida de regras durante a sessão
-                </p>
-            </motion.div>
+                <div>
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-2xl font-serif text-white mb-1">
+                            {activeTab === 'regras' && '📖 Guia Rápido'}
+                            {activeTab === 'investigacao' && '🔍 Investigação'}
+                            {activeTab === 'interludio' && '🌙 Interlúdio'}
+                        </h1>
+                    </div>
 
-            {/* Busca */}
-            <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-ordem-text-muted" />
-                <input
-                    type="text"
-                    placeholder="Buscar regra... (ex: agarrar, crítico, DT)"
-                    value={busca}
-                    onChange={(e) => setBusca(e.target.value)}
-                    className="w-full bg-ordem-ooze border border-ordem-border-light rounded-lg pl-10 pr-4 py-3 text-white placeholder:text-ordem-text-muted focus:outline-none focus:ring-2 focus:ring-ordem-red/50 focus:border-ordem-red"
-                />
-                {busca && (
+                    <p className="text-ordem-text-secondary text-sm">
+
+                        {activeTab === 'regras' && 'Consulta rápida de regras durante a sessão'}
+                        {activeTab === 'investigacao' && 'Gerenciamento de pistas e cenas'}
+                        {activeTab === 'interludio' && 'Descanso e manutenção entre missões'}
+                    </p>
+                </div>
+
+                <div className="flex p-1 bg-ordem-black-deep rounded-lg border border-ordem-border-light">
                     <button
-                        onClick={() => setBusca('')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-ordem-text-muted hover:text-white"
-                    >
-                        ✕
-                    </button>
-                )}
-            </div>
-
-            {/* Categorias */}
-            <div className="flex flex-wrap gap-2 mb-6">
-                <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setCategoriaAtiva('todas')}
-                    className={cn(
-                        'px-3 py-1.5 rounded-lg text-sm font-mono border transition-colors',
-                        categoriaAtiva === 'todas'
-                            ? 'bg-ordem-red/20 border-ordem-red text-white'
-                            : 'bg-ordem-ooze border-ordem-border-light text-ordem-text-muted hover:text-white'
-                    )}
-                >
-                    📋 Todas
-                </motion.button>
-                {CATEGORIAS.map(cat => (
-                    <motion.button
-                        key={cat.id}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setCategoriaAtiva(cat.id)}
+                        onClick={() => setActiveTab('regras')}
                         className={cn(
-                            'px-3 py-1.5 rounded-lg text-sm font-mono border transition-colors',
-                            categoriaAtiva === cat.id
-                                ? 'bg-ordem-red/20 border-ordem-red text-white'
-                                : 'bg-ordem-ooze border-ordem-border-light text-ordem-text-muted hover:text-white'
+                            "px-4 py-1.5 rounded text-sm font-medium transition-colors",
+                            activeTab === 'regras' ? "bg-ordem-red text-white" : "text-ordem-text-muted hover:text-white"
                         )}
                     >
-                        {cat.icone} {cat.nome}
-                    </motion.button>
-                ))}
-            </div>
+                        Regras
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('investigacao')}
+                        className={cn(
+                            "px-4 py-1.5 rounded text-sm font-medium transition-colors",
+                            activeTab === 'investigacao' ? "bg-ordem-red text-white" : "text-ordem-text-muted hover:text-white"
+                        )}
+                    >
+                        Investigação
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('interludio')}
+                        className={cn(
+                            "px-4 py-1.5 rounded text-sm font-medium transition-colors",
+                            activeTab === 'interludio' ? "bg-ordem-red text-white" : "text-ordem-text-muted hover:text-white"
+                        )}
+                    >
+                        Interlúdio
+                    </button>
+                </div>
+            </motion.div>
 
-            {/* Resultados */}
-            <div className="text-xs text-ordem-text-muted mb-3">
-                {regrasFiltradas.length} regra(s) encontrada(s)
-                {favoritos.size > 0 && ` • ${favoritos.size} favorito(s)`}
-            </div>
+            {activeTab === 'investigacao' && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    <InvestigationManager />
+                </motion.div>
+            )}
 
-            {/* Lista de Regras */}
-            <div className="space-y-3">
-                <AnimatePresence mode="popLayout">
-                    {regrasFiltradas.map((regra, index) => (
-                        <motion.div
-                            key={regra.id}
-                            layout
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{ delay: index * 0.02 }}
-                        >
-                            <RegraCard
-                                regra={regra}
-                                expandido={expandidos.has(regra.id)}
-                                favorito={favoritos.has(regra.id)}
-                                onToggle={() => toggleExpandido(regra.id)}
-                                onFavorito={() => toggleFavorito(regra.id)}
-                            />
-                        </motion.div>
-                    ))}
-                </AnimatePresence>
+            {activeTab === 'interludio' && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    <InterludeManager fichas={fichas} onUpdate={onUpdateFicha} />
+                </motion.div>
+            )}
 
-                {regrasFiltradas.length === 0 && (
-                    <div className="text-center py-12 text-ordem-text-muted">
-                        <p className="text-lg mb-2">Nenhuma regra encontrada</p>
-                        <p className="text-sm">Tente buscar por outro termo</p>
+            {activeTab === 'regras' && (
+                <>
+                    {/* Busca */}
+                    <div className="relative mb-4">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-ordem-text-muted" />
+                        <input
+                            type="text"
+                            placeholder="Buscar regra... (ex: agarrar, crítico, DT)"
+                            value={busca}
+                            onChange={(e) => setBusca(e.target.value)}
+                            className="w-full bg-ordem-ooze border border-ordem-border-light rounded-lg pl-10 pr-4 py-3 text-white placeholder:text-ordem-text-muted focus:outline-none focus:ring-2 focus:ring-ordem-red/50 focus:border-ordem-red"
+                        />
+                        {busca && (
+                            <button
+                                onClick={() => setBusca('')}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-ordem-text-muted hover:text-white"
+                            >
+                                ✕
+                            </button>
+                        )}
                     </div>
-                )}
-            </div>
+
+                    {/* Categorias */}
+                    <div className="flex flex-wrap gap-2 mb-6">
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setCategoriaAtiva('todas')}
+                            className={cn(
+                                'px-3 py-1.5 rounded-lg text-sm font-mono border transition-colors',
+                                categoriaAtiva === 'todas'
+                                    ? 'bg-ordem-red/20 border-ordem-red text-white'
+                                    : 'bg-ordem-ooze border-ordem-border-light text-ordem-text-muted hover:text-white'
+                            )}
+                        >
+                            📋 Todas
+                        </motion.button>
+                        {CATEGORIAS.map(cat => (
+                            <motion.button
+                                key={cat.id}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => setCategoriaAtiva(cat.id)}
+                                className={cn(
+                                    'px-3 py-1.5 rounded-lg text-sm font-mono border transition-colors',
+                                    categoriaAtiva === cat.id
+                                        ? 'bg-ordem-red/20 border-ordem-red text-white'
+                                        : 'bg-ordem-ooze border-ordem-border-light text-ordem-text-muted hover:text-white'
+                                )}
+                            >
+                                {cat.icone} {cat.nome}
+                            </motion.button>
+                        ))}
+                    </div>
+
+                    {/* Resultados */}
+                    <div className="text-xs text-ordem-text-muted mb-3">
+                        {regrasFiltradas.length} regra(s) encontrada(s)
+                        {favoritos.size > 0 && ` • ${favoritos.size} favorito(s)`}
+                    </div>
+
+                    {/* Lista de Regras */}
+                    <div className="space-y-3">
+                        <AnimatePresence mode="popLayout">
+                            {regrasFiltradas.map((regra, index) => (
+                                <motion.div
+                                    key={regra.id}
+                                    layout
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    transition={{ delay: index * 0.02 }}
+                                >
+                                    <RegraCard
+                                        regra={regra}
+                                        expandido={expandidos.has(regra.id)}
+                                        favorito={favoritos.has(regra.id)}
+                                        onToggle={() => toggleExpandido(regra.id)}
+                                        onFavorito={() => toggleFavorito(regra.id)}
+                                    />
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+
+                        {regrasFiltradas.length === 0 && (
+                            <div className="text-center py-12 text-ordem-text-muted">
+                                <p className="text-lg mb-2">Nenhuma regra encontrada</p>
+                                <p className="text-sm">Tente buscar por outro termo</p>
+                            </div>
+                        )}
+                    </div>
+                </>
+            )}
         </div>
     );
 }

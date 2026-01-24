@@ -200,9 +200,14 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
                               DEF {cond.efeito.defesa}
                             </Badge>
                           )}
-                          {cond.efeito?.pericias?.penalidadeDados && (
+                          {cond.efeito?.pericias?.penalidadeDados !== undefined && (
                             <Badge variant="danger" size="sm">
                               {cond.efeito.pericias.penalidadeDados}d20
+                            </Badge>
+                          )}
+                          {cond.efeito?.pericias?.penalidadeValor !== undefined && (
+                            <Badge variant="danger" size="sm">
+                              TESTE {cond.efeito.pericias.penalidadeValor}
                             </Badge>
                           )}
                         </div>
@@ -402,12 +407,26 @@ const ConditionCardActive: React.FC<ConditionCardActiveProps> = ({ nome, onRemov
                       <span className="font-mono capitalize">{cond.efeito.acoes}</span>
                     </div>
                   )}
-                  {cond.efeito.pericias && (
+                  {cond.efeito.pericias?.penalidadeDados !== undefined && (
                     <div className="flex items-center gap-2 text-xs">
                       <span className="opacity-70">Dados:</span>
                       <span className="font-mono">
-                        {cond.efeito.pericias.penalidadeDados! > 0 ? '+' : ''}
+                        {cond.efeito.pericias.penalidadeDados > 0 ? '+' : ''}
                         {cond.efeito.pericias.penalidadeDados}d20
+                        {cond.efeito.pericias.atributos && (
+                          <span className="opacity-70 ml-1">
+                            ({cond.efeito.pericias.atributos.join('/')})
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  )}
+                  {cond.efeito.pericias?.penalidadeValor !== undefined && (
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="opacity-70">Valor:</span>
+                      <span className="font-mono">
+                        {cond.efeito.pericias.penalidadeValor > 0 ? '+' : ''}
+                        {cond.efeito.pericias.penalidadeValor}
                         {cond.efeito.pericias.atributos && (
                           <span className="opacity-70 ml-1">
                             ({cond.efeito.pericias.atributos.join('/')})

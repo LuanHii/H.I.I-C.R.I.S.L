@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { FichaRegistro, Campanha } from '../../core/storage/useStoredFichas';
 
 interface CampanhaSectionProps {
@@ -14,6 +14,8 @@ interface CampanhaSectionProps {
     onRenomear?: (id: string, nome: string) => void;
     onRemoverCampanha?: (id: string) => void;
     onExportarCampanha?: (fichas: FichaRegistro[], campanhaNome: string, campanhaId?: string) => void;
+    forceExpanded?: boolean;
+    autoExpand?: boolean;
 }
 
 export function CampanhaSection({
@@ -27,11 +29,24 @@ export function CampanhaSection({
     onRenomear,
     onRemoverCampanha,
     onExportarCampanha,
+    forceExpanded,
+    autoExpand,
 }: CampanhaSectionProps) {
-    const [expandida, setExpandida] = useState(true);
+    const [expandida, setExpandida] = useState(false);
     const [editando, setEditando] = useState(false);
     const [novoNome, setNovoNome] = useState(campanha?.nome || '');
     const [menuAberto, setMenuAberto] = useState<string | null>(null);
+    useEffect(() => {
+        if (forceExpanded !== undefined) {
+            setExpandida(forceExpanded);
+        }
+    }, [forceExpanded]);
+
+    useEffect(() => {
+        if (autoExpand && !expandida) {
+            setExpandida(true);
+        }
+    }, [autoExpand, expandida]);
 
     const cor = campanha?.cor || '#71717a'; // ordem-text-muted para "sem campanha"
     const nome = campanha?.nome || 'Fichas Soltas';
@@ -43,8 +58,6 @@ export function CampanhaSection({
         }
         setEditando(false);
     };
-
-    if (fichas.length === 0) return null;
 
     return (
         <div className="mb-4">
@@ -180,6 +193,11 @@ export function CampanhaSection({
                             </div>
                         </div>
                     ))}
+                    {fichas.length === 0 && (
+                        <div className="text-xs text-ordem-text-muted italic py-2">
+                            Nenhuma ficha nesta campanha.
+                        </div>
+                    )}
                 </div>
             )}
         </div>

@@ -276,6 +276,14 @@ export interface LogEntry {
   tipo: 'dano' | 'cura' | 'gasto' | 'condicao' | 'sistema';
 }
 
+export interface BonusContexto {
+  defesa?: number;
+  deslocamento?: number;
+  carga?: number;
+  periciaFixos?: Partial<Record<PericiaName, number>>;
+  periciaDados?: Partial<Record<PericiaName, number>>;
+}
+
 export interface Personagem {
   nome: string;
   conceito?: string;
@@ -287,6 +295,8 @@ export interface Personagem {
   patente?: Patente;
   pontosAtributoPendentes?: number;
   periciasTreinadasPendentes?: number;
+  bonus?: BonusContexto;
+
   // Promoção de grau de treinamento em marcos de NEX (35%/70%).
   // Quando presente, o jogador/mestre deve escolher perícias elegíveis para promover.
   periciasPromocaoPendentes?: {

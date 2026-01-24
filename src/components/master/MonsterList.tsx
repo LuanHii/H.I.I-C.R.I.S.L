@@ -8,6 +8,8 @@ export const MonsterList: React.FC = () => {
   const [search, setSearch] = useState('');
   const [selectedElement, setSelectedElement] = useState<string>('Todos');
   const [vdRange, setVdRange] = useState<[number, number]>([0, 400]);
+  const [order, setOrder] = useState<'nome' | 'vd-desc' | 'vd-asc'>('nome');
+  const [customOnly, setCustomOnly] = useState(false);
   const { monstros, salvar, remover } = useStoredMonsters();
   const [showEditor, setShowEditor] = useState(false);
   const [editingMonster, setEditingMonster] = useState<{ ameaca: Ameaca, id?: string } | null>(null);
@@ -19,14 +21,20 @@ export const MonsterList: React.FC = () => {
   }, [monstros]);
 
   const filteredMonsters = useMemo(() => {
-    return allMonsters.filter((monster) => {
+    const filtered = allMonsters.filter((monster) => {
       if (!monster || !monster.nome) return false;
       const matchesSearch = monster.nome.toLowerCase().includes(search.toLowerCase());
       const matchesElement = selectedElement === 'Todos' || monster.tipo === selectedElement;
       const matchesVd = monster.vd >= vdRange[0] && monster.vd <= vdRange[1];
-      return matchesSearch && matchesElement && matchesVd;
+      const matchesCustom = !customOnly || monster.isCustom === true;
+      return matchesSearch && matchesElement && matchesVd && matchesCustom;
     });
-  }, [search, selectedElement, vdRange, allMonsters]);
+    return [...filtered].sort((a, b) => {
+      if (order === 'vd-desc') return b.vd - a.vd;
+      if (order === 'vd-asc') return a.vd - b.vd;
+      return a.nome.localeCompare(b.nome);
+    });
+  }, [search, selectedElement, vdRange, customOnly, order, allMonsters]);
 
   const elements = ['Todos', 'Sangue', 'Morte', 'Conhecimento', 'Energia', 'Medo'];
 
@@ -54,7 +62,7 @@ export const MonsterList: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full relative">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 p-1">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 p-1">
         <input
           type="text"
           placeholder="Buscar ameaça..."
@@ -80,7 +88,11 @@ export const MonsterList: React.FC = () => {
                 min="0" 
                 max="400" 
                 value={vdRange[0]} 
-                onChange={(e) => setVdRange([Number(e.target.value), vdRange[1]])}
+                onChange={(e) => {
+                  const min = Number(e.target.value);
+                  const max = Math.max(min, vdRange[1]);
+                  setVdRange([min, max]);
+                }}
                 className="w-16 bg-transparent text-white text-sm font-mono focus:outline-none text-center"
             />
             <span className="text-ordem-text-muted">-</span>
@@ -89,14 +101,54 @@ export const MonsterList: React.FC = () => {
                 min="0" 
                 max="400" 
                 value={vdRange[1]} 
-                onChange={(e) => setVdRange([vdRange[0], Number(e.target.value)])}
+                onChange={(e) => {
+                  const max = Number(e.target.value);
+                  const min = Math.min(vdRange[0], max);
+                  setVdRange([min, max]);
+                }}
                 className="w-16 bg-transparent text-white text-sm font-mono focus:outline-none text-center"
             />
         </div>
 
+        <select
+          value={order}
+          onChange={(e) => setOrder(e.target.value as any)}
+          className="bg-ordem-black/40 border border-ordem-border-light text-white px-3 py-2 rounded focus:border-ordem-red focus:outline-none font-mono text-sm"
+        >
+          <option value="nome">Nome (A→Z)</option>
+          <option value="vd-desc">VD (↓)</option>
+          <option value="vd-asc">VD (↑)</option>
+        </select>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <button
+          onClick={() => setCustomOnly((prev) => !prev)}
+          className={`px-3 py-2 rounded border font-mono text-[10px] uppercase tracking-widest ${
+            customOnly
+              ? 'border-blue-500 text-blue-300 bg-blue-900/20'
+              : 'border-ordem-border text-ordem-text-muted bg-ordem-black/40'
+          }`}
+        >
+          {customOnly ? 'Apenas custom' : 'Todas'}
+        </button>
+        {(search || selectedElement !== 'Todos' || customOnly || vdRange[0] !== 0 || vdRange[1] !== 400 || order !== 'nome') && (
+          <button
+            onClick={() => {
+              setSearch('');
+              setSelectedElement('Todos');
+              setVdRange([0, 400]);
+              setOrder('nome');
+              setCustomOnly(false);
+            }}
+            className="px-3 py-2 rounded border border-ordem-border text-ordem-text-muted font-mono text-[10px] uppercase tracking-widest"
+          >
+            Limpar filtros
+          </button>
+        )}
         <button 
           onClick={handleCreate}
-          className="bg-ordem-red/20 border border-ordem-red text-white px-3 py-2 rounded hover:bg-ordem-red/40 transition-colors font-mono text-sm uppercase"
+          className="ml-auto bg-ordem-red/20 border border-ordem-red text-white px-3 py-2 rounded hover:bg-ordem-red/40 transition-colors font-mono text-sm uppercase"
         >
           + Criar Ameaça
         </button>

@@ -2,6 +2,7 @@
 // Baseado nos documentos: Sistema-Ordem-Paranormal.md, Guia-Testes-e-Combate.md, Condicoes-Status.md
 
 export type RegraCategoria =
+    | 'criacao'
     | 'testes'
     | 'combate'
     | 'ataques'
@@ -24,6 +25,7 @@ export interface Regra {
 }
 
 export const CATEGORIAS: { id: RegraCategoria; nome: string; icone: string; cor: string }[] = [
+    { id: 'criacao', nome: 'Criação', icone: '📝', cor: 'text-emerald-400' },
     { id: 'testes', nome: 'Testes', icone: '🎲', cor: 'text-blue-400' },
     { id: 'combate', nome: 'Combate', icone: '⚔️', cor: 'text-red-400' },
     { id: 'ataques', nome: 'Ataques', icone: '🎯', cor: 'text-orange-400' },
@@ -36,6 +38,91 @@ export const CATEGORIAS: { id: RegraCategoria; nome: string; icone: string; cor:
 ];
 
 export const REGRAS: Regra[] = [
+    // === CRIAÇÃO DE PERSONAGEM ===
+    {
+        id: 'passo-a-passo-criacao',
+        titulo: 'Passo a Passo: Criação de Ficha',
+        categoria: 'criacao',
+        resumo: '1. Conceito → 2. Atributos → 3. Origem → 4. Classe → 5. Perícias.',
+        detalhes: '1. CONCEITO: Quem é seu personagem?\n2. ATRIBUTOS: Distribua pontos (base 1, +4 pontos, máx 3)\n3. ORIGEM: Escolha o passado (2 perícias + 1 poder)\n4. CLASSE: Combatente, Especialista ou Ocultista\n5. PERÍCIAS: Anote as perícias da classe e origem\n6. RECURSOS: Calcule PV, PE, SAN iniciais',
+        tags: ['criação', 'ficha', 'passo a passo']
+    },
+    {
+        id: 'atributos-distribuicao',
+        titulo: 'Distribuição de Atributos',
+        categoria: 'criacao',
+        resumo: 'Todos começam em 1. Você tem 4 pontos para distribuir.',
+        detalhes: 'Regras:\n• Todos os atributos começam em 1\n• Você tem 4 pontos para distribuir\n• Máximo inicial: 3 em qualquer atributo\n• Opcional: Reduza um atributo para 0 = +1 ponto extra',
+        tabela: {
+            cabecalho: ['Atributo', 'Uso Principal'],
+            linhas: [
+                ['AGI', 'Defesa, Iniciativa, Acrobacia, Pontaria'],
+                ['FOR', 'Dano corpo a corpo, Carga, Atletismo, Luta'],
+                ['INT', 'Perícias extras, Conhecimentos'],
+                ['PRE', 'PE, Diplomacia, Intuição, DT rituais'],
+                ['VIG', 'PV, Fortitude, resistência física'],
+            ]
+        },
+        tags: ['atributo', 'criação', 'distribuição']
+    },
+    {
+        id: 'classes-resumo',
+        titulo: 'Classes: Resumo Rápido',
+        categoria: 'criacao',
+        resumo: 'Combatente (luta), Especialista (habilidades), Ocultista (rituais).',
+        tabela: {
+            cabecalho: ['Classe', 'PV', 'PE', 'SAN', 'Perícias'],
+            linhas: [
+                ['Combatente', '20+VIG', '2+PRE', '12', 'Luta/Pontaria + Fort/Refl + 1+INT'],
+                ['Especialista', '16+VIG', '3+PRE', '16', '7 + INT'],
+                ['Ocultista', '12+VIG', '4+PRE', '20', 'Ocultismo + Vontade + 3+INT'],
+            ]
+        },
+        dica: 'Combatente: linha de frente. Especialista: utilitário. Ocultista: paranormal.',
+        tags: ['classe', 'criação', 'combatente', 'especialista', 'ocultista']
+    },
+    {
+        id: 'origens-lista',
+        titulo: 'Origens: Lista Completa',
+        categoria: 'criacao',
+        resumo: 'Sua vida antes da Ordem. Dá 2 perícias + 1 poder/habilidade.',
+        detalhes: 'Acadêmico, Amnésico, Artista, Atlético, Chef de Cozinha, Criança, Cult Leader, Desgarrado, Diplomata, Engenheiro, Executivo, Investigador, Lutador, Magnata, Mercenário, Mergulhador, Militar, Operário, Policial, Religioso, Servidor Público, T.I., Teórico da Conspiração, Trabalhador Rural, Trambiqueiro, Universitário, Vítima',
+        dica: 'Cada origem tem um poder único e 2 perícias treinadas!',
+        tags: ['origem', 'criação', 'background']
+    },
+    {
+        id: 'recursos-iniciais',
+        titulo: 'Recursos Iniciais por Classe',
+        categoria: 'criacao',
+        resumo: 'PV, PE e SAN iniciais são base + atributo.',
+        detalhes: 'Fórmulas Iniciais (NEX 5%):\n• PV = Classe Base + VIG\n• PE = Classe Base + PRE\n• SAN = Classe Base\n\nCada nível de NEX aumenta esses valores.',
+        tabela: {
+            cabecalho: ['Classe', 'PV Base', 'PE Base', 'SAN Base'],
+            linhas: [
+                ['Combatente', '20', '2', '12'],
+                ['Especialista', '16', '3', '16'],
+                ['Ocultista', '12', '4', '20'],
+            ]
+        },
+        tags: ['pv', 'pe', 'san', 'recursos', 'criação']
+    },
+    {
+        id: 'proficiencias',
+        titulo: 'Proficiências por Classe',
+        categoria: 'criacao',
+        resumo: 'Combatente: todas. Especialista: simples. Ocultista: simples.',
+        detalhes: 'Armas Simples: pistola, revolver, escopeta, submetralhadora, faca, cassetete.\nArmas Táticas: fuzil, rifle de precisão, metralhadora.\nArmas Pesadas: lança-granadas, lança-chamas, minas.\n\nSem proficiência = -2d20 no ataque.',
+        tabela: {
+            cabecalho: ['Classe', 'Armas', 'Proteções'],
+            linhas: [
+                ['Combatente', 'Todas', 'Todas'],
+                ['Especialista', 'Simples', 'Leves'],
+                ['Ocultista', 'Simples', 'Nenhuma'],
+            ]
+        },
+        tags: ['proficiência', 'arma', 'proteção', 'classe']
+    },
+
     // === TESTES ===
     {
         id: 'teste-basico',
@@ -76,15 +163,15 @@ export const REGRAS: Regra[] = [
         id: 'modificadores-dados',
         titulo: 'Modificadores de Dados',
         categoria: 'testes',
-        resumo: '+1d20 = +1d20 (melhor), -O = -1d20 (pior).',
+        resumo: '+1d20 = +1d20 (melhor), -1d20 = -1d20 (pior).',
         detalhes: 'Se penalidade reduzir dados para menos de 1, role a quantidade como bônus mas escolha o PIOR resultado.',
         tabela: {
             cabecalho: ['Modificador', 'Efeito'],
             linhas: [
                 ['+1d20', 'Rola +1d20 extra, escolhe o melhor'],
-                ['+1d20O', 'Rola +2d20 extras'],
-                ['-O', 'Rola -1d20, escolhe o pior'],
-                ['-OO', 'Rola -2d20'],
+                ['+2d20', 'Rola +2d20 extras'],
+                ['-1d20', 'Rola -1d20, escolhe o pior'],
+                ['-2d20', 'Rola -2d20'],
             ]
         },
         tags: ['modificador', 'bônus', 'penalidade', 'dado']
@@ -155,7 +242,7 @@ export const REGRAS: Regra[] = [
         id: 'mirar',
         titulo: 'Ação: Mirar',
         categoria: 'ataques',
-        resumo: 'Ação de movimento. Anula -5 ao atirar em alvo em corpo a corpo.',
+        resumo: 'Ação de movimento. Anula -1d20 ao atirar em alvo em corpo a corpo.',
         detalhes: 'Requisito: Treinado em Pontaria\nTipo: Ação de Movimento\n\nUse quando seu alvo está adjacente a outro combatente.',
         dica: 'Essencial quando aliado está lutando corpo a corpo com o inimigo!',
         tags: ['mirar', 'pontaria', 'distância']
@@ -193,7 +280,7 @@ export const REGRAS: Regra[] = [
         titulo: 'Manobra: Derrubar',
         categoria: 'manobras',
         resumo: 'Alvo fica caído. Se vencer por 5+, também empurra 1,5m.',
-        detalhes: 'Efeitos de Caído:\n• -5 DEF vs corpo a corpo\n• +5 DEF vs distância\n• -OO em ataques',
+        detalhes: 'Efeitos de Caído:\n• -5 DEF vs corpo a corpo\n• +5 DEF vs distância\n• -2d20 em ataques',
         tags: ['derrubar', 'caído', 'manobra']
     },
     {
@@ -239,8 +326,8 @@ export const REGRAS: Regra[] = [
             linhas: [
                 ['Flanqueando', '+1d20 no ataque'],
                 ['Posição elevada', '+1d20 no ataque'],
-                ['Invisível', '+1d20O no ataque'],
-                ['Caído (atacando)', '-OO no ataque'],
+                ['Invisível', '+2d20 no ataque'],
+                ['Caído (atacando)', '-2d20 no ataque'],
                 ['Alvo desprevenido', '-5 DEF'],
                 ['Alvo caído (corpo a corpo)', '-5 DEF'],
                 ['Alvo com cobertura', '+5 DEF'],
@@ -313,6 +400,38 @@ export const REGRAS: Regra[] = [
         resumo: 'Deslocamento reduzido à metade.',
         tags: ['lento', 'condição']
     },
+    {
+        id: 'machucado',
+        titulo: 'Machucado',
+        categoria: 'condicoes',
+        resumo: 'PV atual é igual ou menor que metade do máximo.',
+        detalhes: 'Uma condição de alerta, não impõe penalidades diretamente, mas indica perigo.',
+        tags: ['machucado', 'pv', 'condição']
+    },
+    {
+        id: 'morrendo',
+        titulo: 'Morrendo',
+        categoria: 'condicoes',
+        resumo: 'Com 0 PV. 3 turnos morrendo = morte.',
+        detalhes: 'Se iniciar três turnos morrendo na mesma cena (não necessariamente consecutivos), você morre.\n\nEncerrar:\n• Teste de Medicina (DT 20)\n• Efeitos específicos que curem PV ou estabilizem',
+        tags: ['morrendo', 'morte', 'pv', 'condição']
+    },
+    {
+        id: 'perturbado',
+        titulo: 'Perturbado',
+        categoria: 'condicoes',
+        resumo: 'SAN atual ≤ metade do máximo. Recebe efeito de insanidade.',
+        detalhes: 'Na primeira vez que isso acontece em uma cena, você recebe um efeito de insanidade (p. 111 do livro).\n\nCondição de alerta para instabilidade mental.',
+        tags: ['perturbado', 'sanidade', 'condição', 'insanidade']
+    },
+    {
+        id: 'em-chamas',
+        titulo: 'Em Chamas',
+        categoria: 'condicoes',
+        resumo: '1d6 de fogo por turno. Ação padrão para apagar.',
+        detalhes: 'No início do turno sofre 1d6 de dano de fogo.\n\nApagar:\n• Ação padrão (bater nas chamas)\n• Imersão em água\n• Rolar no chão (ação de movimento)',
+        tags: ['em chamas', 'fogo', 'dano', 'condição']
+    },
 
     // === SANIDADE ===
     {
@@ -327,8 +446,8 @@ export const REGRAS: Regra[] = [
         id: 'enlouquecendo',
         titulo: 'Enlouquecendo',
         categoria: 'sanidade',
-        resumo: 'SAN 0. Não pode agir. 3 turnos = mente sucumbe.',
-        detalhes: 'Como sair:\n• Teste de Diplomacia (DT 20)\n• Qualquer efeito que cure 1+ SAN\n\n3 turnos enlouquecendo na mesma cena = perde o personagem',
+        resumo: 'SAN 0. 3 turnos = fica insano (NPC).',
+        detalhes: 'Se iniciar três turnos enlouquecendo na mesma cena (não necessariamente consecutivos), você fica insano — seu personagem se torna um NPC.\n\nEncerrar:\n• Teste de Diplomacia (DT 20 +5 por vez que já foi acalmado na cena)\n• Qualquer efeito que cure pelo menos 1 de Sanidade',
         tags: ['enlouquecendo', 'loucura', 'sanidade']
     },
     {
@@ -336,7 +455,7 @@ export const REGRAS: Regra[] = [
         titulo: 'Ação: Acalmar',
         categoria: 'sanidade',
         resumo: 'Diplomacia DT 20 para tirar alguém de Enlouquecendo.',
-        detalhes: 'Custo: Ação padrão\nTeste: Diplomacia DT 20\n\nAlgumas origens dão bônus (ex: Religioso +5)',
+        detalhes: 'Custo: Ação padrão\nTeste: Diplomacia DT 20 (+5 por vez que já tiver sido acalmado na cena)\n\nAlgumas origens dão bônus (ex: Religioso +5)',
         tags: ['acalmar', 'sanidade', 'diplomacia']
     },
 
@@ -409,7 +528,7 @@ export const REGRAS: Regra[] = [
         categoria: 'investigacao',
         resumo: 'Ajude um aliado: ele ganha +1d20 no teste.',
         detalhes: 'Fora de combate: Sem custo\nEm combate: Gasta ação padrão\n\nVocê deve estar perto do aliado e descrever como ajuda.',
-        dica: 'Múltiplos auxílios se acumulam! 3 ajudando = +1d20OO',
+        dica: 'Múltiplos auxílios se acumulam! 3 ajudando = +3d20',
         tags: ['auxiliar', 'ajudar', 'bônus', 'grupo']
     },
     {
@@ -445,7 +564,7 @@ export const REGRAS: Regra[] = [
         tags: ['oposto', 'teste', 'vs']
     },
     {
-        id: 'morrendo',
+        id: 'pv-zero',
         titulo: 'PV 0 - Morrendo',
         categoria: 'combate',
         resumo: 'Cai inconsciente. Fortitude DT 15 por turno ou morre.',
@@ -488,6 +607,14 @@ export const REGRAS: Regra[] = [
         tags: ['dano', 'massivo', 'morte', 'fortitude']
     },
     {
+        id: 'perda-de-vida',
+        titulo: 'Perda de Vida',
+        categoria: 'combate',
+        resumo: 'Reduz PV do alvo e ignora resistência a dano.',
+        detalhes: 'Perda de Vida reduz diretamente os PV do alvo, mas não é afetada por resistência a dano.',
+        tags: ['perda de vida', 'pv', 'combate']
+    },
+    {
         id: 'queda',
         titulo: 'Dano de Queda',
         categoria: 'combate',
@@ -499,8 +626,8 @@ export const REGRAS: Regra[] = [
         id: 'asfixia',
         titulo: 'Asfixia / Afogamento',
         categoria: 'combate',
-        resumo: 'Prende a respiração por rodadas igual ao Vigor. Depois, morrendo.',
-        detalhes: 'Sem ar:\n• Pode prender fôlego por [Vigor] rodadas\n• Cada dano sofrido reduz em 1 rodada\n• Ao acabar: fica Morrendo\n\nNadar: Atletismo. Armadura pesada = -5.',
+        resumo: 'Prende a respiração por rodadas igual ao Vigor. Depois, Fortitude por rodada.',
+        detalhes: 'Sem ar:\n• Pode prender fôlego por [Vigor] rodadas\n• Depois disso: Fortitude por rodada (DT 5 +5 por teste anterior)\n• Falha: inconsciente e perde 1d6 PV por rodada até respirar ou morrer\n\nNadar: Atletismo. Armadura pesada = -5.',
         tags: ['asfixia', 'afogamento', 'água', 'vigor']
     },
     {
@@ -516,7 +643,7 @@ export const REGRAS: Regra[] = [
         titulo: 'Venenos',
         categoria: 'combate',
         resumo: 'Fortitude para resistir. Efeito varia por veneno.',
-        detalhes: 'Tipos de veneno:\n• Contato: toca a pele\n• Ingestão: engolido\n• Inalação: respirado\n• Ferimento: entra por ferida\n\nEfeitos: condições, dano recorrente, ou ambos.',
+        detalhes: 'Aplicar veneno: ação de movimento.\nSe o tipo de dano não for especificado, é químico.\n\nTipos de veneno:\n• Contato: toca a pele\n• Ingestão: engolido\n• Inalação: respirado\n• Ferimento: entra por ferida\n\nEfeitos: condições, dano recorrente, ou ambos.',
         tags: ['veneno', 'fortitude', 'condição']
     },
     {
@@ -552,7 +679,7 @@ export const REGRAS: Regra[] = [
                 ['Extremo', '90m', '60'],
             ]
         },
-        dica: 'Pode atacar até 2x o alcance com -5 no teste.',
+        dica: 'Pode atacar até 2x o alcance com -2 no teste.',
         tags: ['alcance', 'distância', 'movimento']
     },
     {
@@ -730,8 +857,8 @@ export const REGRAS: Regra[] = [
         id: 'sangrando',
         titulo: 'Sangrando',
         categoria: 'condicoes',
-        resumo: 'Vigor DT 20 por turno. Falha = 1d6 dano.',
-        detalhes: 'No início do turno: Teste Vigor DT 20\n• Sucesso: estabiliza, remove condição\n• Falha: perde 1d6 PV, continua sangrando',
+        resumo: 'Início do turno: 1d6 dano. Ação completa + Medicina DT 20 para estabilizar.',
+        detalhes: 'No início do turno: perde 1d6 PV.\n\nEncerrar:\n• Primeiros socorros (ação padrão + Medicina DT 20)\n• Ação completa + Medicina DT 20 para estabilizar alguém\n• Efeitos que curem PV',
         tags: ['sangrando', 'condição', 'dano']
     },
     {
@@ -752,7 +879,7 @@ export const REGRAS: Regra[] = [
         id: 'vulneravel',
         titulo: 'Vulnerável',
         categoria: 'condicoes',
-        resumo: '-5 na Defesa.',
+        resumo: '-2 na Defesa.',
         tags: ['vulnerável', 'condição', 'defesa']
     },
     {
@@ -802,8 +929,8 @@ export const REGRAS: Regra[] = [
         id: 'atacar-distancia-cac',
         titulo: 'Ataque à Distância em Corpo a Corpo',
         categoria: 'combate',
-        resumo: '-5 no teste e provoca ataque de oportunidade.',
-        detalhes: 'Atirar/arremessar estando adjacente a inimigo:\n• -5 no teste de ataque\n• Provoca ataque de oportunidade\n\nMirar elimina a penalidade de -5.',
+        resumo: '-1d20 no teste e provoca ataque de oportunidade.',
+        detalhes: 'Atirar/arremessar estando adjacente a inimigo:\n• -1d20 no teste de ataque\n• Provoca ataque de oportunidade\n\nMirar elimina a penalidade de -1d20.',
         tags: ['distância', 'corpo a corpo', 'penalidade']
     },
     {

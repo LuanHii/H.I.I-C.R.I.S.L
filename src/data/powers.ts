@@ -93,7 +93,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Artista Marcial',
-    descricao: 'Seus ataques desarmados causam 1d6 de dano (1d8 em NEX 35%, 1d10 em NEX 70%), podem ser letais e contam como armas ágeis.',
+    descricao: 'Seus ataques desarmados causam 1d6 de dano (1d8 em NEX 35%, 1d10 em NEX 70%), podem ser letais e se tornam armas ágeis.',
     tipo: 'Geral', // Tornou-se Geral em SaH
     livro: 'Regras Básicas'
   },
@@ -105,14 +105,14 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Combater com Duas Armas',
-    descricao: 'Usando duas armas (pelo menos uma leve), pode fazer dois ataques (um com cada arma), mas sofre –O em todos os testes de ataque até o próximo turno.',
+    descricao: 'Usando duas armas (pelo menos uma leve), pode fazer dois ataques (um com cada arma), mas sofre -1d20 em todos os testes de ataque até o próximo turno.',
     tipo: 'Geral', // Tornou-se Geral em SaH
     requisitos: 'Agi 3, Treinado em Luta ou Pontaria',
     livro: 'Regras Básicas'
   },
   {
     nome: 'Combate Defensivo',
-    descricao: 'Quando usa a ação agredir, sofre –O em todos os testes de ataque, mas recebe +5 na Defesa até seu próximo turno.',
+    descricao: 'Quando usa a ação agredir, sofre -1d20 em todos os testes de ataque, mas recebe +5 na Defesa até seu próximo turno.',
     tipo: 'Classe',
     requisitos: 'Int 2',
     livro: 'Regras Básicas'
@@ -126,7 +126,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Golpe Pesado',
-    descricao: 'O dano de suas armas corpo a corpo aumenta em mais um dado do mesmo tipo.',
+    descricao: 'Enquanto estiver empunhando uma arma corpo a corpo, o dano dela aumenta em mais um dado do mesmo tipo.',
     tipo: 'Classe',
     livro: 'Regras Básicas'
   },
@@ -240,7 +240,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Esconderijo Desesperado',
-    descricao: 'Você não sofre –O em testes de Furtividade por se mover ao seu deslocamento normal. Em cenas de furtividade, ao passar em teste para esconder-se, sua visibilidade diminui em –2 (em vez de –1).',
+    descricao: 'Você não sofre -1d20 em testes de Furtividade por se mover ao seu deslocamento normal. Em cenas de furtividade, ao passar em teste para esconder-se, sua visibilidade diminui em –2 (em vez de –1).',
     tipo: 'Classe',
     livro: 'Sobrevivendo ao Horror'
   },
@@ -523,7 +523,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Afinidade Elementar (Trilha Esotérico Estágio 4)',
-    descricao: 'Você sofre –O em testes de resistência contra 1 elemento escolhido (trauma). Contudo, uma vez por sessão de jogo você pode sacrificar 1 PV permanentemente para ignorar 1 dano mental ou gasto de PE, ou sacrificar permanentemente 1 PE para reduzir 1 dano físico à metade (Reação).',
+    descricao: 'Você sofre -1d20 em testes de resistência contra 1 elemento escolhido (trauma). Contudo, uma vez por sessão de jogo você pode sacrificar 1 PV permanentemente para ignorar 1 dano mental ou gasto de PE, ou sacrificar permanentemente 1 PE para reduzir 1 dano físico à metade (Reação).',
     tipo: 'Trilha',
     livro: 'Sobrevivendo ao Horror'
   },
@@ -616,7 +616,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Mentiroso Nato',
-    descricao: 'Recebe treinamento em Enganação (+2 se já treinado). A penalidade por mentiras implausíveis diminui para –O.',
+    descricao: 'Recebe treinamento em Enganação (+2 se já treinado). A penalidade por mentiras implausíveis diminui para -1d20.',
     tipo: 'Geral',
     requisitos: 'Pre 2',
     livro: 'Sobrevivendo ao Horror'
@@ -762,14 +762,14 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Combater com Duas Armas',
-    descricao: 'Usando duas armas (pelo menos uma leve), pode fazer dois ataques (um com cada arma), mas sofre –O em todos os testes de ataque até o próximo turno. (Originalmente de Combatente).',
+    descricao: 'Usando duas armas (pelo menos uma leve), pode fazer dois ataques (um com cada arma), mas sofre -1d20 em todos os testes de ataque até o próximo turno. (Originalmente de Combatente).',
     tipo: 'Geral',
     requisitos: 'Agi 3, Treinado em Luta ou Pontaria',
     livro: 'Regras Básicas' // Classificado como Geral em SaH
   },
   {
     nome: 'Artista Marcial',
-    descricao: 'Seus ataques desarmados causam 1d6 de dano (1d8 em NEX 35%, 1d10 em NEX 70%), podem ser letais e contam como armas ágeis. (Originalmente de Combatente/Especialista).',
+    descricao: 'Seus ataques desarmados causam 1d6 de dano (1d8 em NEX 35%, 1d10 em NEX 70%), podem ser letais e se tornam armas ágeis. (Originalmente de Combatente/Especialista).',
     tipo: 'Geral',
     livro: 'Regras Básicas' // Classificado como Geral em SaH
   },
@@ -904,7 +904,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Espreitar da Besta',
-    descricao: 'Você recebe +5 em Furtividade. Em perseguições (como caçador), pode usar Furtividade em vez de Atletismo. Em cenas de furtividade, pode fazer ações discretas sem sofrer –O de penalidade. Afinidade: o bônus em Furtividade aumenta para +10.',
+    descricao: 'Você recebe +5 em Furtividade. Em perseguições (como caçador), pode usar Furtividade em vez de Atletismo. Em cenas de furtividade, pode fazer ações discretas sem sofrer -1d20 de penalidade. Afinidade: o bônus em Furtividade aumenta para +10.',
     tipo: 'Paranormal',
     elemento: 'Sangue',
     livro: 'Sobrevivendo ao Horror'
@@ -982,7 +982,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Sensitivo',
-    descricao: 'Você recebe +5 em testes de Diplomacia, Intimidação e Intuição. Afinidade: quando faz teste oposto, o oponente sofre –O.',
+    descricao: 'Você recebe +5 em testes de Diplomacia, Intimidação e Intuição. Afinidade: quando faz teste oposto, o oponente sofre -1d20.',
     tipo: 'Paranormal',
     elemento: 'Conhecimento',
     livro: 'Regras Básicas'
@@ -1087,7 +1087,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Afinidade Elementar (Trilha Esotérico Estágio 4)',
-    descricao: 'Você sofre –O em testes de resistência contra 1 elemento escolhido (trauma). Contudo, uma vez por sessão de jogo você pode sacrificar 1 PV permanentemente para ignorar 1 dano mental ou gasto de PE, ou sacrificar permanentemente 1 PE para reduzir 1 dano físico à metade (Reação).',
+    descricao: 'Você sofre -1d20 em testes de resistência contra 1 elemento escolhido (trauma). Contudo, uma vez por sessão de jogo você pode sacrificar 1 PV permanentemente para ignorar 1 dano mental ou gasto de PE, ou sacrificar permanentemente 1 PE para reduzir 1 dano físico à metade (Reação).',
     tipo: 'Trilha',
     livro: 'Sobrevivendo ao Horror'
   }

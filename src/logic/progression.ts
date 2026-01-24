@@ -1,7 +1,8 @@
-import { Personagem, AtributoKey, Trilha, Poder } from '../core/types';
+import { Personagem, AtributoKey, Trilha, Poder, PericiaName } from '../core/types';
 import { calculateDerivedStats } from '../core/rules/derivedStats';
 import { TRILHAS } from '../data/tracks';
 import { PODERES, verificarRequisitos } from '../data/powers';
+import { calcularPericiasDetalhadas, calcularCarga } from './rulesEngine';
 
 const NEX_ATRIBUTO = [20, 50, 80, 95];
 const ESTAGIO_ATRIBUTO = [3];
@@ -224,6 +225,48 @@ function recalculateStats(char: Personagem) {
       char.pd.atual = Math.min(char.pd.max, Math.max(0, char.pd.atual + diffPD));
     }
   }
+
+  // Atualizar Carga
+  const cargaInfo = calcularCarga({
+    atributos: char.atributos,
+    itens: char.equipamentos,
+    poderes: char.poderes,
+    bonusCarga: char.bonus?.carga
+  });
+  char.carga = {
+    atual: cargaInfo.atual,
+    maxima: cargaInfo.maxima
+  };
+
+  // Atualizar Perícias Detalhadas com bônus vindos de trilha/origem (derived stats)
+  // Montamos um objeto de bônus fixos baseado no que veio do derived stats
+  const extrasFixos: Partial<Record<PericiaName, number>> = {};
+  if (derived.furtividadeBonus) extrasFixos.Furtividade = (extrasFixos.Furtividade || 0) + derived.furtividadeBonus;
+  if (derived.percepcaoBonus) extrasFixos.Percepção = (extrasFixos.Percepção || 0) + derived.percepcaoBonus;
+  if (derived.iniciativaBonus) extrasFixos.Iniciativa = (extrasFixos.Iniciativa || 0) + derived.iniciativaBonus;
+  if (derived.enganacaoBonus) extrasFixos.Enganação = (extrasFixos.Enganação || 0) + derived.enganacaoBonus;
+  if (derived.diplomaciaBonus) extrasFixos.Diplomacia = (extrasFixos.Diplomacia || 0) + derived.diplomaciaBonus;
+  if (derived.fortitudeBonus) extrasFixos.Fortitude = (extrasFixos.Fortitude || 0) + derived.fortitudeBonus;
+
+  // Preserva overrides manuais de perícias se houver
+  const overridesFixos = char.overrides?.periciaFixos || {};
+
+  // Merge dos bônus: derived + overrides
+  const finalExtrasFixos: Partial<Record<PericiaName, number>> = { ...extrasFixos };
+  for (const [key, val] of Object.entries(overridesFixos)) {
+    const k = key as PericiaName;
+    finalExtrasFixos[k] = (finalExtrasFixos[k] || 0) + (val as number);
+  }
+
+  char.periciasDetalhadas = calcularPericiasDetalhadas(
+    char.atributos,
+    char.pericias,
+    {
+      fixos: finalExtrasFixos,
+      // Se tiver bônus de dados também, deveria vir aqui. Por enquanto derivados só dão bônus numérico fixo.
+      dados: char.bonus?.periciaDados
+    }
+  );
 }
 
 /**
@@ -235,66 +278,7 @@ function recalculateStats(char: Personagem) {
  */
 export function recalcularRecursosPersonagem(personagem: Personagem): Personagem {
   const char = { ...personagem };
-
-  // Recalcular stats derivados com suporte a origem e trilha
-  const derived = calculateDerivedStats({
-    classe: char.classe,
-    atributos: char.atributos,
-    nex: char.nex,
-    estagio: char.estagio,
-    origemNome: char.origem,
-    trilhaNome: char.trilha,
-    qtdTranscender: char.qtdTranscender,
-  });
-
-  // Aplicar PV
-  const oldPvMax = char.pv.max;
-  const newPvMax = char.overrides?.pvMax ?? derived.pvMax;
-  const pvDiff = newPvMax - oldPvMax;
-  char.pv = {
-    ...char.pv,
-    max: newPvMax,
-    atual: Math.min(newPvMax, Math.max(0, char.pv.atual + pvDiff)),
-    machucado: Math.floor(newPvMax / 2),
-  };
-
-  // Aplicar PE
-  const oldPeMax = char.pe.max;
-  const newPeMax = char.overrides?.peMax ?? derived.peMax;
-  const peDiff = newPeMax - oldPeMax;
-  char.pe = {
-    ...char.pe,
-    max: newPeMax,
-    atual: Math.min(newPeMax, Math.max(0, char.pe.atual + peDiff)),
-    rodada: derived.peRodada,
-  };
-
-  // Aplicar SAN
-  const oldSanMax = char.san.max;
-  const newSanMax = char.overrides?.sanMax ?? derived.sanMax;
-  const sanDiff = newSanMax - oldSanMax;
-  char.san = {
-    ...char.san,
-    max: newSanMax,
-    atual: Math.min(newSanMax, Math.max(0, char.san.atual + sanDiff)),
-  };
-
-  // Aplicar Defesa (se não tiver override)
-  if (!char.overrides?.defesa) {
-    char.defesa = derived.defesa;
-  }
-
-  // Aplicar PD se usar
-  if (char.usarPd) {
-    const oldPdMax = char.pd?.max ?? 0;
-    const newPdMax = char.overrides?.pdMax ?? derived.pdMax;
-    const pdDiff = newPdMax - oldPdMax;
-    char.pd = {
-      max: newPdMax,
-      atual: char.pd ? Math.min(newPdMax, Math.max(0, char.pd.atual + pdDiff)) : newPdMax,
-    };
-  }
-
+  recalculateStats(char);
   return char;
 }
 

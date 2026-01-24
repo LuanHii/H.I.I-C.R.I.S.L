@@ -20,6 +20,7 @@ export function FichasManager() {
   const [selecionada, setSelecionada] = useState<string | null>(null);
   const [busca, setBusca] = useState('');
   const [ordem, setOrdem] = useState<'atualizado' | 'nome' | 'nex'>('atualizado');
+  const [expandAll, setExpandAll] = useState<boolean | undefined>(undefined);
   const [modalAberto, setModalAberto] = useState(false);
   // Mobile: controla se o painel de detalhes está visível
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
@@ -379,6 +380,36 @@ export function FichasManager() {
               <option value="nome">Nome (A→Z)</option>
               <option value="nex">NEX (↓)</option>
             </select>
+            {busca.trim().length > 0 && (
+              <button
+                type="button"
+                onClick={() => setBusca('')}
+                className="px-3 py-2 rounded-lg border border-ordem-border text-ordem-text-muted text-[10px] font-mono uppercase tracking-widest"
+              >
+                Limpar busca
+              </button>
+            )}
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">
+              {fichasFiltradas.length} resultado(s)
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setExpandAll(true)}
+                className="px-3 py-2 rounded-lg border border-ordem-border text-ordem-text-muted text-[10px] font-mono uppercase tracking-widest"
+              >
+                Expandir tudo
+              </button>
+              <button
+                type="button"
+                onClick={() => setExpandAll(false)}
+                className="px-3 py-2 rounded-lg border border-ordem-border text-ordem-text-muted text-[10px] font-mono uppercase tracking-widest"
+              >
+                Colapsar tudo
+              </button>
+            </div>
           </div>
         </div>
 
@@ -398,6 +429,8 @@ export function FichasManager() {
               onRenomear={renomearCampanha}
               onRemoverCampanha={handleRemoverCampanha}
               onExportarCampanha={handleExportarCampanha}
+              forceExpanded={expandAll}
+              autoExpand={busca.trim().length > 0}
             />
           ))}
 
@@ -411,6 +444,8 @@ export function FichasManager() {
             campanhasDisponiveis={campanhas}
             renderFichaCard={renderFichaCard}
             onExportarCampanha={handleExportarCampanha}
+            forceExpanded={expandAll}
+            autoExpand={busca.trim().length > 0}
           />
 
           {/* Criar nova campanha */}
@@ -428,6 +463,20 @@ export function FichasManager() {
                 <Plus size={18} />
                 Criar primeiro agente
               </Link>
+            </div>
+          )}
+          {fichas.length > 0 && fichasFiltradas.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-sm text-ordem-white/60 mb-4">
+                Nenhuma ficha corresponde aos filtros atuais.
+              </p>
+              <button
+                type="button"
+                onClick={() => setBusca('')}
+                className="inline-flex items-center gap-2 px-4 py-3 border border-ordem-border text-ordem-text-muted rounded-lg"
+              >
+                Limpar busca
+              </button>
             </div>
           )}
         </div>

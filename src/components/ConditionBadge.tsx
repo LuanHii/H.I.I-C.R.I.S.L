@@ -95,11 +95,24 @@ export const ConditionBadge: React.FC<ConditionBadgeProps> = ({
                                     <span className="text-amber-400 capitalize">{cond.efeito.acoes}</span>
                                 </div>
                             )}
-                            {cond.efeito.pericias && (
+                            {cond.efeito.pericias?.penalidadeDados !== undefined && (
                                 <div className="flex items-center gap-2 text-xs">
                                     <span className="text-ordem-text-muted">Dados:</span>
-                                    <span className={cond.efeito.pericias.penalidadeDados! < 0 ? 'text-red-400' : 'text-green-400'}>
-                                        {cond.efeito.pericias.penalidadeDados! > 0 ? '+' : ''}{cond.efeito.pericias.penalidadeDados}d20
+                                    <span className={cond.efeito.pericias.penalidadeDados < 0 ? 'text-red-400' : 'text-green-400'}>
+                                        {cond.efeito.pericias.penalidadeDados > 0 ? '+' : ''}{cond.efeito.pericias.penalidadeDados}d20
+                                        {cond.efeito.pericias.atributos && (
+                                            <span className="text-ordem-text-muted ml-1">
+                                                ({cond.efeito.pericias.atributos.join('/')})
+                                            </span>
+                                        )}
+                                    </span>
+                                </div>
+                            )}
+                            {cond.efeito.pericias?.penalidadeValor !== undefined && (
+                                <div className="flex items-center gap-2 text-xs">
+                                    <span className="text-ordem-text-muted">Valor:</span>
+                                    <span className={cond.efeito.pericias.penalidadeValor < 0 ? 'text-red-400' : 'text-green-400'}>
+                                        {cond.efeito.pericias.penalidadeValor > 0 ? '+' : ''}{cond.efeito.pericias.penalidadeValor}
                                         {cond.efeito.pericias.atributos && (
                                             <span className="text-ordem-text-muted ml-1">
                                                 ({cond.efeito.pericias.atributos.join('/')})
@@ -181,6 +194,7 @@ export const ConditionsSummary: React.FC<ConditionsSummaryProps> = ({ efeitosAti
     // Calcular penalidades totais
     let defesaTotal = 0;
     let dadosGeral = 0;
+    let valorGeral = 0;
     let acoesBloqueadas = false;
     let deslocamentoStatus: 'normal' | 'metade' | 'zero' = 'normal';
 
@@ -191,6 +205,9 @@ export const ConditionsSummary: React.FC<ConditionsSummaryProps> = ({ efeitosAti
         if (cond.efeito.defesa) defesaTotal += cond.efeito.defesa;
         if (cond.efeito.pericias?.penalidadeDados && !cond.efeito.pericias.atributos) {
             dadosGeral += cond.efeito.pericias.penalidadeDados;
+        }
+        if (cond.efeito.pericias?.penalidadeValor && !cond.efeito.pericias.atributos) {
+            valorGeral += cond.efeito.pericias.penalidadeValor;
         }
         if (cond.efeito.acoes === 'nenhuma') acoesBloqueadas = true;
         if (cond.efeito.deslocamento === 'zero') deslocamentoStatus = 'zero';
@@ -209,6 +226,11 @@ export const ConditionsSummary: React.FC<ConditionsSummaryProps> = ({ efeitosAti
             {dadosGeral !== 0 && (
                 <div className={`px-2 py-1 rounded border ${dadosGeral < 0 ? 'border-red-800 bg-red-900/20 text-red-400' : 'border-green-800 bg-green-900/20 text-green-400'}`}>
                     {dadosGeral > 0 ? '+' : ''}{dadosGeral}d20
+                </div>
+            )}
+            {valorGeral !== 0 && (
+                <div className={`px-2 py-1 rounded border ${valorGeral < 0 ? 'border-red-800 bg-red-900/20 text-red-400' : 'border-green-800 bg-green-900/20 text-green-400'}`}>
+                    TESTE {valorGeral > 0 ? '+' : ''}{valorGeral}
                 </div>
             )}
             {deslocamentoStatus !== 'normal' && (

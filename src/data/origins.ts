@@ -74,7 +74,7 @@ export const ORIGENS: Origem[] = [
     pericias: ['Atletismo', 'Fortitude'],
     poder: {
       nome: 'Mutação',
-      descricao: 'Você recebe resistência a dano 2 e +2 em uma perícia à sua escolha que seja originalmente baseada em Força, Agilidade ou Vigor. Entretanto, sofre –O em Diplomacia.'
+      descricao: 'Você recebe resistência a dano 2 e +2 em uma perícia à sua escolha que seja originalmente baseada em Força, Agilidade ou Vigor. Entretanto, sofre -1d20 em Diplomacia.'
     },
     livro: 'Sobrevivendo ao Horror'
   },

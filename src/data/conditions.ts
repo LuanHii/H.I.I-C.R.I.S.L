@@ -23,12 +23,12 @@ export const condicoes: CondicaoCompleta[] = [
   },
   {
     nome: 'Agarrado',
-    descricao: 'O personagem fica desprevenido e imóvel, sofre -1d20 em testes de ataque e só pode atacar com armas leves.',
+    descricao: 'O personagem fica desprevenido e imóvel, sofre -2 em testes de ataque e só pode atacar com armas leves.',
     efeito: {
       deslocamento: 'zero',
       defesa: -5,
       pericias: {
-        penalidadeDados: -1
+        penalidadeValor: -2
       }
     },
     categoria: 'paralisia',
@@ -52,8 +52,8 @@ export const condicoes: CondicaoCompleta[] = [
   },
   {
     nome: 'Asfixiado',
-    descricao: 'O personagem não pode respirar. Pode prender o fôlego por rodadas igual ao seu Vigor.',
-    especial: 'A cada dano sofrido enquanto asfixiado, reduz este valor em 1. No final da última rodada, fica Morrendo.'
+    descricao: 'O personagem não pode respirar. Pode prender a respiração por um número de rodadas igual ao seu Vigor.',
+    especial: 'Depois disso, deve fazer um teste de Fortitude por rodada (DT 5 +5 por teste anterior). Se falhar, cai inconsciente e perde 1d6 PV por rodada até respirar novamente ou morrer.'
   },
   {
     nome: 'Atordoado',
@@ -136,11 +136,11 @@ export const condicoes: CondicaoCompleta[] = [
   },
   {
     nome: 'Enlouquecendo',
-    descricao: 'Com Sanidade 0. Se iniciar três turnos enlouquecendo na mesma cena, sua mente sucumbe à loucura.',
+    descricao: 'Com Sanidade 0. Se iniciar três turnos enlouquecendo na mesma cena (não necessariamente consecutivos), você fica insano — seu personagem se torna um NPC.',
     efeito: {
       acoes: 'nenhuma'
     },
-    remocao: 'Teste de Diplomacia (DT 20) ou qualquer efeito que cure pelo menos 1 ponto de Sanidade.'
+    remocao: 'Teste de Diplomacia (DT 20 +5 por vez que já tiver sido acalmado na cena) ou qualquer efeito que cure pelo menos 1 ponto de Sanidade.'
   },
   {
     nome: 'Enredado',
@@ -271,12 +271,12 @@ export const condicoes: CondicaoCompleta[] = [
   },
   {
     nome: 'Morrendo',
-    descricao: 'Com 0 pontos de vida. O personagem fica inconsciente e, se terminar mais de três rodadas morrendo na mesma cena, morre.',
+    descricao: 'Com 0 pontos de vida. Se iniciar três turnos morrendo na mesma cena (não necessariamente consecutivos), você morre.',
     efeito: {
       defesa: -10,
       acoes: 'nenhuma'
     },
-    remocao: 'Se o personagem voltar a ter pelo menos 1 PV.'
+    remocao: 'Teste de Medicina (DT 20) ou efeitos específicos que curem/estabilizem.'
   },
   {
     nome: 'Ofuscado',
@@ -309,7 +309,7 @@ export const condicoes: CondicaoCompleta[] = [
   {
     nome: 'Perturbado',
     descricao: 'O personagem tem menos da metade de seus pontos de Sanidade totais.',
-    especial: 'Esta é uma condição de status, não causa penalidades diretas mas pode ativar efeitos de outras habilidades.'
+    especial: 'Na primeira vez que isso acontece em uma cena, você recebe um efeito de insanidade. Esta é uma condição de status e não causa penalidades diretas.'
   },
   {
     nome: 'Petrificado',
@@ -322,7 +322,7 @@ export const condicoes: CondicaoCompleta[] = [
   {
     nome: 'Sangrando',
     descricao: 'No início de seus turnos, deve fazer um teste de Vigor (DT 20). Se falhar, perde 1d6 PV e continua sangrando.',
-    remocao: 'Sucesso no teste de Vigor (DT 20) estabiliza e remove essa condição.'
+    remocao: 'Sucesso no teste de Vigor (DT 20) estabiliza e remove essa condição. Também é possível estabilizar com ação completa e teste de Medicina (DT 20).'
   },
   {
     nome: 'Surdo',
@@ -345,9 +345,9 @@ export const condicoes: CondicaoCompleta[] = [
   },
   {
     nome: 'Vulnerável',
-    descricao: 'O personagem sofre -5 na Defesa.',
+    descricao: 'O personagem sofre -2 na Defesa.',
     efeito: {
-      defesa: -5
+      defesa: -2
     }
   }
 ];

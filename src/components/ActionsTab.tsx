@@ -224,8 +224,8 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
       const pericia = character.periciasDetalhadas[periciaName];
       
       const penalidade = getPenalidadesPericia(character, pericia.atributoBase);
-      const dados = Math.max(0, pericia.dados + penalidade);
-      const bonus = pericia.bonusFixo + pericia.bonusO;
+      const dados = Math.max(0, pericia.dados + penalidade.dados);
+      const bonus = pericia.bonusFixo + pericia.bonusO + penalidade.valor;
       const sinal = bonus >= 0 ? '+' : '';
 
       return {
@@ -233,7 +233,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
         tipo: 'Ataque',
         descricao: `Dano: ${item.stats?.dano || '-'} | Crítico: ${item.stats?.critico || '-'} | Alcance: ${item.stats?.alcance || '-'} ${item.stats?.tipoDano ? `| ${item.stats.tipoDano}` : ''}\n${item.descricao}`,
         pericia: periciaName,
-        teste: `${dados}d20 ${sinal}${bonus}${penalidade !== 0 ? ` (${penalidade}d)` : ''}`
+        teste: `${dados}d20 ${sinal}${bonus}${penalidade.dados !== 0 ? ` (${penalidade.dados}d)` : ''}${penalidade.valor !== 0 ? ` (${penalidade.valor})` : ''}`
       } as any;
     });
 

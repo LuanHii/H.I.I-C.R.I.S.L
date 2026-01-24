@@ -22,7 +22,7 @@ import { WEAPONS } from '../data/weapons';
 import { TRILHAS } from '../data/tracks';
 import { MODIFICACOES_ARMAS, getModificacoesParaArma } from '../data/modifications';
 import { Atributos, ClasseName, ClasseStats, Personagem, PericiaName, Ritual, Item, Elemento, Trilha, Poder, ModificacaoArma, Patente } from '../core/types';
-import type { ClassePreferencias } from '../logic/rulesEngine';
+import { ClassePreferencias, listarPatentes, getPatenteConfig } from '../logic/rulesEngine';
 import type { RecreateDraft } from '../logic/recreateFromPersonagem';
 
 const ELEMENTO_COLORS: Record<Elemento, string> = {
@@ -68,13 +68,24 @@ export default function CharacterCreator({
   const [nivelSelecionado, setNivelSelecionado] = useState<number>(0);
 
   // Patentes disponíveis (usando tipo importado de types.ts)
-  const PATENTES: { nome: Patente; nexMinimo: number; cor: string; icone: string }[] = [
-    { nome: 'Recruta', nexMinimo: 5, cor: 'text-ordem-text-secondary', icone: '○' },
-    { nome: 'Operador', nexMinimo: 10, cor: 'text-ordem-green', icone: '●' },
-    { nome: 'Agente Especial', nexMinimo: 20, cor: 'text-blue-400', icone: '◇' },
-    { nome: 'Oficial de Operações', nexMinimo: 35, cor: 'text-purple-400', icone: '◆' },
-    { nome: 'Agente de Elite', nexMinimo: 50, cor: 'text-ordem-gold', icone: '★' },
-  ];
+  // Patentes disponíveis (usando dados centralizados do rulesEngine)
+  const PATENTES = useMemo(() => {
+    const configs = listarPatentes();
+    const uiProps: Record<string, { cor: string; icone: string }> = {
+      'Recruta': { cor: 'text-ordem-text-secondary', icone: '○' },
+      'Operador': { cor: 'text-ordem-green', icone: '●' },
+      'Agente Especial': { cor: 'text-blue-400', icone: '◇' },
+      'Oficial de Operações': { cor: 'text-purple-400', icone: '◆' },
+      'Agente de Elite': { cor: 'text-ordem-gold', icone: '★' },
+    };
+
+    return configs.map(cfg => ({
+      nome: cfg.nome,
+      nexMinimo: cfg.nexMin,
+      cor: uiProps[cfg.nome]?.cor || 'text-white',
+      icone: uiProps[cfg.nome]?.icone || '•'
+    }));
+  }, []);
   const [patenteSelecionada, setPatenteSelecionada] = useState<Patente>('Recruta');
 
   useEffect(() => {
@@ -203,17 +214,13 @@ export default function CharacterCreator({
       return { 0: Infinity, 1: 1, 2: 0, 3: 0, 4: 0 };
     }
     // Agentes - baseado na patente selecionada
-    switch (patenteSelecionada) {
-      case 'Agente de Elite':
-        return { 0: Infinity, 1: Infinity, 2: Infinity, 3: 3, 4: 1 };
-      case 'Oficial de Operações':
-        return { 0: Infinity, 1: Infinity, 2: 3, 3: 2, 4: 0 };
-      case 'Agente Especial':
-        return { 0: Infinity, 1: Infinity, 2: 2, 3: 1, 4: 0 };
-      case 'Operador':
-        return { 0: Infinity, 1: 5, 2: 1, 3: 0, 4: 0 };
-      default: // Recruta
-        return { 0: Infinity, 1: 3, 2: 0, 3: 0, 4: 0 };
+    // Agentes - baseado na patente selecionada (busca do engine)
+    try {
+      const config = getPatenteConfig(patenteSelecionada);
+      return config.limiteItens;
+    } catch (e) {
+      // Fallback para Recruta se der erro
+      return { I: 2, II: 0, III: 0, IV: 0 };
     }
   }, [tipoSelecionado, patenteSelecionada]);
 

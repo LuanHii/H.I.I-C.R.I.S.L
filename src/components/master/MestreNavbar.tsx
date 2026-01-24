@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { LogOut, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-type MestreTab = 'agentes' | 'ameacas' | 'inventario' | 'fichas' | 'guia';
+type MestreTab = 'agentes' | 'ameacas' | 'inventario' | 'fichas' | 'guia' | 'combate';
 
 function MestreLink({
   href,
@@ -125,16 +125,16 @@ export function MestreNavbar({
         <nav className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto touch-scroll custom-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 no-select">
           {onTabSelect && inMestreRoot ? (
             <>
-              <MestreButton label="AGENTES" active={tab === 'agentes'} onClick={() => onTabSelect('agentes')} />
               <MestreButton label="AMEAÇAS" active={tab === 'ameacas'} onClick={() => onTabSelect('ameacas')} />
+              <MestreButton label="COMBATE" active={tab === 'combate'} onClick={() => onTabSelect('combate')} />
               <MestreButton label="INVENTÁRIO" active={tab === 'inventario'} onClick={() => onTabSelect('inventario')} />
               <MestreButton label="GUIA" active={tab === 'guia'} onClick={() => onTabSelect('guia')} />
               <MestreLink href="/mestre/fichas" label="FICHAS" active={false} />
             </>
           ) : (
             <>
-              <MestreLink href={{ pathname: '/mestre', query: { tab: 'agentes' } }} label="AGENTES" active={inMestreRoot && tab === 'agentes'} />
               <MestreLink href={{ pathname: '/mestre', query: { tab: 'ameacas' } }} label="AMEAÇAS" active={inMestreRoot && tab === 'ameacas'} />
+              <MestreLink href={{ pathname: '/mestre', query: { tab: 'combate' } }} label="COMBATE" active={inMestreRoot && tab === 'combate'} />
               <MestreLink href={{ pathname: '/mestre', query: { tab: 'inventario' } }} label="INVENTÁRIO" active={inMestreRoot && tab === 'inventario'} />
               <MestreLink href={{ pathname: '/mestre', query: { tab: 'guia' } }} label="GUIA" active={inMestreRoot && tab === 'guia'} />
               <MestreLink href="/mestre/fichas" label="FICHAS" active={inFichas} />

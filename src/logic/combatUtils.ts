@@ -16,20 +16,28 @@ export function calcularDefesaEfetiva(personagem: Personagem): number {
   return defesa;
 }
 
-export function getPenalidadesPericia(personagem: Personagem, atributo: string): number {
+export function getPenalidadesPericia(
+  personagem: Personagem,
+  atributo: string
+): { dados: number; valor: number } {
   let penalidadeDados = 0;
+  let penalidadeValor = 0;
 
   if (personagem.efeitosAtivos) {
     personagem.efeitosAtivos.forEach(nome => {
       const condicao = condicoes.find(c => c.nome === nome);
       if (condicao?.efeito?.pericias) {
-        const { atributos, penalidadeDados: dados } = condicao.efeito.pericias;
-        if (atributos && atributos.includes(atributo as any) && dados) {
+        const { atributos, penalidadeDados: dados, penalidadeValor: valor } = condicao.efeito.pericias;
+        const aplica = !atributos || atributos.includes(atributo as any);
+        if (aplica && dados) {
           penalidadeDados += dados;
+        }
+        if (aplica && valor) {
+          penalidadeValor += valor;
         }
       }
     });
   }
 
-  return penalidadeDados;
+  return { dados: penalidadeDados, valor: penalidadeValor };
 }

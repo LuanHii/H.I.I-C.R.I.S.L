@@ -101,7 +101,7 @@ export const WEAPONS: Weapow[] = [
   {
     nome: 'Lança',
     categoria: 0,
-    espaco: 2,
+    espaco: 1,
     tipo: 'Simples',
     proficiencia: 'Armas Simples',
     descricao: 'Arma primitiva com ponta perfurante. Pode ser usada para investidas ou arremessada.',
@@ -136,9 +136,9 @@ export const WEAPONS: Weapow[] = [
     proficiencia: 'Armas Simples',
     descricao: 'Ferramenta de trabalho adaptada para combate. Arma leve.',
     stats: {
-      Dano_Base: '1d4',
+      Dano_Base: '1d6',
       Dano_Tipo: 'Impacto',
-      Critico: 'x3',
+      Critico: 'x2',
       Alcance: 'Corpo a corpo'
     },
     livro: 'Ordem Paranormal RPG'
@@ -153,7 +153,7 @@ export const WEAPONS: Weapow[] = [
     stats: {
       Dano_Base: '1d4',
       Dano_Tipo: 'Perfuração',
-      Critico: '19',
+      Critico: 'x3',
       Alcance: 'Curto'
     },
     livro: 'Ordem Paranormal RPG'
@@ -281,13 +281,13 @@ export const WEAPONS: Weapow[] = [
   // ===================================================================
   {
     nome: 'Corrente',
-    categoria: 1,
+    categoria: 0,
     espaco: 1,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
-    descricao: 'Corrente de metal. Alcance de 3m.',
+    descricao: 'Corrente de metal. Alcance de 3m. Fornece +2 em testes de desarmar e derrubar.',
     stats: {
-      Dano_Base: '2d4',
+      Dano_Base: '1d8',
       Dano_Tipo: 'Impacto',
       Critico: 'x2',
       Alcance: 'Corpo a corpo (3m)'
@@ -494,7 +494,7 @@ export const WEAPONS: Weapow[] = [
     proficiencia: 'Armas Táticas',
     descricao: 'Arma de fogo automática de uma mão. Usa balas curtas. Tiro automático.',
     stats: {
-      Dano_Base: '2d10',
+      Dano_Base: '2d6',
       Dano_Tipo: 'Balístico',
       Critico: '19/x3',
       Alcance: 'Curto'
@@ -524,10 +524,10 @@ export const WEAPONS: Weapow[] = [
     proficiencia: 'Armas Táticas',
     descricao: 'Arma de fogo automática de duas mãos. Usa balas longas. Tiro automático.',
     stats: {
-      Dano_Base: '2d8',
+      Dano_Base: '2d10',
       Dano_Tipo: 'Balístico',
       Critico: '19/x3',
-      Alcance: 'Longo'
+      Alcance: 'Médio'
     },
     livro: 'Ordem Paranormal RPG'
   },
@@ -556,12 +556,12 @@ export const WEAPONS: Weapow[] = [
     espaco: 4,
     tipo: 'Pesada',
     proficiencia: 'Armas Pesadas',
-    descricao: 'Lançador de foguetes de duas mãos. Dispara foguetes. Ignora RD de objetos.',
+    descricao: 'Lançador de foguetes de duas mãos. Dispara foguetes. Dano em área de 3m.',
     stats: {
       Dano_Base: '10d8',
-      Dano_Tipo: 'Fogo',
+      Dano_Tipo: 'Impacto',
       Critico: 'x2',
-      Alcance: 'Longo'
+      Alcance: 'Médio'
     },
     livro: 'Ordem Paranormal RPG'
   },
@@ -639,7 +639,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 1,
     tipo: 'Simples',
     proficiencia: 'Armas Simples',
-    descricao: 'Lâmina para fixar em fuzil. Fixada: arma de duas mãos ágil, dano 1d6, –O em ataques à distância.',
+    descricao: 'Lâmina para fixar em fuzil. Fixada: arma de duas mãos ágil, dano 1d6, -1d20 em ataques à distância.',
     stats: {
       Dano_Base: '1d4',
       Dano_Tipo: 'Perfuração',
@@ -748,7 +748,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 1,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
-    descricao: 'Pistola de calibre superior. –O no ataque (anulado com duas mãos). Usa balas curtas.',
+    descricao: 'Pistola de calibre superior. -1d20 no ataque (anulado com duas mãos). Usa balas curtas.',
     stats: {
       Dano_Base: '2d8',
       Dano_Tipo: 'Balístico',
@@ -763,7 +763,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 2,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
-    descricao: 'Espingarda com dois canos. Recarregar é ação de movimento. Disparar ambos: –O ataque, dano 6d6. Usa cartuchos.',
+    descricao: 'Espingarda com dois canos. Recarregar é ação de movimento. Disparar ambos: -1d20 ataque, dano 6d6. Usa cartuchos.',
     stats: {
       Dano_Base: '4d6',
       Dano_Tipo: 'Balístico',

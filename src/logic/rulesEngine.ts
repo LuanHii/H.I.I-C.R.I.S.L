@@ -15,6 +15,7 @@ import {
   Poder,
   Ritual,
   Item,
+  BonusContexto,
 } from '../core/types';
 import { validateAttributes } from '../core/rules/attributes';
 import { CLASSES } from '../data/classes';
@@ -104,21 +105,21 @@ const PATENTE_CONFIGS: PatenteConfig[] = [
   },
   {
     nome: 'Agente Especial',
-    credito: 'Alto',
-    limiteItens: { I: 4, II: 2, III: 1, IV: 0 },
-    nexMin: 40,
+    credito: 'Médio',
+    limiteItens: { I: 5, II: 2, III: 1, IV: 0 },
+    nexMin: 35,
   },
   {
     nome: 'Oficial de Operações',
-    credito: 'Muito Alto',
-    limiteItens: { I: 5, II: 3, III: 2, IV: 1 },
-    nexMin: 60,
+    credito: 'Alto',
+    limiteItens: { I: 99, II: 3, III: 2, IV: 1 },
+    nexMin: 50,
   },
   {
     nome: 'Agente de Elite',
     credito: 'Ilimitado',
-    limiteItens: { I: 6, II: 4, III: 3, IV: 2 },
-    nexMin: 80,
+    limiteItens: { I: 99, II: 5, III: 3, IV: 2 },
+    nexMin: 70,
   },
 ];
 
@@ -185,7 +186,8 @@ const NEX_EVENTOS_BASE: { requisito: number; tipo: NexEvento['tipo']; descricao:
   { requisito: 99, tipo: 'Trilha', descricao: '4ª habilidade da Trilha' },
 ];
 
-const ORDEM_PATENTE: Patente[] = PATENTE_CONFIGS.map((cfg) => cfg.nome);
+export const TODAS_PATENTES: Patente[] = PATENTE_CONFIGS.map((cfg) => cfg.nome);
+const ORDEM_PATENTE: Patente[] = TODAS_PATENTES;
 
 export interface ClassePreferencias {
   ofensiva?: Extract<PericiaName, 'Luta' | 'Pontaria'>;
@@ -200,13 +202,7 @@ interface TrilhaConfigOptions {
   >;
 }
 
-interface BonusContexto {
-  defesa?: number;
-  deslocamento?: number;
-  carga?: number;
-  periciaFixos?: Partial<Record<PericiaName, number>>;
-  periciaDados?: Partial<Record<PericiaName, number>>;
-}
+// BonusContexto removido (agora importado de tipos)
 
 /**
  * Resultado do cálculo de bônus dos poderes de origem.
