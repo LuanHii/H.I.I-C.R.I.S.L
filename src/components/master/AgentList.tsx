@@ -12,15 +12,6 @@ export const AgentList: React.FC = () => {
   const [ordem, setOrdem] = useState<'nome' | 'nex' | 'atualizado'>('nome');
   const [somenteComProblemas, setSomenteComProblemas] = useState(false);
 
-  if (fichas.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 text-ordem-text-muted">
-        <p className="font-mono text-lg">Nenhum agente registrado.</p>
-        <p className="text-xs text-ordem-text-muted mt-2">Crie fichas em &quot;Novo Agente&quot; para vê-las aqui.</p>
-      </div>
-    );
-  }
-
   const handleUpdate = (id: string, updates: Partial<Personagem>) => {
     const ficha = fichas.find(f => f.id === id);
     if (ficha) {
@@ -64,6 +55,14 @@ export const AgentList: React.FC = () => {
 
   return (
     <div className="p-4 pb-20 space-y-4">
+      {fichas.length === 0 && (
+        <div className="flex flex-col items-center justify-center h-64 text-ordem-text-muted">
+          <p className="font-mono text-lg">Nenhum agente registrado.</p>
+          <p className="text-xs text-ordem-text-muted mt-2">Crie fichas em &quot;Novo Agente&quot; para vê-las aqui.</p>
+        </div>
+      )}
+      {fichas.length > 0 && (
+        <>
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div className="text-xs font-mono text-ordem-text-muted uppercase tracking-widest">
           {filtradas.length} ficha(s)
@@ -138,6 +137,8 @@ export const AgentList: React.FC = () => {
         <div className="text-center text-ordem-text-muted font-mono py-10">
           Nenhum agente encontrado com os filtros atuais.
         </div>
+      )}
+        </>
       )}
     </div>
   );

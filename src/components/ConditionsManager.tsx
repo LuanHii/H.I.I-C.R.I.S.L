@@ -24,7 +24,10 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<ConditionCategory | 'todas'>('todas');
 
-  const activeConditions = personagem.efeitosAtivos || [];
+  const activeConditions = useMemo(
+    () => personagem.efeitosAtivos || [],
+    [personagem.efeitosAtivos]
+  );
 
   const handleAddCondition = (condicaoNome: string) => {
     if (!activeConditions.includes(condicaoNome)) {

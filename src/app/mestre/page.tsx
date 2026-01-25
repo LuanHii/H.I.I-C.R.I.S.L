@@ -1,12 +1,13 @@
 ﻿import { redirect } from 'next/navigation';
 import { MasterDashboard } from '../../components/MasterDashboard';
 
-export default function MestrePage({
+export default async function MestrePage({
   searchParams,
 }: {
-  searchParams: { tab?: string };
+  searchParams: Promise<{ tab?: string }>;
 }) {
-  if (!searchParams?.tab) {
+  const params = await searchParams;
+  if (!params?.tab) {
     redirect('/mestre/fichas');
   }
 

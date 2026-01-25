@@ -14,11 +14,11 @@ export const AMEACAS: Ameaca[] = [
       dano: '2d4 mental',
       nexImune: 25
     },
-    sentidos: 'Percepção O, Iniciativa O, Percepção às Cegas',
+    sentidos: 'Percepção 1d20, Iniciativa 1d20, Percepção às Cegas',
     defesa: 16,
     fortitude: '3d20+5',
-    reflexos: 'O',
-    vontade: 'O',
+    reflexos: "1d20",
+    vontade: "1d20",
     vida: 50,
     imunidades: [],
     resistencias: ['Balístico 5', 'Corte 5', 'Impacto 5', 'Perfuração 5', 'Morte 10'],
@@ -31,7 +31,7 @@ export const AMEACAS: Ameaca[] = [
       VIG: 3
     },
     pericias: {
-      Furtividade: 'O+10'
+      Furtividade: '1d20+10'
     },
     deslocamento: '9m',
     habilidades: [
@@ -78,11 +78,11 @@ export const AMEACAS: Ameaca[] = [
       dano: '4d6 mental',
       nexImune: 40
     },
-    sentidos: 'Percepção O+5, Iniciativa O+5, Percepção às Cegas',
+    sentidos: 'Percepção 1d20+5, Iniciativa 1d20+5, Percepção às Cegas',
     defesa: 23,
     fortitude: '4d20+10',
-    reflexos: 'O+5',
-    vontade: 'O+5',
+    reflexos: '1d20+5',
+    vontade: '1d20+5',
     vida: 140,
     imunidades: ['Balístico', 'Corte', 'Impacto', 'Perfuração'],
     resistencias: ['Sangue 20'],
@@ -95,8 +95,8 @@ export const AMEACAS: Ameaca[] = [
       VIG: 4
     },
     pericias: {
-      Enganação: 'O',
-      Furtividade: 'O'
+      Enganação: "1d20",
+      Furtividade: "1d20"
     },
     deslocamento: '9m',
     habilidades: [
@@ -143,7 +143,7 @@ export const AMEACAS: Ameaca[] = [
     },
     sentidos: 'Percepção 3d20+5, Iniciativa 4d20+5, Visão no Escuro',
     defesa: 29,
-    fortitude: 'O+5',
+    fortitude: '1d20+5',
     reflexos: '4d20+5',
     vontade: '3d20+5',
     vida: 200,
@@ -205,7 +205,7 @@ export const AMEACAS: Ameaca[] = [
     pericias: {
       Atletismo: '4d20+10',
       Furtividade: '4d20+8',
-      Sobrevivência: 'O+20'
+      Sobrevivência: '1d20+20'
     },
     deslocamento: '15m',
     habilidades: [
@@ -341,10 +341,10 @@ export const AMEACAS: Ameaca[] = [
       dano: '8d6 mental',
       nexImune: 80
     },
-    sentidos: 'Percepção 3d20+20, Iniciativa O+15, Visão no Escuro',
+    sentidos: 'Percepção 3d20+20, Iniciativa 1d20+15, Visão no Escuro',
     defesa: 44,
     fortitude: '3d20+20',
-    reflexos: 'O+15',
+    reflexos: '1d20+15',
     vontade: '3d20+20',
     vida: 650,
     imunidades: [],
@@ -358,7 +358,7 @@ export const AMEACAS: Ameaca[] = [
       VIG: 3
     },
     pericias: {
-      Furtividade: 'O+30'
+      Furtividade: '1d20+30'
     },
     deslocamento: '9m',
     habilidades: [
@@ -585,7 +585,7 @@ export const AMEACAS: Ameaca[] = [
     },
     sentidos: 'Percepção 3d20+10, Iniciativa 3d20+10, Percepção às Cegas',
     defesa: 20,
-    fortitude: 'O+5',
+    fortitude: '1d20+5',
     reflexos: '3d20+10',
     vontade: '3d20+10',
     vida: 100,
@@ -630,11 +630,11 @@ export const AMEACAS: Ameaca[] = [
       dano: '3d6 mental',
       nexImune: 30
     },
-    sentidos: 'Percepção O+5, Iniciativa O, Percepção às Cegas',
+    sentidos: 'Percepção 1d20+5, Iniciativa 1d20, Percepção às Cegas',
     defesa: 19,
     fortitude: '3d20+10',
-    reflexos: 'O',
-    vontade: 'O',
+    reflexos: "1d20",
+    vontade: "1d20",
     vida: 70,
     imunidades: [],
     resistencias: ['Balístico 5', 'Impacto 5', 'Perfuração 5', 'Sangue 10'],
@@ -794,11 +794,11 @@ export const AMEACAS: Ameaca[] = [
       dano: '2d6 mental',
       nexImune: 25
     },
-    sentidos: 'Percepção O+10, Iniciativa 2d20+5, Percepção às Cegas',
+    sentidos: 'Percepção 1d20+10, Iniciativa 2d20+5, Percepção às Cegas',
     defesa: 17,
     fortitude: '2d20+5',
     reflexos: '2d20+5',
-    vontade: 'O+5',
+    vontade: '1d20+5',
     vida: 45,
     imunidades: [],
     resistencias: ['Balístico 5', 'Impacto 5', 'Perfuração 5', 'Sangue 10'],
@@ -886,11 +886,11 @@ export const AMEACAS: Ameaca[] = [
       dano: '2d4 mental',
       nexImune: 25
     },
-    sentidos: 'Percepção O, Iniciativa 2d20, Percepção às Cegas',
+    sentidos: 'Percepção 1d20, Iniciativa 2d20, Percepção às Cegas',
     defesa: 14,
     fortitude: '2d20',
     reflexos: '2d20+5',
-    vontade: 'O',
+    vontade: "1d20",
     vida: 40,
     imunidades: [],
     resistencias: ['Corte 5', 'Impacto 5', 'Perfuração 5', 'Morte 10'],
@@ -995,7 +995,7 @@ export const AMEACAS: Ameaca[] = [
       dano: '8d6 mental',
       nexImune: 85
     },
-    sentidos: 'Percepção O+5, Iniciativa 3d20+15, Percepção às Cegas',
+    sentidos: 'Percepção 1d20+5, Iniciativa 3d20+15, Percepção às Cegas',
     defesa: 28,
     fortitude: '5d20+15',
     reflexos: 'Veja texto',
@@ -1057,7 +1057,7 @@ export const AMEACAS: Ameaca[] = [
     },
     sentidos: 'Percepção 2d20+5, Iniciativa 4d20+5, Percepção às Cegas',
     defesa: 19,
-    fortitude: 'O',
+    fortitude: "1d20",
     reflexos: '4d20+5',
     vontade: '2d20+5',
     vida: 60,
@@ -1286,10 +1286,10 @@ export const AMEACAS: Ameaca[] = [
       dano: '1d6 mental',
       nexImune: 25
     },
-    sentidos: 'Percepção 2d20+5, Iniciativa O+5, Percepção às Cegas',
+    sentidos: 'Percepção 2d20+5, Iniciativa 1d20+5, Percepção às Cegas',
     defesa: 13,
     fortitude: '2d20',
-    reflexos: 'O',
+    reflexos: "1d20",
     vontade: '2d20+10',
     vida: 36,
     imunidades: [],
@@ -1311,7 +1311,7 @@ export const AMEACAS: Ameaca[] = [
     acoes: [
       {
         nome: 'Pancada',
-        descricao: 'Corpo a corpo. Teste O+5, Dano 1d4+1 impacto.',
+        descricao: 'Corpo a corpo. Teste 1d20+5, Dano 1d4+1 impacto.',
         tipo: 'Padrão'
       },
       {
@@ -1488,11 +1488,11 @@ export const AMEACAS: Ameaca[] = [
       dano: '3d6 mental',
       nexImune: 30
     },
-    sentidos: 'Percepção O+5, Iniciativa 4d20+5, Percepção às Cegas',
+    sentidos: 'Percepção 1d20+5, Iniciativa 4d20+5, Percepção às Cegas',
     defesa: 20,
-    fortitude: 'O',
+    fortitude: "1d20",
     reflexos: '4d20+10',
-    vontade: 'O+5',
+    vontade: '1d20+5',
     vida: 65,
     imunidades: [],
     resistencias: ['Corte 5', 'Impacto 5', 'Perfuração 5', 'Morte 10'],
@@ -1594,7 +1594,7 @@ export const AMEACAS: Ameaca[] = [
     },
     sentidos: 'Percepção –2d20, Iniciativa 3d20+5, Visão no Escuro',
     defesa: 21,
-    fortitude: 'O',
+    fortitude: "1d20",
     reflexos: '3d20+10',
     vontade: '–2d20',
     vida: 30,
@@ -1633,11 +1633,11 @@ export const AMEACAS: Ameaca[] = [
       dano: '3d4 mental',
       nexImune: 30
     },
-    sentidos: 'Percepção O+5, Iniciativa O, Percepção às Cegas',
+    sentidos: 'Percepção 1d20+5, Iniciativa 1d20, Percepção às Cegas',
     defesa: 18,
     fortitude: '2d20+5',
-    reflexos: 'O+5',
-    vontade: 'O',
+    reflexos: '1d20+5',
+    vontade: "1d20",
     vida: 60,
     imunidades: [],
     resistencias: ['Balístico 5', 'Corte 5', 'Impacto 5', 'Sangue 10'],
@@ -1651,7 +1651,7 @@ export const AMEACAS: Ameaca[] = [
     },
     pericias: {
       Enganação: '2d20+5',
-      Furtividade: 'O+5'
+      Furtividade: '1d20+5'
     },
     deslocamento: '9m',
     habilidades: [
@@ -1690,7 +1690,7 @@ export const AMEACAS: Ameaca[] = [
     },
     sentidos: 'Percepção 2d20+5, Iniciativa 2d20+5, Percepção às Cegas',
     defesa: 20,
-    fortitude: 'O+5',
+    fortitude: '1d20+5',
     reflexos: '2d20+10',
     vontade: '2d20+5',
     vida: 80,
@@ -1742,10 +1742,10 @@ export const AMEACAS: Ameaca[] = [
     vd: 10,
     tipo: 'Pessoa',
     tamanho: 'Médio',
-    sentidos: 'Percepção –2d20+5, Iniciativa O',
+    sentidos: 'Percepção –2d20+5, Iniciativa 1d20',
     defesa: 12,
-    fortitude: 'O+5',
-    reflexos: 'O',
+    fortitude: '1d20+5',
+    reflexos: "1d20",
     vontade: '–2d20',
     vida: 6,
     imunidades: [],
@@ -1759,7 +1759,7 @@ export const AMEACAS: Ameaca[] = [
       VIG: 1
     },
     pericias: {
-      Diplomacia: 'O+5'
+      Diplomacia: '1d20+5'
     },
     deslocamento: '6m',
     habilidades: [
@@ -1779,7 +1779,7 @@ export const AMEACAS: Ameaca[] = [
     acoes: [
       {
         nome: 'Soco',
-        descricao: 'Corpo a corpo. Teste O, Dano 1d3+1 impacto.',
+        descricao: 'Corpo a corpo. Teste 1d20, Dano 1d3+1 impacto.',
         tipo: 'Padrão'
       }
     ],
@@ -1790,10 +1790,10 @@ export const AMEACAS: Ameaca[] = [
     vd: 10,
     tipo: 'Pessoa',
     tamanho: 'Médio',
-    sentidos: 'Percepção 2d20+5, Iniciativa O',
+    sentidos: 'Percepção 2d20+5, Iniciativa 1d20',
     defesa: 11,
-    fortitude: 'O',
-    reflexos: 'O',
+    fortitude: "1d20",
+    reflexos: "1d20",
     vontade: '2d20+5',
     vida: 6,
     imunidades: [],
@@ -1828,7 +1828,7 @@ export const AMEACAS: Ameaca[] = [
     acoes: [
       {
         nome: 'Soco',
-        descricao: 'Corpo a corpo. Teste O, Dano 1d3+1 impacto.',
+        descricao: 'Corpo a corpo. Teste 1d20, Dano 1d3+1 impacto.',
         tipo: 'Padrão'
       }
     ],
@@ -1839,10 +1839,10 @@ export const AMEACAS: Ameaca[] = [
     vd: 20,
     tipo: 'Pessoa',
     tamanho: 'Médio',
-    sentidos: 'Percepção 2d20+5, Iniciativa O',
+    sentidos: 'Percepção 2d20+5, Iniciativa 1d20',
     defesa: 16,
     fortitude: '2d20+5',
-    reflexos: 'O',
+    reflexos: "1d20",
     vontade: '2d20+5',
     vida: 16,
     imunidades: [],
@@ -1856,7 +1856,7 @@ export const AMEACAS: Ameaca[] = [
       VIG: 2
     },
     pericias: {
-      Profissão: 'O+10'
+      Profissão: '1d20+10'
     },
     deslocamento: '9m',
     habilidades: [
@@ -1881,7 +1881,7 @@ export const AMEACAS: Ameaca[] = [
       },
       {
         nome: 'Espingarda',
-        descricao: 'À distância (Curto). Teste O+5, crítico x3, Dano 4d6 balístico.',
+        descricao: 'À distância (Curto). Teste 1d20+5, crítico x3, Dano 4d6 balístico.',
         tipo: 'Padrão'
       },
       {
@@ -1901,7 +1901,7 @@ export const AMEACAS: Ameaca[] = [
     defesa: 18,
     fortitude: '2d20',
     reflexos: '2d20+5',
-    vontade: 'O+5',
+    vontade: '1d20+5',
     vida: 68,
     imunidades: [],
     resistencias: [],
@@ -1915,9 +1915,9 @@ export const AMEACAS: Ameaca[] = [
     },
     pericias: {
       Crime: '2d20+5',
-      Diplomacia: 'O+5',
+      Diplomacia: '1d20+5',
       Furtividade: '2d20+5',
-      Intuição: 'O+5',
+      Intuição: '1d20+5',
       Investigação: '2d20+5'
     },
     deslocamento: '9m',
@@ -1930,7 +1930,7 @@ export const AMEACAS: Ameaca[] = [
     acoes: [
       {
         nome: 'Soco',
-        descricao: 'Corpo a corpo. Teste O+10, Dano 1d3+1 impacto.',
+        descricao: 'Corpo a corpo. Teste 1d20+10, Dano 1d3+1 impacto.',
         tipo: 'Padrão'
       },
       {
@@ -1951,10 +1951,10 @@ export const AMEACAS: Ameaca[] = [
     vd: 20,
     tipo: 'Pessoa',
     tamanho: 'Médio',
-    sentidos: 'Percepção 2d20+5, Iniciativa O',
+    sentidos: 'Percepção 2d20+5, Iniciativa 1d20',
     defesa: 13,
-    fortitude: 'O+5',
-    reflexos: 'O',
+    fortitude: '1d20+5',
+    reflexos: "1d20",
     vontade: '2d20+5',
     vida: 14,
     imunidades: [],
@@ -1997,10 +1997,10 @@ export const AMEACAS: Ameaca[] = [
     vd: 40,
     tipo: 'Pessoa',
     tamanho: 'Médio',
-    sentidos: 'Percepção 3d20+5, Iniciativa O+5',
+    sentidos: 'Percepção 3d20+5, Iniciativa 1d20+5',
     defesa: 15,
-    fortitude: 'O',
-    reflexos: 'O',
+    fortitude: "1d20",
+    reflexos: "1d20",
     vontade: '3d20+5',
     vida: 32,
     imunidades: [],
@@ -2036,7 +2036,7 @@ export const AMEACAS: Ameaca[] = [
     acoes: [
       {
         nome: 'Pancada',
-        descricao: 'Corpo a corpo. Teste O+5, Dano 1d3+1 impacto.',
+        descricao: 'Corpo a corpo. Teste 1d20+5, Dano 1d3+1 impacto.',
         tipo: 'Padrão'
       },
       {
@@ -2068,7 +2068,7 @@ export const AMEACAS: Ameaca[] = [
     tamanho: 'Médio',
     sentidos: 'Percepção 3d20+10, Iniciativa 3d20+5',
     defesa: 21,
-    fortitude: 'O+5',
+    fortitude: '1d20+5',
     reflexos: '3d20+10',
     vontade: '3d20+10',
     vida: 60,
@@ -2136,11 +2136,11 @@ export const AMEACAS: Ameaca[] = [
     vd: 80,
     tipo: 'Pessoa',
     tamanho: 'Médio',
-    sentidos: 'Percepção O+5, Iniciativa 2d20+10',
+    sentidos: 'Percepção 1d20+5, Iniciativa 2d20+10',
     defesa: 23,
     fortitude: '3d20+10',
     reflexos: '2d20+10',
-    vontade: 'O+5',
+    vontade: '1d20+5',
     vida: 80,
     imunidades: [],
     resistencias: ['10/paranormal (quando machucado)'],
@@ -2154,7 +2154,7 @@ export const AMEACAS: Ameaca[] = [
     },
     pericias: {
       Atletismo: '3d20+10',
-      Sobrevivência: 'O+10'
+      Sobrevivência: '1d20+10'
     },
     deslocamento: '9m',
     habilidades: [
@@ -2217,7 +2217,7 @@ export const AMEACAS: Ameaca[] = [
     tamanho: 'Médio',
     sentidos: 'Percepção 3d20+15, Iniciativa 3d20+15',
     defesa: 27,
-    fortitude: 'O+5',
+    fortitude: '1d20+5',
     reflexos: '3d20+15',
     vontade: '3d20+15',
     vida: 150,
@@ -2275,11 +2275,11 @@ export const AMEACAS: Ameaca[] = [
     vd: 20,
     tipo: 'Animal',
     tamanho: 'Médio',
-    sentidos: 'Percepção O+5, Iniciativa O+5',
+    sentidos: 'Percepção 1d20+5, Iniciativa 1d20+5',
     defesa: 16,
     fortitude: '2d20+5',
     reflexos: '2d20+5',
-    vontade: 'O',
+    vontade: "1d20",
     vida: 20,
     imunidades: [],
     resistencias: [],
@@ -2316,11 +2316,11 @@ export const AMEACAS: Ameaca[] = [
     vd: 20,
     tipo: 'Animal',
     tamanho: 'Médio',
-    sentidos: 'Percepção 2d20+5, Iniciativa O+5, Faro',
+    sentidos: 'Percepção 2d20+5, Iniciativa 1d20+5, Faro',
     defesa: 17,
     fortitude: '2d20+5',
     reflexos: '2d20+5',
-    vontade: 'O+5',
+    vontade: '1d20+5',
     vida: 24,
     imunidades: [],
     resistencias: [],
@@ -2358,11 +2358,11 @@ export const AMEACAS: Ameaca[] = [
     vd: 40,
     tipo: 'Animal',
     tamanho: 'Grande',
-    sentidos: 'Percepção O+5, Iniciativa O',
+    sentidos: 'Percepção 1d20+5, Iniciativa 1d20',
     defesa: 18,
     fortitude: '3d20+10',
-    reflexos: 'O+5',
-    vontade: 'O+5',
+    reflexos: '1d20+5',
+    vontade: '1d20+5',
     vida: 50,
     imunidades: [],
     resistencias: [],
@@ -2402,7 +2402,7 @@ export const AMEACAS: Ameaca[] = [
     defesa: 20,
     fortitude: '3d20+10',
     reflexos: '2d20+10',
-    vontade: 'O+5',
+    vontade: '1d20+5',
     vida: 60,
     imunidades: [],
     resistencias: [],
@@ -2448,10 +2448,10 @@ export const AMEACAS: Ameaca[] = [
     vd: 60,
     tipo: 'Animal',
     tamanho: 'Grande',
-    sentidos: 'Percepção 2d20+5, Iniciativa O, Faro',
+    sentidos: 'Percepção 2d20+5, Iniciativa 1d20, Faro',
     defesa: 20,
     fortitude: '4d20+15',
-    reflexos: 'O+5',
+    reflexos: '1d20+5',
     vontade: '2d20+5',
     vida: 100,
     imunidades: [],

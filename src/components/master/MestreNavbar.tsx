@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { LogOut, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-type MestreTab = 'agentes' | 'ameacas' | 'inventario' | 'fichas' | 'guia' | 'combate';
+type MestreTab = 'ameacas' | 'inventario' | 'fichas' | 'guia' | 'combate';
 
 function MestreLink({
   href,
@@ -91,7 +91,7 @@ export function MestreNavbar({
 
   const inFichas = pathname?.startsWith('/mestre/fichas');
   const inMestreRoot = pathname === '/mestre';
-  const tab: MestreTab = activeTab ?? (inFichas ? 'fichas' : 'agentes');
+  const tab: MestreTab = activeTab ?? (inFichas ? 'fichas' : 'ameacas');
 
   return (
     <header className="sticky top-0 z-50 min-h-[56px] sm:h-16 border-b border-ordem-border bg-ordem-black/95 backdrop-blur shrink-0 safe-top">
