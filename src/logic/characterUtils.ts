@@ -27,7 +27,7 @@ export function calcularPericiasIniciais(
   int: number,
   origem: Origem,
   preferenciasClasse?: ClassePreferencias,
-): { qtdEscolhaLivre: number; obrigatorias: PericiaName[] } {
+): { qtdEscolhaLivre: number; qtdEscolhaOrigem: number; obrigatorias: PericiaName[] } {
   return calcularPericiasDisponiveis(classe, int, origem, preferenciasClasse);
 }
 

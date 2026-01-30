@@ -22,13 +22,13 @@ export const AgentSelectorModal: React.FC<AgentSelectorModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ordem-black/80 backdrop-blur-sm p-4">
       <div className="bg-ordem-black-deep border border-ordem-border rounded-xl w-full max-w-2xl flex flex-col max-h-[80vh] shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-        
+
         <div className="flex items-center justify-between p-4 border-b border-ordem-border bg-ordem-ooze/50 rounded-t-xl">
           <div>
             <h2 className="text-xl font-serif text-zinc-100">Gerenciar Agentes na Cena</h2>
             <p className="text-sm text-ordem-text-muted font-mono">Selecione os agentes que participarão desta sessão.</p>
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 hover:bg-ordem-ooze rounded-lg text-ordem-text-secondary hover:text-white transition-colors"
           >
@@ -46,16 +46,16 @@ export const AgentSelectorModal: React.FC<AgentSelectorModalProps> = ({
                   onClick={() => onToggleAgent(id)}
                   className={`
                     flex items-center gap-4 p-3 rounded-lg border transition-all text-left group
-                    ${isActive 
-                      ? 'bg-ordem-ooze/80 border-ordem-red/50 shadow-[0_0_15px_rgba(220,38,38,0.1)]' 
+                    ${isActive
+                      ? 'bg-ordem-ooze/80 border-ordem-red/50 shadow-[0_0_15px_rgba(220,38,38,0.1)]'
                       : 'bg-ordem-black-deep border-ordem-border hover:border-ordem-border-light opacity-60 hover:opacity-100'
                     }
                   `}
                 >
                   <div className={`
                     w-10 h-10 rounded-full flex items-center justify-center border
-                    ${isActive 
-                      ? 'bg-ordem-red/20 border-ordem-red text-ordem-red' 
+                    ${isActive
+                      ? 'bg-ordem-red/20 border-ordem-red text-ordem-red'
                       : 'bg-ordem-ooze border-ordem-border-light text-ordem-text-muted'
                     }
                   `}>
@@ -65,7 +65,7 @@ export const AgentSelectorModal: React.FC<AgentSelectorModalProps> = ({
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
                     )}
                   </div>
-                  
+
                   <div className="flex-1">
                     <h4 className={`font-bold ${isActive ? 'text-zinc-100' : 'text-ordem-text-secondary'}`}>
                       {personagem.nome}
@@ -77,8 +77,8 @@ export const AgentSelectorModal: React.FC<AgentSelectorModalProps> = ({
 
                   <div className={`
                     px-2 py-1 rounded text-xs font-mono border
-                    ${isActive 
-                      ? 'bg-green-900/20 border-green-900/50 text-green-400' 
+                    ${isActive
+                      ? 'bg-green-900/20 border-green-900/50 text-green-400'
                       : 'bg-ordem-ooze border-ordem-border text-ordem-text-muted'
                     }
                   `}>
@@ -98,7 +98,7 @@ export const AgentSelectorModal: React.FC<AgentSelectorModalProps> = ({
         </div>
 
         <div className="p-4 border-t border-ordem-border bg-ordem-ooze/30 rounded-b-xl flex justify-end">
-          <button 
+          <button
             onClick={onClose}
             className="px-6 py-2 bg-zinc-100 hover:bg-white text-ordem-black-deep font-bold rounded transition-colors"
           >

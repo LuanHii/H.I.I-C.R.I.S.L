@@ -352,12 +352,10 @@ export const condicoes: CondicaoCompleta[] = [
   }
 ];
 
-// Helper para buscar condição por nome
 export function getCondicao(nome: string): CondicaoCompleta | undefined {
   return condicoes.find(c => c.nome.toLowerCase() === nome.toLowerCase());
 }
 
-// Helper para calcular penalidades totais de defesa
 export function calcularPenalidadeDefesa(efeitosAtivos: string[]): number {
   let penalidadeTotal = 0;
   for (const nome of efeitosAtivos) {
@@ -369,13 +367,12 @@ export function calcularPenalidadeDefesa(efeitosAtivos: string[]): number {
   return penalidadeTotal;
 }
 
-// Helper para calcular penalidades de dados por atributo
 export function calcularPenalidadeDados(efeitosAtivos: string[], atributo?: string): number {
   let penalidadeTotal = 0;
   for (const nome of efeitosAtivos) {
     const cond = getCondicao(nome);
     if (cond?.efeito?.pericias?.penalidadeDados) {
-      // Verifica se a penalidade é geral ou específica para o atributo
+
       if (!cond.efeito.pericias.atributos ||
         (atributo && cond.efeito.pericias.atributos.includes(atributo as any))) {
         penalidadeTotal += cond.efeito.pericias.penalidadeDados;
@@ -385,7 +382,6 @@ export function calcularPenalidadeDados(efeitosAtivos: string[], atributo?: stri
   return penalidadeTotal;
 }
 
-// Helper para verificar se está imóvel
 export function estaImovel(efeitosAtivos: string[]): boolean {
   return efeitosAtivos.some(nome => {
     const cond = getCondicao(nome);
@@ -393,7 +389,6 @@ export function estaImovel(efeitosAtivos: string[]): boolean {
   });
 }
 
-// Helper para verificar se está lento
 export function estaLento(efeitosAtivos: string[]): boolean {
   return efeitosAtivos.some(nome => {
     const cond = getCondicao(nome);
@@ -401,7 +396,6 @@ export function estaLento(efeitosAtivos: string[]): boolean {
   });
 }
 
-// Helper para verificar se não pode agir
 export function naoPodeAgir(efeitosAtivos: string[]): boolean {
   return efeitosAtivos.some(nome => {
     const cond = getCondicao(nome);
@@ -409,7 +403,6 @@ export function naoPodeAgir(efeitosAtivos: string[]): boolean {
   });
 }
 
-// Helper para obter cor de categoria
 export function getCategoriaCor(categoria?: ConditionCategory): string {
   switch (categoria) {
     case 'medo': return 'border-purple-700 bg-purple-900/20 text-purple-300';
@@ -421,7 +414,6 @@ export function getCategoriaCor(categoria?: ConditionCategory): string {
   }
 }
 
-// Helper para obter ícone de categoria
 export function getCategoriaIcon(categoria?: ConditionCategory): string {
   switch (categoria) {
     case 'medo': return '😱';

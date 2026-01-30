@@ -1,5 +1,4 @@
-// Componentes UI Primitivos
-// Exportação centralizada para imports limpos
+
 
 export { Button, IconButton } from './Button';
 export type { ButtonVariant, ButtonSize } from './Button';

@@ -25,7 +25,6 @@ export const MasterDashboard: React.FC = () => {
     return null;
   };
 
-  // Permite navegação por URL e restaura última aba usada
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const tabFromUrl = getTabFromUrl();
@@ -69,10 +68,10 @@ export const MasterDashboard: React.FC = () => {
       <MestreNavbar activeTab={activeTab} onTabSelect={setTab} />
 
       <main className="flex-1 relative overflow-hidden bg-ordem-black-deep">
-        {/* Grid pattern background */}
+        {}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(30,30,30,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(30,30,30,0.2)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
 
-        {/* Subtle glow effect */}
+        {}
         <motion.div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 rounded-full blur-3xl pointer-events-none"
           animate={{

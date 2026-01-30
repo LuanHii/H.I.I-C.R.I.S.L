@@ -37,27 +37,19 @@ export function ParanormalPowerModal({
     const [filtroElemento, setFiltroElemento] = useState<Elemento | 'todos'>('todos');
     const [poderSelecionado, setPoderSelecionado] = useState<string | null>(null);
     const [showRitualModal, setShowRitualModal] = useState(false);
-    const [poderAprenderRitual, setPoderAprenderRitual] = useState<Poder | null>(null);
-
-    // Contagem de poderes por elemento
+    const [poderAprenderRitual, setPoderAprenderRitual] = useState<Poder | null>(null);
     const contagemElementos = useMemo(() => {
         const elementos: Elemento[] = ['Sangue', 'Morte', 'Conhecimento', 'Energia'];
         return elementos.reduce((acc, elem) => {
             acc[elem] = contarPoderesElemento(agent, elem);
             return acc;
         }, {} as Record<Elemento, number>);
-    }, [agent]);
-
-    // Poderes paranormais com elegibilidade
+    }, [agent]);
     const poderesFiltrados = useMemo(() => {
-        let lista = getPoderesParanormaisElegiveis(agent);
-
-        // Filtrar por elemento
+        let lista = getPoderesParanormaisElegiveis(agent);
         if (filtroElemento !== 'todos') {
             lista = lista.filter(p => p.elemento === filtroElemento || !p.elemento);
-        }
-
-        // Busca
+        }
         if (busca.trim()) {
             const termo = busca.toLowerCase();
             lista = lista.filter(p =>
@@ -65,9 +57,7 @@ export function ParanormalPowerModal({
                 p.descricao.toLowerCase().includes(termo) ||
                 p.requisitos?.toLowerCase().includes(termo)
             );
-        }
-
-        // Ordenar: elegíveis primeiro, depois por elemento, depois por nome
+        }
         return lista.sort((a, b) => {
             if (a.elegivel !== b.elegivel) return a.elegivel ? -1 : 1;
             if (a.elemento !== b.elemento) {
@@ -83,9 +73,7 @@ export function ParanormalPowerModal({
         if (!poderSelecionado) return;
 
         const poder = poderesFiltrados.find(p => p.nome === poderSelecionado);
-        if (!poder || !poder.elegivel) return;
-
-        // Se for Aprender Ritual, abrir modal de rituais
+        if (!poder || !poder.elegivel) return;
         if (poder.nome === 'Aprender Ritual') {
             setPoderAprenderRitual(poder);
             setShowRitualModal(true);
@@ -110,9 +98,7 @@ export function ParanormalPowerModal({
         return <Icon size={14} className={config.color} />;
     };
 
-    const isAprenderRitual = (nome: string) => nome === 'Aprender Ritual';
-
-    // Modal de seleção de ritual
+    const isAprenderRitual = (nome: string) => nome === 'Aprender Ritual';
     if (showRitualModal) {
         return (
             <RitualChoiceModal
@@ -141,7 +127,7 @@ export function ParanormalPowerModal({
                 className="relative w-full max-w-3xl max-h-[90vh] bg-ordem-ooze border border-ordem-border rounded-xl overflow-hidden flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Header */}
+                {}
                 <div className="p-4 border-b border-ordem-border bg-gradient-to-r from-purple-900/30 to-ordem-ooze">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -163,7 +149,7 @@ export function ParanormalPowerModal({
                         )}
                     </div>
 
-                    {/* Contagem de elementos */}
+                    {}
                     <div className="flex gap-2 mb-4">
                         {(['Sangue', 'Morte', 'Conhecimento', 'Energia'] as Elemento[]).map(elem => {
                             const config = ELEMENTO_CONFIG[elem];
@@ -185,7 +171,7 @@ export function ParanormalPowerModal({
                         })}
                     </div>
 
-                    {/* Busca e Filtros */}
+                    {}
                     <div className="flex gap-2 flex-wrap">
                         <div className="flex-1 min-w-[200px] relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-ordem-text-muted" size={16} />
@@ -232,7 +218,7 @@ export function ParanormalPowerModal({
                     </div>
                 </div>
 
-                {/* Lista de Poderes */}
+                {}
                 <div className="flex-1 overflow-y-auto p-4 space-y-2">
                     <AnimatePresence mode="popLayout">
                         {poderesFiltrados.length === 0 ? (
@@ -299,7 +285,7 @@ export function ParanormalPowerModal({
                     </AnimatePresence>
                 </div>
 
-                {/* Footer */}
+                {}
                 <div className="p-4 border-t border-ordem-border bg-ordem-ooze/80 flex justify-between items-center gap-2">
                     <p className="text-xs text-ordem-text-muted">
                         ⚠ Ao escolher Transcender, você <strong>não ganha Sanidade</strong> neste aumento de NEX.

@@ -28,17 +28,17 @@ export const TrackSelectorModal: React.FC<TrackSelectorModalProps> = ({ agent, o
                 Seu personagem atingiu um novo patamar. Escolha como ele se especializará.
             </p>
         </div>
-        
+
         <div className="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2">
             {availableTracks.map(track => (
-                <div 
+                <div
                     key={track.nome}
                     onClick={() => setSelectedTrack(track.nome)}
                     className={`
                         cursor-pointer border rounded-lg p-4 transition-all duration-200
                         flex flex-col gap-2 relative overflow-hidden group
-                        ${selectedTrack === track.nome 
-                            ? 'bg-ordem-ooze border-ordem-red ring-1 ring-ordem-red' 
+                        ${selectedTrack === track.nome
+                            ? 'bg-ordem-ooze border-ordem-red ring-1 ring-ordem-red'
                             : 'bg-ordem-black/40 border-ordem-border hover:border-ordem-text-muted hover:bg-ordem-ooze/50'}
                     `}
                 >
@@ -50,7 +50,7 @@ export const TrackSelectorModal: React.FC<TrackSelectorModalProps> = ({ agent, o
                             <div className="w-3 h-3 bg-ordem-red rounded-full shadow-[0_0_10px_rgba(220,38,38,0.8)]"></div>
                         )}
                     </div>
-                    
+
                     <p className="text-sm text-ordem-text-secondary leading-relaxed flex-1">
                         {track.descricao}
                     </p>
@@ -79,14 +79,14 @@ export const TrackSelectorModal: React.FC<TrackSelectorModalProps> = ({ agent, o
                 {selectedTrack ? `Selecionado: ${selectedTrack}` : 'Nenhuma trilha selecionada'}
             </div>
             {onDefer && (
-                <button 
+                <button
                     onClick={onDefer}
                     className="px-6 py-3 border border-ordem-text-muted text-ordem-text-secondary rounded hover:text-white hover:border-white transition-colors font-bold tracking-wide"
                 >
                     ESCOLHER DEPOIS
                 </button>
             )}
-            <button 
+            <button
                 onClick={handleConfirm}
                 disabled={!selectedTrack}
                 className="px-6 py-3 bg-ordem-red text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed font-bold tracking-wide transition-colors"

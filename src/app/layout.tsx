@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { AuthWrapper } from "@/components/AuthWrapper";
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -40,7 +41,9 @@ export default function RootLayout({
       >
         <div className="scanline fixed inset-0 pointer-events-none z-50"></div>
         <div className="fixed inset-0 pointer-events-none z-40 bg-[radial-gradient(circle_at_center,_transparent_0%,_rgba(0,0,0,0.4)_100%)]"></div>
-        {children}
+        <AuthWrapper showUserMenu>
+          {children}
+        </AuthWrapper>
       </body>
     </html>
   );

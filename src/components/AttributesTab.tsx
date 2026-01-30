@@ -32,7 +32,7 @@ export const AttributesTab: React.FC<AttributesTabProps> = ({ character }) => {
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full overflow-y-auto custom-scrollbar">
       <div className="flex justify-center gap-4 mb-8 py-4">
         {Object.entries(attributes).map(([key, value]) => (
-          <div 
+          <div
             key={key}
             onClick={() => toggleAttribute(key as keyof Atributos)}
             className={`relative w-16 h-16 flex flex-col items-center justify-center border-2 cursor-pointer transition-all hover:scale-110 ${openAttribute === key ? 'border-ordem-white bg-white/10' : 'border-ordem-border-light bg-ordem-black/40'}`}
@@ -55,7 +55,7 @@ export const AttributesTab: React.FC<AttributesTabProps> = ({ character }) => {
             if (attrSkills.length === 0 && openAttribute === attr) return (
                 <div key={attr} className="text-center text-ordem-text-muted text-sm py-2">Nenhuma perícia treinada em {attr}</div>
             );
-            
+
             if (attrSkills.length === 0) return null;
 
             return (

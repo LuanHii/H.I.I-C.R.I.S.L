@@ -16,19 +16,19 @@ export const AbilitiesTab: React.FC<AbilitiesTabProps> = ({ character, useSanity
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full flex flex-col">
       <div className="flex gap-2 mb-4 border-b border-ordem-border pb-2">
-        <button 
+        <button
           onClick={() => setFilter('todos')}
           className={`px-3 py-1 text-sm font-mono rounded ${filter === 'todos' ? 'bg-ordem-white text-black' : 'text-ordem-text-secondary hover:text-white'}`}
         >
           TODOS
         </button>
-        <button 
+        <button
           onClick={() => setFilter('poderes')}
           className={`px-3 py-1 text-sm font-mono rounded ${filter === 'poderes' ? 'bg-ordem-white text-black' : 'text-ordem-text-secondary hover:text-white'}`}
         >
           HABILIDADES
         </button>
-        <button 
+        <button
           onClick={() => setFilter('rituais')}
           className={`px-3 py-1 text-sm font-mono rounded ${filter === 'rituais' ? 'bg-ordem-white text-black' : 'text-ordem-text-secondary hover:text-white'}`}
         >

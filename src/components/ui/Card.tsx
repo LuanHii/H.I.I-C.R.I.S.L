@@ -53,9 +53,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
     }
 );
 
-Card.displayName = 'Card';
-
-// Subcomponentes para estrutura
+Card.displayName = 'Card';
 interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> { }
 
 export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(

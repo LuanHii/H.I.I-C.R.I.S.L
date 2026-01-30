@@ -13,9 +13,7 @@ export interface ExportData {
 
 const EXPORT_VERSION = '1.0.0';
 
-/**
- * Exporta todas as fichas do localStorage
- */
+
 export function exportarFichas(): string {
   if (typeof window === 'undefined') {
     throw new Error('Exportação só pode ser feita no navegador');
@@ -33,9 +31,7 @@ export function exportarFichas(): string {
   return JSON.stringify(data, null, 2);
 }
 
-/**
- * Exporta todos os dados do usuário (fichas + itens + monstros)
- */
+
 export function exportarTudo(): string {
   if (typeof window === 'undefined') {
     throw new Error('Exportação só pode ser feita no navegador');
@@ -63,9 +59,7 @@ export function exportarTudo(): string {
   return JSON.stringify(data, null, 2);
 }
 
-/**
- * Faz download de um arquivo JSON
- */
+
 export function downloadJSON(data: string, filename: string): void {
   const blob = new Blob([data], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -78,19 +72,13 @@ export function downloadJSON(data: string, filename: string): void {
   URL.revokeObjectURL(url);
 }
 
-/**
- * Valida e parseia dados de importação
- */
+
 export function validarDadosImportacao(jsonString: string): ExportData | null {
   try {
-    const data = JSON.parse(jsonString) as ExportData;
-
-    // Validação básica
+    const data = JSON.parse(jsonString) as ExportData;
     if (!data || typeof data !== 'object') {
       return null;
-    }
-
-    // Valida estrutura básica
+    }
     const validado: ExportData = {
       version: data.version || EXPORT_VERSION,
       exportadoEm: data.exportadoEm || new Date().toISOString(),
@@ -119,9 +107,7 @@ export function validarDadosImportacao(jsonString: string): ExportData | null {
   }
 }
 
-/**
- * Importa dados no localStorage (mesclando ou substituindo)
- */
+
 export function importarDados(
   data: ExportData,
   opcao: 'mesclar' | 'substituir' = 'mesclar'
@@ -140,25 +126,20 @@ export function importarDados(
     itens: { importados: 0, total: 0 },
     armas: { importadas: 0, total: 0 },
     monstros: { importados: 0, total: 0 },
-  };
-
-  // Importar fichas
+  };
   if (data.fichas && data.fichas.length > 0) {
     resultado.fichas.total = data.fichas.length;
 
     if (opcao === 'substituir') {
       window.localStorage.setItem('fichas-origem', JSON.stringify(data.fichas));
       resultado.fichas.importadas = data.fichas.length;
-    } else {
-      // Mesclar: adiciona novas e atualiza existentes
+    } else {
       const raw = window.localStorage.getItem('fichas-origem');
       const existentes: FichaRegistro[] = raw ? JSON.parse(raw) : [];
       const idsExistentes = new Set(existentes.map((f) => f.id));
 
       const novas = data.fichas.filter((f) => !idsExistentes.has(f.id));
-      const atualizadas = data.fichas.filter((f) => idsExistentes.has(f.id));
-
-      // Remove as antigas que serão atualizadas
+      const atualizadas = data.fichas.filter((f) => idsExistentes.has(f.id));
       const semAtualizadas = existentes.filter(
         (f) => !atualizadas.some((a) => a.id === f.id)
       );
@@ -167,9 +148,7 @@ export function importarDados(
       window.localStorage.setItem('fichas-origem', JSON.stringify(mescladas));
       resultado.fichas.importadas = novas.length + atualizadas.length;
     }
-  }
-
-  // Importar itens
+  }
   if (data.itens && data.itens.length > 0) {
     resultado.itens.total = data.itens.length;
 
@@ -186,9 +165,7 @@ export function importarDados(
       window.localStorage.setItem('custom-items', JSON.stringify(mesclados));
       resultado.itens.importados = novos.length;
     }
-  }
-
-  // Importar armas
+  }
   if (data.armas && data.armas.length > 0) {
     resultado.armas.total = data.armas.length;
 
@@ -205,9 +182,7 @@ export function importarDados(
       window.localStorage.setItem('custom-weapons', JSON.stringify(mescladas));
       resultado.armas.importadas = novas.length;
     }
-  }
-
-  // Importar monstros
+  }
   if (data.monstros && data.monstros.length > 0) {
     resultado.monstros.total = data.monstros.length;
 
@@ -235,9 +210,7 @@ export function importarDados(
   return resultado;
 }
 
-/**
- * Lê um arquivo JSON do input file
- */
+
 export function lerArquivoJSON(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -253,9 +226,7 @@ export function lerArquivoJSON(file: File): Promise<string> {
   });
 }
 
-/**
- * Interface para exportação de uma única ficha
- */
+
 export interface ExportFichaIndividual {
   version: string;
   exportadoEm: string;
@@ -263,9 +234,7 @@ export interface ExportFichaIndividual {
   ficha: FichaRegistro;
 }
 
-/**
- * Exporta uma única ficha para JSON (para o jogador enviar ao mestre)
- */
+
 export function exportarFichaIndividual(ficha: FichaRegistro): string {
   const data: ExportFichaIndividual = {
     version: EXPORT_VERSION,
@@ -276,9 +245,7 @@ export function exportarFichaIndividual(ficha: FichaRegistro): string {
   return JSON.stringify(data, null, 2);
 }
 
-/**
- * Interface para exportação de fichas de uma campanha
- */
+
 export interface ExportCampanhaData {
   version: string;
   exportadoEm: string;
@@ -288,9 +255,7 @@ export interface ExportCampanhaData {
   fichas: FichaRegistro[];
 }
 
-/**
- * Exporta fichas de uma campanha específica
- */
+
 export function exportarFichasPorCampanha(
   fichas: FichaRegistro[],
   campanhaNome: string,
@@ -307,16 +272,11 @@ export function exportarFichasPorCampanha(
   return JSON.stringify(data, null, 2);
 }
 
-/**
- * Valida dados de importação de ficha individual
- */
+
 export function validarFichaIndividual(jsonString: string): ExportFichaIndividual | null {
   try {
-    const data = JSON.parse(jsonString);
-
-    // Pode ser uma exportação individual ou um formato antigo com array de fichas
-    if (data && typeof data === 'object') {
-      // Formato novo: ficha individual
+    const data = JSON.parse(jsonString);
+    if (data && typeof data === 'object') {
       if (data.tipo === 'ficha-individual' && data.ficha) {
         return {
           version: data.version || EXPORT_VERSION,
@@ -324,9 +284,7 @@ export function validarFichaIndividual(jsonString: string): ExportFichaIndividua
           tipo: 'ficha-individual',
           ficha: data.ficha,
         };
-      }
-
-      // Formato antigo: ExportData com array de fichas (pega a primeira)
+      }
       if (data.fichas && Array.isArray(data.fichas) && data.fichas.length > 0) {
         return {
           version: data.version || EXPORT_VERSION,
@@ -334,9 +292,7 @@ export function validarFichaIndividual(jsonString: string): ExportFichaIndividua
           tipo: 'ficha-individual',
           ficha: data.fichas[0],
         };
-      }
-
-      // Tentar interpretar como uma FichaRegistro direta
+      }
       if (data.id && data.personagem) {
         return {
           version: EXPORT_VERSION,
@@ -354,12 +310,7 @@ export function validarFichaIndividual(jsonString: string): ExportFichaIndividua
   }
 }
 
-/**
- * Importa uma única ficha mesclando com as existentes.
- * Se a ficha já existir (mesmo ID), atualiza.
- * Se for nova, adiciona.
- * Se houver conflito de nome (ID diferente mas nome igual), gera novo ID.
- */
+
 export function importarFichaIndividual(
   fichaData: ExportFichaIndividual,
   opcao: 'mesclar' | 'substituir-se-existir' = 'mesclar'
@@ -377,14 +328,11 @@ export function importarFichaIndividual(
     const raw = window.localStorage.getItem('fichas-origem');
     const existentes: FichaRegistro[] = raw ? JSON.parse(raw) : [];
 
-    let fichaParaImportar = { ...fichaData.ficha };
-
-    // Verifica se já existe ficha com mesmo ID
+    let fichaParaImportar = { ...fichaData.ficha };
     const fichaExistenteIndex = existentes.findIndex(f => f.id === fichaParaImportar.id);
 
     if (fichaExistenteIndex >= 0) {
-      if (opcao === 'substituir-se-existir') {
-        // Substitui a ficha existente
+      if (opcao === 'substituir-se-existir') {
         existentes[fichaExistenteIndex] = fichaParaImportar;
         window.localStorage.setItem('fichas-origem', JSON.stringify(existentes));
         return {
@@ -393,12 +341,9 @@ export function importarFichaIndividual(
           fichaId: fichaParaImportar.id,
           acao: 'atualizada',
         };
-      } else {
-        // Mesclar: gera novo ID para não sobrescrever
+      } else {
         const novoId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        const nomeOriginal = fichaParaImportar.personagem.nome;
-
-        // Verifica se já existe ficha com mesmo nome para evitar confusão
+        const nomeOriginal = fichaParaImportar.personagem.nome;
         const nomeExiste = existentes.some(
           f => f.personagem.nome === nomeOriginal && f.id !== fichaParaImportar.id
         );
@@ -421,13 +366,10 @@ export function importarFichaIndividual(
           acao: 'renomeada',
         };
       }
-    }
-
-    // Verifica se existe ficha com mesmo nome (mas ID diferente)
+    }
     const nomeExiste = existentes.some(f => f.personagem.nome === fichaParaImportar.personagem.nome);
 
-    if (nomeExiste) {
-      // Adiciona sufixo para evitar confusão
+    if (nomeExiste) {
       fichaParaImportar = {
         ...fichaParaImportar,
         personagem: {
@@ -435,9 +377,7 @@ export function importarFichaIndividual(
           nome: `${fichaParaImportar.personagem.nome} (${new Date().toLocaleDateString('pt-BR')})`,
         },
       };
-    }
-
-    // Adiciona a nova ficha
+    }
     existentes.push(fichaParaImportar);
     window.localStorage.setItem('fichas-origem', JSON.stringify(existentes));
 

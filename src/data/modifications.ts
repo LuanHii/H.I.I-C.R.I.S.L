@@ -1,9 +1,6 @@
 import { ModificacaoArma } from '../core/types';
 
-export const MODIFICACOES_ARMAS: ModificacaoArma[] = [
-    // ===================================================================
-    // MODIFICAÇÕES PARA ARMAS CORPO A CORPO E DE DISPARO
-    // ===================================================================
+export const MODIFICACOES_ARMAS: ModificacaoArma[] = [
     {
         nome: 'Certeira',
         tipo: 'universal',
@@ -38,11 +35,7 @@ export const MODIFICACOES_ARMAS: ModificacaoArma[] = [
         efeito: 'Pode sacar como ação livre.',
         stats: { saqueRapido: true },
         livro: 'Regras Básicas'
-    },
-
-    // ===================================================================
-    // MODIFICAÇÕES PARA ARMAS DE FOGO
-    // ===================================================================
+    },
     {
         nome: 'Alongada',
         tipo: 'fogo',
@@ -99,11 +92,7 @@ export const MODIFICACOES_ARMAS: ModificacaoArma[] = [
         efeito: 'Ignora camuflagem do alvo.',
         stats: { ignoraCamuflagem: true },
         livro: 'Regras Básicas'
-    },
-
-    // ===================================================================
-    // MODIFICAÇÕES PARA MUNIÇÕES
-    // ===================================================================
+    },
     {
         nome: 'Dum Dum',
         tipo: 'municao',
@@ -120,9 +109,7 @@ export const MODIFICACOES_ARMAS: ModificacaoArma[] = [
         stats: { danoExtraFixo: '2d6' },
         livro: 'Regras Básicas'
     },
-];
-
-// Helper para obter modificações compatíveis com um tipo de arma
+];
 export function getModificacoesParaArma(tipoArma: 'cac' | 'disparo' | 'fogo'): ModificacaoArma[] {
     return MODIFICACOES_ARMAS.filter(mod => {
         if (mod.tipo === 'universal') return true;

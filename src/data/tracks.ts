@@ -1,9 +1,7 @@
 import { Trilha } from '../core/types';
 
 export const TRILHAS: Trilha[] = [
-  // ===================================================================
-  // NOVAS TRILHAS DE COMBATENTE (SOBREVIVENDO AO HORROR)
-  // ===================================================================
+
   {
     nome: 'Agente Secreto',
     classe: 'Combatente',
@@ -98,9 +96,6 @@ export const TRILHAS: Trilha[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // NOVAS TRILHAS DE ESPECIALISTA (SOBREVIVENDO AO HORROR)
-  // ===================================================================
   {
     nome: 'Bibliotecário',
     classe: 'Especialista',
@@ -191,9 +186,6 @@ export const TRILHAS: Trilha[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // NOVAS TRILHAS DE OCULTISTA (SOBREVIVENDO AO HORROR)
-  // ===================================================================
   {
     nome: 'Exorcista',
     classe: 'Ocultista',
@@ -283,22 +275,18 @@ export const TRILHAS: Trilha[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // TRILHAS DA NOVA CLASSE SOBREVIVENTE (SOBREVIVENDO AO HORROR)
-  // Nota: Estas usam estágios (Nível 0 / Estágio 2 / Estágio 4) em vez de NEX.
-  // ===================================================================
   {
     nome: 'Durão',
     classe: 'Sobrevivente',
     descricao: 'Focado em resistência física, como um atleta ou segurança.',
     habilidades: [
       {
-        nex: 2, // Estágio 2
+        nex: 2,
         nome: 'Durão',
         descricao: 'Você recebe +4 PV. Quando subir para o 3º estágio, recebe +2 PV.'
       },
       {
-        nex: 4, // Estágio 4
+        nex: 4,
         nome: 'Pancada Forte',
         descricao: 'Quando faz um ataque, você pode gastar 1 PE para receber +1d20 no teste de ataque. Se você se tornar um combatente, perde esta habilidade, mas reduz o custo de ativação de Ataque Especial em –1 PE.'
       }
@@ -311,7 +299,7 @@ export const TRILHAS: Trilha[] = [
     descricao: 'Focado em conhecimento e inteligência.',
     habilidades: [
       {
-        nex: 2, // Estágio 2
+        nex: 2,
         nome: 'Esperto',
         descricao: 'Você se torna treinado em uma perícia adicional a sua escolha.',
         escolha: {
@@ -320,7 +308,7 @@ export const TRILHAS: Trilha[] = [
         }
       },
       {
-        nex: 4, // Estágio 4
+        nex: 4,
         nome: 'Entendido',
         descricao: 'Escolha duas perícias nas quais você é treinado (exceto Luta e Pontaria). Quando faz um teste de uma dessas perícias, você pode gastar 1 PE para somar +1d4 no resultado do teste. Se você se tornar um especialista, perde esta habilidade, mas reduz o custo de ativação de Perito em –1 PE.',
         escolha: {
@@ -337,12 +325,12 @@ export const TRILHAS: Trilha[] = [
     descricao: 'Focado em habilidades esotéricas, afinidade com o paranormal e maior força de vontade.',
     habilidades: [
       {
-        nex: 2, // Estágio 2
+        nex: 2,
         nome: 'Esotérico',
         descricao: 'Você pode gastar uma ação padrão e 1 PE para sentir energias paranormais em alcance curto. O mestre dirá quais informações você consegue obter, se houver.'
       },
       {
-        nex: 4, // Estágio 4
+        nex: 4,
         nome: 'Iniciado',
         descricao: 'Você aprende e pode conjurar um ritual de 1º círculo a sua escolha. Se você se tornar um ocultista, soma este ritual aos três rituais que aprende com Escolhido pelo Outro Lado.',
         escolha: {
@@ -354,9 +342,6 @@ export const TRILHAS: Trilha[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // TRILHAS DE COMBATENTE (REGRAS BÁSICAS)
-  // ===================================================================
   {
     nome: 'Aniquilador',
     classe: 'Combatente',
@@ -502,9 +487,6 @@ export const TRILHAS: Trilha[] = [
     livro: 'Regras Básicas'
   },
 
-  // ===================================================================
-  // TRILHAS DE ESPECIALISTA (REGRAS BÁSICAS)
-  // ===================================================================
   {
     nome: 'Atirador de Elite',
     classe: 'Especialista',
@@ -646,9 +628,6 @@ export const TRILHAS: Trilha[] = [
     livro: 'Regras Básicas'
   },
 
-  // ===================================================================
-  // TRILHAS DE OCULTISTA (REGRAS BÁSICAS)
-  // ===================================================================
   {
     nome: 'Conduíte',
     classe: 'Ocultista',

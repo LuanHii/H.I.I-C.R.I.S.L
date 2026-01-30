@@ -25,9 +25,7 @@ export function PageTransition({ children }: PageTransitionProps) {
             </motion.div>
         </AnimatePresence>
     );
-}
-
-// Componente para animar entrada de seções
+}
 interface FadeInProps {
     children: React.ReactNode;
     delay?: number;
@@ -45,9 +43,7 @@ export function FadeIn({ children, delay = 0, className }: FadeInProps) {
             {children}
         </motion.div>
     );
-}
-
-// Componente para animar listas com stagger
+}
 interface StaggerListProps {
     children: React.ReactNode;
     className?: string;

@@ -1,9 +1,7 @@
 import { Item } from '../core/types';
 
 export const ITENS: Item[] = [
-  // ===================================================================
-  // ITENS AMALDIÇOADOS - SANGUE (SOBREVIVENDO AO HORROR)
-  // ===================================================================
+
   {
     nome: 'Conector de Membros',
     categoria: 3,
@@ -62,9 +60,6 @@ export const ITENS: Item[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // ITENS AMALDIÇOADOS - MORTE (SOBREVIVENDO AO HORROR)
-  // ===================================================================
   {
     nome: 'Ampulheta do Tempo Sofrido',
     categoria: 2,
@@ -122,9 +117,6 @@ export const ITENS: Item[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // ITENS AMALDIÇOADOS - CONHECIMENTO (SOBREVIVENDO AO HORROR)
-  // ===================================================================
   {
     nome: 'Enciclopédia Infinita',
     categoria: 3,
@@ -185,14 +177,11 @@ export const ITENS: Item[] = [
     nome: 'Lente de Revelação',
     categoria: 1,
     espaco: 1,
-    tipo: 'Modificação Paranormal (Acessório)',
+    tipo: 'Paranormal',
     descricao: 'Modificação para câmeras de aura paranormal. Permite ver seres invisíveis e incorpóreos. Ação padrão + 1 PE: fotografa criatura em alcance curto. Até o fim da cena, a criatura perde camuflagem, invisibilidade e se torna corpórea (Vontade DT Pre evita).',
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // ITENS AMALDIÇOADOS - ENERGIA (SOBREVIVENDO AO HORROR)
-  // ===================================================================
   {
     nome: 'Arreio Neural',
     categoria: 2,
@@ -226,9 +215,6 @@ export const ITENS: Item[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // ITENS AMALDIÇOADOS - MEDO (SOBREVIVENDO AO HORROR)
-  // ===================================================================
   {
     nome: 'A Primeira Adaga',
     categoria: 3,
@@ -238,9 +224,6 @@ export const ITENS: Item[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // ITENS GERAIS - ACESSÓRIOS (SOBREVIVENDO AO HORROR)
-  // ===================================================================
   {
     nome: 'Amuleto Sagrado',
     categoria: 0,
@@ -346,9 +329,6 @@ export const ITENS: Item[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // ITENS GERAIS - MEDICAMENTOS (SOBREVIVENDO AO HORROR)
-  // ===================================================================
   {
     nome: 'Antibiótico',
     categoria: 1,
@@ -414,9 +394,6 @@ export const ITENS: Item[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // ITENS GERAIS - EXPLOSIVOS (SOBREVIVENDO AO HORROR)
-  // ===================================================================
   {
     nome: 'Dinamite',
     categoria: 1,
@@ -458,9 +435,6 @@ export const ITENS: Item[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // ITENS GERAIS - OPERACIONAIS (SOBREVIVENDO AO HORROR)
-  // ===================================================================
   {
     nome: 'Alarme de Movimento',
     categoria: 0,
@@ -486,11 +460,11 @@ export const ITENS: Item[] = [
     livro: 'Sobrevivendo ao Horror'
   },
   {
-    nome: 'Braçadeiras de Bloqueio',
+    nome: 'Braçadeira Reforçada',
     categoria: 1,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Proteções similares às de artes marciais. Aumentam em +2 a RD de bloqueio.',
+    descricao: 'Proteções usadas em artes marciais. Aumentam em +2 a RD recebida ao usar bloqueio.',
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -534,9 +508,6 @@ export const ITENS: Item[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // ITENS GERAIS - CATALISADORES (SOBREVIVENDO AO HORROR)
-  // ===================================================================
   {
     nome: 'Catalisador Ritualístico (Ampliador)',
     categoria: 1,
@@ -570,9 +541,6 @@ export const ITENS: Item[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // ITENS GERAIS (REGRAS BÁSICAS)
-  // ===================================================================
   {
     nome: 'Kit de Perícia',
     categoria: 0,
@@ -594,7 +562,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 1,
     tipo: 'Geral (Acessório)',
-    descricao: 'Roupa ou item com benefício. Máximo de quatro itens vestidos.',
+    descricao: 'Peça de vestuário que fornece +2 em uma perícia (exceto Luta ou Pontaria). Você pode receber os bônus de no máximo duas vestimentas. Vestir ou despir é ação completa.',
     livro: 'Regras Básicas'
   },
   {
@@ -638,14 +606,6 @@ export const ITENS: Item[] = [
     livro: 'Regras Básicas'
   },
   {
-    nome: 'Coquetel Molotov',
-    categoria: 0,
-    espaco: 1,
-    tipo: 'Explosivo',
-    descricao: 'Garrafa com líquido inflamável. Arremesso em alcance curto: 3d6 fogo em raio 1,5m, condição em chamas (Reflexos DT Agi evita).',
-    livro: 'Regras Básicas'
-  },
-  {
     nome: 'Granada de Fumaça',
     categoria: 0,
     espaco: 1,
@@ -654,9 +614,6 @@ export const ITENS: Item[] = [
     livro: 'Regras Básicas'
   },
 
-  // ===================================================================
-  // ITENS GERAIS - OPERACIONAIS (REGRAS BÁSICAS)
-  // ===================================================================
   {
     nome: 'Algemas',
     categoria: 0,
@@ -719,6 +676,14 @@ export const ITENS: Item[] = [
     espaco: 1,
     tipo: 'Geral (Operacional)',
     descricao: 'Lanterna potente e resistente. Ilumina cone de 9m. Pode ser acoplada a armas. Fornece +2 em testes contra condição ofuscado.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Máscara de Gás',
+    categoria: 0,
+    espaco: 1,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Protege contra gases e partículas nocivas. Imune a efeitos de gás enquanto vestida.',
     livro: 'Regras Básicas'
   },
   {
@@ -794,9 +759,6 @@ export const ITENS: Item[] = [
     livro: 'Regras Básicas'
   },
 
-  // ===================================================================
-  // ITENS PARANORMAIS (REGRAS BÁSICAS)
-  // ===================================================================
   {
     nome: 'Amarras de Sangue',
     categoria: 2,
@@ -926,79 +888,32 @@ export const ITENS: Item[] = [
     livro: 'Regras Básicas'
   },
 
-  // ===================================================================
-  // PROTEÇÕES (REGRAS BÁSICAS)
-  // ===================================================================
   {
-    nome: 'Escudo Leve',
-    categoria: 0,
-    espaco: 1,
-    tipo: 'Proteção',
-    descricao: 'Escudo pequeno. Fornece +1 na Defesa.',
-    stats: { defesa: 1 },
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Escudo Pesado',
+    nome: 'Proteção Leve',
     categoria: 1,
     espaco: 2,
     tipo: 'Proteção',
-    descricao: 'Escudo grande. Fornece +2 na Defesa.',
-    stats: { defesa: 2 },
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Roupas Resistentes',
-    categoria: 0,
-    espaco: 1,
-    tipo: 'Proteção',
-    descricao: 'Roupas reforçadas (jaqueta de couro, etc.). Fornece +1 na Defesa.',
-    stats: { defesa: 1 },
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Colete à Prova de Balas',
-    categoria: 1,
-    espaco: 2,
-    tipo: 'Proteção',
-    descricao: 'Proteção balística leve. Fornece +2 na Defesa.',
-    stats: { defesa: 2 },
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Colete de Alta Resistência',
-    categoria: 2,
-    espaco: 2,
-    tipo: 'Proteção',
-    descricao: 'Colete tático avançado. Fornece +3 na Defesa.',
-    stats: { defesa: 3 },
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Armadura Tática Leve',
-    categoria: 2,
-    espaco: 2,
-    tipo: 'Proteção',
-    descricao: 'Conjunto de proteções táticas leves. Fornece +3 na Defesa.',
-    stats: { defesa: 3 },
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Armadura Tática Pesada',
-    categoria: 3,
-    espaco: 4,
-    tipo: 'Proteção',
-    descricao: 'Armadura tática completa. Fornece +5 na Defesa, mas sofre –3m de deslocamento.',
+    descricao: 'Jaqueta de couro pesada ou colete de kevlar. Fornece +5 na Defesa.',
     stats: { defesa: 5 },
     livro: 'Regras Básicas'
   },
   {
-    nome: 'Máscara de Gás',
-    categoria: 0,
-    espaco: 1,
+    nome: 'Proteção Pesada',
+    categoria: 2,
+    espaco: 5,
     tipo: 'Proteção',
-    descricao: 'Protege contra gases e partículas nocivas. Imune a efeitos de gás enquanto vestida.',
-    livro: 'Sobrevivendo ao Horror'
+    descricao: 'Equipamento pesado com placas e capacete. Fornece +10 na Defesa e resistência a balístico, corte, impacto e perfuração 2, mas impõe –5 em perícias afetadas por carga.',
+    stats: { defesa: 10, resistencia: 2 },
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Escudo',
+    categoria: 0,
+    espaco: 2,
+    tipo: 'Proteção',
+    descricao: 'Escudo moderno ou medieval. Fornece +2 na Defesa e precisa ser empunhado em uma mão.',
+    stats: { defesa: 2 },
+    livro: 'Regras Básicas'
   },
   {
     nome: 'Capacete Tático',

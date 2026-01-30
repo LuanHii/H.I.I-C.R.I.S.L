@@ -27,7 +27,7 @@ export const InventoryTab: React.FC<InventoryTabProps> = ({ character }) => {
     const count = itemsByCat[cat]?.length || 0;
     const limitKey = ['I', 'II', 'III', 'IV'][cat - 1] as keyof typeof limiteItens;
     const limit = cat === 0 ? Infinity : (limiteItens[limitKey] ?? 0);
-    
+
     if (cat === 0) return null;
 
     const isExceeded = count > limit;
@@ -52,7 +52,7 @@ export const InventoryTab: React.FC<InventoryTabProps> = ({ character }) => {
           </span>
         </div>
         <div className="w-full h-2 bg-ordem-ooze rounded-full overflow-hidden">
-          <div 
+          <div
             className={`h-full transition-all duration-500 ${cargaAtual > cargaMaxima ? 'bg-ordem-red' : 'bg-ordem-white'}`}
             style={{ width: `${Math.min(100, (cargaAtual / cargaMaxima) * 100)}%` }}
           ></div>
@@ -62,7 +62,7 @@ export const InventoryTab: React.FC<InventoryTabProps> = ({ character }) => {
             ⚠ SOBRECARGA: -2 em testes físicos
           </div>
         )}
-        
+
         <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-ordem-border">
             {renderLimit(1, 'Cat I')}
             {renderLimit(2, 'Cat II')}
@@ -101,7 +101,7 @@ export const InventoryTab: React.FC<InventoryTabProps> = ({ character }) => {
                                         </span>
                                     </div>
                                     </div>
-                                    
+
                                     {item.stats && (
                                         <div className="mt-2 flex gap-3 text-xs font-mono text-ordem-white-muted">
                                             {item.stats.dano && <span>Dano: {item.stats.dano}</span>}

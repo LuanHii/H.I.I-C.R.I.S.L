@@ -12,7 +12,7 @@ interface PowerChoiceModalProps {
     agent: Personagem;
     onSelect: (poderNome: string) => void;
     onClose?: () => void;
-    /** Callback quando Transcender é escolhido e o poder paranormal é selecionado */
+
     onTranscenderComplete?: (poderParanormal: Poder, ritual?: Ritual) => void;
 }
 
@@ -27,37 +27,27 @@ export function PowerChoiceModal({
     const [poderSelecionado, setPoderSelecionado] = useState<string | null>(null);
     const [showParanormalModal, setShowParanormalModal] = useState(false);
 
-    const pendentes = agent.poderesClassePendentes || 0;
-
-    // Poderes disponíveis
+    const pendentes = agent.poderesClassePendentes || 0;
     const { poderesClasse, poderesGerais, todosPoderes } = useMemo(() => {
         const classe = getPoderesClasse(agent.classe);
-        const gerais = getPoderesGerais();
-
-        // Remover duplicatas
+        const gerais = getPoderesGerais();
         const todos = [...classe, ...gerais].filter((p, idx, arr) =>
             arr.findIndex(x => x.nome === p.nome) === idx
         );
 
         return { poderesClasse: classe, poderesGerais: gerais, todosPoderes: todos };
-    }, [agent.classe]);
-
-    // Filtrar e marcar elegibilidade
+    }, [agent.classe]);
     const poderesFiltrados = useMemo(() => {
         let lista = filtro === 'classe' ? poderesClasse :
             filtro === 'gerais' ? poderesGerais :
-                todosPoderes;
-
-        // Filtrar já possuídos (exceto Transcender que pode ser escolhido várias vezes)
+                todosPoderes;
         const nomesPossuidos = new Set(agent.poderes.map(p => p.nome));
         lista = lista.filter(p => {
-            if (p.nome === 'Transcender') return true; // Sempre disponível
-            if (p.nome === 'Treinamento em Perícia') return true; // Pode repetir
-            if (p.nome === 'Aumento de Atributo') return true; // Pode repetir
+            if (p.nome === 'Transcender') return true;
+            if (p.nome === 'Treinamento em Perícia') return true;
+            if (p.nome === 'Aumento de Atributo') return true;
             return !nomesPossuidos.has(p.nome);
-        });
-
-        // Busca
+        });
         if (busca.trim()) {
             const termo = busca.toLowerCase();
             lista = lista.filter(p =>
@@ -65,9 +55,7 @@ export function PowerChoiceModal({
                 p.descricao.toLowerCase().includes(termo) ||
                 p.requisitos?.toLowerCase().includes(termo)
             );
-        }
-
-        // Marcar elegibilidade
+        }
         return lista.map(p => ({
             ...p,
             ...verificarRequisitos(p, agent)
@@ -75,9 +63,7 @@ export function PowerChoiceModal({
     }, [filtro, busca, poderesClasse, poderesGerais, todosPoderes, agent]);
 
     const handleConfirm = () => {
-        if (!poderSelecionado) return;
-
-        // Verificar se é Transcender
+        if (!poderSelecionado) return;
         if (poderSelecionado === 'Transcender') {
             setShowParanormalModal(true);
             return;
@@ -87,9 +73,7 @@ export function PowerChoiceModal({
     };
 
     const handleParanormalSelect = (poderParanormal: Poder, ritual?: Ritual) => {
-        setShowParanormalModal(false);
-
-        // Notificar que Transcender foi escolhido junto com o poder paranormal
+        setShowParanormalModal(false);
         if (onTranscenderComplete) {
             onTranscenderComplete(poderParanormal, ritual);
         } else {
@@ -97,9 +81,7 @@ export function PowerChoiceModal({
         }
     };
 
-    const isTranscender = (nome: string) => nome === 'Transcender';
-
-    // Se o modal de poderes paranormais estiver aberto
+    const isTranscender = (nome: string) => nome === 'Transcender';
     if (showParanormalModal) {
         return (
             <ParanormalPowerModal
@@ -126,7 +108,7 @@ export function PowerChoiceModal({
                 className="relative w-full max-w-2xl max-h-[85vh] bg-ordem-ooze border border-ordem-border rounded-xl overflow-hidden flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Header */}
+                {}
                 <div className="p-4 border-b border-ordem-border bg-ordem-ooze/80">
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
@@ -148,7 +130,7 @@ export function PowerChoiceModal({
                         )}
                     </div>
 
-                    {/* Busca e Filtros */}
+                    {}
                     <div className="flex gap-2">
                         <div className="flex-1 relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-ordem-text-muted" size={16} />
@@ -183,7 +165,7 @@ export function PowerChoiceModal({
                     </div>
                 </div>
 
-                {/* Lista de Poderes */}
+                {}
                 <div className="flex-1 overflow-y-auto p-4 space-y-2">
                     <AnimatePresence mode="popLayout">
                         {poderesFiltrados.length === 0 ? (
@@ -256,7 +238,7 @@ export function PowerChoiceModal({
                     </AnimatePresence>
                 </div>
 
-                {/* Footer */}
+                {}
                 <div className="p-4 border-t border-ordem-border bg-ordem-ooze/80 flex justify-end gap-2">
                     {onClose && (
                         <button

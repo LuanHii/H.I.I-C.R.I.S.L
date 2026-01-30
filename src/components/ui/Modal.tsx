@@ -86,9 +86,7 @@ export const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
     }
 );
 
-ModalContent.displayName = 'ModalContent';
-
-// Subcomponentes
+ModalContent.displayName = 'ModalContent';
 export const ModalHeader = forwardRef<
     HTMLDivElement,
     React.HTMLAttributes<HTMLDivElement>

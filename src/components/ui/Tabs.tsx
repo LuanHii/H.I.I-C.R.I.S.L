@@ -3,12 +3,8 @@
 import React, { forwardRef } from 'react';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
-
-// Root
-export const Tabs = TabsPrimitive.Root;
-
-// Lista de tabs
+import { cn } from '@/lib/utils';
+export const Tabs = TabsPrimitive.Root;
 interface TabsListProps extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> {
     variant?: 'default' | 'pills' | 'underline';
 }
@@ -35,9 +31,7 @@ export const TabsList = forwardRef<
         />
     );
 });
-TabsList.displayName = 'TabsList';
-
-// Tab individual
+TabsList.displayName = 'TabsList';
 interface TabsTriggerProps extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger> {
     variant?: 'default' | 'pills' | 'underline';
 }
@@ -62,9 +56,7 @@ export const TabsTrigger = forwardRef<
         />
     );
 });
-TabsTrigger.displayName = 'TabsTrigger';
-
-// Conteúdo da tab com animação
+TabsTrigger.displayName = 'TabsTrigger';
 interface TabsContentProps extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content> {
     animate?: boolean;
 }

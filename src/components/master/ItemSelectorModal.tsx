@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ITENS } from '../../data/items';
 import { WEAPONS } from '../../data/weapons';
-import { useStoredItems } from '../../core/storage/useStoredItems';
+import { useCloudItems } from '../../core/storage';
 import { Item } from '../../core/types';
 
 interface ItemSelectorModalProps {
@@ -14,7 +14,7 @@ export const ItemSelectorModal: React.FC<ItemSelectorModalProps> = ({ isOpen, on
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<number | 'all'>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
-  const { customItems, customWeapons } = useStoredItems();
+  const { customItems, customWeapons } = useCloudItems();
 
   const allItems = useMemo(() => {
     const allWeaponsSource = [...WEAPONS, ...customWeapons];

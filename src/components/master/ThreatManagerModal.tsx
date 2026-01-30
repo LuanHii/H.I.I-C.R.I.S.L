@@ -16,12 +16,8 @@ export const ThreatManagerModal: React.FC<ThreatManagerModalProps> = ({ isOpen, 
   const filteredThreats = useMemo(() => {
     return AMEACAS.filter(threat => {
       const matchesSearch = threat.nome.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesType = selectedType ? threat.tipo === selectedType : true;
-      // Assuming custom threats might be identified by a property or just by not being in the base list if we had a separate list. 
-      // For now, since we only have AMEACAS, we'll skip the custom filter logic or assume all are standard.
-      // If the user adds custom threats, they would likely be stored in a separate state or marked.
-      // Let's assume for now we are just filtering the static list.
-      
+      const matchesType = selectedType ? threat.tipo === selectedType : true;
+
       return matchesSearch && matchesType;
     });
   }, [searchTerm, selectedType]);
@@ -31,7 +27,7 @@ export const ThreatManagerModal: React.FC<ThreatManagerModalProps> = ({ isOpen, 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ordem-black/80 backdrop-blur-sm p-4">
       <div className="bg-ordem-ooze border border-ordem-border-light rounded-lg w-full max-w-5xl h-[80vh] flex flex-col shadow-2xl">
-        
+
         <div className="flex justify-between items-center p-6 border-b border-ordem-border bg-ordem-black-deep rounded-t-lg">
           <div>
             <h2 className="text-2xl font-serif text-ordem-red tracking-wider">GERENCIADOR DE AMEAÇAS</h2>
@@ -64,8 +60,8 @@ export const ThreatManagerModal: React.FC<ThreatManagerModalProps> = ({ isOpen, 
                 key={type}
                 onClick={() => setSelectedType(selectedType === type ? null : type)}
                 className={`px-3 py-1 rounded border text-sm font-mono transition-all
-                  ${selectedType === type 
-                    ? `bg-${type === 'Sangue' ? 'red' : type === 'Morte' ? 'zinc' : type === 'Conhecimento' ? 'yellow' : type === 'Energia' ? 'purple' : 'white'}-900/30 border-${type === 'Sangue' ? 'red' : type === 'Morte' ? 'zinc' : type === 'Conhecimento' ? 'yellow' : type === 'Energia' ? 'purple' : 'white'}-500 text-white` 
+                  ${selectedType === type
+                    ? `bg-${type === 'Sangue' ? 'red' : type === 'Morte' ? 'zinc' : type === 'Conhecimento' ? 'yellow' : type === 'Energia' ? 'purple' : 'white'}-900/30 border-${type === 'Sangue' ? 'red' : type === 'Morte' ? 'zinc' : type === 'Conhecimento' ? 'yellow' : type === 'Energia' ? 'purple' : 'white'}-500 text-white`
                     : 'border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted'}`}
               >
                 {type.toUpperCase()}
@@ -74,8 +70,8 @@ export const ThreatManagerModal: React.FC<ThreatManagerModalProps> = ({ isOpen, 
              <button
                 onClick={() => setSelectedType(selectedType === 'Realidade' ? null : 'Realidade')}
                 className={`px-3 py-1 rounded border text-sm font-mono transition-all
-                  ${selectedType === 'Realidade' 
-                    ? 'bg-blue-900/30 border-blue-500 text-white' 
+                  ${selectedType === 'Realidade'
+                    ? 'bg-blue-900/30 border-blue-500 text-white'
                     : 'border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted'}`}
               >
                 REALIDADE
@@ -90,7 +86,7 @@ export const ThreatManagerModal: React.FC<ThreatManagerModalProps> = ({ isOpen, 
                 <h3 className="font-bold text-lg text-ordem-white group-hover:text-ordem-red transition-colors">{threat.nome}</h3>
                 <span className="text-xs font-mono bg-ordem-ooze px-2 py-1 rounded text-ordem-text-secondary">VD {threat.vd}</span>
               </div>
-              
+
               <div className="text-xs text-ordem-text-muted font-mono mb-3 flex gap-2">
                 <span className={`
                   ${threat.tipo === 'Sangue' ? 'text-red-500' : ''}
@@ -115,7 +111,7 @@ export const ThreatManagerModal: React.FC<ThreatManagerModalProps> = ({ isOpen, 
               </div>
 
               <div className="mt-auto pt-3 border-t border-ordem-ooze flex gap-2">
-                <button 
+                <button
                   onClick={() => onAddThreat(threat)}
                   className="flex-1 bg-ordem-ooze hover:bg-ordem-red hover:text-white text-ordem-white-muted py-2 rounded text-sm font-mono transition-colors"
                 >

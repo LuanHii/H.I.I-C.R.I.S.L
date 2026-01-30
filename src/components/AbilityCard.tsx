@@ -13,7 +13,7 @@ export const AbilityCard: React.FC<AbilityCardProps> = ({ data, type, useSanity 
   const getElementColor = (element?: string) => {
     switch (element) {
       case 'Sangue': return 'text-ordem-red border-ordem-red';
-      case 'Morte': return 'text-ordem-ooze border-ordem-ooze'; // Using ooze for black/death
+      case 'Morte': return 'text-ordem-ooze border-ordem-ooze';
       case 'Conhecimento': return 'text-ordem-gold border-ordem-gold';
       case 'Energia': return 'text-ordem-purple border-ordem-purple';
       case 'Medo': return 'text-white border-white';
@@ -41,7 +41,7 @@ export const AbilityCard: React.FC<AbilityCardProps> = ({ data, type, useSanity 
   const elementColorClass = getElementColor(data.elemento);
 
   return (
-    <div 
+    <div
       className={`w-full mb-2 border-l-2 bg-ordem-black/40 hover:bg-white/5 transition-all cursor-pointer overflow-hidden ${isOpen ? 'border-l-4' : ''} ${elementColorClass.split(' ')[1]}`}
       onClick={() => setIsOpen(!isOpen)}
     >
@@ -64,7 +64,7 @@ export const AbilityCard: React.FC<AbilityCardProps> = ({ data, type, useSanity 
 
       <div className={`transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
         <div className="p-3 pt-0 text-sm text-ordem-white-muted border-t border-white/10 mt-1">
-          
+
           {type === 'ritual' && (
             <div className="grid grid-cols-2 gap-2 mb-2 text-xs text-ordem-text-muted font-mono">
               <div>Exec: {(data as Ritual).execucao}</div>
@@ -88,7 +88,7 @@ export const AbilityCard: React.FC<AbilityCardProps> = ({ data, type, useSanity 
               )}
             </div>
           )}
-          
+
           {type === 'poder' && (data as Poder).requisitos && (
             <div className="text-xs text-ordem-text-muted mt-2">
               Requisitos: {(data as Poder).requisitos}

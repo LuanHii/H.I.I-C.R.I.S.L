@@ -33,7 +33,6 @@ const ELEMENTO_COLORS: Record<Elemento, string> = {
   Medo: 'border-white text-white',
 };
 
-// Descrições das classes
 const CLASSE_DESCRICOES: Record<string, string> = {
   Combatente: 'Treinado para lutar com todo tipo de armas, com força e coragem para encarar perigos de frente. Prefere abordagens diretas e costuma atirar primeiro e perguntar depois.',
   Especialista: 'Confia mais em esperteza do que em força bruta. Se vale de conhecimento técnico, raciocínio rápido ou lábia para resolver mistérios e enfrentar o paranormal.',
@@ -67,8 +66,6 @@ export default function CharacterCreator({
   });
   const [nivelSelecionado, setNivelSelecionado] = useState<number>(0);
 
-  // Patentes disponíveis (usando tipo importado de types.ts)
-  // Patentes disponíveis (usando dados centralizados do rulesEngine)
   const PATENTES = useMemo(() => {
     const configs = listarPatentes();
     const uiProps: Record<string, { cor: string; icone: string }> = {
@@ -96,7 +93,6 @@ export default function CharacterCreator({
     if (tipoSelecionado === 'Sobrevivente') setNivelSelecionado(1);
   }, [tipoSelecionado]);
 
-  // Prefill (recriar): preenche campos e posiciona o usuário no step inicial.
   useEffect(() => {
     if (!initialDraft) return;
 
@@ -133,7 +129,7 @@ export default function CharacterCreator({
         usarPd: initialDraft.usarPd === true,
         preferenciasClasse: initialDraft.preferenciasClasse,
         atributos: { ...initialDraft.atributosBase },
-        // Origem precisa ser objeto (com `pericias`) para o cálculo de perícias iniciais.
+
         origem: ORIGENS.find((o) => o.nome === initialDraft.origemNome) as any,
         periciasSelecionadas: [...(initialDraft.periciasLivres ?? [])],
         rituais: [...(initialDraft.rituaisIniciais ?? [])],
@@ -153,30 +149,24 @@ export default function CharacterCreator({
   const [equipamentosSelecionados, setEquipamentosSelecionados] = useState<Item[]>([]);
   const [activeTab, setActiveTab] = useState<'items' | 'weapons' | 'mods'>('items');
 
-  // Estado para modificações de armas
-  // Mapa: nomeArma -> lista de modificações aplicadas
   const [modificacoesArmas, setModificacoesArmas] = useState<Record<string, ModificacaoArma[]>>({});
   const [armaParaModificar, setArmaParaModificar] = useState<string | null>(null);
 
-  // Estado para Trilha
   const [trilhaSelecionada, setTrilhaSelecionada] = useState<Trilha | null>(null);
   const [escolhasTrilha, setEscolhasTrilha] = useState<Record<string, string[]>>({});
 
-  // Verifica se o personagem desbloqueou trilha
   const desbloqueouTrilha = useMemo(() => {
     if (tipoSelecionado === 'Agente') return nivelSelecionado >= 10;
     if (tipoSelecionado === 'Sobrevivente') return nivelSelecionado >= 2;
     return false;
   }, [tipoSelecionado, nivelSelecionado]);
 
-  // Trilhas disponíveis para a classe atual
   const trilhasDisponiveis = useMemo(() => {
     const classe = classeSelecionada || (tipoSelecionado === 'Sobrevivente' ? 'Sobrevivente' : '');
     if (!classe) return [];
     return TRILHAS.filter(t => t.classe === classe);
   }, [classeSelecionada, tipoSelecionado]);
 
-  // Habilidades desbloqueadas da trilha selecionada
   const habilidadesDesbloqueadas = useMemo(() => {
     if (!trilhaSelecionada) return [];
     const nivel = tipoSelecionado === 'Sobrevivente' ? nivelSelecionado : nivelSelecionado;
@@ -199,8 +189,11 @@ export default function CharacterCreator({
         state.data.classe === 'Combatente' ? (state.data.preferenciasClasse ?? preferenciasCombatente) : undefined,
       )
       : null;
-  const excedeuLimite = periciaMeta ? periciasSelecionadas.length > periciaMeta.qtdEscolhaLivre : false;
-  const faltandoPericias = periciaMeta ? Math.max(0, periciaMeta.qtdEscolhaLivre - periciasSelecionadas.length) : 0;
+  const totalEscolhas = periciaMeta
+    ? periciaMeta.qtdEscolhaLivre + (periciaMeta.qtdEscolhaOrigem ?? 0)
+    : 0;
+  const excedeuLimite = periciaMeta ? periciasSelecionadas.length > totalEscolhas : false;
+  const faltandoPericias = periciaMeta ? Math.max(0, totalEscolhas - periciasSelecionadas.length) : 0;
 
   const rituaisDisponiveis = useMemo(() => RITUAIS.filter(r => r.circulo === 1), []);
   const limiteRituais = 3;
@@ -208,29 +201,25 @@ export default function CharacterCreator({
   const itensDisponiveis = useMemo(() => ITENS.filter(i => i.categoria <= 1), []);
   const armasDisponiveis = useMemo(() => WEAPONS.filter(w => w.categoria <= 1), []);
 
-  // Limites por categoria baseado em patente selecionada
   const limitesCategoria = useMemo(() => {
     if (tipoSelecionado === 'Sobrevivente') {
       return { 0: Infinity, 1: 1, 2: 0, 3: 0, 4: 0 };
     }
-    // Agentes - baseado na patente selecionada
-    // Agentes - baseado na patente selecionada (busca do engine)
+
     try {
       const config = getPatenteConfig(patenteSelecionada);
       return config.limiteItens;
     } catch (e) {
-      // Fallback para Recruta se der erro
+
       return { I: 2, II: 0, III: 0, IV: 0 };
     }
   }, [tipoSelecionado, patenteSelecionada]);
 
-  // Calcula categoria efetiva de cada equipamento considerando modificações
   const getCategoriaEfetiva = (nomeEquipamento: string, categoriaBase: number) => {
     const mods = modificacoesArmas[nomeEquipamento] || [];
     return Math.min(4, categoriaBase + mods.length);
   };
 
-  // Contagem de itens por categoria considerando modificações
   const contagemPorCategoria = useMemo(() => {
     const contagem = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 };
     for (const eq of equipamentosSelecionados) {
@@ -238,17 +227,14 @@ export default function CharacterCreator({
       contagem[catEfetiva]++;
     }
     return contagem;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [equipamentosSelecionados, modificacoesArmas]);
 
-  // Verifica se pode adicionar mais uma modificação a uma arma
   const podeAdicionarModificacao = (nomeArma: string, categoriaBase: number) => {
     const catAtual = getCategoriaEfetiva(nomeArma, categoriaBase);
     const catNova = catAtual + 1;
     if (catNova > 4) return false;
 
-    // Verifica se há espaço na nova categoria
-    // (considera que o item sai da categoria atual e vai para a nova)
     const contagemSimulada = { ...contagemPorCategoria };
     contagemSimulada[catAtual as 0 | 1 | 2 | 3 | 4]--;
     contagemSimulada[catNova as 0 | 1 | 2 | 3 | 4]++;
@@ -256,12 +242,9 @@ export default function CharacterCreator({
     return contagemSimulada[catNova as 0 | 1 | 2 | 3 | 4] <= limitesCategoria[catNova as 0 | 1 | 2 | 3 | 4];
   };
 
-  // Para retrocompatibilidade
   const limiteCatI = limitesCategoria[1] === Infinity ? 999 : limitesCategoria[1];
   const contagemCatI = contagemPorCategoria[1];
 
-  // Modo permissivo: não bloqueia avanço. Em vez disso, mostramos avisos visuais.
-  // Erros que quebram a geração (ex.: perícias acima do limite) serão reportados no "Finalizar".
   const isNextDisabled = false;
 
   const atualizarAtributo = (atributo: keyof Atributos, delta: number) => {
@@ -331,13 +314,9 @@ export default function CharacterCreator({
     URL.revokeObjectURL(url);
   };
 
-  // Determina os steps visíveis baseado nas escolhas
-  // Nova ordem: 0=Tipo, 1=Conceito, 2=Atributos, 3=Origem, 4=Perícias, 5=Rituais (Ocultista), 6=Equipamento, 7=Trilha
-  // Equipamento vem ANTES de Trilha para que escolhas como "A Favorita" possam ver as armas
   const temStepTrilha = desbloqueouTrilha && trilhasDisponiveis.length > 0;
   const temStepRituais = state.data.classe === 'Ocultista';
 
-  // Aplica modificações de armas ao personagem
   const aplicarModificacoesArmas = (personagem: Personagem) => {
     for (const [nomeArma, mods] of Object.entries(modificacoesArmas)) {
       if (mods.length === 0) continue;
@@ -349,7 +328,6 @@ export default function CharacterCreator({
       const novaCategoria = Math.min(4, arma.categoria + mods.length) as 0 | 1 | 2 | 3 | 4;
       const modNomes = mods.map(m => m.nome).join(', ');
 
-      // Calcula novos stats baseado nas modificações
       let ataqueBonus = 0;
       let danoBonus = 0;
       let margemAmeaca = 0;
@@ -411,22 +389,22 @@ export default function CharacterCreator({
         newState = setOrigem(state, origemSelecionada);
       } else if (state.step === 4) {
         newState = setPericias(state, periciasSelecionadas);
-        // Depois de perícias: vai para rituais (se Ocultista) ou equipamento
+
         if (!temStepRituais) {
           newState = { ...newState, step: 6 };
         }
       } else if (state.step === 5) {
-        // Rituais (só Ocultista)
+
         newState = setRituais(state, rituaisSelecionados);
       } else if (state.step === 6) {
-        // Equipamento - depois vai para Trilha (se tiver) ou finaliza
+
         newState = setEquipamento(state, equipamentosSelecionados);
         if (temStepTrilha) {
           newState = { ...newState, step: 7 };
         } else {
-          // Sem trilha: finaliza
+
           let personagem = finalizarCriacao(newState);
-          // Aplica modificações de armas e patente
+
           personagem = aplicarModificacoesArmas(personagem);
           if (tipoSelecionado === 'Agente') {
             personagem.patente = patenteSelecionada;
@@ -436,11 +414,11 @@ export default function CharacterCreator({
           if (onCreated) onCreated(personagem);
         }
       } else if (state.step === 7) {
-        // Step de Trilha (DEPOIS de equipamento)
+
         if (desbloqueouTrilha && !trilhaSelecionada) {
           throw new Error("Selecione uma trilha.");
         }
-        // Verifica se todas as escolhas obrigatórias foram feitas
+
         for (const hab of habilidadesDesbloqueadas) {
           if (hab.escolha) {
             const escolhas = escolhasTrilha[hab.nome] || [];
@@ -450,16 +428,13 @@ export default function CharacterCreator({
           }
         }
 
-        // Finaliza com trilha aplicada
         const personagem = finalizarCriacao(state);
 
-        // Aplica bônus da trilha ao personagem
         if (trilhaSelecionada) {
           personagem.trilha = trilhaSelecionada.nome;
-          personagem.escolhaTrilhaPendente = false; // Marca que a trilha foi escolhida
+          personagem.escolhaTrilhaPendente = false;
           personagem.poderes = personagem.poderes || [];
 
-          // Adiciona habilidades da trilha como poderes
           for (const hab of habilidadesDesbloqueadas) {
             const poder: Poder = {
               nome: hab.nome,
@@ -469,7 +444,6 @@ export default function CharacterCreator({
             };
             personagem.poderes.push(poder);
 
-            // Aplica perícias ganhas pela trilha automaticamente (do texto da descrição)
             if (hab.descricao.toLowerCase().includes('recebe treinamento em')) {
               const match = hab.descricao.match(/recebe treinamento em ([\w\s()]+?)(?:\s|,|\.|$)/i);
               if (match) {
@@ -485,11 +459,9 @@ export default function CharacterCreator({
               }
             }
 
-            // Aplica escolhas feitas pelo jogador
             if (hab.escolha && escolhasTrilha[hab.nome]) {
               const escolhas = escolhasTrilha[hab.nome];
 
-              // Tipo: perícia - treina a perícia escolhida
               if (hab.escolha.tipo === 'pericia') {
                 for (const p of escolhas) {
                   const periciaNome = p as PericiaName;
@@ -502,13 +474,12 @@ export default function CharacterCreator({
                 }
               }
 
-              // Tipo: arma - aplica efeito da habilidade (ex: A Favorita reduz categoria)
               if (hab.escolha.tipo === 'arma') {
                 for (const nomeArma of escolhas) {
                   const armaIdx = personagem.equipamentos.findIndex(eq => eq.nome === nomeArma);
                   if (armaIdx !== -1) {
                     const arma = personagem.equipamentos[armaIdx];
-                    // "A Favorita" do Aniquilador: reduz categoria em I
+
                     if (hab.nome === 'A Favorita') {
                       const novaCategoria = Math.max(0, arma.categoria - 1) as 0 | 1 | 2 | 3 | 4;
                       personagem.equipamentos[armaIdx] = {
@@ -521,9 +492,8 @@ export default function CharacterCreator({
                 }
               }
 
-              // Tipo: elemento - armazena afinidade/elemento escolhido
               if (hab.escolha.tipo === 'elemento') {
-                // Se a habilidade dá afinidade, define no personagem
+
                 if (hab.descricao.toLowerCase().includes('escolha um elemento')) {
                   personagem.afinidade = escolhas[0] as any;
                 }
@@ -532,10 +502,8 @@ export default function CharacterCreator({
           }
         }
 
-        // Aplica modificações de armas
         aplicarModificacoesArmas(personagem);
 
-        // Aplica patente
         if (tipoSelecionado === 'Agente') {
           personagem.patente = patenteSelecionada;
         }
@@ -562,7 +530,7 @@ export default function CharacterCreator({
           <h2 className="text-4xl font-serif text-ordem-green mb-2 tracking-widest glitch-text">
             {resultado.classe === 'Sobrevivente' ? 'SOBREVIVENTE REGISTRADO' : 'AGENTE REGISTRADO'}
           </h2>
-          <p className="text-ordem-text-secondary font-mono text-sm">PROTOCOLO: C.R.I.S // STATUS: <span className="text-ordem-green">ATIVO</span></p>
+          <p className="text-ordem-text-secondary font-mono text-sm">PROTOCOLO: C.R.I.S. - REGISTRO</p>
         </div>
 
         <div className="bg-ordem-black/60 border border-ordem-green/30 p-8 rounded-lg relative overflow-hidden shadow-[0_0_30px_rgba(0,255,0,0.05)]">
@@ -688,7 +656,7 @@ export default function CharacterCreator({
   return (
     <div className="w-full max-w-5xl mx-auto p-4 sm:p-6 md:p-8 safe-x">
       <header className="mb-6 sm:mb-10 flex flex-col gap-4 border-b border-ordem-border pb-4">
-        {/* Título e status */}
+        {}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3">
           <div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif text-white tracking-wider mb-1 sm:mb-2">
@@ -701,15 +669,14 @@ export default function CharacterCreator({
           </div>
         </div>
 
-        {/* Step indicators - horizontal scroll em mobile */}
+        {}
         <div className="flex items-center gap-1 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-visible touch-scroll no-select">
           {[0, 1, 2, 3, 4, 5, 6, 7].map((step) => {
-            // Oculta Rituais se não é Ocultista
+
             if (step === 5 && !temStepRituais) return null;
-            // Oculta Trilha se não desbloqueou
+
             if (step === 7 && !temStepTrilha) return null;
 
-            // Calcula se o step está completo
             const finalStep = temStepTrilha ? 7 : 6;
             const isCompleted = state.step > step || (state.step === step && step === finalStep);
             const isCurrent = state.step === step;
@@ -809,11 +776,11 @@ export default function CharacterCreator({
 
             {tipoSelecionado === 'Agente' && (
               <div className="space-y-4">
-                {/* Layout empilhado em mobile, lado a lado em desktop */}
+                {}
                 <div className="flex flex-col lg:flex-row gap-4">
                   <div className="flex-1 space-y-4">
                     <label className="text-xs font-bold text-ordem-text-secondary uppercase tracking-widest">Classe</label>
-                    {/* Grid 1 coluna em mobile, 3 em desktop */}
+                    {}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                       {classeEntries.filter(([nome]) => nome !== 'Sobrevivente').map(([nomeClasse, stats]) => (
                         <button
@@ -893,7 +860,7 @@ export default function CharacterCreator({
                     )}
                   </div>
 
-                  {/* Seletor de NEX e Patente - grid em mobile */}
+                  {}
                   <div className="w-full lg:w-48 space-y-2 mt-4 lg:mt-0">
                     <div className="grid grid-cols-1 gap-3">
                       <div>
@@ -923,7 +890,7 @@ export default function CharacterCreator({
                       </div>
                     </div>
 
-                    {/* Info da patente selecionada */}
+                    {}
                     <div className={`text-center p-2 border rounded-lg bg-ordem-black/30 ${PATENTES.find(p => p.nome === patenteSelecionada)?.cor.replace('text-', 'border-') || 'border-ordem-border'
                       }`}>
                       <div className="text-[9px] sm:text-[10px] text-ordem-text-muted">
@@ -974,17 +941,17 @@ export default function CharacterCreator({
               </p>
             </div>
 
-            {/* Grid de atributos - responsível para mobile */}
+            {}
             <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-4 md:gap-6 justify-items-center">
               {(Object.entries(atributosTemp) as [keyof Atributos, number][]).map(([chave, valor]) => (
                 <div key={chave} className="flex sm:flex-col items-center gap-4 sm:gap-2 w-full max-w-sm sm:max-w-[100px] p-2 sm:p-0 bg-ordem-black/20 sm:bg-transparent rounded-lg border border-ordem-border/50 sm:border-0">
-                  {/* Card do atributo */}
+                  {}
                   <div className="shrink-0 w-20 h-20 sm:w-full sm:h-28 aspect-square sm:aspect-auto bg-ordem-ooze/80 border border-ordem-border-light rounded-lg flex flex-col items-center justify-center relative">
                     <span className="text-[10px] sm:text-xs font-bold text-ordem-text-muted uppercase tracking-widest mb-1">{chave}</span>
                     <span className="text-3xl sm:text-4xl font-mono text-white">{valor}</span>
                   </div>
 
-                  {/* Botões sempre visíveis e com tamanho adequado para touch */}
+                  {}
                   <div className="flex sm:flex-row flex-1 sm:flex-initial gap-2 w-full justify-between items-center sm:justify-center">
                     <button
                       onClick={() => atualizarAtributo(chave, -1)}
@@ -1020,7 +987,11 @@ export default function CharacterCreator({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto custom-scrollbar pr-2 max-h-[60vh] sm:max-h-[400px]">
-              {ORIGENS.map((origem) => (
+              {ORIGENS.map((origem) => {
+                const textoPericias = origem.periciasTexto
+                  ? (origem.pericias.length > 0 ? `${origem.pericias.join(', ')} — ${origem.periciasTexto}` : origem.periciasTexto)
+                  : origem.pericias.join(', ');
+                return (
                 <button
                   key={origem.nome}
                   onClick={() => setOrigemSelecionada(origem.nome)}
@@ -1033,7 +1004,7 @@ export default function CharacterCreator({
                     {origem.nome}
                   </div>
                   <div className="text-xs text-ordem-text-muted space-y-2">
-                    <p className="line-clamp-3">{origem.pericias.join(', ')}</p>
+                    <p className="line-clamp-3">{textoPericias}</p>
                     {origemSelecionada === origem.nome && (
                       <div className="pt-2 border-t border-ordem-gold/20 text-ordem-gold/80 italic">
                         Selecionado
@@ -1041,7 +1012,7 @@ export default function CharacterCreator({
                     )}
                   </div>
                 </button>
-              ))}
+              )})}
             </div>
           </div>
         )}
@@ -1058,9 +1029,14 @@ export default function CharacterCreator({
                   ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
                   : 'border-ordem-green text-ordem-green bg-ordem-green/10'
                   }`}>
-                  ESCOLHAS LIVRES: {periciasSelecionadas.length} / {periciaMeta.qtdEscolhaLivre}
+                  ESCOLHAS: {periciasSelecionadas.length} / {totalEscolhas}
                 </div>
               )}
+              {periciaMeta?.qtdEscolhaOrigem ? (
+                <div className="mt-2 text-[11px] text-ordem-text-muted font-mono">
+                  Inclui {periciaMeta.qtdEscolhaOrigem} perícia(s) da origem.
+                </div>
+              ) : null}
               {periciaMeta && faltandoPericias > 0 && (
                 <p className="mt-2 text-[11px] text-ordem-gold font-mono tracking-widest">
                   FALTAM {faltandoPericias} PERÍCIA(S) — VOCÊ PODE AVANÇAR, MAS FICARÁ PENDENTE
@@ -1124,7 +1100,7 @@ export default function CharacterCreator({
               )}
             </div>
 
-            {/* Lista de trilhas dispon\u00edveis */}
+            {}
             <div className="grid grid-cols-1 gap-4 overflow-y-auto custom-scrollbar pr-2 max-h-[60vh] sm:max-h-none lg:grid-cols-3">
               {trilhasDisponiveis.map((trilha) => {
                 const isSelected = trilhaSelecionada?.nome === trilha.nome;
@@ -1152,7 +1128,7 @@ export default function CharacterCreator({
               })}
             </div>
 
-            {/* Habilidades desbloqueadas da trilha selecionada */}
+            {}
             {trilhaSelecionada && habilidadesDesbloqueadas.length > 0 && (
               <div className="mt-6 bg-ordem-ooze/30 border border-ordem-border rounded-lg p-4">
                 <h4 className="text-sm font-bold text-ordem-gold uppercase tracking-widest mb-4">
@@ -1169,9 +1145,9 @@ export default function CharacterCreator({
                       </div>
                       <p className="text-xs text-ordem-text-secondary mb-2">{hab.descricao}</p>
 
-                      {/* Se a habilidade tem escolha, mostra as opções */}
+                      {}
                       {hab.escolha && (() => {
-                        // Determina as opções baseado no tipo
+
                         let opcoes: string[] = [];
                         let tipoLabel: string = hab.escolha.tipo;
 
@@ -1181,8 +1157,7 @@ export default function CharacterCreator({
                           opcoes = [...TODAS_PERICIAS];
                           tipoLabel = 'perícia(s)';
                         } else if (hab.escolha.tipo === 'arma') {
-                          // Usa armas do equipamento selecionado
-                          // Armas são itens com tipo 'Arma' ou que tem stats.dano
+
                           opcoes = equipamentosSelecionados
                             .filter(eq => eq.tipo === 'Arma' || (eq.stats && eq.stats.dano))
                             .map(eq => eq.nome);
@@ -1347,7 +1322,7 @@ export default function CharacterCreator({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 overflow-y-auto custom-scrollbar pr-2 max-h-[60vh] sm:max-h-[400px]">
               {activeTab === 'mods' ? (
-                // Aba de modificações
+
                 (() => {
                   const armasSelecionadas = equipamentosSelecionados.filter(eq => eq.tipo === 'Arma' || (eq.stats && eq.stats.dano));
 
@@ -1360,7 +1335,6 @@ export default function CharacterCreator({
                     );
                   }
 
-                  // Resumo de limites primeiro
                   const resumoLimites = (
                     <div key="resumo-limites" className="col-span-2 bg-ordem-black/40 border border-ordem-border rounded-lg p-3 mb-2">
                       <div className="text-[10px] text-ordem-text-muted uppercase tracking-widest mb-2">Limites de Patente:</div>
@@ -1389,7 +1363,6 @@ export default function CharacterCreator({
                       const podeModificarCategoria = categoriaAtual < 4;
                       const podeModificarLimite = podeAdicionarModificacao(arma.nome, arma.categoria);
 
-                      // Determina tipo da arma para filtrar modificações compatíveis
                       const tipoArma = arma.stats?.alcance ? 'fogo' : 'cac';
                       const modsDisponiveis = MODIFICACOES_ARMAS.filter(mod => {
                         if (mod.tipo === 'universal') return true;
@@ -1415,7 +1388,7 @@ export default function CharacterCreator({
                             )}
                           </div>
 
-                          {/* Modificações aplicadas */}
+                          {}
                           {modsAplicadas.length > 0 && (
                             <div className="mb-3 space-y-1">
                               <div className="text-[10px] text-ordem-text-muted uppercase tracking-widest">Aplicadas:</div>
@@ -1440,7 +1413,7 @@ export default function CharacterCreator({
                             </div>
                           )}
 
-                          {/* Adicionar modificação */}
+                          {}
                           {podeModificarCategoria && podeModificarLimite && modsDisponiveis.length > 0 && (
                             <div>
                               <div className="text-[10px] text-ordem-text-muted uppercase tracking-widest mb-2">
@@ -1563,7 +1536,7 @@ export default function CharacterCreator({
 
       </div>
 
-      {/* Footer de navegação - fixo em mobile */}
+      {}
       <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 border-t border-ordem-border pt-4 sm:pt-6 safe-bottom">
         <button
           onClick={handleReset}
@@ -1573,19 +1546,19 @@ export default function CharacterCreator({
         </button>
 
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 order-1 sm:order-2">
-          {/* Botão Voltar - só aparece se não estiver no primeiro step */}
+          {}
           {state.step > 0 && (
             <button
               onClick={() => {
-                // Calcula o step anterior
+
                 let prevStep = state.step - 1;
-                // Se voltando do step 7 (trilha), volta para 6 (equipamento)
+
                 if (state.step === 7) prevStep = 6;
-                // Se voltando do step 6 (equipamento) e tem rituais, volta para 5
+
                 else if (state.step === 6 && temStepRituais) prevStep = 5;
-                // Se voltando do step 6 (equipamento) e não tem rituais, volta para 4
+
                 else if (state.step === 6 && !temStepRituais) prevStep = 4;
-                // Se voltando do step 5 (rituais), volta para 4
+
                 else if (state.step === 5) prevStep = 4;
 
                 setState(prev => ({ ...prev, step: prevStep }));

@@ -86,7 +86,7 @@ export const InterludeManager: React.FC<InterludeManagerProps> = ({ fichas, onUp
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Coluna 1: Ações Disponíveis */}
+                {}
                 <div className="bg-ordem-ooze/30 border border-ordem-border rounded-xl p-4 space-y-3 h-fit">
                     <h3 className="font-bold text-white mb-2 text-sm uppercase tracking-wider">Ações de Interlúdio</h3>
 
@@ -136,7 +136,7 @@ export const InterludeManager: React.FC<InterludeManagerProps> = ({ fichas, onUp
                     </button>
                 </div>
 
-                {/* Coluna 2 e 3: Lista de Agentes */}
+                {}
                 <div className="md:col-span-2 bg-ordem-ooze/20 border border-ordem-border rounded-xl p-4">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="font-bold text-white text-sm uppercase tracking-wider">Agentes no Grupo</h3>

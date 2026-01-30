@@ -73,9 +73,9 @@ export function RemoteAgentView({
   return (
     <div className="min-h-screen bg-ordem-black text-white">
       <div className="max-w-5xl mx-auto px-4 py-4 sm:py-6 safe-x safe-top">
-        {/* Header */}
+        {}
         <div className="flex flex-col gap-3 sm:gap-4 border-b border-ordem-border pb-4 sm:pb-5 mb-4 sm:mb-6">
-          {/* Título e info */}
+          {}
           <div className="min-w-0">
             <div className="text-[10px] sm:text-xs font-mono tracking-[0.25em] sm:tracking-[0.35em] text-ordem-text-muted uppercase">Visualização Remota</div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif text-white truncate mt-1 sm:mt-2">{agent.nome}</h1>
@@ -88,7 +88,7 @@ export function RemoteAgentView({
             </div>
           </div>
 
-          {/* Ações e status */}
+          {}
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {onOpenOverlayMini && (
               <button
@@ -156,7 +156,7 @@ export function RemoteAgentView({
           </div>
         )}
 
-        {/* Tabs - scroll horizontal em mobile */}
+        {}
         <div className="flex gap-2 mb-4 sm:mb-5 overflow-x-auto touch-scroll -mx-4 px-4 sm:mx-0 sm:px-0 pb-2 no-select">
           <TabButton id="status" label="STATUS" />
           <TabButton id="acoes" label="AÇÕES" />
@@ -164,7 +164,7 @@ export function RemoteAgentView({
           <TabButton id="inventario" label="INVENTÁRIO" />
         </div>
 
-        {/* Content */}
+        {}
         {tab === 'status' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-ordem-ooze/40 border border-ordem-border rounded-xl p-5">

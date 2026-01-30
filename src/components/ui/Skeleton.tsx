@@ -24,9 +24,7 @@ export function Skeleton({ className, variant = 'default', ...props }: SkeletonP
             {...props}
         />
     );
-}
-
-// Presets comuns
+}
 export function SkeletonText({ lines = 3, className }: { lines?: number; className?: string }) {
     return (
         <div className={cn('space-y-2', className)}>

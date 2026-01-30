@@ -12,18 +12,13 @@ interface WeaponModsModalProps {
     onClose: () => void;
 }
 
-function WeaponModsModalContent({ personagem, onUpdate, onClose }: Omit<WeaponModsModalProps, 'isOpen'>) {
-    // Armas do personagem
-    const armas = personagem.equipamentos.filter(eq => eq.tipo === 'Arma' || (eq.stats && eq.stats.dano));
-
-    // Extrair modificações da descrição
+function WeaponModsModalContent({ personagem, onUpdate, onClose }: Omit<WeaponModsModalProps, 'isOpen'>) {
+    const armas = personagem.equipamentos.filter(eq => eq.tipo === 'Arma' || (eq.stats && eq.stats.dano));
     const getModificacoesFromDescricao = (descricao: string): string[] => {
         const match = descricao.match(/\[Mods: ([^\]]+)\]/);
         if (!match) return [];
         return match[1].split(',').map(m => m.trim()).filter(Boolean);
-    };
-
-    // Aplicar modificação a uma arma
+    };
     const aplicarModificacao = useCallback((nomeArma: string, mod: ModificacaoArma) => {
         const equipamentos = [...personagem.equipamentos];
         const idx = equipamentos.findIndex(eq => eq.nome === nomeArma);
@@ -41,24 +36,18 @@ function WeaponModsModalContent({ personagem, onUpdate, onClose }: Omit<WeaponMo
         };
 
         onUpdate({ ...personagem, equipamentos });
-    }, [personagem, onUpdate]);
-
-    // Remover modificação de uma arma
+    }, [personagem, onUpdate]);
     const removerModificacao = useCallback((nomeArma: string, modNome: string) => {
         const equipamentos = [...personagem.equipamentos];
         const idx = equipamentos.findIndex(eq => eq.nome === nomeArma);
         if (idx === -1) return;
 
         const arma = equipamentos[idx];
-        const novaCategoria = Math.max(0, arma.categoria - 1) as 0 | 1 | 2 | 3 | 4;
-
-        // Remove a modificação da descrição
+        const novaCategoria = Math.max(0, arma.categoria - 1) as 0 | 1 | 2 | 3 | 4;
         let novaDescricao = arma.descricao
             .replace(new RegExp(`,\\s*${modNome}`, 'g'), '')
             .replace(new RegExp(`${modNome},\\s*`, 'g'), '')
-            .replace(new RegExp(`\\[Mods: ${modNome}\\]`, 'g'), '');
-
-        // Se não sobrou nenhuma mod, limpa o texto
+            .replace(new RegExp(`\\[Mods: ${modNome}\\]`, 'g'), '');
         if (novaDescricao.includes('[Mods: ]')) {
             novaDescricao = novaDescricao.replace('[Mods: ]', '').trim();
         }
@@ -138,7 +127,7 @@ function WeaponModsModalContent({ personagem, onUpdate, onClose }: Omit<WeaponMo
                                         </div>
                                     </div>
 
-                                    {/* Mods aplicadas */}
+                                    {}
                                     {modsAplicadas.length > 0 && (
                                         <div className="mb-3">
                                             <div className="text-[10px] text-ordem-text-muted uppercase tracking-widest mb-2">Aplicadas:</div>
@@ -166,7 +155,7 @@ function WeaponModsModalContent({ personagem, onUpdate, onClose }: Omit<WeaponMo
                                         </div>
                                     )}
 
-                                    {/* Adicionar mod */}
+                                    {}
                                     {podeAdicionar && modsDisponiveis.length > 0 && (
                                         <div>
                                             <div className="text-[10px] text-ordem-text-muted uppercase tracking-widest mb-2">
@@ -224,16 +213,12 @@ export function WeaponModsModal({ personagem, onUpdate, isOpen, onClose }: Weapo
         setMounted(true);
     }, []);
 
-    if (!isOpen || !mounted) return null;
-
-    // Use portal to render outside the component tree
+    if (!isOpen || !mounted) return null;
     return createPortal(
         <WeaponModsModalContent personagem={personagem} onUpdate={onUpdate} onClose={onClose} />,
         document.body
     );
-}
-
-// Botão para abrir o modal de modificações
+}
 interface WeaponModsButtonProps {
     personagem: Personagem;
     onUpdate: (updated: Personagem) => void;
@@ -241,9 +226,7 @@ interface WeaponModsButtonProps {
 }
 
 export function WeaponModsButton({ personagem, onUpdate, className = '' }: WeaponModsButtonProps) {
-    const [showModal, setShowModal] = useState(false);
-
-    // Conta armas no inventário
+    const [showModal, setShowModal] = useState(false);
     const armasCount = personagem.equipamentos.filter(eq => eq.tipo === 'Arma' || (eq.stats && eq.stats.dano)).length;
 
     const handleOpenModal = useCallback((e: React.MouseEvent) => {

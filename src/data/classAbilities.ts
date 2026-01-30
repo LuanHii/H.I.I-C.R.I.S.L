@@ -10,9 +10,9 @@ export interface ClassAbility {
 
 export const CLASS_ABILITIES: Record<ClasseName, ClassAbility[]> = {
   'Combatente': [
-    { 
-      nex: 10, 
-      nome: 'Ataque Especial', 
+    {
+      nex: 10,
+      nome: 'Ataque Especial',
       descricao: 'Gaste 2 PE para receber +5 no teste de ataque ou na rolagem de dano. Você pode gastar +PE para aumentar o bônus.',
       custo: '2 PE',
       acao: 'Livre'

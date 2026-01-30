@@ -18,14 +18,14 @@ export const SessionTab: React.FC<SessionTabProps> = ({ personagem, onUpdate }) 
           <div className="flex items-center justify-between bg-ordem-black-deep p-4 rounded border border-ordem-border">
             <span className="text-ordem-text-secondary">Rodada Atual</span>
             <div className="flex items-center gap-4">
-              <button 
+              <button
                 onClick={() => setRodada(Math.max(1, rodada - 1))}
                 className="w-8 h-8 flex items-center justify-center bg-ordem-ooze hover:bg-ordem-border-light rounded text-ordem-white"
               >
                 -
               </button>
               <span className="text-2xl font-mono font-bold text-red-500">{rodada}</span>
-              <button 
+              <button
                 onClick={() => setRodada(rodada + 1)}
                 className="w-8 h-8 flex items-center justify-center bg-ordem-ooze hover:bg-ordem-border-light rounded text-ordem-white"
               >

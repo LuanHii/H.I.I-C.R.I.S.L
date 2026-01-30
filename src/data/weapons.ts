@@ -1,9 +1,6 @@
 import { Weapow } from '../core/types';
 
-export const WEAPONS: Weapow[] = [
-  // ===================================================================
-  // ARMAS IMPROVISADAS (REGRAS BÁSICAS)
-  // ===================================================================
+export const WEAPONS: Weapow[] = [
   {
     nome: 'Ataque Desarmado',
     categoria: 0,
@@ -48,11 +45,7 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Corpo a corpo'
     },
     livro: 'Ordem Paranormal RPG'
-  },
-
-  // ===================================================================
-  // ARMAS SIMPLES - CORPO A CORPO (REGRAS BÁSICAS)
-  // ===================================================================
+  },
   {
     nome: 'Bastão',
     categoria: 0,
@@ -157,11 +150,7 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Curto'
     },
     livro: 'Ordem Paranormal RPG'
-  },
-
-  // ===================================================================
-  // ARMAS SIMPLES - DISPARO (REGRAS BÁSICAS)
-  // ===================================================================
+  },
   {
     nome: 'Arco',
     categoria: 0,
@@ -191,11 +180,7 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Médio'
     },
     livro: 'Ordem Paranormal RPG'
-  },
-
-  // ===================================================================
-  // ARMAS SIMPLES - FOGO (REGRAS BÁSICAS)
-  // ===================================================================
+  },
   {
     nome: 'Pistola',
     categoria: 1,
@@ -240,11 +225,7 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Médio'
     },
     livro: 'Ordem Paranormal RPG'
-  },
-
-  // ===================================================================
-  // ARMAS TÁTICAS - CORPO A CORPO LEVES (REGRAS BÁSICAS)
-  // ===================================================================
+  },
   {
     nome: 'Machadinha',
     categoria: 0,
@@ -274,11 +255,7 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Corpo a corpo'
     },
     livro: 'Ordem Paranormal RPG'
-  },
-
-  // ===================================================================
-  // ARMAS TÁTICAS - CORPO A CORPO UMA MÃO (REGRAS BÁSICAS)
-  // ===================================================================
+  },
   {
     nome: 'Corrente',
     categoria: 0,
@@ -353,11 +330,7 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Corpo a corpo'
     },
     livro: 'Ordem Paranormal RPG'
-  },
-
-  // ===================================================================
-  // ARMAS TÁTICAS - CORPO A CORPO DUAS MÃOS (REGRAS BÁSICAS)
-  // ===================================================================
+  },
   {
     nome: 'Acha',
     categoria: 1,
@@ -447,11 +420,7 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Corpo a corpo'
     },
     livro: 'Ordem Paranormal RPG'
-  },
-
-  // ===================================================================
-  // ARMAS TÁTICAS - DISPARO (REGRAS BÁSICAS)
-  // ===================================================================
+  },
   {
     nome: 'Arco Composto',
     categoria: 1,
@@ -481,11 +450,7 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Médio'
     },
     livro: 'Ordem Paranormal RPG'
-  },
-
-  // ===================================================================
-  // ARMAS TÁTICAS - FOGO (REGRAS BÁSICAS)
-  // ===================================================================
+  },
   {
     nome: 'Submetralhadora',
     categoria: 2,
@@ -545,11 +510,7 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Extremo'
     },
     livro: 'Ordem Paranormal RPG'
-  },
-
-  // ===================================================================
-  // ARMAS PESADAS (REGRAS BÁSICAS)
-  // ===================================================================
+  },
   {
     nome: 'Bazuca',
     categoria: 3,
@@ -594,11 +555,7 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Longo'
     },
     livro: 'Ordem Paranormal RPG'
-  },
-
-  // ===================================================================
-  // NOVAS ARMAS - IMPROVISADAS (SOBREVIVENDO AO HORROR)
-  // ===================================================================
+  },
   {
     nome: 'Gancho de Carne',
     categoria: 0,
@@ -628,11 +585,7 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Corpo a corpo'
     },
     livro: 'Sobrevivendo ao Horror'
-  },
-
-  // ===================================================================
-  // NOVAS ARMAS - SIMPLES (SOBREVIVENDO AO HORROR)
-  // ===================================================================
+  },
   {
     nome: 'Baioneta',
     categoria: 0,
@@ -692,11 +645,7 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Curto'
     },
     livro: 'Sobrevivendo ao Horror'
-  },
-
-  // ===================================================================
-  // NOVAS ARMAS - TÁTICAS (SOBREVIVENDO AO HORROR)
-  // ===================================================================
+  },
   {
     nome: 'Bastão Policial',
     categoria: 1,
@@ -771,11 +720,7 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Curto'
     },
     livro: 'Sobrevivendo ao Horror'
-  },
-
-  // ===================================================================
-  // MUNIÇÃO (REGRAS BÁSICAS)
-  // ===================================================================
+  },
   {
     nome: 'Balas Curtas (Pacote)',
     categoria: 0,
@@ -865,11 +810,7 @@ export const WEAPONS: Weapow[] = [
       Alcance: '—'
     },
     livro: 'Ordem Paranormal RPG'
-  },
-
-  // ===================================================================
-  // MODIFICAÇÕES DE ARMAS (REGRAS BÁSICAS)
-  // ===================================================================
+  },
   {
     nome: 'Silenciador',
     categoria: 1,
@@ -974,11 +915,7 @@ export const WEAPONS: Weapow[] = [
       Alcance: '—'
     },
     livro: 'Sobrevivendo ao Horror'
-  },
-
-  // ===================================================================
-  // TASER E EQUIPAMENTOS ESPECIAIS
-  // ===================================================================
+  },
   {
     nome: 'Taser',
     categoria: 1,

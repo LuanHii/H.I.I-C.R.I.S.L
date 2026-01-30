@@ -4,9 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Users, Skull, UserPlus, Dice6, PlusCircle } from 'lucide-react';
 import { type Combatant, generateCombatantId, rollInitiative, type CombatantAbility } from './CombatManagerTypes';
-import { cn } from '@/lib/utils';
-
-// Types for importing from fichas/ameaças
+import { cn } from '@/lib/utils';
 interface AgentData {
     id: string;
     nome: string;
@@ -52,17 +50,13 @@ export function AddCombatantModal({
     const [tab, setTab] = useState<ModalTab>('agents');
     const [search, setSearch] = useState('');
     const [selectedAgents, setSelectedAgents] = useState<Set<string>>(new Set());
-    const [selectedCreatures, setSelectedCreatures] = useState<Set<string>>(new Set());
-
-    // Custom NPC form
+    const [selectedCreatures, setSelectedCreatures] = useState<Set<string>>(new Set());
     const [customName, setCustomName] = useState('');
     const [customHp, setCustomHp] = useState('20');
     const [customDefense, setCustomDefense] = useState('12');
     const [customInitBonus, setCustomInitBonus] = useState('0');
 
-    const [customCount, setCustomCount] = useState('1');
-
-    // Create Threat Form
+    const [customCount, setCustomCount] = useState('1');
     const [isCreatingThreat, setIsCreatingThreat] = useState(false);
     const [newThreat, setNewThreat] = useState({ nome: '', vd: 0, pv: 10, defesa: 10, iniciativa: 0 });
     const [newThreatAction, setNewThreatAction] = useState('');
@@ -108,11 +102,11 @@ export function AddCombatantModal({
         const threatData = {
             ...newThreat,
             abilities,
-            acoes: [], // Required by Ameaca type but likely unused here if we use abilities
+            acoes: [],
             habilidades: [],
-            tipo: 'Sangue', // Default
+            tipo: 'Sangue',
             tamanho: 'Médio',
-            sentidos: `Iniciativa +${newThreat.iniciativa}`, // Rough parsing compat
+            sentidos: `Iniciativa +${newThreat.iniciativa}`,
             pericias: {},
             atributos: { AGI: 1, FOR: 1, INT: 1, PRE: 1, VIG: 1 }
         };
@@ -126,9 +120,7 @@ export function AddCombatantModal({
     };
 
     const handleAddSelected = () => {
-        const combatants: Combatant[] = [];
-
-        // Add selected agents
+        const combatants: Combatant[] = [];
         selectedAgents.forEach(id => {
             const agent = agents.find(a => a.id === id);
             if (agent) {
@@ -150,9 +142,7 @@ export function AddCombatantModal({
                     abilities: agent.abilities,
                 });
             }
-        });
-
-        // Add selected creatures
+        });
         selectedCreatures.forEach(nome => {
             const creature = creatures.find(c => c.nome === nome);
             if (creature) {
@@ -230,7 +220,7 @@ export function AddCombatantModal({
                     onClick={e => e.stopPropagation()}
                     className="w-full max-w-2xl bg-ordem-black border border-ordem-border rounded-xl shadow-2xl overflow-hidden"
                 >
-                    {/* Header */}
+                    {}
                     <div className="px-4 py-3 border-b border-ordem-border flex items-center justify-between bg-ordem-ooze">
                         <h2 className="text-lg font-serif text-white">Adicionar Combatentes</h2>
                         <button onClick={onClose} className="p-1 text-ordem-text-secondary hover:text-white">
@@ -238,7 +228,7 @@ export function AddCombatantModal({
                         </button>
                     </div>
 
-                    {/* Tabs */}
+                    {}
                     <div className="flex border-b border-ordem-border">
                         <button
                             onClick={() => setTab('agents')}
@@ -275,9 +265,9 @@ export function AddCombatantModal({
                         </button>
                     </div>
 
-                    {/* Content */}
+                    {}
                     <div className="p-4">
-                        {/* Search (for agents and creatures) */}
+                        {}
                         {(tab === 'agents' || tab === 'creatures') && (
                             <div className="relative mb-4">
                                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ordem-text-muted" />
@@ -293,7 +283,7 @@ export function AddCombatantModal({
 
 
 
-                        {/* Thread Creation Form State */}
+                        {}
                         {isCreatingThreat ? (
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between mb-2">
@@ -371,8 +361,7 @@ export function AddCombatantModal({
                                     Salvar Ameaça
                                 </button>
                             </div>
-                        ) : (
-                            // Add Button for Creatures tab
+                        ) : (
                             tab === 'creatures' && (
                                 <button
                                     onClick={() => setIsCreatingThreat(true)}
@@ -383,7 +372,7 @@ export function AddCombatantModal({
                             )
                         )}
 
-                        {/* Agents List */}
+                        {}
                         {tab === 'agents' && (
                             <div className="max-h-72 overflow-y-auto custom-scrollbar space-y-2">
                                 {filteredAgents.length === 0 ? (
@@ -418,7 +407,7 @@ export function AddCombatantModal({
                             </div>
                         )}
 
-                        {/* Creatures List */}
+                        {}
                         {tab === 'creatures' && (
                             <div className="max-h-72 overflow-y-auto custom-scrollbar space-y-2">
                                 {filteredCreatures.length === 0 ? (
@@ -454,7 +443,7 @@ export function AddCombatantModal({
                             </div>
                         )}
 
-                        {/* Custom NPC Form */}
+                        {}
                         {tab === 'custom' && (
                             <div className="space-y-4">
                                 <div>
@@ -519,7 +508,7 @@ export function AddCombatantModal({
                         )}
                     </div>
 
-                    {/* Footer (for agents and creatures) */}
+                    {}
                     {(tab === 'agents' || tab === 'creatures') && (
                         <div className="px-4 py-3 border-t border-ordem-border bg-ordem-ooze flex items-center justify-between">
                             <span className="text-sm text-ordem-text-secondary">

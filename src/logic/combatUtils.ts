@@ -3,7 +3,7 @@ import { condicoes } from '../data/conditions';
 
 export function calcularDefesaEfetiva(personagem: Personagem): number {
   let defesa = personagem.defesa;
-  
+
   if (personagem.efeitosAtivos) {
     personagem.efeitosAtivos.forEach(nome => {
       const condicao = condicoes.find(c => c.nome === nome);

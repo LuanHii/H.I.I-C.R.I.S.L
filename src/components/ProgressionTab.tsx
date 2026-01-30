@@ -15,10 +15,10 @@ export const ProgressionTab: React.FC<ProgressionTabProps> = ({ character }) => 
 
   const renderTrackAbility = (nex: number) => {
     const ability = trackData?.habilidades.find(h => h.nex === nex);
-    const isUnlocked = isSurvivor 
-        ? (character.estagio || 0) >= nex 
+    const isUnlocked = isSurvivor
+        ? (character.estagio || 0) >= nex
         : character.nex >= nex;
-    
+
     const label = isSurvivor ? `Estágio ${nex}` : `${nex}% NEX`;
 
     return (
@@ -36,7 +36,7 @@ export const ProgressionTab: React.FC<ProgressionTabProps> = ({ character }) => 
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full overflow-y-auto custom-scrollbar space-y-8 pr-2">
-      
+
       <section>
         <h3 className="text-xs font-bold text-ordem-text-secondary uppercase tracking-widest mb-4 border-b border-ordem-border pb-2">
           Origem
@@ -80,7 +80,7 @@ export const ProgressionTab: React.FC<ProgressionTabProps> = ({ character }) => 
         <h3 className="text-xs font-bold text-ordem-text-secondary uppercase tracking-widest mb-4 border-b border-ordem-border pb-2">
           Trilha de Classe
         </h3>
-        
+
         <div className="bg-ordem-black/40 border border-ordem-border p-4 rounded">
           <div className="mb-6">
             <h2 className="text-xl text-ordem-white font-bold">{character.classe}</h2>

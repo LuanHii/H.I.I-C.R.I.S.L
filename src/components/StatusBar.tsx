@@ -100,7 +100,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      {/* Header com label e valores */}
+      {}
       <div className="flex justify-between items-end mb-2">
         <span className="text-ordem-white font-bold text-sm sm:text-base tracking-wider uppercase">
           {label}
@@ -117,7 +117,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
             {current}
           </motion.span>
 
-          {/* Delta indicator */}
+          {}
           <AnimatePresence>
             {showDelta !== null && (
               <motion.span
@@ -163,15 +163,15 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
         </div>
       </div>
 
-      {/* Barra de progresso */}
+      {}
       <div className={cn(
         'relative h-9 sm:h-8 bg-ordem-black-deep border rounded-lg overflow-hidden',
         config.border
       )}>
-        {/* Fundo com textura */}
+        {}
         <div className="absolute inset-0 opacity-10 bg-[url('/noise.png')]" />
 
-        {/* Barra de progresso animada */}
+        {}
         <motion.div
           className={cn(
             'h-full relative overflow-hidden',
@@ -182,13 +182,13 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
           animate={{ width: `${percentage}%` }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
         >
-          {/* Efeito de highlight no topo */}
+          {}
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-white/30" />
 
-          {/* Efeito de listras diagonais */}
+          {}
           <div className="absolute inset-0 opacity-20 bg-[linear-gradient(45deg,rgba(255,255,255,0.1)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.1)_50%,rgba(255,255,255,0.1)_75%,transparent_75%,transparent)] bg-[length:20px_20px]" />
 
-          {/* Efeito de shimmer quando pulsing */}
+          {}
           <AnimatePresence>
             {isPulsing && (
               <motion.div
@@ -202,7 +202,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
           </AnimatePresence>
         </motion.div>
 
-        {/* Porcentagem no centro */}
+        {}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <span className={cn(
             'text-[10px] font-mono font-bold text-white/60 drop-shadow-md',
@@ -213,7 +213,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
         </div>
       </div>
 
-      {/* Botões de ajuste */}
+      {}
       {!readOnly && (
         <div className="flex justify-between mt-2 gap-2">
           <div className="flex gap-1.5">

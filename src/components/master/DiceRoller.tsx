@@ -8,16 +8,12 @@ import { cn } from '@/lib/utils';
 interface DiceRollerProps {
     compact?: boolean;
     onRollResult?: (result: number, details: string) => void;
-}
-
-// Dice roll with multiple d20s (Ordem Paranormal system)
+}
 function rollD20(diceCount: number): { rolls: number[]; total: number } {
     const rolls: number[] = [];
     for (let i = 0; i < Math.abs(diceCount); i++) {
         rolls.push(Math.floor(Math.random() * 20) + 1);
-    }
-
-    // Positive = keep highest, Negative = keep lowest
+    }
     let total: number;
     if (diceCount >= 0) {
         total = rolls.length > 0 ? Math.max(...rolls) : 0;
@@ -26,9 +22,7 @@ function rollD20(diceCount: number): { rolls: number[]; total: number } {
     }
 
     return { rolls, total };
-}
-
-// Generic dice roll
+}
 function rollDice(sides: number, count: number = 1): { rolls: number[]; total: number } {
     const rolls: number[] = [];
     for (let i = 0; i < count; i++) {
@@ -38,7 +32,7 @@ function rollDice(sides: number, count: number = 1): { rolls: number[]; total: n
 }
 
 export function DiceRoller({ compact = false, onRollResult }: DiceRollerProps) {
-    const [d20Count, setD20Count] = useState(1); // Positive = advantage, Negative = disadvantage
+    const [d20Count, setD20Count] = useState(1);
     const [modifier, setModifier] = useState(0);
     const [lastRoll, setLastRoll] = useState<{
         rolls: number[];
@@ -108,10 +102,9 @@ export function DiceRoller({ compact = false, onRollResult }: DiceRollerProps) {
                 </button>
             </div>
 
-            {!showDamage ? (
-                // D20 Test Roll
+            {!showDamage ? (
                 <div className="space-y-3">
-                    {/* D20 Count */}
+                    {}
                     <div className="flex items-center gap-2">
                         <span className="text-xs text-ordem-text-secondary w-16">Dados:</span>
                         <button
@@ -139,7 +132,7 @@ export function DiceRoller({ compact = false, onRollResult }: DiceRollerProps) {
                         </span>
                     </div>
 
-                    {/* Modifier */}
+                    {}
                     <div className="flex items-center gap-2">
                         <span className="text-xs text-ordem-text-secondary w-16">Bônus:</span>
                         <button
@@ -162,7 +155,7 @@ export function DiceRoller({ compact = false, onRollResult }: DiceRollerProps) {
                         </button>
                     </div>
 
-                    {/* Roll Button */}
+                    {}
                     <button
                         onClick={handleD20Roll}
                         className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
@@ -170,10 +163,9 @@ export function DiceRoller({ compact = false, onRollResult }: DiceRollerProps) {
                         🎲 Rolar Teste
                     </button>
                 </div>
-            ) : (
-                // Damage Dice
+            ) : (
                 <div className="space-y-3">
-                    {/* Quick Damage Buttons */}
+                    {}
                     <div className="grid grid-cols-4 gap-2">
                         {[
                             { label: '1d4', sides: 4, count: 1 },
@@ -195,7 +187,7 @@ export function DiceRoller({ compact = false, onRollResult }: DiceRollerProps) {
                         ))}
                     </div>
 
-                    {/* Modifier for damage */}
+                    {}
                     <div className="flex items-center gap-2">
                         <span className="text-xs text-ordem-text-secondary">Bônus dano:</span>
                         <button
@@ -215,7 +207,7 @@ export function DiceRoller({ compact = false, onRollResult }: DiceRollerProps) {
                 </div>
             )}
 
-            {/* Result Display */}
+            {}
             <AnimatePresence mode="wait">
                 {lastRoll && (
                     <motion.div
@@ -270,9 +262,7 @@ export function DiceRoller({ compact = false, onRollResult }: DiceRollerProps) {
             </AnimatePresence>
         </div>
     );
-}
-
-// Simple inline dice button for quick rolls
+}
 export function QuickDiceButton({
     label,
     diceExpression,
@@ -284,8 +274,7 @@ export function QuickDiceButton({
 }) {
     const [lastResult, setLastResult] = useState<number | null>(null);
 
-    const parseDice = (expr: string): number => {
-        // Parse expressions like "1d20+5", "2d6", "1d20-2"
+    const parseDice = (expr: string): number => {
         const match = expr.match(/(\d+)d(\d+)([+-]\d+)?/);
         if (!match) return 0;
 
@@ -300,9 +289,7 @@ export function QuickDiceButton({
     const handleRoll = () => {
         const result = parseDice(diceExpression);
         setLastResult(result);
-        onResult?.(result, `${diceExpression} = ${result}`);
-
-        // Clear after 2 seconds
+        onResult?.(result, `${diceExpression} = ${result}`);
         setTimeout(() => setLastResult(null), 2000);
     };
 

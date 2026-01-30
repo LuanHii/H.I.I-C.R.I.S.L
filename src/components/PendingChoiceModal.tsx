@@ -17,7 +17,7 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
 
   const handleConfirm = () => {
     const updated = { ...agent };
-    
+
     updated.habilidadesTrilhaPendentes = updated.habilidadesTrilhaPendentes?.filter(
         p => p.habilidade !== pendingChoice.habilidade
     );
@@ -27,7 +27,7 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
         skills.forEach(skill => {
             const skillName = skill as PericiaName;
 
-            
+
             if (habilidade === 'Esperto' || habilidade === 'Carteirada' || habilidade === 'Mascate') {
 
                  const current = updated.pericias[skillName];
@@ -36,7 +36,7 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
                  else if (current === 'Veterano') updated.pericias[skillName] = 'Expert';
             }
         });
-        
+
         const powerIndex = updated.poderes.findIndex(p => p.nome === habilidade);
         if (powerIndex >= 0) {
             updated.poderes[powerIndex] = {
@@ -66,7 +66,7 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
                 descricao: `${updated.poderes[powerIndex].descricao} \n\n[Escolhido: ${choice}]`
             };
         }
-        
+
         if (habilidade === 'Carteirada' && (choice === 'Diplomacia' || choice === 'Enganação')) {
              const skillName = choice as PericiaName;
              const current = updated.pericias[skillName];
@@ -81,17 +81,17 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
   const renderOptions = () => {
       if (escolha.tipo === 'pericia') {
           const allSkills = [
-            'Acrobacia', 'Adestramento', 'Artes', 'Atletismo', 'Atualidades', 
-            'Ciências', 'Crime', 'Diplomacia', 'Enganação', 'Fortitude', 
-            'Furtividade', 'Iniciativa', 'Intimidação', 'Intuição', 'Investigação', 
-            'Luta', 'Medicina', 'Ocultismo', 'Percepção', 'Pilotagem', 
-            'Pontaria', 'Profissão', 'Reflexos', 'Religião', 'Sobrevivência', 
+            'Acrobacia', 'Adestramento', 'Artes', 'Atletismo', 'Atualidades',
+            'Ciências', 'Crime', 'Diplomacia', 'Enganação', 'Fortitude',
+            'Furtividade', 'Iniciativa', 'Intimidação', 'Intuição', 'Investigação',
+            'Luta', 'Medicina', 'Ocultismo', 'Percepção', 'Pilotagem',
+            'Pontaria', 'Profissão', 'Reflexos', 'Religião', 'Sobrevivência',
             'Tática', 'Tecnologia', 'Vontade'
           ];
-          
+
           if (escolha.quantidade === 1) {
               return (
-                  <select 
+                  <select
                     className="w-full bg-ordem-ooze border border-ordem-border-light p-2 rounded text-white"
                     value={selectedOption}
                     onChange={e => setSelectedOption(e.target.value)}
@@ -105,7 +105,7 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
                   <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
                       {allSkills.map(s => (
                           <label key={s} className="flex items-center gap-2 text-sm">
-                              <input 
+                              <input
                                 type="checkbox"
                                 checked={selectedOptions.includes(s)}
                                 onChange={(e) => {
@@ -125,11 +125,11 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
               );
           }
       }
-      
+
       if (escolha.tipo === 'ritual') {
           const rituals = RITUAIS.filter(r => r.circulo === 1);
           return (
-              <select 
+              <select
                 className="w-full bg-ordem-ooze border border-ordem-border-light p-2 rounded text-white"
                 value={selectedOption}
                 onChange={e => setSelectedOption(e.target.value)}
@@ -156,7 +156,7 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
               </div>
           );
       }
-      
+
       if (escolha.tipo === 'custom' && escolha.opcoes) {
            return (
               <div className="flex flex-col gap-2">
@@ -172,11 +172,11 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
               </div>
           );
       }
-      
+
       if (escolha.tipo === 'arma') {
            return (
-               <input 
-                 type="text" 
+               <input
+                 type="text"
                  placeholder="Digite o nome da arma..."
                  className="w-full bg-ordem-ooze border border-ordem-border-light p-2 rounded text-white"
                  value={selectedOption}
@@ -200,21 +200,21 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
         <p className="text-ordem-text-secondary mb-4">
             A habilidade <span className="text-white font-bold">{habilidade}</span> requer uma escolha.
         </p>
-        
+
         <div className="mb-6">
             {renderOptions()}
         </div>
 
         <div className="flex justify-end gap-2">
             {onDefer && (
-                <button 
+                <button
                     onClick={onDefer}
                     className="px-4 py-2 border border-ordem-text-muted text-ordem-text-secondary rounded hover:text-white hover:border-white transition-colors font-mono text-sm"
                 >
                     ESCOLHER DEPOIS
                 </button>
             )}
-            <button 
+            <button
                 onClick={handleConfirm}
                 disabled={!isValid()}
                 className="px-4 py-2 bg-ordem-red text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed font-bold tracking-wide"

@@ -1,9 +1,7 @@
 import { Poder } from '../core/types';
 
 export const PODERES: Poder[] = [
-  // ===================================================================
-  // PODERES DE COMBATENTE (SOBREVIVENDO AO HORROR)
-  // ===================================================================
+
   {
     nome: 'Apego Angustiado',
     descricao: 'Você não fica inconsciente por estar morrendo, mas sempre que terminar uma rodada nesta condição e consciente, perde 2 pontos de Sanidade.',
@@ -81,9 +79,6 @@ export const PODERES: Poder[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // PODERES DE COMBATENTE (REGRAS BÁSICAS)
-  // ===================================================================
   {
     nome: 'Armamento Pesado',
     descricao: 'Você recebe proficiência com armas pesadas.',
@@ -94,7 +89,7 @@ export const PODERES: Poder[] = [
   {
     nome: 'Artista Marcial',
     descricao: 'Seus ataques desarmados causam 1d6 de dano (1d8 em NEX 35%, 1d10 em NEX 70%), podem ser letais e se tornam armas ágeis.',
-    tipo: 'Geral', // Tornou-se Geral em SaH
+    tipo: 'Geral',
     livro: 'Regras Básicas'
   },
   {
@@ -106,7 +101,7 @@ export const PODERES: Poder[] = [
   {
     nome: 'Combater com Duas Armas',
     descricao: 'Usando duas armas (pelo menos uma leve), pode fazer dois ataques (um com cada arma), mas sofre -1d20 em todos os testes de ataque até o próximo turno.',
-    tipo: 'Geral', // Tornou-se Geral em SaH
+    tipo: 'Geral',
     requisitos: 'Agi 3, Treinado em Luta ou Pontaria',
     livro: 'Regras Básicas'
   },
@@ -159,7 +154,7 @@ export const PODERES: Poder[] = [
   {
     nome: 'Saque Rápido',
     descricao: 'Você pode sacar ou guardar itens como uma ação livre. Se estiver usando contagem de munição, pode recarregar uma arma de disparo como uma ação livre (1x por rodada).',
-    tipo: 'Geral', // Tornou-se Geral em SaH
+    tipo: 'Geral',
     requisitos: 'Treinado em Iniciativa',
     livro: 'Regras Básicas'
   },
@@ -187,7 +182,7 @@ export const PODERES: Poder[] = [
   {
     nome: 'Tiro Certeiro',
     descricao: 'Soma sua Agilidade nas rolagens de dano com arma de disparo e ignora a penalidade contra alvos envolvidos em combate corpo a corpo.',
-    tipo: 'Geral', // Tornou-se Geral em SaH
+    tipo: 'Geral',
     requisitos: 'Treinado em Pontaria',
     livro: 'Regras Básicas'
   },
@@ -222,9 +217,6 @@ export const PODERES: Poder[] = [
     livro: 'Regras Básicas'
   },
 
-  // ===================================================================
-  // PODERES DE ESPECIALISTA (SOBREVIVENDO AO HORROR)
-  // ===================================================================
   {
     nome: 'Acolher o Terror',
     descricao: 'Você pode se entregar para o medo (sofrer condição Apavorado e gastar 1d4 Sanidade) uma vez por sessão de jogo adicional.',
@@ -291,9 +283,6 @@ export const PODERES: Poder[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // PODERES DE ESPECIALISTA (REGRAS BÁSICAS)
-  // ===================================================================
   {
     nome: 'Balística Avançada',
     descricao: 'Você recebe proficiência com armas táticas de fogo e +2 em rolagens de dano com essas armas.',
@@ -347,9 +336,6 @@ export const PODERES: Poder[] = [
     livro: 'Regras Básicas'
   },
 
-  // ===================================================================
-  // PODERES DE OCULTISTA (SOBREVIVENDO AO HORROR)
-  // ===================================================================
   {
     nome: 'Deixe os Sussurros Guiarem',
     descricao: 'Uma vez por cena, gasta 2 PE e uma rodada para receber +2 em testes de perícia para investigação até o fim da cena. Falhar em teste de perícia -1 SAN.',
@@ -402,9 +388,6 @@ export const PODERES: Poder[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // PODERES DE OCULTISTA (REGRAS BÁSICAS)
-  // ===================================================================
   {
     nome: 'Criar Selo',
     descricao: 'Você sabe fabricar selos paranormais de rituais que conheça (Ação Interlúdio + PE do ritual). Limite: Pre selos.',
@@ -487,9 +470,6 @@ export const PODERES: Poder[] = [
     livro: 'Regras Básicas'
   },
 
-  // ===================================================================
-  // PODERES DE SOBREVIVENTE (NOVA CLASSE)
-  // ===================================================================
   {
     nome: 'Empenho',
     descricao: 'Quando faz um teste de perícia, você pode gastar 1 PE para receber +2 nesse teste.',
@@ -528,9 +508,6 @@ export const PODERES: Poder[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // PODERES GERAIS (SOBREVIVENDO AO HORROR E REGRAS BÁSICAS)
-  // ===================================================================
   {
     nome: 'Acrobático',
     descricao: 'Recebe treinamento em Acrobacia (+2 se já treinado). Terreno difícil não reduz seu deslocamento nem impede investidas.',
@@ -751,27 +728,27 @@ export const PODERES: Poder[] = [
     descricao: 'Soma sua Agilidade nas rolagens de dano com arma de disparo e ignora a penalidade contra alvos envolvidos em combate corpo a corpo. (Originalmente de Combatente).',
     tipo: 'Geral',
     requisitos: 'Treinado em Pontaria',
-    livro: 'Regras Básicas' // Classificado como Geral em SaH
+    livro: 'Regras Básicas'
   },
   {
     nome: 'Saque Rápido',
     descricao: 'Você pode sacar ou guardar itens como uma ação livre. Se estiver usando contagem de munição, pode recarregar uma arma de disparo como uma ação livre (1x por rodada). (Originalmente de Combatente).',
     tipo: 'Geral',
     requisitos: 'Treinado em Iniciativa',
-    livro: 'Regras Básicas' // Classificado como Geral em SaH
+    livro: 'Regras Básicas'
   },
   {
     nome: 'Combater com Duas Armas',
     descricao: 'Usando duas armas (pelo menos uma leve), pode fazer dois ataques (um com cada arma), mas sofre -1d20 em todos os testes de ataque até o próximo turno. (Originalmente de Combatente).',
     tipo: 'Geral',
     requisitos: 'Agi 3, Treinado em Luta ou Pontaria',
-    livro: 'Regras Básicas' // Classificado como Geral em SaH
+    livro: 'Regras Básicas'
   },
   {
     nome: 'Artista Marcial',
     descricao: 'Seus ataques desarmados causam 1d6 de dano (1d8 em NEX 35%, 1d10 em NEX 70%), podem ser letais e se tornam armas ágeis. (Originalmente de Combatente/Especialista).',
     tipo: 'Geral',
-    livro: 'Regras Básicas' // Classificado como Geral em SaH
+    livro: 'Regras Básicas'
   },
   {
     nome: 'Transcender',
@@ -792,11 +769,6 @@ export const PODERES: Poder[] = [
     livro: 'Regras Básicas'
   },
 
-  // ===================================================================
-  // PODERES PARANORMAIS (SOBREVIVENDO AO HORROR E REGRAS BÁSICAS)
-  // ===================================================================
-
-  // Gerais
   {
     nome: 'Aprender Ritual',
     descricao: 'Aprende e pode conjurar um ritual de 1º círculo. Pode substituir ritual que já conhece. A partir de NEX 45%, aprende ritual de 2º círculo. A partir de NEX 75%, aprende ritual de 3º círculo. Pode ser escolhido várias vezes.',
@@ -832,7 +804,6 @@ export const PODERES: Poder[] = [
     livro: 'Regras Básicas'
   },
 
-  // Morte
   {
     nome: 'Antecipar Vitalidade',
     descricao: 'Quando faz um teste, pode acumular 1 carga de antecipação para adicionar +1d20 (limite de cargas: Vigor). Enquanto tiver cargas, na próxima ação dormir em vez de recuperar PV você perde 1 carga. Afinidade: limite +2 cargas, perde 2 cargas por ação dormir.',
@@ -886,7 +857,6 @@ export const PODERES: Poder[] = [
     livro: 'Regras Básicas'
   },
 
-  // Sangue
   {
     nome: 'Anatomia Insana',
     descricao: 'Tem 50% de chance (resultado par em 1d4) de ignorar o dano adicional de acerto crítico ou ataque furtivo. Afinidade: imune a acertos críticos e ataques furtivos.',
@@ -941,7 +911,6 @@ export const PODERES: Poder[] = [
     livro: 'Regras Básicas'
   },
 
-  // Conhecimento
   {
     nome: 'Expansão de Conhecimento',
     descricao: 'Você se conecta com o Conhecimento do Outro Lado e aprende um poder de classe que não pertença à sua classe (precisa atender pré-requisitos). Afinidade: aprende um segundo poder de classe que não pertença à sua classe.',
@@ -996,7 +965,6 @@ export const PODERES: Poder[] = [
     livro: 'Regras Básicas'
   },
 
-  // Energia
   {
     nome: 'Afortunado',
     descricao: 'Uma vez por rolagem, pode rolar novamente um resultado 1 em qualquer dado que não seja d20. Afinidade: uma vez por teste, pode rolar novamente um resultado 1 em d20.',
@@ -1051,9 +1019,6 @@ export const PODERES: Poder[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // PODERES DE SOBREVIVENTE (SaH)
-  // ===================================================================
   {
     nome: 'Empenho',
     descricao: 'Quando faz um teste de perícia, você pode gastar 1 PE para receber +2 nesse teste.',
@@ -1093,16 +1058,8 @@ export const PODERES: Poder[] = [
   }
 ];
 
-// ===================================================================
-// FUNÇÕES AUXILIARES PARA PODERES DE CLASSE
-// ===================================================================
-
 import { ClasseName, Personagem, Atributos, PericiaName, GrauTreinamento } from '../core/types';
 
-/**
- * Mapeamento de poderes por classe.
- * Baseado nos comentários do arquivo e na estrutura do sistema OPRPG.
- */
 const PODERES_POR_CLASSE: Record<ClasseName, string[]> = {
   Combatente: [
     'Apego Angustiado', 'Caminho para Forca', 'Ciente das Cicatrizes', 'Correria Desesperada',
@@ -1130,16 +1087,13 @@ const PODERES_POR_CLASSE: Record<ClasseName, string[]> = {
     'Transcender', 'Treinamento em Perícia', 'Aumento de Atributo', 'Versatilidade'
   ],
   Sobrevivente: [
-    // Sobrevivente usa sistema de estágios diferente, poderes são mais limitados
+
     'Cicatrizado', 'Apego Angustiado', 'Correria Desesperada', 'Engolir o Choro',
     'Instinto de Fuga', 'Mochileiro', 'Paranoia Defensiva', 'Sacrificar os Joelhos',
     'Transcender', 'Treinamento em Perícia', 'Aumento de Atributo'
   ]
 };
 
-/**
- * Retorna todos os poderes de classe disponíveis para uma classe específica.
- */
 export function getPoderesClasse(classe: ClasseName): Poder[] {
   const nomesPoderes = PODERES_POR_CLASSE[classe] || [];
   return PODERES.filter(p =>
@@ -1148,16 +1102,10 @@ export function getPoderesClasse(classe: ClasseName): Poder[] {
   );
 }
 
-/**
- * Retorna todos os poderes gerais (disponíveis para qualquer classe).
- */
 export function getPoderesGerais(): Poder[] {
   return PODERES.filter(p => p.tipo === 'Geral');
 }
 
-/**
- * Verifica se um personagem atende aos requisitos de um poder.
- */
 export function verificarRequisitos(
   poder: Poder,
   personagem: Personagem
@@ -1169,7 +1117,6 @@ export function verificarRequisitos(
   const req = poder.requisitos.toLowerCase();
   const atributos = personagem.atributos;
 
-  // Verificar requisitos de atributos (ex: "For 2", "Agi 3")
   const atributoMatch = req.match(/(for|agi|vig|int|pre)\s*(\d+)/gi);
   if (atributoMatch) {
     for (const match of atributoMatch) {
@@ -1186,7 +1133,6 @@ export function verificarRequisitos(
     }
   }
 
-  // Verificar requisitos de treinamento (ex: "Treinado em Luta")
   const treinadoMatch = req.match(/treinado em (\w+)/gi);
   if (treinadoMatch) {
     for (const match of treinadoMatch) {
@@ -1201,7 +1147,6 @@ export function verificarRequisitos(
     }
   }
 
-  // Verificar requisitos de NEX (ex: "NEX 30%", "NEX 60%")
   const nexMatch = req.match(/nex\s*(\d+)%?/i);
   if (nexMatch) {
     const nexReq = parseInt(nexMatch[1]);
@@ -1216,21 +1161,15 @@ export function verificarRequisitos(
   return { elegivel: true };
 }
 
-/**
- * Retorna poderes elegíveis para um personagem escolher.
- * Exclui poderes já possuídos e verifica requisitos.
- */
 export function getPoderesElegiveis(personagem: Personagem): Poder[] {
   const poderesClasse = getPoderesClasse(personagem.classe);
   const poderesGerais = getPoderesGerais();
   const todosPoderes = [...poderesClasse, ...poderesGerais];
 
-  // Remover duplicatas
   const poderesUnicos = todosPoderes.filter((p, idx, arr) =>
     arr.findIndex(x => x.nome === p.nome) === idx
   );
 
-  // Filtrar poderes já possuídos
   const nomesPossuidos = new Set(personagem.poderes.map(p => p.nome));
 
   return poderesUnicos.filter(p => {
@@ -1240,43 +1179,23 @@ export function getPoderesElegiveis(personagem: Personagem): Poder[] {
   });
 }
 
-/**
- * Conta quantos poderes de classe o personagem pode escolher com base no NEX.
- * Marcos: 15%, 30%, 45%, 60%, 75%, 90%
- */
 export function contarPoderesDisponiveis(nex: number): number {
   const marcos = [15, 30, 45, 60, 75, 90];
   return marcos.filter(m => nex >= m).length;
 }
 
-// ===================================================================
-// FUNÇÕES PARA PODERES PARANORMAIS (usadas com Transcender)
-// ===================================================================
-
 import { Elemento } from '../core/types';
 
-/**
- * Retorna todos os poderes paranormais disponíveis.
- */
 export function getPoderesParanormais(): Poder[] {
   return PODERES.filter(p => p.tipo === 'Paranormal');
 }
 
-/**
- * Conta quantos poderes paranormais de um elemento o personagem possui.
- * Usado para verificar requisitos como "Morte 1", "Sangue 2", etc.
- */
 export function contarPoderesElemento(personagem: Personagem, elemento: Elemento): number {
   return personagem.poderes.filter(p =>
     p.tipo === 'Paranormal' && p.elemento === elemento
   ).length;
 }
 
-/**
- * Verifica se um personagem atende aos requisitos de um poder paranormal.
- * Requisitos de elemento (ex: "Morte 1", "Sangue 2") verificam quantos
- * poderes paranormais daquele elemento o personagem já possui.
- */
 export function verificarRequisitosParanormal(
   poder: Poder,
   personagem: Personagem
@@ -1287,7 +1206,6 @@ export function verificarRequisitosParanormal(
 
   const req = poder.requisitos.toLowerCase();
 
-  // Verificar requisitos de elemento (ex: "Morte 1", "Sangue 2", "Conhecimento 1", "Energia 1")
   const elementoMatch = req.match(/(morte|sangue|conhecimento|energia|medo)\s*(\d+)/i);
   if (elementoMatch) {
     const [, elemStr, qtdStr] = elementoMatch;
@@ -1303,20 +1221,15 @@ export function verificarRequisitosParanormal(
     }
   }
 
-  // Também verificar requisitos padrão (atributos, NEX, etc.)
   return verificarRequisitos(poder, personagem);
 }
 
-/**
- * Retorna poderes paranormais elegíveis para um personagem escolher.
- * Usado quando o personagem escolhe Transcender.
- */
 export function getPoderesParanormaisElegiveis(personagem: Personagem): (Poder & { elegivel: boolean; motivo?: string })[] {
   const paranormais = getPoderesParanormais();
   const nomesPossuidos = new Set(personagem.poderes.map(p => p.nome));
 
   return paranormais.map(p => {
-    // "Aprender Ritual" pode ser escolhido várias vezes
+
     const podeRepetir = p.nome === 'Aprender Ritual';
     const jaPossui = nomesPossuidos.has(p.nome);
 
@@ -1329,9 +1242,6 @@ export function getPoderesParanormaisElegiveis(personagem: Personagem): (Poder &
   });
 }
 
-/**
- * Retorna os poderes paranormais filtrados por elemento.
- */
 export function getPoderesParanormaisPorElemento(elemento?: Elemento): Poder[] {
   const paranormais = getPoderesParanormais();
   if (!elemento) return paranormais;

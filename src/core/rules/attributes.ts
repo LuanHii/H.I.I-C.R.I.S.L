@@ -28,7 +28,7 @@ export function validateAttributes(atributos: Atributos, classe: ClasseName): Va
     return { valid: false, message: 'Apenas um atributo pode ser reduzido para 0.', pointsSpent: 0, pointsAllowed: 0 };
   }
 
-  
+
   const currentSum = Object.values(atributos).reduce((a, b) => a + b, 0);
   const baseSum = 5;
   const pointsSpent = currentSum - baseSum;
@@ -39,12 +39,12 @@ export function validateAttributes(atributos: Atributos, classe: ClasseName): Va
 
   if (currentSum !== targetSum) {
     const diff = targetSum - currentSum;
-    const msg = diff > 0 
-      ? `Você ainda tem ${diff} ponto(s) para distribuir.` 
+    const msg = diff > 0
+      ? `Você ainda tem ${diff} ponto(s) para distribuir.`
       : `Você gastou ${Math.abs(diff)} ponto(s) a mais do que o permitido.`;
-      
-    return { 
-      valid: false, 
+
+    return {
+      valid: false,
       message: msg,
       pointsSpent: pointsSpent,
       pointsAllowed: pointsAllowed + (zeroCount > 0 ? 1 : 0)

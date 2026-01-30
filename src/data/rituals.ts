@@ -1,9 +1,7 @@
 import { Ritual } from '../core/types';
 
 export const RITUAIS: Ritual[] = [
-  // ===================================================================
-  // RITUAIS DE SANGUE (SOBREVIVENDO AO HORROR)
-  // ===================================================================
+
   {
     nome: 'Esfolar',
     elemento: 'Sangue',
@@ -73,9 +71,6 @@ export const RITUAIS: Ritual[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // RITUAIS DE MORTE (SOBREVIVENDO AO HORROR)
-  // ===================================================================
   {
     nome: 'Apagar as Luzes',
     elemento: 'Morte',
@@ -128,9 +123,6 @@ export const RITUAIS: Ritual[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // RITUAIS DE CONHECIMENTO (SOBREVIVENDO AO HORROR)
-  // ===================================================================
   {
     nome: 'Desfazer Sinapses',
     elemento: 'Conhecimento',
@@ -200,9 +192,6 @@ export const RITUAIS: Ritual[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // RITUAIS DE ENERGIA (SOBREVIVENDO AO HORROR)
-  // ===================================================================
   {
     nome: 'Overclock',
     elemento: 'Energia',
@@ -255,9 +244,6 @@ export const RITUAIS: Ritual[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // RITUAIS DE MEDO (SOBREVIVENDO AO HORROR)
-  // ===================================================================
   {
     nome: 'Rejeitar Névoa',
     elemento: 'Medo',
@@ -276,9 +262,6 @@ export const RITUAIS: Ritual[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // RITUAIS DE SANGUE (REGRAS BÁSICAS)
-  // ===================================================================
   {
     nome: 'Amaldiçoar Arma',
     elemento: 'Sangue',
@@ -597,15 +580,12 @@ export const RITUAIS: Ritual[] = [
     descricao: 'Cria um símbolo em você e no alvo. Você sofre metade do dano, e o alvo sofre a metade restante (se falhar em Fortitude). Pode ser conjurado com efeito inverso.',
     efeito: {
       padrao: 'Dano sofrido por você é dividido entre você e o alvo (se o alvo falhar em Fortitude). Pode ser invertido para que o alvo receba metade do dano que você receberia.',
-      discente: 'Pode transferir até 50 pontos de vida (+3 PE).', // Fonte incorreta, verificação manual em outras fontes mostra que o discente/verdadeiro não são listados na descrição do vínculo.
+      discente: 'Pode transferir até 50 pontos de vida (+3 PE).',
       verdadeiro: 'Não possui forma Verdadeira listada.'
     },
     livro: 'Regras Básicas'
   },
 
-  // ===================================================================
-  // RITUAIS DE MORTE (REGRAS BÁSICAS)
-  // ===================================================================
   {
     nome: 'Amaldiçoar Arma',
     elemento: 'Morte',
@@ -913,9 +893,6 @@ export const RITUAIS: Ritual[] = [
     livro: 'Regras Básicas'
   },
 
-  // ===================================================================
-  // RITUAIS DE CONHECIMENTO (REGRAS BÁSICAS)
-  // ===================================================================
   {
     nome: 'Amaldiçoar Arma',
     elemento: 'Conhecimento',
@@ -1257,9 +1234,6 @@ export const RITUAIS: Ritual[] = [
     livro: 'Regras Básicas'
   },
 
-  // ===================================================================
-  // RITUAIS DE ENERGIA (REGRAS BÁSICAS)
-  // ===================================================================
   {
     nome: 'Amaldiçoar Arma',
     elemento: 'Energia',
@@ -1584,9 +1558,6 @@ export const RITUAIS: Ritual[] = [
     livro: 'Regras Básicas'
   },
 
-  // ===================================================================
-  // RITUAIS DE MEDO (REGRAS BÁSICAS)
-  // ===================================================================
   {
     nome: 'Cinerária',
     elemento: 'Medo',

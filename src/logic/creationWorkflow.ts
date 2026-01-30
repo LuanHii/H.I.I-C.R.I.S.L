@@ -39,7 +39,6 @@ export const INITIAL_STATE: CreationState = {
   }
 };
 
-
 export function setTipo(state: CreationState, tipo: 'Agente' | 'Sobrevivente'): CreationState {
   return {
     ...state,
@@ -48,11 +47,10 @@ export function setTipo(state: CreationState, tipo: 'Agente' | 'Sobrevivente'): 
   };
 }
 
-
 export function setConceitoClasse(
-  state: CreationState, 
-  nome: string, 
-  conceito: string, 
+  state: CreationState,
+  nome: string,
+  conceito: string,
   classe: ClasseName,
   nex?: number,
   estagio?: number,
@@ -66,13 +64,12 @@ export function setConceitoClasse(
   };
 }
 
-
 export function setAtributos(
-  state: CreationState, 
+  state: CreationState,
   atributos: Atributos
 ): CreationState {
   if (!state.data.classe) throw new Error("Classe não definida.");
-  
+
   const validacao = validarDistribuicaoAtributos(atributos, state.data.classe);
   if (!validacao.valido) {
     throw new Error(validacao.mensagem);
@@ -85,9 +82,8 @@ export function setAtributos(
   };
 }
 
-
 export function setOrigem(
-  state: CreationState, 
+  state: CreationState,
   origemNome: string
 ): CreationState {
   const origem = ORIGENS.find(o => o.nome === origemNome);
@@ -101,16 +97,17 @@ export function setOrigem(
 }
 
 export function setPericias(
-  state: CreationState, 
+  state: CreationState,
   periciasEscolhidas: PericiaName[]
 ): CreationState {
   const { classe, atributos, origem, preferenciasClasse } = state.data;
   if (!classe || !atributos || !origem) throw new Error("Dados incompletos.");
 
-  const { qtdEscolhaLivre, obrigatorias } = calcularPericiasIniciais(classe, atributos.INT, origem, preferenciasClasse);
-  
-  if (periciasEscolhidas.length > qtdEscolhaLivre) {
-    throw new Error(`Você escolheu ${periciasEscolhidas.length} perícias, mas só pode escolher ${qtdEscolhaLivre}.`);
+  const { qtdEscolhaLivre, qtdEscolhaOrigem, obrigatorias } = calcularPericiasIniciais(classe, atributos.INT, origem, preferenciasClasse);
+  const totalEscolhas = qtdEscolhaLivre + (qtdEscolhaOrigem ?? 0);
+
+  if (periciasEscolhidas.length > totalEscolhas) {
+    throw new Error(`Você escolheu ${periciasEscolhidas.length} perícias, mas só pode escolher ${totalEscolhas}.`);
   }
 
   const conjunto = new Set<PericiaName>([...obrigatorias, ...periciasEscolhidas]);
@@ -130,7 +127,7 @@ export function setPericias(
 export function setRituais(state: CreationState, rituais: Ritual[]): CreationState {
   if (state.data.classe !== 'Ocultista') return state;
   if (rituais.length > 3) throw new Error("Máximo de 3 rituais iniciais.");
-  
+
   return {
     ...state,
     data: { ...state.data, rituais },
@@ -148,7 +145,7 @@ export function setEquipamento(state: CreationState, equipamentos: Item[]): Crea
 
 export function finalizarCriacao(state: CreationState): Personagem {
   const { nome, conceito, classe, origem, atributos, periciasSelecionadas, rituais, equipamentos, nex, estagio, preferenciasClasse } = state.data;
-  
+
   if (!nome || !classe || !origem) throw new Error("Dados incompletos para finalizar.");
 
   const nexBase = state.data.tipo === 'Sobrevivente' ? 0 : 5;
@@ -177,7 +174,7 @@ export function finalizarCriacao(state: CreationState): Personagem {
       }
   } else {
       const safeTarget = Math.min(99, Math.max(5, targetNex));
-      // NEX sobe em degraus (inclui 99%). Evitamos aritmética de +5 aqui para não cair em 100%.
+
       while (personagem.nex < safeTarget) {
           personagem = levelUp(personagem);
       }

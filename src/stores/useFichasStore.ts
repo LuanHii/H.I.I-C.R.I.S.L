@@ -1,8 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Personagem } from '@/core/types';
-
-// Tipo para registro de ficha (espelho do useStoredFichas)
+import type { Personagem } from '@/core/types';
 export interface FichaRegistro {
     id: string;
     nome: string;
@@ -21,50 +19,34 @@ export interface Campanha {
     criadaEm: number;
 }
 
-interface FichasState {
-    // Estado
+interface FichasState {
     fichas: FichaRegistro[];
     campanhas: Campanha[];
     fichaAtiva: string | null;
-    campanhaAtiva: string | null;
-
-    // Actions
+    campanhaAtiva: string | null;
     setFichaAtiva: (id: string | null) => void;
-    setCampanhaAtiva: (id: string | null) => void;
-
-    // CRUD Fichas
+    setCampanhaAtiva: (id: string | null) => void;
     addFicha: (ficha: FichaRegistro) => void;
     updateFicha: (id: string, dados: Partial<Personagem>) => void;
-    removeFicha: (id: string) => void;
-
-    // CRUD Campanhas
+    removeFicha: (id: string) => void;
     addCampanha: (campanha: Campanha) => void;
     updateCampanha: (id: string, data: Partial<Campanha>) => void;
-    removeCampanha: (id: string) => void;
-
-    // Bulk
+    removeCampanha: (id: string) => void;
     setFichas: (fichas: FichaRegistro[]) => void;
-    setCampanhas: (campanhas: Campanha[]) => void;
-
-    // Selectors (helpers)
+    setCampanhas: (campanhas: Campanha[]) => void;
     getFichaById: (id: string) => FichaRegistro | undefined;
     getFichasByCampanha: (campanhaId: string | null) => FichaRegistro[];
 }
 
 export const useFichasStore = create<FichasState>()(
     persist(
-        (set, get) => ({
-            // Estado inicial
+        (set, get) => ({
             fichas: [],
             campanhas: [],
             fichaAtiva: null,
-            campanhaAtiva: null,
-
-            // Actions simples
+            campanhaAtiva: null,
             setFichaAtiva: (id) => set({ fichaAtiva: id }),
-            setCampanhaAtiva: (id) => set({ campanhaAtiva: id }),
-
-            // CRUD Fichas
+            setCampanhaAtiva: (id) => set({ campanhaAtiva: id }),
             addFicha: (ficha) => set((state) => ({
                 fichas: [...state.fichas, ficha]
             })),
@@ -80,9 +62,7 @@ export const useFichasStore = create<FichasState>()(
             removeFicha: (id) => set((state) => ({
                 fichas: state.fichas.filter((f) => f.id !== id),
                 fichaAtiva: state.fichaAtiva === id ? null : state.fichaAtiva
-            })),
-
-            // CRUD Campanhas
+            })),
             addCampanha: (campanha) => set((state) => ({
                 campanhas: [...state.campanhas, campanha]
             })),
@@ -94,19 +74,14 @@ export const useFichasStore = create<FichasState>()(
             })),
 
             removeCampanha: (id) => set((state) => ({
-                campanhas: state.campanhas.filter((c) => c.id !== id),
-                // Desvincular fichas da campanha removida
+                campanhas: state.campanhas.filter((c) => c.id !== id),
                 fichas: state.fichas.map((f) =>
                     f.campanhaId === id ? { ...f, campanhaId: undefined } : f
                 ),
                 campanhaAtiva: state.campanhaAtiva === id ? null : state.campanhaAtiva
-            })),
-
-            // Bulk
+            })),
             setFichas: (fichas) => set({ fichas }),
-            setCampanhas: (campanhas) => set({ campanhas }),
-
-            // Selectors
+            setCampanhas: (campanhas) => set({ campanhas }),
             getFichaById: (id) => get().fichas.find((f) => f.id === id),
             getFichasByCampanha: (campanhaId) =>
                 get().fichas.filter((f) =>
@@ -114,17 +89,14 @@ export const useFichasStore = create<FichasState>()(
                 ),
         }),
         {
-            name: 'fichas-store',
-            // Apenas persistir dados essenciais
+            name: 'fichas-store',
             partialize: (state) => ({
                 fichas: state.fichas,
                 campanhas: state.campanhas,
             }),
         }
     )
-);
-
-// Hook seletor para performance
+);
 export const useFichaAtiva = () => {
     const fichaAtiva = useFichasStore((state) => state.fichaAtiva);
     const fichas = useFichasStore((state) => state.fichas);

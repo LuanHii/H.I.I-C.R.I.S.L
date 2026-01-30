@@ -35,7 +35,6 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
     [registro, salvar],
   );
 
-  // Exportar ficha como JSON
   const handleExportarFicha = () => {
     if (!personagemAtual) return;
     const blob = new Blob([JSON.stringify(personagemAtual, null, 2)], {

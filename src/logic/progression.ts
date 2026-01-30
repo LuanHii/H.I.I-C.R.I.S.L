@@ -8,9 +8,7 @@ const NEX_ATRIBUTO = [20, 50, 80, 95];
 const ESTAGIO_ATRIBUTO = [3];
 
 const NEX_HABILIDADE = [10, 40, 65, 99];
-const ESTAGIO_HABILIDADE = [2, 4];
-
-// Marcos de NEX para poderes de classe
+const ESTAGIO_HABILIDADE = [2, 4];
 const NEX_PODER = [15, 30, 45, 60, 75, 90];
 
 export function levelUp(character: Personagem): Personagem {
@@ -34,14 +32,10 @@ export function levelUp(character: Personagem): Personagem {
     }
 
   } else {
-    const currentNex = newChar.nex;
-    // NEX avança em degraus de 5% até 95%, e o último degrau é 99% (OPRPG).
-    // Portanto 95% -> 99% (não 100%).
+    const currentNex = newChar.nex;
     if (currentNex >= 99) return newChar;
     const newNex = currentNex === 95 ? 99 : currentNex + 5;
-    newChar.nex = newNex;
-
-    // Grau de Treinamento (OPRPG): em NEX 35% e 70% promove perícias (escolha do jogador).
+    newChar.nex = newNex;
     if (newNex === 35 || newNex === 70) {
       const basePorClasse: Record<string, number> = {
         Combatente: 2,
@@ -70,9 +64,7 @@ export function levelUp(character: Personagem): Personagem {
       } else if (newChar.trilha) {
         addTrackAbility(newChar, newNex, false);
       }
-    }
-
-    // Poder de classe nos marcos 15/30/45/60/75/90
+    }
     if (NEX_PODER.includes(newNex)) {
       newChar.poderesClassePendentes = (newChar.poderesClassePendentes || 0) + 1;
     }
@@ -105,8 +97,7 @@ export function levelDown(character: Personagem): Personagem {
     const currentNex = newChar.nex;
     if (currentNex <= 5) return newChar;
 
-    const oldNex = currentNex;
-    // Degrau especial: 99% volta para 95%.
+    const oldNex = currentNex;
     newChar.nex = currentNex === 99 ? 95 : currentNex - 5;
 
     if (NEX_ATRIBUTO.includes(oldNex)) {
@@ -126,9 +117,7 @@ export function levelDown(character: Personagem): Personagem {
 export function applyAttributePoint(character: Personagem, attribute: AtributoKey): Personagem {
   if (!character.pontosAtributoPendentes || character.pontosAtributoPendentes <= 0) {
     return character;
-  }
-
-  // Regra de Sobrevivente: Não pode aumentar atributo além de 3 via progressão
+  }
   if (character.classe === 'Sobrevivente' && character.atributos[attribute] >= 3) {
     return character;
   }
@@ -150,7 +139,7 @@ export function removeAttributePoint(character: Personagem, attribute: AtributoK
   const newChar = { ...character };
   newChar.atributos = { ...newChar.atributos };
 
-  if (newChar.atributos[attribute] > 0) { // Evita atributo negativo
+  if (newChar.atributos[attribute] > 0) {
     newChar.atributos[attribute] -= 1;
     newChar.pontosAtributoPendentes = (newChar.pontosAtributoPendentes || 0) + 1;
     recalculateStats(newChar);
@@ -207,9 +196,7 @@ function recalculateStats(char: Personagem) {
   char.pe.rodada = derived.peRodada;
 
   char.san.max = targetSanMax;
-  char.san.atual = Math.min(char.san.max, Math.max(0, char.san.atual + diffSAN));
-
-  // Atualizar defesa se derivado do cálculo
+  char.san.atual = Math.min(char.san.max, Math.max(0, char.san.atual + diffSAN));
   if (char.defesa !== undefined && !char.overrides?.defesa) {
     char.defesa = derived.defesa;
   }
@@ -224,9 +211,7 @@ function recalculateStats(char: Personagem) {
       char.pd.max = targetPdMax;
       char.pd.atual = Math.min(char.pd.max, Math.max(0, char.pd.atual + diffPD));
     }
-  }
-
-  // Atualizar Carga
+  }
   const cargaInfo = calcularCarga({
     atributos: char.atributos,
     itens: char.equipamentos,
@@ -236,22 +221,15 @@ function recalculateStats(char: Personagem) {
   char.carga = {
     atual: cargaInfo.atual,
     maxima: cargaInfo.maxima
-  };
-
-  // Atualizar Perícias Detalhadas com bônus vindos de trilha/origem (derived stats)
-  // Montamos um objeto de bônus fixos baseado no que veio do derived stats
+  };
   const extrasFixos: Partial<Record<PericiaName, number>> = {};
   if (derived.furtividadeBonus) extrasFixos.Furtividade = (extrasFixos.Furtividade || 0) + derived.furtividadeBonus;
   if (derived.percepcaoBonus) extrasFixos.Percepção = (extrasFixos.Percepção || 0) + derived.percepcaoBonus;
   if (derived.iniciativaBonus) extrasFixos.Iniciativa = (extrasFixos.Iniciativa || 0) + derived.iniciativaBonus;
   if (derived.enganacaoBonus) extrasFixos.Enganação = (extrasFixos.Enganação || 0) + derived.enganacaoBonus;
   if (derived.diplomaciaBonus) extrasFixos.Diplomacia = (extrasFixos.Diplomacia || 0) + derived.diplomaciaBonus;
-  if (derived.fortitudeBonus) extrasFixos.Fortitude = (extrasFixos.Fortitude || 0) + derived.fortitudeBonus;
-
-  // Preserva overrides manuais de perícias se houver
-  const overridesFixos = char.overrides?.periciaFixos || {};
-
-  // Merge dos bônus: derived + overrides
+  if (derived.fortitudeBonus) extrasFixos.Fortitude = (extrasFixos.Fortitude || 0) + derived.fortitudeBonus;
+  const overridesFixos = char.overrides?.periciaFixos || {};
   const finalExtrasFixos: Partial<Record<PericiaName, number>> = { ...extrasFixos };
   for (const [key, val] of Object.entries(overridesFixos)) {
     const k = key as PericiaName;
@@ -262,20 +240,13 @@ function recalculateStats(char: Personagem) {
     char.atributos,
     char.pericias,
     {
-      fixos: finalExtrasFixos,
-      // Se tiver bônus de dados também, deveria vir aqui. Por enquanto derivados só dão bônus numérico fixo.
+      fixos: finalExtrasFixos,
       dados: char.bonus?.periciaDados
     }
   );
 }
 
-/**
- * Recalcula todos os recursos de um personagem existente, aplicando os bônus de origem e trilha.
- * Use esta função para atualizar personagens criados antes da implementação dos bônus automáticos.
- * 
- * @param personagem - O personagem a ser recalculado
- * @returns O personagem com os recursos atualizados
- */
+
 export function recalcularRecursosPersonagem(personagem: Personagem): Personagem {
   const char = { ...personagem };
   recalculateStats(char);
@@ -326,39 +297,24 @@ function removeTrackAbility(char: Personagem, level: number, isStage: boolean) {
   }
 }
 
-/**
- * Aplica a escolha de um poder de classe ao personagem.
- * Verifica requisitos e decrementa a contagem de poderes pendentes.
- */
-export function choosePower(character: Personagem, poderNome: string): Personagem {
-  const newChar = { ...character };
 
-  // Verifica se tem poderes pendentes
+export function choosePower(character: Personagem, poderNome: string): Personagem {
+  const newChar = { ...character };
   if (!newChar.poderesClassePendentes || newChar.poderesClassePendentes <= 0) {
     throw new Error('Não há poderes de classe pendentes para escolher.');
-  }
-
-  // Busca o poder no catálogo
+  }
   const poder = PODERES.find(p => p.nome === poderNome);
   if (!poder) {
     throw new Error(`Poder "${poderNome}" não encontrado.`);
-  }
-
-  // Verifica se já possui o poder
+  }
   if (newChar.poderes.some(p => p.nome === poderNome)) {
     throw new Error(`Você já possui o poder "${poderNome}".`);
-  }
-
-  // Verifica requisitos
+  }
   const { elegivel, motivo } = verificarRequisitos(poder, newChar);
   if (!elegivel) {
     throw new Error(`Requisito não atendido: ${motivo}`);
-  }
-
-  // Adiciona o poder
-  newChar.poderes = [...newChar.poderes, poder];
-
-  // Decrementa pendência
+  }
+  newChar.poderes = [...newChar.poderes, poder];
   newChar.poderesClassePendentes = (newChar.poderesClassePendentes || 1) - 1;
   if (newChar.poderesClassePendentes <= 0) {
     newChar.poderesClassePendentes = undefined;

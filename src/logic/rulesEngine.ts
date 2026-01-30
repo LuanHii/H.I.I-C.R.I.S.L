@@ -202,12 +202,6 @@ interface TrilhaConfigOptions {
   >;
 }
 
-// BonusContexto removido (agora importado de tipos)
-
-/**
- * Resultado do cálculo de bônus dos poderes de origem.
- * Estes bônus são aplicados automaticamente ao personagem.
- */
 interface BonusPoderOrigem {
   pvBonus: number;
   peBonus: number;
@@ -286,29 +280,29 @@ export function calcularPericiasDisponiveis(
   intelecto: number,
   origem: Origem,
   preferenciasClasse?: ClassePreferencias,
-): { qtdEscolhaLivre: number; obrigatorias: PericiaName[] } {
+): { qtdEscolhaLivre: number; qtdEscolhaOrigem: number; obrigatorias: PericiaName[] } {
   const obrigatorias = new Set<PericiaName>();
-  // Modo permissivo: evita quebrar se `origem` vier incompleta por dados antigos/edge cases.
+
   const origemPericias = (origem as any)?.pericias ?? [];
+  const origemExtras = origem?.periciasExtras ?? 0;
   origemPericias.forEach((p: PericiaName) => obrigatorias.add(p));
 
   switch (classe) {
     case 'Combatente':
-      // Combatente escolhe 1 perícia ofensiva (Luta/Pontaria) e 1 defensiva (Fortitude/Reflexos).
-      // Guardamos a escolha em `preferenciasClasse`. Se não houver, usamos padrão (Luta + Fortitude).
+
       obrigatorias.add(preferenciasClasse?.ofensiva ?? 'Luta');
       obrigatorias.add(preferenciasClasse?.defensiva ?? 'Fortitude');
-      return { qtdEscolhaLivre: Math.max(1, 1 + intelecto), obrigatorias: Array.from(obrigatorias) };
+      return { qtdEscolhaLivre: Math.max(1, 1 + intelecto), qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
     case 'Especialista':
-      return { qtdEscolhaLivre: Math.max(1, 7 + intelecto), obrigatorias: Array.from(obrigatorias) };
+      return { qtdEscolhaLivre: Math.max(1, 7 + intelecto), qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
     case 'Ocultista':
       obrigatorias.add('Ocultismo');
       obrigatorias.add('Vontade');
-      return { qtdEscolhaLivre: Math.max(1, 3 + intelecto), obrigatorias: Array.from(obrigatorias) };
+      return { qtdEscolhaLivre: Math.max(1, 3 + intelecto), qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
     case 'Sobrevivente':
-      return { qtdEscolhaLivre: Math.max(1, 1 + intelecto), obrigatorias: Array.from(obrigatorias) };
+      return { qtdEscolhaLivre: Math.max(1, 1 + intelecto), qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
     default:
-      return { qtdEscolhaLivre: 1, obrigatorias: Array.from(obrigatorias) };
+      return { qtdEscolhaLivre: 1, qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
   }
 }
 
@@ -348,7 +342,6 @@ export function gerarFicha(input: CriacaoInput): Personagem {
     config: input.trilhaConfig,
   });
 
-  // Calcular bônus de poderes de origem
   const aplicarPoderOrigem =
     input.classe === 'Sobrevivente' && input.sobreviventeBeneficioOrigem === 'pericias'
       ? false
@@ -423,14 +416,13 @@ export function gerarFicha(input: CriacaoInput): Personagem {
     pe: {
       atual: recursos.pe,
       max: recursos.pe,
-      // Limite de PE por turno segue a Tabela 1.2 (5%->1 ... 95%->19, 99%->20)
+
       rodada: input.classe === 'Sobrevivente' ? 1 : Math.min(20, Math.max(1, Math.ceil(nexBase / 5))),
     },
     san: {
       atual: recursos.san,
       max: recursos.san,
-      // Perturbado é derivado da SAN atual vs SAN máxima (não PV).
-      // Na criação, SAN atual == SAN máxima, então começa como false.
+
       perturbado: false,
     },
     pd: recursos.pd ? { atual: recursos.pd, max: recursos.pd } : undefined,
@@ -456,9 +448,6 @@ export function listarEventosNex(nex: number): NexEvento[] {
   }));
 }
 
-// DT para resistir a rituais (OPRPG): mesma regra de DT de habilidades (p. 78),
-// usando Presença como atributo (ver seção de rituais).
-// DT = 10 + limite de PE por turno + Presença + bônus situacionais.
 export function calcularDTRitual(params: {
   atributos: Atributos;
   limitePe: number;
@@ -539,14 +528,10 @@ function construirPericias(params: {
     slotsLivres -= 1;
   });
 
-  // Regra: o jogador escolhe suas perícias treinadas. Não preenchemos automaticamente.
-  // Se o fluxo de UI permitir finalizar com escolhas incompletas, isso deve gerar aviso,
-  // não alterar a ficha silenciosamente.
   if (slotsLivres > 0) {
     logs.push(`Faltam ${slotsLivres} perícia(s) livre(s) para escolher.`);
   }
 
-  // Promoções de Grau de Treinamento (35%/70%) são escolhas do jogador e devem ser tratadas na progressão.
   return { graus, extrasFixos, extrasDados, logs, pendentesLivres: slotsLivres };
 }
 
@@ -710,8 +695,7 @@ function gerarDetalhesPericia(params: {
     const atributoValor = params.atributos[atributoBase];
     const dadosBase = atributoValor > 0 ? atributoValor : 2;
     const criterio = atributoValor > 0 ? 'melhor' : 'pior';
-    // O bônus fixo NÃO deve somar o valor do atributo. O atributo define os DADOS.
-    // O bônus fixo vem APENAS do grau de treinamento e outros bônus (itens, poderes).
+
     const grau = params.graus[pericia] || 'Destreinado';
     const bonusFixo = GRAU_BONUS[grau] + (params.extrasFixos[pericia] ?? 0);
     const bonusO = params.extrasDados[pericia] ?? 0;
@@ -807,7 +791,7 @@ function calcularPd(
 
   const nivel = Math.min(20, Math.max(1, Math.ceil(Math.max(nex, 0) / 5)));
   const incrementos = Math.max(0, nivel - 1);
-  // SaH p.104: a cada novo NEX soma (porNivel + PRE)
+
   const valorPorNivel = cfg.porNivel + presenca;
   return base + incrementos * valorPorNivel;
 }
@@ -873,9 +857,6 @@ export function calcularCarga(params: {
   return { atual: cargaAtual, maxima: cargaMaxima };
 }
 
-/**
- * Cria um objeto de bônus de origem vazio (para quando o poder não se aplica)
- */
 function criarBonusOrigemVazio(): BonusPoderOrigem {
   return {
     pvBonus: 0,
@@ -891,10 +872,6 @@ function criarBonusOrigemVazio(): BonusPoderOrigem {
   };
 }
 
-/**
- * Calcula os bônus mecânicos concedidos pelo poder da origem do personagem.
- * Esses bônus são aplicados automaticamente ao personagem.
- */
 function calcularBonusPoderOrigem(
   origem: Origem,
   nex: number,
@@ -905,107 +882,81 @@ function calcularBonusPoderOrigem(
   const nomePoder = origem.poder.nome;
 
   switch (nomeOrigem) {
-    // ===================================================================
-    // BÔNUS DE PV
-    // ===================================================================
+
     case 'Desgarrado':
-      // Calejado: +1 PV para cada 5% de NEX
+
       bonus.pvBonus = Math.floor(nex / 5);
       bonus.efeitos.push(`Calejado: +${bonus.pvBonus} PV (${nex}% NEX ÷ 5)`);
       break;
 
     case 'Mergulhador':
-      // Fôlego de Nadador: +5 PV
+
       bonus.pvBonus = 5;
       bonus.efeitos.push('Fôlego de Nadador: +5 PV');
       break;
 
-    // ===================================================================
-    // BÔNUS DE PE
-    // ===================================================================
     case 'Universitário':
-      // Dedicação: +1 PE, e +1 PE adicional a cada NEX ímpar
-      // NEX 5, 15, 25, 35, 45, 55, 65, 75, 85, 95, 99
+
       const nexImpares = [5, 15, 25, 35, 45, 55, 65, 75, 85, 95, 99].filter(n => nex >= n).length;
       bonus.peBonus = 1 + nexImpares;
       bonus.efeitos.push(`Dedicação: +${bonus.peBonus} PE (1 base + ${nexImpares} por NEX ímpar)`);
       break;
 
-    // ===================================================================
-    // BÔNUS DE SANIDADE
-    // ===================================================================
     case 'Vítima':
-      // Cicatrizes Psicológicas: +1 SAN para cada 5% de NEX
+
       bonus.sanBonus = Math.floor(nex / 5);
       bonus.efeitos.push(`Cicatrizes Psicológicas: +${bonus.sanBonus} SAN (${nex}% NEX ÷ 5)`);
       break;
 
-    // ===================================================================
-    // BÔNUS DE DEFESA
-    // ===================================================================
     case 'Policial':
-      // Patrulha: +2 Defesa
+
       bonus.defesaBonus = 2;
       bonus.efeitos.push('Patrulha: +2 Defesa');
       break;
 
-    // ===================================================================
-    // BÔNUS DE DANO
-    // ===================================================================
     case 'Lutador':
-      // Mão Pesada: +2 dano corpo a corpo
+
       bonus.danoCorpoACorpoBonus = 2;
       bonus.efeitos.push('Mão Pesada: +2 dano corpo a corpo');
       break;
 
     case 'Militar':
-      // Para Bellum: +2 dano com armas de fogo
+
       bonus.danoArmaFogoBonus = 2;
       bonus.efeitos.push('Para Bellum: +2 dano com armas de fogo');
       break;
 
-    // ===================================================================
-    // BÔNUS DE PERÍCIAS (FIXOS)
-    // ===================================================================
     case 'Diplomata':
-      // Conexões: +2 Diplomacia
+
       bonus.periciaFixos.Diplomacia = 2;
       bonus.efeitos.push('Conexões: +2 Diplomacia');
       break;
 
     case 'Profetizado':
-      // Luta ou Fuga: +2 Vontade
+
       bonus.periciaFixos.Vontade = 2;
       bonus.efeitos.push('Luta ou Fuga: +2 Vontade');
       break;
 
     case 'Religioso':
-      // Acalentar: +5 Religião para acalmar
+
       bonus.periciaFixos.Religião = 5;
       bonus.efeitos.push('Acalentar: +5 Religião (para acalmar)');
       break;
 
     case 'Experimento':
-      // Mutação: +2 em uma perícia FOR/AGI/VIG (aqui aplicamos em Atletismo como padrão)
-      // e -O em Diplomacia
+
       bonus.periciaFixos.Atletismo = 2;
       bonus.periciaDados.Diplomacia = -1;
       bonus.efeitos.push('Mutação: +2 Atletismo, –1d20 Diplomacia');
       break;
 
-    // ===================================================================
-    // RESISTÊNCIA A DANO MENTAL
-    // ===================================================================
     case 'Teórico da Conspiração':
-      // Eu Já Sabia: resistência a dano mental = Intelecto
+
       bonus.resistenciaDanoMental = atributos.INT;
       bonus.efeitos.push(`Eu Já Sabia: RD ${atributos.INT} dano mental`);
       break;
 
-    // ===================================================================
-    // OUTROS PODERES (sem efeitos numéricos automáticos)
-    // Estes são listados como efeitos textuais apenas
-    // ===================================================================
     case 'Acadêmico':
       bonus.efeitos.push('Saber é Poder: gaste 2 PE para +5 em teste INT');
       break;

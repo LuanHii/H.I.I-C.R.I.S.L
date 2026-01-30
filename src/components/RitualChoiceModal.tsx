@@ -11,7 +11,7 @@ interface RitualChoiceModalProps {
     agent: Personagem;
     onSelect: (ritual: Ritual) => void;
     onClose?: () => void;
-    /** Círculo máximo permitido baseado no NEX */
+
     circuloMaximo?: number;
 }
 
@@ -23,12 +23,7 @@ const ELEMENTO_CONFIG: Record<Elemento, { icon: React.ElementType; color: string
     Medo: { icon: Ghost, color: 'text-gray-400', bg: 'bg-gray-500/20' },
 };
 
-/**
- * Calcula o círculo máximo de ritual baseado no NEX
- * 1º círculo: NEX 15% (base)
- * 2º círculo: NEX 45%
- * 3º círculo: NEX 75%
- */
+
 function calcularCirculoMaximo(nex: number): number {
     if (nex >= 75) return 3;
     if (nex >= 45) return 2;
@@ -44,37 +39,22 @@ export function RitualChoiceModal({
     const [busca, setBusca] = useState('');
     const [filtroElemento, setFiltroElemento] = useState<Elemento | 'todos'>('todos');
     const [filtroCirculo, setFiltroCirculo] = useState<number | 'todos'>('todos');
-    const [ritualSelecionado, setRitualSelecionado] = useState<string | null>(null);
-
-    // Calcular círculo máximo baseado no NEX
-    const circuloMaximo = circuloMaximoProp ?? calcularCirculoMaximo(agent.nex);
-
-    // Rituais já conhecidos
-    const rituaisConhecidos = useMemo(() => new Set(agent.rituais.map(r => r.nome)), [agent.rituais]);
-
-    // Filtrar rituais
+    const [ritualSelecionado, setRitualSelecionado] = useState<string | null>(null);
+    const circuloMaximo = circuloMaximoProp ?? calcularCirculoMaximo(agent.nex);
+    const rituaisConhecidos = useMemo(() => new Set(agent.rituais.map(r => r.nome)), [agent.rituais]);
     const rituaisFiltrados = useMemo(() => {
-        let lista = RITUAIS.filter(r => {
-            // Filtrar por círculo máximo
-            if (r.circulo > circuloMaximo) return false;
-            // Não mostrar rituais já conhecidos
-            if (rituaisConhecidos.has(r.nome)) return false;
-            // Não mostrar rituais de 4º círculo (não disponível via Aprender Ritual)
+        let lista = RITUAIS.filter(r => {
+            if (r.circulo > circuloMaximo) return false;
+            if (rituaisConhecidos.has(r.nome)) return false;
             if (r.circulo === 4) return false;
             return true;
-        });
-
-        // Filtrar por elemento
+        });
         if (filtroElemento !== 'todos') {
             lista = lista.filter(r => r.elemento === filtroElemento);
-        }
-
-        // Filtrar por círculo
+        }
         if (filtroCirculo !== 'todos') {
             lista = lista.filter(r => r.circulo === filtroCirculo);
-        }
-
-        // Busca
+        }
         if (busca.trim()) {
             const termo = busca.toLowerCase();
             lista = lista.filter(r =>
@@ -82,9 +62,7 @@ export function RitualChoiceModal({
                 r.descricao.toLowerCase().includes(termo) ||
                 r.elemento.toLowerCase().includes(termo)
             );
-        }
-
-        // Ordenar por círculo, depois por nome
+        }
         return lista.sort((a, b) => {
             if (a.circulo !== b.circulo) return a.circulo - b.circulo;
             return a.nome.localeCompare(b.nome);
@@ -120,7 +98,7 @@ export function RitualChoiceModal({
                 className="relative w-full max-w-3xl max-h-[90vh] bg-ordem-ooze border border-ordem-border rounded-xl overflow-hidden flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Header */}
+                {}
                 <div className="p-4 border-b border-ordem-border bg-gradient-to-r from-blue-900/30 to-ordem-ooze">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -142,7 +120,7 @@ export function RitualChoiceModal({
                         )}
                     </div>
 
-                    {/* Busca e Filtros */}
+                    {}
                     <div className="flex gap-2 flex-wrap">
                         <div className="flex-1 min-w-[200px] relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-ordem-text-muted" size={16} />
@@ -155,7 +133,7 @@ export function RitualChoiceModal({
                             />
                         </div>
 
-                        {/* Filtro de Círculo */}
+                        {}
                         <div className="flex gap-1">
                             <button
                                 onClick={() => setFiltroCirculo('todos')}
@@ -185,7 +163,7 @@ export function RitualChoiceModal({
                         </div>
                     </div>
 
-                    {/* Filtro de Elemento */}
+                    {}
                     <div className="flex gap-1 mt-2 flex-wrap">
                         <button
                             onClick={() => setFiltroElemento('todos')}
@@ -220,7 +198,7 @@ export function RitualChoiceModal({
                     </div>
                 </div>
 
-                {/* Lista de Rituais */}
+                {}
                 <div className="flex-1 overflow-y-auto p-4 space-y-2">
                     <AnimatePresence mode="popLayout">
                         {rituaisFiltrados.length === 0 ? (
@@ -278,7 +256,7 @@ export function RitualChoiceModal({
                     </AnimatePresence>
                 </div>
 
-                {/* Footer */}
+                {}
                 <div className="p-4 border-t border-ordem-border bg-ordem-ooze/80 flex justify-end gap-2">
                     {onClose && (
                         <button

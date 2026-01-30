@@ -1,8 +1,8 @@
 "use client";
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
-import { useStoredFichas, useCampanhas, type FichaRegistro } from '../../core/storage/useStoredFichas';
+import { useEffect, useMemo, useState } from 'react';
+import { useCloudFichas, useCloudCampanhas, type FichaRegistro } from '../../core/storage';
 import { AgentDetailView } from './AgentDetailView';
 import { normalizePersonagem } from '../../core/personagemUtils';
 import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPersonagem';
@@ -11,22 +11,74 @@ import { ImportExportModal } from './ImportExportModal';
 import { downloadJSON, exportarFichaIndividual, exportarFichasPorCampanha } from '../../core/storage/exportImportUtils';
 import { CampanhaSection, NovaCampanhaForm } from './CampanhaSection';
 import { recalcularRecursosPersonagem } from '../../logic/progression';
-import { Cloud, X, ChevronLeft, Menu, Plus, Download, Settings } from 'lucide-react';
+import { Cloud, CloudOff, X, ChevronLeft, Menu, Plus, Download, Settings } from 'lucide-react';
 import { WeaponModsButton } from './WeaponModsModal';
 
 export function FichasManager() {
-  const { fichas, remover, duplicar, salvar, moverParaCampanha, marcarComoSincronizada } = useStoredFichas();
-  const { campanhas, criarCampanha, renomearCampanha, removerCampanha } = useCampanhas();
+  const { fichas, remover, duplicar, salvar, moverParaCampanha, marcarComoSincronizada, isCloudMode, loading: fichasLoading } = useCloudFichas();
+  const { campanhas, criarCampanha, renomearCampanha, removerCampanha, loading: campanhasLoading } = useCloudCampanhas();
   const [selecionada, setSelecionada] = useState<string | null>(null);
   const [busca, setBusca] = useState('');
+  const [filtroClasse, setFiltroClasse] = useState<'Todas' | 'Combatente' | 'Especialista' | 'Ocultista' | 'Sobrevivente'>('Todas');
+  const [filtroPatente, setFiltroPatente] = useState<'Todas' | 'Recruta' | 'Operador' | 'Agente Especial' | 'Oficial de Operações' | 'Agente de Elite'>('Todas');
   const [ordem, setOrdem] = useState<'atualizado' | 'nome' | 'nex'>('atualizado');
+  const [viewMode, setViewMode] = useState<'compact' | 'full'>('full');
   const [expandAll, setExpandAll] = useState<boolean | undefined>(undefined);
   const [modalAberto, setModalAberto] = useState(false);
-  // Mobile: controla se o painel de detalhes está visível
+  const [hydrated, setHydrated] = useState(false);
+
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
+  const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
 
   const registroAtual = fichas.find((ficha) => ficha.id === selecionada);
   const fichaAtual = registroAtual?.personagem;
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedOrdem = window.localStorage.getItem('fichas.ordem') as 'atualizado' | 'nome' | 'nex' | null;
+      const storedView = window.localStorage.getItem('fichas.view') as 'compact' | 'full' | null;
+      if (storedOrdem) setOrdem(storedOrdem);
+      if (storedView) setViewMode(storedView);
+      setHydrated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && hydrated) {
+      window.localStorage.setItem('fichas.ordem', ordem);
+    }
+  }, [ordem, hydrated]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && hydrated) {
+      window.localStorage.setItem('fichas.view', viewMode);
+    }
+  }, [viewMode, hydrated]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!selecionada) {
+      const stored = window.localStorage.getItem('fichas.selecionada');
+      setLastSelectedId(stored);
+      if (stored && fichas.some((f) => f.id === stored)) {
+        setSelecionada(stored);
+      }
+    }
+  }, [fichas, selecionada]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (selecionada) {
+      window.localStorage.setItem('fichas.selecionada', selecionada);
+      setLastSelectedId(selecionada);
+    }
+  }, [selecionada]);
+
+  const formatUpdated = (value: unknown) => {
+    const timestamp = toMs(value);
+    if (!timestamp) return '—';
+    return new Date(timestamp).toLocaleDateString('pt-BR');
+  };
 
   const toMs = (value: unknown): number => {
     if (typeof value === 'number') return value;
@@ -51,22 +103,26 @@ export function FichasManager() {
       );
     });
 
-    return [...filtradas].sort((a, b) => {
+    const filtradasPorTag = filtradas.filter((r) => {
+      const p = r.personagem;
+      if (filtroClasse !== 'Todas' && p.classe !== filtroClasse) return false;
+      if (filtroPatente !== 'Todas' && p.patente !== filtroPatente) return false;
+      return true;
+    });
+
+    return [...filtradasPorTag].sort((a, b) => {
       if (ordem === 'nome') return a.personagem.nome.localeCompare(b.personagem.nome);
       if (ordem === 'nex') return (b.personagem.nex ?? 0) - (a.personagem.nex ?? 0);
       return toMs(b.atualizadoEm) - toMs(a.atualizadoEm);
     });
-  }, [busca, fichas, ordem]);
+  }, [busca, fichas, ordem, filtroClasse, filtroPatente]);
 
-  // Agrupar fichas por campanha
   const fichasPorCampanha = useMemo(() => {
     const grupos: Map<string | undefined, FichaRegistro[]> = new Map();
 
-    // Inicializa grupos para todas as campanhas
     campanhas.forEach((c) => grupos.set(c.id, []));
-    grupos.set(undefined, []); // Fichas sem campanha
+    grupos.set(undefined, []);
 
-    // Distribui fichas
     fichasFiltradas.forEach((f) => {
       const campanhaId = f.campanha;
       if (!grupos.has(campanhaId)) {
@@ -132,7 +188,7 @@ export function FichasManager() {
   };
 
   const handleRemoverCampanha = (campanhaId: string) => {
-    // Move todas as fichas da campanha para "Fichas Soltas"
+
     fichas
       .filter((f) => f.campanha === campanhaId)
       .forEach((f) => moverParaCampanha(f.id, undefined));
@@ -152,13 +208,11 @@ export function FichasManager() {
     }
   };
 
-  // Selecionar ficha e abrir detalhes (mobile)
   const handleSelectFicha = (id: string) => {
     setSelecionada(id);
     setMobileDetailOpen(true);
   };
 
-  // Fechar detalhes (mobile)
   const handleCloseDetail = () => {
     setMobileDetailOpen(false);
   };
@@ -172,6 +226,52 @@ export function FichasManager() {
         : `Problemas detectados (${summary.errors} erro(s), ${summary.warns} aviso(s)):\n${issues
           .map((i) => `- [${i.severity.toUpperCase()}] ${i.message}`)
           .join('\n')}`;
+
+    if (viewMode === 'compact') {
+      return (
+        <article
+          key={registro.id}
+          role="button"
+          tabIndex={0}
+          onClick={() => handleSelectFicha(registro.id)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              handleSelectFicha(registro.id);
+            }
+          }}
+          className={`w-full text-left border rounded-lg px-3 py-2 transition relative overflow-hidden touch-active ${
+            selecionada === registro.id
+              ? 'border-ordem-red bg-ordem-red/10'
+              : 'border-ordem-border bg-ordem-black/40 hover:border-ordem-text-muted active:bg-ordem-ooze/50'
+          }`}
+          title={title}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-white truncate">{registro.personagem.nome}</p>
+              <p className="text-[10px] text-ordem-text-secondary">
+                {registro.personagem.classe} · NEX {registro.personagem.nex}% · {registro.personagem.patente}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-[10px] text-ordem-text-muted">
+              {summary.total > 0 && (
+                <span
+                  className={`px-2 py-0.5 rounded border font-mono tracking-widest ${
+                    summary.errors > 0
+                      ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
+                      : 'border-ordem-gold text-ordem-gold bg-ordem-gold/10'
+                  }`}
+                >
+                  {summary.errors > 0 ? 'ERRO' : 'AVISO'}
+                </span>
+              )}
+              {registro.sincronizadaNaNuvem && <Cloud size={14} className="text-ordem-green" />}
+            </div>
+          </div>
+        </article>
+      );
+    }
 
     return (
       <article
@@ -192,10 +292,15 @@ export function FichasManager() {
       >
         <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_20%_0%,rgba(220,38,38,0.08),transparent_55%)]" />
 
-        {/* Header com classe e indicadores */}
-        <div className="flex justify-between items-start text-xs text-ordem-white/60 relative mb-2">
-          <span className="font-medium">{registro.personagem.classe}</span>
-          <div className="flex items-center gap-2">
+        {}
+        <div className="flex justify-between items-start text-xs text-ordem-white/60 relative mb-2 gap-2">
+          <div className="flex flex-col min-w-0">
+            <span className="font-medium">{registro.personagem.classe}</span>
+            <span className="text-[10px] text-ordem-text-muted">
+              Atualizado: {formatUpdated(registro.atualizadoEm)}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
             {registro.sincronizadaNaNuvem && (
               <span
                 className="text-ordem-green"
@@ -218,15 +323,15 @@ export function FichasManager() {
           </div>
         </div>
 
-        {/* Nome do personagem */}
+        {}
         <p className="text-lg font-semibold text-white relative truncate">{registro.personagem.nome}</p>
 
-        {/* Info secundária */}
+        {}
         <p className="text-sm text-ordem-text-secondary relative mt-1">
           NEX {registro.personagem.nex}% · {registro.personagem.patente}
         </p>
 
-        {/* Stats compactos */}
+        {}
         <div className="mt-3 flex gap-3 text-xs text-ordem-text-secondary relative">
           <span className="bg-ordem-ooze/50 px-2 py-1 rounded">
             PV {registro.personagem.pv.atual}/{registro.personagem.pv.max}
@@ -239,7 +344,7 @@ export function FichasManager() {
           </span>
         </div>
 
-        {/* Botões de ação - grid responsivo */}
+        {}
         <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 relative">
           <button
             type="button"
@@ -304,12 +409,16 @@ export function FichasManager() {
             type="button"
             onClick={(event) => {
               event.stopPropagation();
-              if (confirm('Tem certeza que deseja remover esta ficha?')) {
+                  if (confirm(`Tem certeza que deseja remover "${registro.personagem.nome}"?`)) {
                 remover(registro.id);
                 if (selecionada === registro.id) {
                   setSelecionada(null);
                   setMobileDetailOpen(false);
                 }
+                    if (typeof window !== 'undefined') {
+                      window.localStorage.removeItem('fichas.selecionada');
+                      setLastSelectedId(null);
+                    }
               }
             }}
             className="text-xs px-3 py-2.5 border border-ordem-red text-ordem-red hover:bg-ordem-red/10 active:bg-ordem-red/20 rounded-lg touch-target-sm flex items-center justify-center"
@@ -323,24 +432,49 @@ export function FichasManager() {
 
   return (
     <div className="flex flex-col lg:grid lg:grid-cols-3 h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)] overflow-hidden">
-      {/* Lista de fichas - Sempre visível em mobile, lado esquerdo em desktop */}
+      {}
       <section
         className={`
-          flex-1 lg:flex-none lg:border-r border-ordem-border 
+          flex-1 lg:flex-none lg:border-r border-ordem-border
           p-4 lg:p-6 space-y-4 overflow-hidden flex flex-col
           ${mobileDetailOpen ? 'hidden lg:flex' : 'flex'}
         `}
       >
-        {/* Header */}
+        {}
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <div className="text-xs font-mono tracking-[0.35em] text-ordem-text-muted uppercase">Arquivo</div>
+            <div className="flex items-center gap-2">
+              <div className="text-xs font-mono tracking-[0.35em] text-ordem-text-muted uppercase">Arquivo</div>
+              {isCloudMode ? (
+                <span className="flex items-center gap-1 text-[10px] text-ordem-green" title="Sincronizado na nuvem">
+                  <Cloud size={12} />
+                  <span className="hidden sm:inline">Nuvem</span>
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-[10px] text-ordem-text-muted" title="Dados locais">
+                  <CloudOff size={12} />
+                  <span className="hidden sm:inline">Local</span>
+                </span>
+              )}
+            </div>
             <h2 className="text-xl lg:text-2xl font-serif text-white truncate">Fichas</h2>
             <div className="text-xs font-mono text-ordem-text-muted mt-1">
-              {fichasFiltradas.length} de {fichas.length} ficha(s)
+              {fichasLoading ? 'Carregando...' : `${fichasFiltradas.length} de ${fichas.length} ficha(s)`}
             </div>
           </div>
           <div className="flex gap-2 shrink-0">
+            {lastSelectedId && fichas.some((f) => f.id === lastSelectedId) && (
+              <button
+                onClick={() => {
+                  setSelecionada(lastSelectedId);
+                  setMobileDetailOpen(true);
+                }}
+                className="px-3 py-2.5 text-[10px] font-mono tracking-[0.15em] border border-ordem-border text-ordem-text-muted hover:border-ordem-text-secondary hover:text-white rounded-lg transition touch-target-sm"
+                aria-label="Abrir última ficha selecionada"
+              >
+                ÚLTIMA
+              </button>
+            )}
             <button
               onClick={() => setModalAberto(true)}
               className="px-3 py-2.5 text-[10px] font-mono tracking-[0.15em] border border-ordem-gold text-ordem-gold hover:bg-ordem-gold/10 active:bg-ordem-gold/20 rounded-lg transition touch-target-sm"
@@ -359,15 +493,61 @@ export function FichasManager() {
           </div>
         </div>
 
-        {/* Busca e filtros */}
+        {}
         <div className="space-y-2">
           <input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar fichas..."
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setBusca('');
+            }}
             className="w-full bg-ordem-black/40 border border-ordem-border text-white px-4 py-3 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-sm touch-target"
             aria-label="Buscar por nome, classe, NEX ou patente"
           />
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={filtroClasse}
+              onChange={(e) => setFiltroClasse(e.target.value as any)}
+              className="bg-ordem-black/40 border border-ordem-border text-white px-3 py-2 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-[10px]"
+              aria-label="Filtrar por classe"
+            >
+              <option value="Todas">Todas as classes</option>
+              <option value="Combatente">Combatente</option>
+              <option value="Especialista">Especialista</option>
+              <option value="Ocultista">Ocultista</option>
+              <option value="Sobrevivente">Sobrevivente</option>
+            </select>
+            <select
+              value={filtroPatente}
+              onChange={(e) => setFiltroPatente(e.target.value as any)}
+              className="bg-ordem-black/40 border border-ordem-border text-white px-3 py-2 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-[10px]"
+              aria-label="Filtrar por patente"
+            >
+              <option value="Todas">Todas as patentes</option>
+              <option value="Recruta">Recruta</option>
+              <option value="Operador">Operador</option>
+              <option value="Agente Especial">Agente Especial</option>
+              <option value="Oficial de Operações">Oficial de Operações</option>
+              <option value="Agente de Elite">Agente de Elite</option>
+            </select>
+            {(filtroClasse !== 'Todas' || filtroPatente !== 'Todas') && (
+              <button
+                type="button"
+                onClick={() => {
+                  setFiltroClasse('Todas');
+                  setFiltroPatente('Todas');
+                }}
+                className="px-3 py-2 rounded-lg border border-ordem-border text-ordem-text-muted text-[10px] font-mono uppercase tracking-widest"
+              >
+                Limpar filtros
+              </button>
+            )}
+          </div>
+          <div className="flex items-center justify-between gap-2 text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">
+            <span>Total: {fichas.length} ficha(s)</span>
+            <span>Campanhas: {campanhas.length}</span>
+          </div>
           <div className="flex items-center justify-between gap-2">
             <span className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">Ordenar</span>
             <select
@@ -380,6 +560,30 @@ export function FichasManager() {
               <option value="nome">Nome (A→Z)</option>
               <option value="nex">NEX (↓)</option>
             </select>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setViewMode('compact')}
+                className={`px-2 py-2 rounded-lg border text-[10px] font-mono uppercase tracking-widest ${
+                  viewMode === 'compact'
+                    ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
+                    : 'border-ordem-border text-ordem-text-muted'
+                }`}
+              >
+                Compacto
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('full')}
+                className={`px-2 py-2 rounded-lg border text-[10px] font-mono uppercase tracking-widest ${
+                  viewMode === 'full'
+                    ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
+                    : 'border-ordem-border text-ordem-text-muted'
+                }`}
+              >
+                Detalhado
+              </button>
+            </div>
             {busca.trim().length > 0 && (
               <button
                 type="button"
@@ -413,9 +617,9 @@ export function FichasManager() {
           </div>
         </div>
 
-        {/* Lista de campanhas e fichas */}
+        {}
         <div className="flex-1 overflow-y-auto touch-scroll custom-scrollbar -mx-4 px-4 lg:mx-0 lg:px-0 lg:pr-2 space-y-3">
-          {/* Campanhas existentes */}
+          {}
           {campanhas.map((campanha) => (
             <CampanhaSection
               key={campanha.id}
@@ -434,7 +638,7 @@ export function FichasManager() {
             />
           ))}
 
-          {/* Fichas sem campanha */}
+          {}
           <CampanhaSection
             campanha={null}
             fichas={fichasPorCampanha.get(undefined) || []}
@@ -448,7 +652,7 @@ export function FichasManager() {
             autoExpand={busca.trim().length > 0}
           />
 
-          {/* Criar nova campanha */}
+          {}
           <NovaCampanhaForm onCriar={criarCampanha} />
 
           {fichas.length === 0 && (
@@ -482,7 +686,7 @@ export function FichasManager() {
         </div>
       </section>
 
-      {/* Painel de detalhes - Fullscreen em mobile, lado direito em desktop */}
+      {}
       <section
         className={`
           lg:col-span-2 bg-ordem-black-deep overflow-hidden
@@ -491,7 +695,7 @@ export function FichasManager() {
       >
         {fichaAtual ? (
           <div className="h-full flex flex-col">
-            {/* Header mobile com botão voltar */}
+            {}
             <div className="lg:hidden flex items-center gap-3 p-4 border-b border-ordem-border bg-ordem-black safe-top">
               <button
                 onClick={handleCloseDetail}
@@ -506,7 +710,7 @@ export function FichasManager() {
               </div>
             </div>
 
-            {/* Conteúdo da ficha */}
+            {}
             <div className="flex-1 overflow-y-auto touch-scroll p-4 lg:p-6 safe-bottom">
               <div className="rounded-xl border border-ordem-border overflow-hidden">
                 <AgentDetailView agent={fichaAtual} onUpdate={handleUpdate} readOnly={false} />

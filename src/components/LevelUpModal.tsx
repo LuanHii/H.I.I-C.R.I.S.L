@@ -35,12 +35,8 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
     const [personagemAtualizado, setPersonagemAtualizado] = useState<Personagem | null>(null);
     const [mudancas, setMudancas] = useState<MudancasNex | null>(null);
     const [pendenciaSelecionada, setPendenciaSelecionada] = useState<PendenciaNex | null>(null);
-    const [transcenderEscolhido, setTranscenderEscolhido] = useState(false);
-
-    // Calcular novo NEX
-    const novoNex = agent.nex + 5;
-
-    // Executar level-up na primeira renderização
+    const [transcenderEscolhido, setTranscenderEscolhido] = useState(false);
+    const novoNex = agent.nex + 5;
     React.useEffect(() => {
         if (!personagemAtualizado) {
             const resultado = subirNex(agent, novoNex, transcenderEscolhido);
@@ -93,11 +89,7 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
 
 
     const handleTranscenderComplete = (poderParanormal: Poder, ritual?: Ritual) => {
-        if (!pendenciaSelecionada) return;
-
-        // Transcender é o mecanismo para ganhar poderes paranormais
-        // O poder que fica salvo é o poder PARANORMAL escolhido, não "Transcender"
-        // Adicionar o poder paranormal ao personagem
+        if (!pendenciaSelecionada) return;
         let novosPoderes = [...personagemAtualizado.poderes, poderParanormal];
         let novosRituais = [...personagemAtualizado.rituais];
 
@@ -107,30 +99,19 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
 
         const infoPendencia = ritual
             ? `Transcender: ${poderParanormal.nome} (${ritual.nome})`
-            : `Transcender: ${poderParanormal.nome}`;
-
-        // Incrementar contador de transcender
-        const qtdTranscender = (personagemAtualizado.qtdTranscender || 0) + 1;
-
-        // Aplicar alterações iniciais
+            : `Transcender: ${poderParanormal.nome}`;
+        const qtdTranscender = (personagemAtualizado.qtdTranscender || 0) + 1;
         let atualizado: Personagem = {
             ...resolverPendencia(personagemAtualizado, pendenciaSelecionada.id, infoPendencia),
             poderes: novosPoderes,
             rituais: novosRituais,
             qtdTranscender: qtdTranscender
-        };
-
-        // Recalcular recursos para aplicar penalidade de Sanidade automaticamente
-        // (Isso vai ajustar san.max e san.atual corretamente baseado no qtdTranscender)
-        atualizado = recalcularRecursosPersonagem(atualizado);
-
-        // Marcar que já aplicamos a penalidade de Transcender
+        };
+        atualizado = recalcularRecursosPersonagem(atualizado);
         setTranscenderEscolhido(true);
         setPersonagemAtualizado(atualizado);
         setPendenciaSelecionada(null);
-        setModalState('summary');
-
-        // Atualizar as mudanças exibidas
+        setModalState('summary');
         if (mudancas) {
             setMudancas({
                 ...mudancas,
@@ -140,17 +121,10 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
     };
 
     const handlePowerSelect = (poderNome: string) => {
-        if (!pendenciaSelecionada) return;
-
-        // SEGURANÇA: Se o poder selecionado for "Transcender", ignorar
-        // Isso deve ser tratado via onTranscenderComplete
-        if (poderNome === 'Transcender') return;
-
-        // Encontrar o poder selecionado
+        if (!pendenciaSelecionada) return;
+        if (poderNome === 'Transcender') return;
         const poder = PODERES.find(p => p.nome === poderNome);
-        if (!poder) return;
-
-        // ... resto da função segue normal, mas preciso garantir que não cortei nada
+        if (!poder) return;
         const atualizado = {
             ...resolverPendencia(personagemAtualizado, pendenciaSelecionada.id, poderNome),
             poderes: [...personagemAtualizado.poderes, poder],
@@ -199,9 +173,7 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
         setPersonagemAtualizado(atualizado);
         setPendenciaSelecionada(null);
         setModalState('summary');
-    };
-
-    // Renderizar sub-modais
+    };
     if (modalState === 'powerChoice' && pendenciaSelecionada) {
         return (
             <PowerChoiceModal
@@ -225,9 +197,7 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
                     let atualizado = {
                         ...resolverPendencia(personagemAtualizado, pendenciaSelecionada.id, poder.nome),
                         poderes: novosPoderes,
-                    };
-
-                    // Se escolheu Aprender Ritual e selecionou um ritual
+                    };
                     if (ritualSelecionado) {
                         atualizado = {
                             ...atualizado,
@@ -358,9 +328,7 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
                 onCancel={() => { setPendenciaSelecionada(null); setModalState('summary'); }}
             />
         );
-    }
-
-    // Modal principal de resumo
+    }
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -376,7 +344,7 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
                 className="relative w-full max-w-lg bg-ordem-ooze border border-ordem-border rounded-xl overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Header */}
+                {}
                 <div className="p-4 border-b border-ordem-border bg-gradient-to-r from-green-900/30 to-ordem-ooze">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -399,7 +367,7 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
                     </div>
                 </div>
 
-                {/* Mudanças */}
+                {}
                 <div className="p-4 space-y-4">
                     <h3 className="text-sm font-bold text-ordem-text-muted uppercase tracking-wide">
                         Mudanças Automáticas
@@ -445,7 +413,7 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
                     </div>
                 </div>
 
-                {/* Pendências */}
+                {}
                 {temPendencias && (
                     <div className="p-4 border-t border-ordem-border">
                         <div className="flex items-center gap-2 mb-3">
@@ -471,7 +439,7 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
                     </div>
                 )}
 
-                {/* Footer */}
+                {}
                 <div className="p-4 border-t border-ordem-border bg-ordem-ooze/80 flex justify-end gap-2">
                     {onClose && (
                         <button
@@ -515,11 +483,7 @@ function SkillUpgradeModal({ personagem, pendencia, onConfirm, onCancel }: { per
     const requisitoAtual = pendencia.nex === 35 ? 'Treinado' : 'Veterano';
 
     const eligibleSkills = Object.keys(personagem.pericias).filter(p => {
-        const grau = personagem.pericias[p as PericiaName];
-        // Permitir upgrade apenas se tiver o grau anterior necessário?
-        // Regra OPRPG: "Escolha X pericias... elas aumentam em um grau (T->V ou V->E)"
-        // Portanto, se for 35%, precisa ser Treinado para virar Veterano.
-        // Se for 70%, precisa ser Veterano para virar Expert.
+        const grau = personagem.pericias[p as PericiaName];
         return grau === requisitoAtual;
     });
 
@@ -559,7 +523,7 @@ function SkillUpgradeModal({ personagem, pendencia, onConfirm, onCancel }: { per
                     <button onClick={onCancel} className="px-4 py-2 border border-ordem-border rounded text-ordem-text-muted">Cancelar</button>
                     <button
                         onClick={() => onConfirm(selected)}
-                        disabled={selected.length === 0} // Pode confirmar com menos que o max? Sim. Opcional? Não, regra diz "Escolha X".
+                        disabled={selected.length === 0}
                         className="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50"
                     >
                         Confirmar ({selected.length}/{maxSelect})
@@ -571,9 +535,7 @@ function SkillUpgradeModal({ personagem, pendencia, onConfirm, onCancel }: { per
 }
 
 function VersatilityChoiceModal({ personagem, onSelect, onCancel, openPowerModal }: { personagem: Personagem, onSelect: (v: string) => void, onCancel: () => void, openPowerModal: () => void }) {
-    const [view, setView] = useState<'main' | 'tracks'>('main');
-
-    // Filter tracks: same class, not own track
+    const [view, setView] = useState<'main' | 'tracks'>('main');
     const availableTracks = useMemo(() => {
         return TRILHAS.filter(t => t.classe === personagem.classe && t.nome !== personagem.trilha);
     }, [personagem]);
@@ -637,7 +599,7 @@ function TrackAbilityChoiceModal({ personagem, pendencia, onConfirm, onCancel }:
     const habilidade = trilhaData?.habilidades.find(h => h.nex === pendencia.nex);
 
     if (!habilidade || !habilidade.escolha) {
-        return null; // Should not happen given logic
+        return null;
     }
 
     const escolha = habilidade.escolha;

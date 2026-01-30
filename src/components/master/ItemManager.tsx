@@ -1,15 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { ITENS } from '../../data/items';
 import { WEAPONS } from '../../data/weapons';
-import { useStoredItems } from '../../core/storage/useStoredItems';
+import { useCloudItems } from '../../core/storage';
 import { Item, Weapow } from '../../core/types';
+import { Cloud, CloudOff } from 'lucide-react';
 
 export const ItemManager: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'items' | 'weapons'>('items');
   const [isCreating, setIsCreating] = useState(false);
-  const { customItems, customWeapons, addCustomItem, addCustomWeapon, removeCustomItem, removeCustomWeapon } = useStoredItems();
-
-  // Form states
+  const { customItems, customWeapons, addCustomItem, addCustomWeapon, removeCustomItem, removeCustomWeapon, isCloudMode, loading } = useCloudItems();
   const [newItem, setNewItem] = useState<Partial<Item>>({
     categoria: 1,
     espaco: 1,

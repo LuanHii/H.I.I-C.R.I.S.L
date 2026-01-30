@@ -12,18 +12,14 @@ interface ConditionPickerProps {
     onAdd: (conditionId: string) => void;
     onRemove: (conditionId: string) => void;
     compact?: boolean;
-}
-
-// Get all conditions from guiaRegras
+}
 const CONDITIONS = REGRAS.filter(r => r.categoria === 'condicoes');
 
 export function ConditionPicker({ selectedConditions, onAdd, onRemove, compact = false }: ConditionPickerProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');
     const [hoveredCondition, setHoveredCondition] = useState<Regra | null>(null);
-    const dropdownRef = useRef<HTMLDivElement>(null);
-
-    // Close on click outside
+    const dropdownRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -50,7 +46,7 @@ export function ConditionPicker({ selectedConditions, onAdd, onRemove, compact =
 
     return (
         <div className="relative" ref={dropdownRef}>
-            {/* Selected Conditions Display */}
+            {}
             <div className="flex flex-wrap gap-1.5 mb-2">
                 {selectedConditions.map(condId => {
                     const condition = getConditionById(condId);
@@ -78,7 +74,7 @@ export function ConditionPicker({ selectedConditions, onAdd, onRemove, compact =
                                 </button>
                             </span>
 
-                            {/* Tooltip */}
+                            {}
                             {hoveredCondition?.id === condId && (
                                 <motion.div
                                     initial={{ opacity: 0, y: 5 }}
@@ -97,7 +93,7 @@ export function ConditionPicker({ selectedConditions, onAdd, onRemove, compact =
                 })}
             </div>
 
-            {/* Add Condition Button */}
+            {}
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={cn(
@@ -110,7 +106,7 @@ export function ConditionPicker({ selectedConditions, onAdd, onRemove, compact =
                 <ChevronDown size={14} className={cn('transition-transform', isOpen && 'rotate-180')} />
             </button>
 
-            {/* Dropdown */}
+            {}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -119,7 +115,7 @@ export function ConditionPicker({ selectedConditions, onAdd, onRemove, compact =
                         exit={{ opacity: 0, y: -10 }}
                         className="absolute z-50 top-full left-0 mt-1 w-72 bg-ordem-black border border-ordem-border rounded-lg shadow-xl overflow-hidden"
                     >
-                        {/* Search */}
+                        {}
                         <div className="p-2 border-b border-ordem-border">
                             <div className="relative">
                                 <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-ordem-text-muted" />
@@ -134,7 +130,7 @@ export function ConditionPicker({ selectedConditions, onAdd, onRemove, compact =
                             </div>
                         </div>
 
-                        {/* Condition List */}
+                        {}
                         <div className="max-h-64 overflow-y-auto custom-scrollbar">
                             {filteredConditions.length === 0 ? (
                                 <p className="p-3 text-sm text-ordem-text-muted text-center">Nenhuma condição encontrada</p>
@@ -178,9 +174,7 @@ export function ConditionPicker({ selectedConditions, onAdd, onRemove, compact =
             </AnimatePresence>
         </div>
     );
-}
-
-// Simple badge display for conditions (for compact view)
+}
 export function ConditionBadges({
     conditions,
     onRemove,
@@ -220,7 +214,7 @@ export function ConditionBadges({
                             )}
                         </span>
 
-                        {/* Tooltip on hover */}
+                        {}
                         {showTooltip && hoveredCondition?.id === condId && (
                             <motion.div
                                 initial={{ opacity: 0, y: 5 }}

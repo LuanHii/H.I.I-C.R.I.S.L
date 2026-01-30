@@ -96,7 +96,7 @@ export function MestreNavbar({
   return (
     <header className="sticky top-0 z-50 min-h-[56px] sm:h-16 border-b border-ordem-border bg-ordem-black/95 backdrop-blur shrink-0 safe-top">
       <div className="h-full flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-2 sm:py-0 gap-2 sm:gap-0">
-        {/* Logo e título + ações (mobile) */}
+        {}
         <div className="flex items-center justify-between sm:justify-start gap-4 sm:gap-8">
           <motion.div
             className="flex flex-col shrink-0"
@@ -108,7 +108,7 @@ export function MestreNavbar({
             <span className="text-[9px] sm:text-[10px] text-ordem-text-secondary font-mono tracking-[0.15em] sm:tracking-[0.2em]">{subtitle}</span>
           </motion.div>
 
-          {/* Ações em mobile - aparecem no canto direito */}
+          {}
           <div className="flex sm:hidden items-center gap-2">
             {rightSlot}
             <Link
@@ -121,7 +121,7 @@ export function MestreNavbar({
           </div>
         </div>
 
-        {/* Navegação - scroll horizontal em mobile */}
+        {}
         <nav className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto touch-scroll custom-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 no-select">
           {onTabSelect && inMestreRoot ? (
             <>
@@ -142,7 +142,7 @@ export function MestreNavbar({
           )}
         </nav>
 
-        {/* Ações em desktop */}
+        {}
         <div className="hidden sm:flex items-center gap-3">
           {rightSlot}
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>

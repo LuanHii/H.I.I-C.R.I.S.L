@@ -55,7 +55,7 @@ function PlayerAgentContent() {
   };
 
   if (loading) {
-    if (isOverlay) return null; // Silent load for overlay
+    if (isOverlay) return null;
     return (
       <div className="min-h-screen bg-ordem-black text-white flex items-center justify-center font-mono">
         <div className="flex flex-col items-center gap-4">

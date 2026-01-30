@@ -104,9 +104,7 @@ export function ImportExportModal({
 
       if (onImportComplete) {
         onImportComplete();
-      }
-
-      // Recarrega a página após 2 segundos para atualizar os dados
+      }
       setTimeout(() => {
         window.location.reload();
       }, 2000);
@@ -142,9 +140,7 @@ export function ImportExportModal({
 
         if (onImportComplete) {
           onImportComplete();
-        }
-
-        // Recarrega a página após 2 segundos para atualizar os dados
+        }
         setTimeout(() => {
           window.location.reload();
         }, 2000);

@@ -1,10 +1,6 @@
 import { Origem } from '../core/types';
 
 export const ORIGENS: Origem[] = [
-  // ===================================================================
-  // ORIGENS DE SOBREVIVENDO AO HORROR (SaH)
-  // O suplemento traz 20 novas origens.
-  // ===================================================================
 
   {
     nome: 'Amigo dos Animais',
@@ -26,7 +22,7 @@ export const ORIGENS: Origem[] = [
   },
   {
     nome: 'Chef do Outro Lado',
-    pericias: ['Ocultismo', 'Profissão'], // Profissão (cozinheiro)
+    pericias: ['Ocultismo', 'Profissão'],
     poder: {
       nome: 'Fome do Outro Lado',
       descricao: 'Você pode usar partes de criaturas do Outro Lado como ingredientes culinários (Categoria I, 0,5 espaço). Pode gastar uma ação de interlúdio e 1 ingrediente para preparar um prato especial; se passar em teste de Profissão (cozinheiro) DT 15 + O, o prato fornece RD 10 contra o tipo de dano do elemento da criatura. Ingerir partes de criatura causa perda de 1 ponto de Sanidade permanente e aumenta NEX em 3% (se regra opcional ativa).'
@@ -98,7 +94,7 @@ export const ORIGENS: Origem[] = [
   },
   {
     nome: 'Inventor Paranormal',
-    pericias: ['Profissão', 'Vontade'], // Profissão (engenheiro)
+    pericias: ['Profissão', 'Vontade'],
     poder: {
       nome: 'Invenção Paranormal',
       descricao: 'Escolha um ritual de 1º círculo. Você possui um invento (Categoria 0, 1 espaço) que permite executar o efeito do ritual. Para ativar, gasta uma ação padrão (ou ação do ritual) e faz teste de Profissão (engenheiro) com DT 15 (+5 para cada ativação na missão). Se passar, conjura o ritual na forma básica sem pagar PE.'
@@ -161,7 +157,9 @@ export const ORIGENS: Origem[] = [
   },
   {
     nome: 'Profetizado',
-    pericias: ['Vontade'], // +1 a escolha
+    pericias: ['Vontade'],
+    periciasTexto: 'Vontade + 1 perícia à escolha',
+    periciasExtras: 1,
     poder: {
       nome: 'Luta ou Fuga',
       descricao: 'Você recebe +2 em Vontade. Quando surge uma referência a sua premonição, recebe +2 PE temporários que duram até o fim da cena.'
@@ -187,13 +185,6 @@ export const ORIGENS: Origem[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // ORIGENS DO LIVRO BÁSICO (OPRPG)
-  // O suplemento Sobrevivendo ao Horror lista 16 novas origens
-  // (além das 20 da comunidade, totalizando 36 em SaH).
-  // As fontes fornecidas listam diversas origens do Livro Básico.
-  // ===================================================================
-
   {
     nome: 'Acadêmico',
     pericias: ['Ciências', 'Investigação'],
@@ -216,6 +207,7 @@ export const ORIGENS: Origem[] = [
     nome: 'Amnésico',
     pericias: [],
     periciasTexto: 'Duas à escolha do Mestre',
+    periciasExtras: 2,
     poder: {
       nome: 'Vislumbres do Passado',
       descricao: 'Uma vez por sessão, pode fazer teste de Intelecto (DT 10) para reconhecer pessoas ou lugares familiares. Se passar, recebe 1d4 PE temporários e uma informação útil (a critério do mestre).'
@@ -242,7 +234,7 @@ export const ORIGENS: Origem[] = [
   },
   {
     nome: 'Chef de Cozinha',
-    pericias: ['Fortitude', 'Profissão'], // Profissão (cozinheiro)
+    pericias: ['Fortitude', 'Profissão'],
     poder: {
       nome: 'Ingrediente Secreto',
       descricao: 'Em cenas de interlúdio, pode cozinhar prato especial (ação alimentar-se). Você e os membros do grupo que comerem recebem o benefício de dois pratos (benefícios acumulam se repetidos).'

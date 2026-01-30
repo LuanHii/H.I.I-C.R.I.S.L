@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import type { FichaRegistro, Campanha } from '../../core/storage/useStoredFichas';
 
 interface CampanhaSectionProps {
-    campanha: Campanha | null; // null = "Sem Campanha"
+    campanha: Campanha | null;
     fichas: FichaRegistro[];
     selecionada: string | null;
     onSelecionar: (id: string) => void;
@@ -48,9 +48,10 @@ export function CampanhaSection({
         }
     }, [autoExpand, expandida]);
 
-    const cor = campanha?.cor || '#71717a'; // ordem-text-muted para "sem campanha"
+    const cor = campanha?.cor || '#71717a';
     const nome = campanha?.nome || 'Fichas Soltas';
     const id = campanha?.id;
+    const hasSelected = Boolean(selecionada && fichas.some((f) => f.id === selecionada));
 
     const handleSalvarNome = () => {
         if (id && onRenomear && novoNome.trim()) {
@@ -61,11 +62,20 @@ export function CampanhaSection({
 
     return (
         <div className="mb-4">
-            {/* Header da Campanha */}
+            {}
             <div
                 className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition hover:bg-ordem-ooze/50"
                 style={{ borderLeft: `3px solid ${cor}` }}
                 onClick={() => setExpandida(!expandida)}
+                aria-expanded={expandida}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setExpandida(!expandida);
+                    }
+                }}
             >
                 <span
                     className="text-lg transition-transform"
@@ -105,6 +115,11 @@ export function CampanhaSection({
                 <span className="text-xs text-ordem-text-secondary font-mono">
                     {fichas.length} ficha{fichas.length !== 1 ? 's' : ''}
                 </span>
+                {hasSelected && !expandida && (
+                    <span className="text-[10px] px-2 py-0.5 rounded border border-ordem-green text-ordem-green">
+                        selecionada
+                    </span>
+                )}
 
                 {onExportarCampanha && fichas.length > 0 && (
                     <button
@@ -135,14 +150,14 @@ export function CampanhaSection({
                 )}
             </div>
 
-            {/* Lista de Fichas */}
+            {}
             {expandida && (
                 <div className="mt-2 space-y-2 pl-4">
                     {fichas.map((registro) => (
                         <div key={registro.id} className="relative group">
                             {renderFichaCard(registro)}
 
-                            {/* Menu de mover campanha */}
+                            {}
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition">
                                 <button
                                     onClick={(e) => {
@@ -214,14 +229,14 @@ export function NovaCampanhaForm({ onCriar }: NovaCampanhaFormProps) {
     const [cor, setCor] = useState('#dc2626');
 
     const cores = [
-        '#dc2626', // red
-        '#f97316', // orange
-        '#eab308', // yellow
-        '#22c55e', // green
-        '#06b6d4', // cyan
-        '#3b82f6', // blue
-        '#8b5cf6', // violet
-        '#ec4899', // pink
+        '#dc2626',
+        '#f97316',
+        '#eab308',
+        '#22c55e',
+        '#06b6d4',
+        '#3b82f6',
+        '#8b5cf6',
+        '#ec4899',
     ];
 
     const handleCriar = () => {

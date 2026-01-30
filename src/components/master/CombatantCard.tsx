@@ -90,9 +90,9 @@ export function CombatantCard({
                 !combatant.isActive && 'opacity-40'
             )}
         >
-            {/* Main Row */}
+            {}
             <div className="p-3 flex items-center gap-3">
-                {/* Turn Indicator */}
+                {}
                 {isCurrentTurn && !isDead && (
                     <motion.div
                         animate={{ scale: [1, 1.2, 1] }}
@@ -101,13 +101,13 @@ export function CombatantCard({
                     />
                 )}
 
-                {/* Initiative */}
+                {}
                 <div className="w-10 text-center shrink-0">
                     <span className="text-lg font-bold text-white">{combatant.initiative}</span>
                     <p className="text-[9px] text-ordem-text-muted uppercase">INIT</p>
                 </div>
 
-                {/* Type Icon + Name */}
+                {}
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                         {getTypeIcon()}
@@ -141,7 +141,7 @@ export function CombatantCard({
                         )}
                     </div>
 
-                    {/* Condition Badges */}
+                    {}
                     {combatant.conditions.length > 0 && (
                         <div className="mt-1">
                             <ConditionBadges
@@ -154,15 +154,15 @@ export function CombatantCard({
                     )}
                 </div>
 
-                {/* Stats */}
+                {}
                 <div className="flex items-center gap-4 shrink-0">
-                    {/* HP */}
+                    {}
                     <div className="text-center">
                         <div className="flex items-center gap-1 text-red-400">
                             <Heart size={12} />
                             <span className="text-sm font-mono">{combatant.hp.current}/{combatant.hp.max}</span>
                         </div>
-                        {/* HP Bar */}
+                        {}
                         <div className="w-20 h-1.5 bg-ordem-black rounded-full overflow-hidden mt-0.5">
                             <motion.div
                                 className={cn('h-full', getHpColor())}
@@ -173,7 +173,7 @@ export function CombatantCard({
                         </div>
                     </div>
 
-                    {/* Defense */}
+                    {}
                     <div className="text-center">
                         <div className="flex items-center gap-1 text-blue-400">
                             <Shield size={12} />
@@ -183,7 +183,7 @@ export function CombatantCard({
                     </div>
                 </div>
 
-                {/* Expand Button */}
+                {}
                 <button
                     onClick={() => setIsExpanded(!isExpanded)}
                     className="p-1.5 text-ordem-text-secondary hover:text-white transition-colors"
@@ -192,7 +192,7 @@ export function CombatantCard({
                 </button>
             </div>
 
-            {/* Expanded Content */}
+            {}
             {isExpanded && (
                 <motion.div
                     initial={{ height: 0 }}
@@ -200,7 +200,7 @@ export function CombatantCard({
                     exit={{ height: 0 }}
                     className="border-t border-ordem-border bg-ordem-black/50 p-3 space-y-3"
                 >
-                    {/* Quick Damage */}
+                    {}
                     <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs text-ordem-text-secondary">Dano:</span>
                         <div className="flex items-center gap-1">
@@ -228,7 +228,7 @@ export function CombatantCard({
                         <button onClick={() => applyHealing(10)} className="px-2 py-1 text-xs bg-green-600/20 hover:bg-green-600/40 text-green-400 rounded">+10</button>
                     </div>
 
-                    {/* PE and SAN if available */}
+                    {}
                     {(combatant.pe || combatant.san) && (
                         <div className="flex items-center gap-4">
                             {combatant.pe && (
@@ -268,7 +268,7 @@ export function CombatantCard({
                         </div>
                     )}
 
-                    {/* Conditions */}
+                    {}
                     <div>
                         <span className="text-xs text-ordem-text-secondary mb-1 block">Condições:</span>
                         <ConditionPicker
@@ -279,7 +279,7 @@ export function CombatantCard({
                         />
                     </div>
 
-                    {/* Notes */}
+                    {}
                     <div>
                         <div className="flex items-center gap-1 mb-1">
                             <StickyNote size={12} className="text-ordem-text-muted" />
@@ -293,7 +293,7 @@ export function CombatantCard({
                         />
                     </div>
 
-                    {/* Abilities */}
+                    {}
                     {combatant.abilities && combatant.abilities.length > 0 && (
                         <div className="pt-2 border-t border-ordem-border/50">
                             <span className="text-xs text-ordem-text-secondary mb-2 block font-bold uppercase">Habilidades & Ações</span>
@@ -320,7 +320,7 @@ export function CombatantCard({
                         </div>
                     )}
 
-                    {/* Actions */}
+                    {}
                     <div className="flex items-center gap-2 pt-2 border-t border-ordem-border/50">
                         <button
                             onClick={onDuplicate}

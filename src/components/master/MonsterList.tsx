@@ -1,16 +1,38 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { AMEACAS } from '../../data/monsters';
 import { Ameaca } from '../../core/types';
-import { useStoredMonsters } from '../../core/storage/useStoredMonsters';
+import { useCloudMonsters } from '../../core/storage';
 import { MonsterEditor } from './MonsterEditor';
+import { Cloud, CloudOff } from 'lucide-react';
 
 export const MonsterList: React.FC = () => {
-  const [search, setSearch] = useState('');
-  const [selectedElement, setSelectedElement] = useState<string>('Todos');
-  const [vdRange, setVdRange] = useState<[number, number]>([0, 400]);
-  const [order, setOrder] = useState<'nome' | 'vd-desc' | 'vd-asc'>('nome');
-  const [customOnly, setCustomOnly] = useState(false);
-  const { monstros, salvar, remover } = useStoredMonsters();
+  const [search, setSearch] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    return window.localStorage.getItem('ameacas.search') ?? '';
+  });
+  const [selectedElement, setSelectedElement] = useState<string>(() => {
+    if (typeof window === 'undefined') return 'Todos';
+    return window.localStorage.getItem('ameacas.element') ?? 'Todos';
+  });
+  const [vdRange, setVdRange] = useState<[number, number]>(() => {
+    if (typeof window === 'undefined') return [0, 400];
+    const raw = window.localStorage.getItem('ameacas.vd');
+    if (!raw) return [0, 400];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length === 2) return [Number(parsed[0]), Number(parsed[1])];
+    } catch { }
+    return [0, 400];
+  });
+  const [order, setOrder] = useState<'nome' | 'vd-desc' | 'vd-asc'>(() => {
+    if (typeof window === 'undefined') return 'nome';
+    return (window.localStorage.getItem('ameacas.order') as any) ?? 'nome';
+  });
+  const [customOnly, setCustomOnly] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.localStorage.getItem('ameacas.custom') === 'true';
+  });
+  const { monstros, salvar, remover, isCloudMode, loading } = useCloudMonsters();
   const [showEditor, setShowEditor] = useState(false);
   const [editingMonster, setEditingMonster] = useState<{ ameaca: Ameaca, id?: string } | null>(null);
 
@@ -35,6 +57,15 @@ export const MonsterList: React.FC = () => {
       return a.nome.localeCompare(b.nome);
     });
   }, [search, selectedElement, vdRange, customOnly, order, allMonsters]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem('ameacas.search', search);
+    window.localStorage.setItem('ameacas.element', selectedElement);
+    window.localStorage.setItem('ameacas.vd', JSON.stringify(vdRange));
+    window.localStorage.setItem('ameacas.order', order);
+    window.localStorage.setItem('ameacas.custom', String(customOnly));
+  }, [search, selectedElement, vdRange, order, customOnly]);
 
   const elements = ['Todos', 'Sangue', 'Morte', 'Conhecimento', 'Energia', 'Medo'];
 
@@ -68,9 +99,12 @@ export const MonsterList: React.FC = () => {
           placeholder="Buscar ameaça..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setSearch('');
+          }}
           className="bg-ordem-black/40 border border-ordem-border-light text-white px-3 py-2 rounded focus:border-ordem-red focus:outline-none font-mono text-sm"
         />
-        
+
         <select
           value={selectedElement}
           onChange={(e) => setSelectedElement(e.target.value)}
@@ -83,11 +117,11 @@ export const MonsterList: React.FC = () => {
 
         <div className="flex items-center gap-2 bg-ordem-black/40 border border-ordem-border-light px-3 rounded">
             <span className="text-xs font-mono text-ordem-text-muted">VD:</span>
-            <input 
-                type="number" 
-                min="0" 
-                max="400" 
-                value={vdRange[0]} 
+            <input
+                type="number"
+                min="0"
+                max="400"
+                value={vdRange[0]}
                 onChange={(e) => {
                   const min = Number(e.target.value);
                   const max = Math.max(min, vdRange[1]);
@@ -96,11 +130,11 @@ export const MonsterList: React.FC = () => {
                 className="w-16 bg-transparent text-white text-sm font-mono focus:outline-none text-center"
             />
             <span className="text-ordem-text-muted">-</span>
-            <input 
-                type="number" 
-                min="0" 
-                max="400" 
-                value={vdRange[1]} 
+            <input
+                type="number"
+                min="0"
+                max="400"
+                value={vdRange[1]}
                 onChange={(e) => {
                   const max = Number(e.target.value);
                   const min = Math.min(vdRange[0], max);
@@ -122,6 +156,18 @@ export const MonsterList: React.FC = () => {
       </div>
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
+        <div className="text-[10px] text-ordem-text-muted font-mono uppercase tracking-widest flex items-center gap-2">
+          {loading ? 'Carregando...' : `${filteredMonsters.length} resultado(s)`}
+          {isCloudMode ? (
+            <span className="flex items-center gap-1 text-ordem-green" title="Monstros customizados sincronizados na nuvem">
+              <Cloud size={12} />
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 text-ordem-text-muted" title="Dados locais">
+              <CloudOff size={12} />
+            </span>
+          )}
+        </div>
         <button
           onClick={() => setCustomOnly((prev) => !prev)}
           className={`px-3 py-2 rounded border font-mono text-[10px] uppercase tracking-widest ${
@@ -146,7 +192,7 @@ export const MonsterList: React.FC = () => {
             Limpar filtros
           </button>
         )}
-        <button 
+        <button
           onClick={handleCreate}
           className="ml-auto bg-ordem-red/20 border border-ordem-red text-white px-3 py-2 rounded hover:bg-ordem-red/40 transition-colors font-mono text-sm uppercase"
         >
@@ -156,9 +202,9 @@ export const MonsterList: React.FC = () => {
 
       <div className="grid grid-cols-1 gap-4 overflow-y-auto custom-scrollbar pr-2 pb-4">
         {filteredMonsters.map((monster, index) => (
-          <MonsterCard 
-            key={`${monster.nome}-${index}`} 
-            monster={monster} 
+          <MonsterCard
+            key={`${monster.nome}-${index}`}
+            monster={monster}
             onEdit={monster.isCustom ? () => handleEdit(monster, monster.id!) : undefined}
             onDelete={monster.isCustom ? () => remover(monster.id!) : undefined}
             onClone={() => handleClone(monster)}
@@ -172,10 +218,10 @@ export const MonsterList: React.FC = () => {
       </div>
 
       {showEditor && (
-        <MonsterEditor 
-          initialData={editingMonster?.ameaca} 
-          onSave={handleSave} 
-          onCancel={() => setShowEditor(false)} 
+        <MonsterEditor
+          initialData={editingMonster?.ameaca}
+          onSave={handleSave}
+          onCancel={() => setShowEditor(false)}
         />
       )}
     </div>
@@ -207,7 +253,7 @@ const MonsterCard: React.FC<MonsterCardProps> = ({ monster, onEdit, onDelete, on
 
   return (
     <div className={`border rounded transition-colors duration-300 ${expanded ? 'bg-ordem-black/80 border-ordem-border-light' : 'bg-ordem-black/40 border-ordem-border hover:border-ordem-border-light'}`}>
-      <div 
+      <div
         className="p-4 flex items-center justify-between cursor-pointer select-none"
         onClick={() => setExpanded(!expanded)}
       >
@@ -223,7 +269,7 @@ const MonsterCard: React.FC<MonsterCardProps> = ({ monster, onEdit, onDelete, on
                 <p className="text-xs font-mono text-ordem-text-secondary">{monster.tipo} &bull; {monster.tamanho}</p>
             </div>
         </div>
-        
+
         <div className="flex items-center gap-6">
             <div className="text-right hidden md:block">
                 <div className="text-[10px] font-mono text-ordem-text-muted uppercase">Vida</div>
@@ -286,11 +332,11 @@ const MonsterCard: React.FC<MonsterCardProps> = ({ monster, onEdit, onDelete, on
                                 <p><span className="text-ordem-text-muted">Vontade:</span> {monster.vontade || '—'}</p>
                                 <p><span className="text-ordem-text-muted">Deslocamento:</span> {monster.deslocamento || '—'}</p>
                             </div>
-                            
+
                             {monster.sentidos && (
                                 <p><span className="text-ordem-text-muted">Sentidos:</span> {monster.sentidos}</p>
                             )}
-                            
+
                             {monster.pericias && Object.keys(monster.pericias).length > 0 && (
                                 <p><span className="text-ordem-text-muted">Perícias:</span> {Object.entries(monster.pericias).map(([k, v]) => `${k} ${v}`).join(', ')}</p>
                             )}
@@ -321,7 +367,7 @@ const MonsterCard: React.FC<MonsterCardProps> = ({ monster, onEdit, onDelete, on
                                     <p className="text-ordem-white-muted text-sm leading-relaxed">{acao.descricao}</p>
                                 </div>
                             ))}
-                            
+
                             {monster.habilidades?.map((hab, idx) => (
                                 <div key={`hab-${idx}`} className="text-sm pl-2 border-l-2 border-ordem-border-light">
                                     <span className="font-bold text-gray-200 italic">{hab.nome}: </span>

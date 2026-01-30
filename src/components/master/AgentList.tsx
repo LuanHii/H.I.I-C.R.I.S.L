@@ -216,7 +216,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
           {issueSummary.errors > 0 ? 'ERRO' : 'AVISO'} {issueSummary.total}
         </div>
       )}
-      {/* Header */}
+      {}
       <div className="flex justify-between items-start">
         <div>
             <h3 className="text-lg font-serif leading-tight truncate text-gray-200" title={nome}>{nome}</h3>
@@ -230,38 +230,38 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
         </div>
       </div>
 
-      {/* Stats Grid */}
+      {}
       <div className="grid grid-cols-3 gap-2">
-        {/* PV */}
+        {}
         <div className="relative overflow-hidden bg-ordem-black/40 border border-red-900/30 p-2 rounded flex flex-col items-center justify-between group/stat h-20">
-          {/* Bar Background */}
+          {}
           <div className="absolute bottom-0 left-0 w-full bg-red-900/20 h-full z-0" />
-          {/* Bar Fill */}
-          <div 
+          {}
+          <div
             className="absolute bottom-0 left-0 w-full bg-red-600/20 transition-all duration-500 ease-out z-0 border-t border-red-500/30"
             style={{ height: `${Math.min(100, (pv.atual / pv.max) * 100)}%` }}
           />
-          
+
           <div className="relative z-10 flex flex-col items-center w-full">
             <div className="text-[10px] font-mono text-red-400 uppercase mb-1">PV</div>
             <div className="font-bold text-white leading-none text-xl">
                 {pv.atual}<span className="text-xs text-ordem-text-muted">/{pv.max}</span>
             </div>
           </div>
-          
-          {/* Quick Actions */}
+
+          {}
           <div className="relative z-10 flex gap-1 mt-1">
             <button onClick={() => adjustStat('pv', -1)} className="w-6 h-6 flex items-center justify-center bg-ordem-black/60 hover:bg-red-900/80 text-red-200 rounded text-xs border border-red-900/50 transition-colors">-1</button>
             <button onClick={() => adjustStat('pv', 1)} className="w-6 h-6 flex items-center justify-center bg-ordem-black/60 hover:bg-red-900/80 text-red-200 rounded text-xs border border-red-900/50 transition-colors">+1</button>
           </div>
         </div>
 
-        {/* SAN / PD */}
+        {}
         <div className={`relative overflow-hidden bg-ordem-black/40 border p-2 rounded flex flex-col items-center justify-between h-20 ${usesPd ? 'border-ordem-border-light' : 'border-blue-900/30'}`}>
-          {/* Bar Background */}
+          {}
           <div className={`absolute bottom-0 left-0 w-full h-full z-0 ${usesPd ? 'bg-ordem-ooze/20' : 'bg-blue-900/20'}`} />
-          {/* Bar Fill */}
-          <div 
+          {}
+          <div
             className={`absolute bottom-0 left-0 w-full transition-all duration-500 ease-out z-0 border-t ${usesPd ? 'bg-ordem-text-muted/20 border-ordem-text-secondary/30' : 'bg-blue-600/20 border-blue-500/30'}`}
             style={{ height: `${usesPd ? `${Math.min(100, ((pd?.atual ?? 0) / (pdMax || 1)) * 100)}%` : `${Math.min(100, (san.atual / san.max) * 100)}%`}` }}
           />
@@ -277,15 +277,15 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
           </div>
 
           <div className="relative z-10 flex gap-1 mt-1">
-            <button 
-                onClick={() => adjustStat(usesPd ? 'pd' : 'san', -1)} 
+            <button
+                onClick={() => adjustStat(usesPd ? 'pd' : 'san', -1)}
                 className={`w-6 h-6 flex items-center justify-center rounded text-xs border transition-colors bg-ordem-black/60
                     ${usesPd ? 'hover:bg-ordem-border-light text-ordem-white-muted border-ordem-border-light' : 'hover:bg-blue-900/80 text-blue-200 border-blue-900/50'}`}
             >
                 -1
             </button>
-            <button 
-                onClick={() => adjustStat(usesPd ? 'pd' : 'san', 1)} 
+            <button
+                onClick={() => adjustStat(usesPd ? 'pd' : 'san', 1)}
                 className={`w-6 h-6 flex items-center justify-center rounded text-xs border transition-colors bg-ordem-black/60
                     ${usesPd ? 'hover:bg-ordem-border-light text-ordem-white-muted border-ordem-border-light' : 'hover:bg-blue-900/80 text-blue-200 border-blue-900/50'}`}
             >
@@ -294,13 +294,13 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
           </div>
         </div>
 
-        {/* PE (Hidden if using PD) */}
+        {}
         {!usesPd && (
         <div className="relative overflow-hidden bg-ordem-black/40 border border-yellow-900/30 p-2 rounded flex flex-col items-center justify-between h-20">
-          {/* Bar Background */}
+          {}
           <div className="absolute bottom-0 left-0 w-full bg-yellow-900/20 h-full z-0" />
-          {/* Bar Fill */}
-          <div 
+          {}
+          <div
             className="absolute bottom-0 left-0 w-full bg-yellow-600/20 transition-all duration-500 ease-out z-0 border-t border-yellow-500/30"
             style={{ height: `${Math.min(100, (pe.atual / pe.max) * 100)}%` }}
           />
@@ -320,7 +320,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
         )}
       </div>
 
-      {/* Attributes Mini */}
+      {}
       <div className="flex justify-between border-t border-ordem-border pt-3 mt-auto">
         {Object.entries(atributos).map(([key, value]) => (
           <div key={key} className="flex flex-col items-center">
@@ -330,16 +330,16 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
         ))}
       </div>
 
-      {/* Inventory Quick View */}
+      {}
       <div className="border-t border-ordem-border pt-2">
-        <button 
+        <button
             onClick={() => setShowInventory(!showInventory)}
             className="w-full text-xs font-mono text-ordem-text-muted hover:text-white flex items-center justify-between"
         >
             <span>INVENTÁRIO ({equipamentos.length})</span>
             <span>{showInventory ? '▲' : '▼'}</span>
         </button>
-        
+
         {showInventory && (
             <div className="mt-2 animate-in slide-in-from-top-2 duration-200">
                 <div className="max-h-32 overflow-y-auto custom-scrollbar mb-2 space-y-1">
@@ -351,7 +351,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
                     ))}
                     {equipamentos.length === 0 && <p className="text-xs text-ordem-text-muted italic">Vazio</p>}
                 </div>
-                <button 
+                <button
                     onClick={() => setIsItemModalOpen(true)}
                     className="w-full bg-ordem-ooze hover:bg-ordem-border-light text-white text-xs py-1 rounded border border-ordem-border-light transition-colors"
                 >
@@ -362,7 +362,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ id, personagem, onUpdate }) => {
       </div>
     </div>
 
-    <ItemSelectorModal 
+    <ItemSelectorModal
         isOpen={isItemModalOpen}
         onClose={() => setIsItemModalOpen(false)}
         onSelect={handleAddItem}

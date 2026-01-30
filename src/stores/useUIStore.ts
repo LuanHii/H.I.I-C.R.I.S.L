@@ -12,28 +12,17 @@ type ModalId =
     | 'pending-choice'
     | null;
 
-interface UIState {
-    // Sidebar
+interface UIState {
     sidebarOpen: boolean;
-    sidebarCollapsed: boolean;
-
-    // Modal
+    sidebarCollapsed: boolean;
     activeModal: ModalId;
-    modalData: unknown;
-
-    // Theme
+    modalData: unknown;
     theme: 'dark' | 'terminal';
-    scanlineEnabled: boolean;
-
-    // Mobile
+    scanlineEnabled: boolean;
     mobileMenuOpen: boolean;
-    mobileDetailOpen: boolean;
-
-    // Loading
+    mobileDetailOpen: boolean;
     globalLoading: boolean;
-    loadingMessage: string | null;
-
-    // Actions
+    loadingMessage: string | null;
     toggleSidebar: () => void;
     setSidebarOpen: (open: boolean) => void;
     toggleSidebarCollapsed: () => void;
@@ -50,8 +39,7 @@ interface UIState {
     setGlobalLoading: (loading: boolean, message?: string) => void;
 }
 
-export const useUIStore = create<UIState>((set) => ({
-    // Estado inicial
+export const useUIStore = create<UIState>((set) => ({
     sidebarOpen: true,
     sidebarCollapsed: false,
     activeModal: null,
@@ -61,33 +49,21 @@ export const useUIStore = create<UIState>((set) => ({
     mobileMenuOpen: false,
     mobileDetailOpen: false,
     globalLoading: false,
-    loadingMessage: null,
-
-    // Sidebar
+    loadingMessage: null,
     toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
     setSidebarOpen: (open) => set({ sidebarOpen: open }),
-    toggleSidebarCollapsed: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
-
-    // Modal
+    toggleSidebarCollapsed: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
     openModal: (id, data) => set({ activeModal: id, modalData: data }),
-    closeModal: () => set({ activeModal: null, modalData: null }),
-
-    // Theme
+    closeModal: () => set({ activeModal: null, modalData: null }),
     setTheme: (theme) => set({ theme }),
-    toggleScanline: () => set((state) => ({ scanlineEnabled: !state.scanlineEnabled })),
-
-    // Mobile
+    toggleScanline: () => set((state) => ({ scanlineEnabled: !state.scanlineEnabled })),
     setMobileMenuOpen: (open) => set({ mobileMenuOpen: open }),
-    setMobileDetailOpen: (open) => set({ mobileDetailOpen: open }),
-
-    // Loading
+    setMobileDetailOpen: (open) => set({ mobileDetailOpen: open }),
     setGlobalLoading: (loading, message) => set({
         globalLoading: loading,
         loadingMessage: message || null
     }),
-}));
-
-// Hooks seletores para performance
+}));
 export const useModal = () => ({
     activeModal: useUIStore((state) => state.activeModal),
     modalData: useUIStore((state) => state.modalData),

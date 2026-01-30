@@ -37,17 +37,13 @@ export function GuiaMestre({ fichas, onUpdateFicha }: GuiaMestreProps) {
         } catch {
             return new Set();
         }
-    });
-
-    // Filtrar regras
+    });
     const regrasFiltradas = useMemo(() => {
         let resultado = busca.trim()
             ? buscarRegras(busca)
             : categoriaAtiva === 'todas'
                 ? REGRAS
-                : regrasPorCategoria(categoriaAtiva);
-
-        // Favoritos primeiro
+                : regrasPorCategoria(categoriaAtiva);
         return resultado.sort((a, b) => {
             const aFav = favoritos.has(a.id) ? 0 : 1;
             const bFav = favoritos.has(b.id) ? 0 : 1;
@@ -78,7 +74,7 @@ export function GuiaMestre({ fichas, onUpdateFicha }: GuiaMestreProps) {
 
     return (
         <div className="max-w-5xl mx-auto p-4 sm:p-6">
-            {/* Header */}
+            {}
             <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -146,7 +142,7 @@ export function GuiaMestre({ fichas, onUpdateFicha }: GuiaMestreProps) {
 
             {activeTab === 'regras' && (
                 <>
-                    {/* Busca */}
+                    {}
                     <div className="relative mb-4">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-ordem-text-muted" />
                         <input
@@ -166,7 +162,7 @@ export function GuiaMestre({ fichas, onUpdateFicha }: GuiaMestreProps) {
                         )}
                     </div>
 
-                    {/* Categorias */}
+                    {}
                     <div className="flex flex-wrap gap-2 mb-6">
                         <motion.button
                             whileHover={{ scale: 1.02 }}
@@ -199,13 +195,13 @@ export function GuiaMestre({ fichas, onUpdateFicha }: GuiaMestreProps) {
                         ))}
                     </div>
 
-                    {/* Resultados */}
+                    {}
                     <div className="text-xs text-ordem-text-muted mb-3">
                         {regrasFiltradas.length} regra(s) encontrada(s)
                         {favoritos.size > 0 && ` • ${favoritos.size} favorito(s)`}
                     </div>
 
-                    {/* Lista de Regras */}
+                    {}
                     <div className="space-y-3">
                         <AnimatePresence mode="popLayout">
                             {regrasFiltradas.map((regra, index) => (
@@ -239,9 +235,7 @@ export function GuiaMestre({ fichas, onUpdateFicha }: GuiaMestreProps) {
             )}
         </div>
     );
-}
-
-// Card de Regra
+}
 interface RegraCardProps {
     regra: Regra;
     expandido: boolean;
@@ -259,9 +253,9 @@ function RegraCard({ regra, expandido, favorito, onToggle, onFavorito }: RegraCa
             'bg-ordem-ooze/50 border-ordem-border-light',
             expandido && 'border-ordem-red/30'
         )}>
-            {/* Header */}
+            {}
             <div className="flex items-center">
-                {/* Botão de favorito - FORA do botão principal */}
+                {}
                 <button
                     onClick={onFavorito}
                     className={cn(
@@ -272,7 +266,7 @@ function RegraCard({ regra, expandido, favorito, onToggle, onFavorito }: RegraCa
                     <Star size={16} fill={favorito ? 'currentColor' : 'none'} />
                 </button>
 
-                {/* Botão de expandir */}
+                {}
                 <button
                     onClick={onToggle}
                     className="flex-1 p-4 flex items-start justify-between text-left hover:bg-ordem-ooze/80 transition-colors"
@@ -300,7 +294,7 @@ function RegraCard({ regra, expandido, favorito, onToggle, onFavorito }: RegraCa
                 </button>
             </div>
 
-            {/* Conteúdo Expandido */}
+            {}
             <AnimatePresence>
                 {expandido && (
                     <motion.div
@@ -311,7 +305,7 @@ function RegraCard({ regra, expandido, favorito, onToggle, onFavorito }: RegraCa
                         className="overflow-hidden"
                     >
                         <div className="px-4 pb-4 pt-0 border-t border-ordem-border/30">
-                            {/* Detalhes */}
+                            {}
                             {regra.detalhes && (
                                 <div className="mt-3 p-3 bg-ordem-black-deep rounded-lg">
                                     <pre className="text-sm text-ordem-white-muted whitespace-pre-wrap font-mono">
@@ -320,7 +314,7 @@ function RegraCard({ regra, expandido, favorito, onToggle, onFavorito }: RegraCa
                                 </div>
                             )}
 
-                            {/* Tabela */}
+                            {}
                             {regra.tabela && (
                                 <div className="mt-3 overflow-x-auto">
                                     <table className="w-full text-sm border-collapse">
@@ -348,7 +342,7 @@ function RegraCard({ regra, expandido, favorito, onToggle, onFavorito }: RegraCa
                                 </div>
                             )}
 
-                            {/* Dica */}
+                            {}
                             {regra.dica && (
                                 <div className="mt-3 p-3 bg-yellow-900/20 border border-yellow-800/30 rounded-lg">
                                     <div className="flex items-start gap-2">
@@ -358,7 +352,7 @@ function RegraCard({ regra, expandido, favorito, onToggle, onFavorito }: RegraCa
                                 </div>
                             )}
 
-                            {/* Tags */}
+                            {}
                             <div className="mt-3 flex flex-wrap gap-1">
                                 {regra.tags.map(tag => (
                                     <span

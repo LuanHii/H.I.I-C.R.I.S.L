@@ -26,8 +26,7 @@ const variantStyles: Record<BadgeVariant, string> = {
     success: 'bg-green-900/30 border-green-800 text-green-400',
     warning: 'bg-amber-900/30 border-amber-800 text-amber-400',
     danger: 'bg-red-900/30 border-red-800 text-red-400',
-    info: 'bg-blue-900/30 border-blue-800 text-blue-400',
-    // Variantes específicas para condições
+    info: 'bg-blue-900/30 border-blue-800 text-blue-400',
     medo: 'bg-purple-900/20 border-purple-700 text-purple-300',
     mental: 'bg-blue-900/20 border-blue-700 text-blue-300',
     paralisia: 'bg-amber-900/20 border-amber-700 text-amber-300',
@@ -58,9 +57,7 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
     }
 );
 
-Badge.displayName = 'Badge';
-
-// Badge com dot indicator
+Badge.displayName = 'Badge';
 interface DotBadgeProps extends BadgeProps {
     dot?: boolean;
     dotColor?: string;

@@ -1,9 +1,7 @@
 import { Ameaca } from '../core/types';
 
 export const AMEACAS: Ameaca[] = [
-  // ===================================================================
-  // AMEAÇAS DE SOBREVIVENDO AO HORROR (SaH)
-  // ===================================================================
+
   {
     nome: 'Sepultado',
     vd: 20,
@@ -172,7 +170,7 @@ export const AMEACAS: Ameaca[] = [
       }
     ],
     acoes: [
-      // Ações hostis são descritas principalmente nas regras de Parasitose Melancólica e Atormentar.
+
     ],
     livro: 'Sobrevivendo ao Horror'
   },
@@ -617,9 +615,6 @@ export const AMEACAS: Ameaca[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // AMEAÇAS DO LIVRO BÁSICO (OPRPG)
-  // ===================================================================
   {
     nome: 'Aberração de Carne',
     vd: 40,
@@ -727,7 +722,7 @@ export const AMEACAS: Ameaca[] = [
         descricao: 'Pode se movimentar para qualquer espaço com grande quantidade de sangue exposta.',
         tipo: 'Movimento'
       }
-      // Não inclui Desejos de Sangue por não estar detalhado na ficha/habilidades em nível de ação.
+
     ],
     livro: 'Regras Básicas'
   },
@@ -1165,7 +1160,7 @@ export const AMEACAS: Ameaca[] = [
       nexImune: 99
     },
     sentidos: 'Percepção —, Iniciativa —, Visão no Escuro',
-    defesa: 40, // Baseado nos atributos de 5d20+15 para Fort/Refl/Vontade
+    defesa: 40,
     fortitude: '5d20+15',
     reflexos: '5d20+15',
     vontade: '5d20+15',
@@ -1174,11 +1169,11 @@ export const AMEACAS: Ameaca[] = [
     resistencias: [],
     vulnerabilidades: ['Conhecimento'],
     atributos: {
-      AGI: 0, // Imaterial
-      FOR: 0, // Imaterial
+      AGI: 0,
+      FOR: 0,
       INT: 5,
       PRE: 5,
-      VIG: 0 // Imaterial
+      VIG: 0
     },
     pericias: {},
     deslocamento: '0m (Voo 0m)',
@@ -1262,7 +1257,7 @@ export const AMEACAS: Ameaca[] = [
       }
     ],
     acoes: [
-      // Ações são dependentes das facetas no Ato 1 e 2, mas aqui listamos um exemplo de faceta:
+
       {
         nome: 'Afogamento (Silenus - Ato 2)',
         descricao: 'Um ser que sofre dano de Corte de Água fica asfixiado (Fortitude DT 35 evita).',
@@ -1616,13 +1611,10 @@ export const AMEACAS: Ameaca[] = [
         descricao: 'No início do turno, rola 1d6 para determinar ação. Se não puder agir, recebe RD 5 até o próximo turno.'
       }
     ],
-    acoes: [], // Ações definidas pela tabela de Comportamento Errático
+    acoes: [],
     livro: 'Regras Básicas'
   },
 
-  // ===================================================================
-  // AMEAÇAS FALTANTES DE SOBREVIVENDO AO HORROR
-  // ===================================================================
   {
     nome: 'Mescla',
     vd: 40,
@@ -1734,9 +1726,6 @@ export const AMEACAS: Ameaca[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // AMEAÇAS DA REALIDADE - SOBREVIVENDO AO HORROR
-  // ===================================================================
   {
     nome: 'Bêbado Local',
     vd: 10,
@@ -2058,9 +2047,6 @@ export const AMEACAS: Ameaca[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // SERIAL KILLERS - SOBREVIVENDO AO HORROR
-  // ===================================================================
   {
     nome: 'Predador Sofisticado',
     vd: 60,
@@ -2267,9 +2253,6 @@ export const AMEACAS: Ameaca[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  // ===================================================================
-  // ANIMAIS - SOBREVIVENDO AO HORROR
-  // ===================================================================
   {
     nome: 'Ariranha',
     vd: 20,

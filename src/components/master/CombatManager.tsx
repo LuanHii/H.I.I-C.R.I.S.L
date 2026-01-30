@@ -17,7 +17,6 @@ import { useStoredFichas } from '@/core/storage/useStoredFichas';
 import { useStoredMonsters } from '@/core/storage/useStoredMonsters';
 import { cn } from '@/lib/utils';
 
-// Quick reference data
 const QUICK_ACTIONS = REGRAS.filter(r =>
     r.categoria === 'combate' || r.categoria === 'ataques' || r.categoria === 'manobras'
 ).slice(0, 15);
@@ -35,23 +34,20 @@ interface CombatManagerProps {
 }
 
 export function CombatManager({ creatures = [] }: CombatManagerProps) {
-    // Load fichas from storage
+
     const { fichas, salvar: salvarFicha } = useStoredFichas();
-    // Load custom threats from existing unified store
+
     const { monstros, salvar: salvarMonstro } = useStoredMonsters();
 
     const userThreats = useMemo(() => monstros.map(m => m.ameaca), [monstros]);
 
-    // Transform fichas to agent format for AddCombatantModal
     const agents = useMemo(() => fichas.map(f => {
         const p = f.personagem;
-        // Get iniciativa bonus from periciasDetalhadas if available
+
         const iniciativaBonus = p.periciasDetalhadas?.Iniciativa?.bonusFixo ?? 0;
 
-        // Map abilities
         const abilities: CombatantAbility[] = [];
 
-        // Powers
         p.poderes.forEach(poder => {
             abilities.push({
                 name: poder.nome,
@@ -60,7 +56,6 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
             });
         });
 
-        // Rituals
         p.rituais.forEach(ritual => {
             abilities.push({
                 name: ritual.nome,
@@ -81,19 +76,18 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
             sanMax: p.san?.max ?? 0,
             defesa: p.defesa ?? 10,
             pericias: { Iniciativa: { total: iniciativaBonus } },
-            abilities // Pass to modal
+            abilities
         };
     }), [fichas]);
 
-    // Transform AMEACAS and userThreats to creatures format for AddCombatantModal
     const allCreatures = useMemo(() => {
-        // Parse initiative from sentidos string (e.g., "Iniciativa O+5" or "Iniciativa 2d20+10")
+
         const parseIniciativa = (sentidos: string | undefined): number => {
             if (!sentidos) return 0;
             const match = sentidos.match(/Iniciativa\s+(?:O\+?(\d+)|(\d+)d20\+(\d+))/i);
             if (match) {
-                if (match[1]) return parseInt(match[1], 10); // O+X format
-                if (match[3]) return parseInt(match[3], 10); // XdY+Z format - return base bonus
+                if (match[1]) return parseInt(match[1], 10);
+                if (match[3]) return parseInt(match[3], 10);
             }
             return 0;
         };
@@ -103,16 +97,14 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
         return sourceThreats.map(a => {
             const abilities: CombatantAbility[] = [];
 
-            // Actions
             a.acoes.forEach(acao => {
                 abilities.push({
                     name: acao.nome,
                     description: `${acao.descricao}${acao.teste ? ` (Teste: ${acao.teste})` : ''}${acao.dano ? ` (Dano: ${acao.dano})` : ''}`,
-                    type: acao.tipo // Padrão, Movimento, etc.
+                    type: acao.tipo
                 });
             });
 
-            // Abilities
             a.habilidades.forEach(h => {
                 abilities.push({
                     name: h.nome,
@@ -127,17 +119,15 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                 pv: a.vida ?? 0,
                 defesa: a.defesa ?? 10,
                 iniciativa: parseIniciativa(a.sentidos),
-                abilities // Pass to modal
+                abilities
             };
         });
     }, [userThreats]);
 
-    // Merge external creatures prop with AMEACAS data
     const mergedCreatures = useMemo(() => {
         return [...allCreatures, ...creatures];
     }, [allCreatures, creatures]);
 
-    // Load state from localStorage
     const loadState = (): CombatState => {
         if (typeof window === 'undefined') return { isActive: false, combatants: [], currentTurnIndex: 0, round: 1 };
         try {
@@ -151,15 +141,38 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showQuickRef, setShowQuickRef] = useState(false);
     const [quickRefTab, setQuickRefTab] = useState<'dice' | 'actions' | 'conditions'>('dice');
+    const [quickRefQuery, setQuickRefQuery] = useState('');
 
-    // Save state to localStorage
+    useEffect(() => {
+        setQuickRefQuery('');
+    }, [quickRefTab]);
+
+    const filteredQuickActions = useMemo(() => {
+        const q = quickRefQuery.trim().toLowerCase();
+        if (!q) return QUICK_ACTIONS;
+        return QUICK_ACTIONS.filter(rule =>
+            rule.titulo.toLowerCase().includes(q) ||
+            rule.resumo.toLowerCase().includes(q) ||
+            (rule.tags || []).some(t => t.toLowerCase().includes(q))
+        );
+    }, [quickRefQuery]);
+
+    const filteredQuickConditions = useMemo(() => {
+        const q = quickRefQuery.trim().toLowerCase();
+        if (!q) return QUICK_CONDITIONS;
+        return QUICK_CONDITIONS.filter(rule =>
+            rule.titulo.toLowerCase().includes(q) ||
+            rule.resumo.toLowerCase().includes(q) ||
+            (rule.tags || []).some(t => t.toLowerCase().includes(q))
+        );
+    }, [quickRefQuery]);
+
     useEffect(() => {
         if (typeof window !== 'undefined') {
             localStorage.setItem('combat-state', JSON.stringify(state));
         }
     }, [state]);
 
-    // Sorted combatants by initiative (highest first)
     const sortedCombatants = useMemo(() => {
         return [...state.combatants]
             .filter(c => c.isActive)
@@ -170,10 +183,8 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
         return state.combatants.filter(c => !c.isActive);
     }, [state.combatants]);
 
-    // Current combatant
     const currentCombatant = sortedCombatants[state.currentTurnIndex] || null;
 
-    // Actions
     const addCombatants = useCallback((newCombatants: Combatant[]) => {
         setState(prev => ({
             ...prev,
@@ -182,7 +193,6 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
         setShowAddModal(false);
     }, []);
 
-    // Sync agent stats with stored fichas
     const syncAgentStats = useCallback((combatant: Combatant) => {
         if (combatant.type !== 'agent' || !combatant.sourceId) return;
 
@@ -192,20 +202,17 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
         const novoPersonagem = { ...ficha.personagem };
         let changed = false;
 
-        // Update PV
         if (novoPersonagem.pv.atual !== combatant.hp.current) {
-            // Ensure we preserve other pv properties
+
             novoPersonagem.pv = { ...novoPersonagem.pv, atual: combatant.hp.current };
             changed = true;
         }
 
-        // Update PE
         if (combatant.pe && novoPersonagem.pe.atual !== combatant.pe.current) {
             novoPersonagem.pe = { ...novoPersonagem.pe, atual: combatant.pe.current };
             changed = true;
         }
 
-        // Update SAN
         if (combatant.san && novoPersonagem.san.atual !== combatant.san.current) {
             novoPersonagem.san = { ...novoPersonagem.san, atual: combatant.san.current };
             changed = true;
@@ -221,7 +228,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
             const newCombatants = prev.combatants.map(c => {
                 if (c.id === id) {
                     const updated = { ...c, ...updates };
-                    // Sync with ficha if it's an agent
+
                     syncAgentStats(updated);
                     return updated;
                 }
@@ -273,7 +280,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
 
             const nextIndex = prev.currentTurnIndex + 1;
             if (nextIndex >= activeCount) {
-                // New round
+
                 return { ...prev, currentTurnIndex: 0, round: prev.round + 1 };
             }
             return { ...prev, currentTurnIndex: nextIndex };
@@ -322,7 +329,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
 
     return (
         <div className="max-w-7xl mx-auto p-4 sm:p-6">
-            {/* Header */}
+            {}
             <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -339,7 +346,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                         </p>
                     </div>
 
-                    {/* Combat Controls */}
+                    {}
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setShowAddModal(true)}
@@ -369,21 +376,21 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                 </div>
             </motion.div>
 
-            {/* Main Content */}
+            {}
             <div className="flex gap-6">
-                {/* Initiative Tracker */}
+                {}
                 <div className="flex-1 min-w-0">
-                    {/* Combat Status Bar */}
+                    {}
                     <div className="mb-4 p-4 bg-ordem-ooze/50 border border-ordem-border rounded-xl">
                         <div className="flex items-center justify-between flex-wrap gap-3">
                             <div className="flex items-center gap-4">
-                                {/* Round Counter */}
+                                {}
                                 <div className="text-center">
                                     <span className="text-2xl font-bold text-white">{state.round}</span>
                                     <p className="text-[10px] text-ordem-text-muted uppercase">Rodada</p>
                                 </div>
 
-                                {/* Turn Counter */}
+                                {}
                                 <div className="text-center">
                                     <span className="text-2xl font-bold text-ordem-green">
                                         {sortedCombatants.length > 0 ? state.currentTurnIndex + 1 : 0}
@@ -392,7 +399,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                     <p className="text-[10px] text-ordem-text-muted uppercase">Turno</p>
                                 </div>
 
-                                {/* Current Combatant Name */}
+                                {}
                                 {currentCombatant && state.isActive && (
                                     <div className="hidden sm:block pl-4 border-l border-ordem-border">
                                         <p className="text-xs text-ordem-text-muted">Vez de:</p>
@@ -401,7 +408,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                 )}
                             </div>
 
-                            {/* Controls */}
+                            {}
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={prevTurn}
@@ -460,7 +467,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                         </div>
                     </div>
 
-                    {/* Combatants List */}
+                    {}
                     {state.combatants.length === 0 ? (
                         <motion.div
                             initial={{ opacity: 0 }}
@@ -494,7 +501,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                 ))}
                             </AnimatePresence>
 
-                            {/* Inactive Combatants */}
+                            {}
                             {inactiveCombatants.length > 0 && (
                                 <div className="mt-6 pt-4 border-t border-ordem-border">
                                     <h3 className="text-sm text-ordem-text-muted mb-3 flex items-center gap-2">
@@ -518,7 +525,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                     )}
                 </div>
 
-                {/* Quick Reference Panel */}
+                {}
                 <AnimatePresence>
                     {showQuickRef && (
                         <motion.div
@@ -534,7 +541,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                     </h3>
                                 </div>
 
-                                {/* Tabs */}
+                                {}
                                 <div className="flex border-b border-ordem-border">
                                     <button
                                         onClick={() => setQuickRefTab('dice')}
@@ -565,7 +572,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                     </button>
                                 </div>
 
-                                {/* Content */}
+                                {}
                                 <div className="max-h-[calc(100vh-300px)] overflow-y-auto custom-scrollbar">
                                     {quickRefTab === 'dice' && (
                                         <div className="p-2">
@@ -573,23 +580,59 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                         </div>
                                     )}
                                     {quickRefTab === 'actions' && (
-                                        <div className="p-2 space-y-1">
-                                            {QUICK_ACTIONS.map(rule => (
-                                                <div key={rule.id} className="p-2 hover:bg-ordem-ooze rounded transition-colors">
+                                        <div className="p-2 space-y-2">
+                                            <input
+                                                value={quickRefQuery}
+                                                onChange={(e) => setQuickRefQuery(e.target.value)}
+                                                placeholder="Buscar ações..."
+                                                className="w-full bg-ordem-black/40 border border-ordem-border-light text-white px-3 py-2 rounded focus:border-ordem-red focus:outline-none text-xs"
+                                            />
+                                            <div className="text-[10px] text-ordem-text-muted">
+                                                {filteredQuickActions.length} resultado(s)
+                                            </div>
+                                            {filteredQuickActions.map(rule => (
+                                                <div
+                                                    key={rule.id}
+                                                    className="p-2 hover:bg-ordem-ooze rounded transition-colors"
+                                                    title={rule.detalhes || rule.resumo}
+                                                >
                                                     <h4 className="text-sm font-medium text-white">{rule.titulo}</h4>
                                                     <p className="text-xs text-ordem-text-muted">{rule.resumo}</p>
                                                 </div>
                                             ))}
+                                            {filteredQuickActions.length === 0 && (
+                                                <div className="text-xs text-ordem-text-muted italic py-2">
+                                                    Nenhuma ação encontrada.
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                     {quickRefTab === 'conditions' && (
-                                        <div className="p-2 space-y-1">
-                                            {QUICK_CONDITIONS.map(rule => (
-                                                <div key={rule.id} className="p-2 hover:bg-ordem-ooze rounded transition-colors">
+                                        <div className="p-2 space-y-2">
+                                            <input
+                                                value={quickRefQuery}
+                                                onChange={(e) => setQuickRefQuery(e.target.value)}
+                                                placeholder="Buscar condições..."
+                                                className="w-full bg-ordem-black/40 border border-ordem-border-light text-white px-3 py-2 rounded focus:border-ordem-red focus:outline-none text-xs"
+                                            />
+                                            <div className="text-[10px] text-ordem-text-muted">
+                                                {filteredQuickConditions.length} resultado(s)
+                                            </div>
+                                            {filteredQuickConditions.map(rule => (
+                                                <div
+                                                    key={rule.id}
+                                                    className="p-2 hover:bg-ordem-ooze rounded transition-colors"
+                                                    title={rule.detalhes || rule.resumo}
+                                                >
                                                     <h4 className="text-sm font-medium text-white">{rule.titulo}</h4>
                                                     <p className="text-xs text-ordem-text-muted">{rule.resumo}</p>
                                                 </div>
                                             ))}
+                                            {filteredQuickConditions.length === 0 && (
+                                                <div className="text-xs text-ordem-text-muted italic py-2">
+                                                    Nenhuma condição encontrada.
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -599,7 +642,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                 </AnimatePresence>
             </div>
 
-            {/* Add Combatant Modal */}
+            {}
             <AddCombatantModal
                 isOpen={showAddModal}
                 onClose={() => setShowAddModal(false)}

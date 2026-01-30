@@ -1,5 +1,4 @@
-// Dados estruturados das regras do sistema Ordem Paranormal RPG
-// Baseado nos documentos: Sistema-Ordem-Paranormal.md, Guia-Testes-e-Combate.md, Condicoes-Status.md
+
 
 export type RegraCategoria =
     | 'criacao'
@@ -38,7 +37,7 @@ export const CATEGORIAS: { id: RegraCategoria; nome: string; icone: string; cor:
 ];
 
 export const REGRAS: Regra[] = [
-    // === CRIAÇÃO DE PERSONAGEM ===
+
     {
         id: 'passo-a-passo-criacao',
         titulo: 'Passo a Passo: Criação de Ficha',
@@ -123,7 +122,6 @@ export const REGRAS: Regra[] = [
         tags: ['proficiência', 'arma', 'proteção', 'classe']
     },
 
-    // === TESTES ===
     {
         id: 'teste-basico',
         titulo: 'Como Fazer um Teste',
@@ -185,7 +183,6 @@ export const REGRAS: Regra[] = [
         tags: ['dt', 'resistência', 'habilidade', 'pe']
     },
 
-    // === COMBATE ===
     {
         id: 'estrutura-turno',
         titulo: 'Estrutura do Turno',
@@ -220,7 +217,6 @@ export const REGRAS: Regra[] = [
         tags: ['ação', 'padrão', 'movimento', 'completa', 'livre', 'reação']
     },
 
-    // === ATAQUES ===
     {
         id: 'ataque-basico',
         titulo: 'Teste de Ataque',
@@ -257,7 +253,6 @@ export const REGRAS: Regra[] = [
         tags: ['fintar', 'enganação', 'desprevenido']
     },
 
-    // === MANOBRAS ===
     {
         id: 'manobras-geral',
         titulo: 'Manobras de Combate',
@@ -307,7 +302,6 @@ export const REGRAS: Regra[] = [
         tags: ['investida', 'movimento', 'ataque']
     },
 
-    // === DEFESA ===
     {
         id: 'acoes-defesa',
         titulo: 'Ações de Defesa (Reação)',
@@ -336,7 +330,6 @@ export const REGRAS: Regra[] = [
         tags: ['modificador', 'flanquear', 'cobertura']
     },
 
-    // === CONDIÇÕES ===
     {
         id: 'abalado',
         titulo: 'Abalado',
@@ -433,7 +426,6 @@ export const REGRAS: Regra[] = [
         tags: ['em chamas', 'fogo', 'dano', 'condição']
     },
 
-    // === SANIDADE ===
     {
         id: 'sanidade-basico',
         titulo: 'Sistema de Sanidade',
@@ -459,7 +451,6 @@ export const REGRAS: Regra[] = [
         tags: ['acalmar', 'sanidade', 'diplomacia']
     },
 
-    // === RITUAIS ===
     {
         id: 'ritual-basico',
         titulo: 'Conjurar Ritual',
@@ -494,7 +485,6 @@ export const REGRAS: Regra[] = [
         tags: ['elemento', 'ritual']
     },
 
-    // === EQUIPAMENTO ===
     {
         id: 'patentes',
         titulo: 'Limites por Patente',
@@ -521,7 +511,6 @@ export const REGRAS: Regra[] = [
         tags: ['modificação', 'arma', 'categoria']
     },
 
-    // === INVESTIGAÇÃO ===
     {
         id: 'auxiliar',
         titulo: 'Ação: Auxiliar',
@@ -596,7 +585,6 @@ export const REGRAS: Regra[] = [
         tags: ['retentativa', 'teste', 'repetir']
     },
 
-    // === PERIGOS E DANOS ESPECIAIS ===
     {
         id: 'dano-massivo',
         titulo: 'Dano Massivo',
@@ -663,7 +651,6 @@ export const REGRAS: Regra[] = [
         tags: ['fome', 'sede', 'sobrevivência']
     },
 
-    // === ALCANCES E MOVIMENTO ===
     {
         id: 'alcances',
         titulo: 'Categorias de Alcance',
@@ -699,7 +686,6 @@ export const REGRAS: Regra[] = [
         tags: ['terreno', 'movimento', 'difícil']
     },
 
-    // === ILUMINAÇÃO E VISIBILIDADE ===
     {
         id: 'iluminacao',
         titulo: 'Iluminação',
@@ -724,7 +710,6 @@ export const REGRAS: Regra[] = [
         tags: ['camuflagem', 'cobertura', 'defesa']
     },
 
-    // === MAIS CONDIÇÕES ===
     {
         id: 'agarrado',
         titulo: 'Agarrado',
@@ -890,7 +875,6 @@ export const REGRAS: Regra[] = [
         tags: ['alquebrado', 'condição', 'mental', 'pe']
     },
 
-    // === HIERARQUIA DE CONDIÇÕES ===
     {
         id: 'hierarquia-condicoes',
         titulo: 'Hierarquia de Condições',
@@ -900,7 +884,6 @@ export const REGRAS: Regra[] = [
         tags: ['hierarquia', 'condição', 'acúmulo']
     },
 
-    // === REGRAS DE COMBATE ADICIONAIS ===
     {
         id: 'golpe-misericordia',
         titulo: 'Golpe de Misericórdia',
@@ -950,7 +933,6 @@ export const REGRAS: Regra[] = [
         tags: ['ágil', 'agilidade', 'arma']
     },
 
-    // === CARGA E EQUIPAMENTO ===
     {
         id: 'capacidade-carga',
         titulo: 'Capacidade de Carga',
@@ -977,7 +959,6 @@ export const REGRAS: Regra[] = [
         tags: ['espaço', 'carga', 'item']
     },
 
-    // === TIPOS DE DANO ===
     {
         id: 'tipos-dano',
         titulo: 'Tipos de Dano',
@@ -1008,7 +989,6 @@ export const REGRAS: Regra[] = [
         tags: ['resistência', 'dano', 'rd', 'proteção']
     },
 
-    // === RITUAIS AVANÇADOS ===
     {
         id: 'ritual-componentes',
         titulo: 'Componentes Ritualísticos',
@@ -1027,8 +1007,6 @@ export const REGRAS: Regra[] = [
     },
 ];
 
-
-// Função para buscar regras
 export function buscarRegras(termo: string): Regra[] {
     const termoLower = termo.toLowerCase();
     return REGRAS.filter(r =>
@@ -1039,7 +1017,6 @@ export function buscarRegras(termo: string): Regra[] {
     );
 }
 
-// Função para filtrar por categoria
 export function regrasPorCategoria(categoria: RegraCategoria): Regra[] {
     return REGRAS.filter(r => r.categoria === categoria);
 }

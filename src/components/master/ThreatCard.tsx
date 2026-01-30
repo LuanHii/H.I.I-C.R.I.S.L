@@ -41,21 +41,21 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({ threat, onUpdateHP, onRe
               <span className="text-[10px] font-mono bg-ordem-black/50 px-1.5 py-0.5 rounded text-ordem-text-secondary border border-ordem-border-light">{data.tamanho}</span>
             </div>
           </div>
-          <button 
+          <button
             onClick={() => onRemove(threat.instanceId)}
             className="text-ordem-text-muted hover:text-red-400 transition-colors p-1 ml-2"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 18 12"/></svg>
           </button>
         </div>
-        
+
         <div className="mt-2">
           <div className="flex justify-between text-xs mb-1 font-mono">
             <span className="text-ordem-text-secondary">PV</span>
             <span className="text-ordem-white">{currentHP} / {data.vida}</span>
           </div>
           <div className="h-3 bg-ordem-black-deep border border-ordem-border-light rounded-full overflow-hidden relative">
-            <div 
+            <div
               className="h-full bg-gradient-to-r from-red-900 to-red-600 transition-all duration-500"
               style={{ width: `${(currentHP / data.vida) * 100}%` }}
             />
@@ -65,7 +65,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({ threat, onUpdateHP, onRe
 
       {isExpanded && (
         <div className="border-t border-ordem-border-light bg-ordem-ooze/30 p-4 animate-in slide-in-from-top-2">
-            
+
             <div className="flex items-center justify-between mb-6 bg-ordem-black-deep p-2 rounded border border-ordem-border">
                 <span className="text-xs font-mono text-ordem-text-muted uppercase ml-2">Gerenciar Vida</span>
                 <div className="flex items-center gap-1">

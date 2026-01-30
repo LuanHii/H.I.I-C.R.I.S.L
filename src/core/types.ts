@@ -53,6 +53,7 @@ export interface Origem {
   nome: string;
   pericias: PericiaName[];
   periciasTexto?: string;
+  periciasExtras?: number;
   poder: {
     nome: string;
     descricao: string;
@@ -235,21 +236,17 @@ export interface NexEvento {
   desbloqueado: boolean;
 }
 
-/**
- * Representa uma pendência gerada durante o level-up de NEX.
- * Cada pendência requer uma escolha do jogador antes de ser resolvida.
- */
 export interface PendenciaNex {
   id: string;
   tipo: 'poder' | 'atributo' | 'trilha' | 'trilhaHabilidade' | 'pericia' | 'afinidade' | 'versatilidade' | 'transcenderPoder';
   descricao: string;
   nex: number;
   resolvida: boolean;
-  /** Para pendências que requerem múltiplas escolhas (ex: perícias) */
+
   quantidade?: number;
-  /** Opções pré-definidas quando aplicável */
+
   opcoes?: string[];
-  /** Valor escolhido após resolução */
+
   valorEscolhido?: string | string[];
 }
 
@@ -297,8 +294,6 @@ export interface Personagem {
   periciasTreinadasPendentes?: number;
   bonus?: BonusContexto;
 
-  // Promoção de grau de treinamento em marcos de NEX (35%/70%).
-  // Quando presente, o jogador/mestre deve escolher perícias elegíveis para promover.
   periciasPromocaoPendentes?: {
     alvo: 'Veterano' | 'Expert';
     restante: number;
@@ -313,7 +308,7 @@ export interface Personagem {
       opcoes?: string[];
     };
   }[];
-  // Quantidade de poderes de classe pendentes para escolher (nos marcos de NEX 15/30/45/60/75/90)
+
   poderesClassePendentes?: number;
   trilha?: string;
   afinidade?: Elemento;
@@ -336,19 +331,17 @@ export interface Personagem {
   rituais: Ritual[];
   proficiencias: string[];
   efeitosAtivos: string[];
-  /** Pendências de escolha geradas durante level-up de NEX */
+
   pendenciasNex?: PendenciaNex[];
   log?: LogEntry[];
-  // Overrides persistentes (modo Mestre/Operador) para ajustes pontuais fora da regra padrão.
-  // Sempre que possível, o sistema deve calcular derivados automaticamente; overrides existem
-  // para casos excepcionais (regras da casa, correções de ficha, bônus temporários).
+
   overrides?: {
     pvMax?: number;
     peMax?: number;
     sanMax?: number;
     pdMax?: number;
     defesa?: number;
-    // Bônus fixos adicionais (delta) por perícia. Soma ao bônus calculado (grau + outros bônus).
+
     periciaFixos?: Partial<Record<PericiaName, number>>;
   };
 }

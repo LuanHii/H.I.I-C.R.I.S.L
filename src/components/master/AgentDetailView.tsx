@@ -30,7 +30,7 @@ interface AgentDetailViewProps {
 export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdate, readOnly, disableInteractionModals }) => {
     const [openSections, setOpenSections] = useState<Record<string, boolean>>({
         status: true,
-        // Na visualização remota, a prioridade é status + ações.
+
         attributes: !!readOnly ? false : true,
         inventory: false,
         abilities: false,
@@ -83,7 +83,6 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     const handleManualSkillBonusChange = (skillName: PericiaName, newValue: number) => {
         const updated = { ...agent };
 
-        // Persistimos um DELTA (extras fixos) para atingir o valor final desejado.
         const baseBonus = calcularPericiasDetalhadas(updated.atributos, updated.pericias)[skillName]?.bonusFixo ?? 0;
         const delta = newValue - baseBonus;
         updated.overrides = {
@@ -119,15 +118,13 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
 
     const handleAttributeChange = (attr: AtributoKey, increase: boolean) => {
         if (isEditingMode) {
-            // Manual Override Mode
+
             const updated = { ...agent };
             updated.atributos[attr] += increase ? 1 : -1;
             if (updated.atributos[attr] < 0) updated.atributos[attr] = 0;
 
-            // Update Skills
             updated.periciasDetalhadas = recalcularPericias(updated);
 
-            // Recalculate Derived Stats
             const derived = calculateDerivedStats(updated.classe, updated.atributos, updated.nex, updated.estagio);
 
             const targetPvMax = updated.overrides?.pvMax ?? derived.pvMax;
@@ -156,7 +153,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
 
             onUpdate(updated);
         } else {
-            // Standard Progression Mode
+
             if (increase) {
                 const updated = applyAttributePoint(agent, attr);
                 onUpdate(updated);
@@ -221,7 +218,6 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
             else updated.pd.max = newMax;
         }
 
-        // Persistir override no modo Mestre/Operador
         updated.overrides = {
             ...(updated.overrides ?? {}),
             pvMax: stat === 'pv' ? newMax : updated.overrides?.pvMax,
@@ -231,7 +227,6 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
             periciaFixos: updated.overrides?.periciaFixos,
         };
 
-        // Clamp dos atuais
         if (stat === 'pv') updated.pv.atual = Math.min(updated.pv.atual, updated.pv.max);
         if (stat === 'pe') updated.pe.atual = Math.min(updated.pe.atual, updated.pe.max);
         if (stat === 'san') updated.san.atual = Math.min(updated.san.atual, updated.san.max);
@@ -429,35 +424,30 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                     onTranscenderComplete={(poderParanormal: Poder, ritual?: Ritual) => {
                         const updated = { ...agent };
 
-                        // Adicionar poder paranormal
                         updated.poderes = [...updated.poderes, poderParanormal];
 
-                        // Adicionar ritual se houver
                         if (ritual) {
                             updated.rituais = [...updated.rituais, ritual];
                         }
 
-                        // Reduzir pendência de poder de classe
                         if (updated.poderesClassePendentes && updated.poderesClassePendentes > 0) {
                             updated.poderesClassePendentes -= 1;
                             if (updated.poderesClassePendentes <= 0) updated.poderesClassePendentes = undefined;
                         }
 
-                        // Incrementar contador de transcender
                         updated.qtdTranscender = (updated.qtdTranscender || 0) + 1;
 
-                        // Recalcular recursos para aplicar penalidade de Sanidade automaticamente
                         const finalAgent = recalcularRecursosPersonagem(updated);
 
                         onUpdate(finalAgent);
-                        // Fechar o modal (suprimir aviso temporariamente)
+
                         setIsPendingChoiceModalSuppressed(true);
                     }}
                     onClose={() => setIsPendingChoiceModalSuppressed(true)}
                 />
             )}
             <div className="bg-ordem-ooze border border-ordem-border-light rounded-xl p-4 sm:p-6 relative overflow-hidden shadow-lg">
-                {/* Botão de modo PD - reposicionado para não sobrepor em mobile */}
+                {}
                 {!readOnly && (
                     <button
                         onClick={togglePdMode}
@@ -467,14 +457,14 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                         {agent.usarPd ? <Flame size={18} className="text-violet-300" /> : <Brain size={18} className="text-blue-300" />}
                     </button>
                 )}
-                {/* Ilustração de fundo - menor em mobile */}
+                {}
                 <div className="absolute bottom-0 right-0 p-2 sm:p-4 opacity-10 pointer-events-none">
                     <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-[120px] sm:h-[120px]"><circle cx="9" cy="12" r="1" /><circle cx="15" cy="12" r="1" /><path d="M8 20v2h8v-2" /><path d="m12.5 17-.5-1-.5 1h1z" /><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20" /></svg>
                 </div>
 
-                {/* Header: Nome, classe, defesa */}
+                {}
                 <div className="relative z-10">
-                    {/* Nome e info básica */}
+                    {}
                     <div className="mb-3 sm:mb-0">
                         <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tight mb-2 pr-10 sm:pr-0">{agent.nome}</h2>
                         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-ordem-white-muted font-mono text-[10px] sm:text-xs">
@@ -519,7 +509,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                         </div>
                     </div>
 
-                    {/* Defesa - inline em mobile */}
+                    {}
                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-ordem-border/50 sm:absolute sm:top-0 sm:right-0 sm:mt-0 sm:pt-0 sm:border-0">
                         <div className="flex items-center gap-2 sm:flex-col sm:items-end">
                             <div className="text-[10px] sm:text-xs text-ordem-text-secondary uppercase tracking-widest">Defesa</div>
@@ -590,7 +580,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                     </div>
                 )}
 
-                {/* Barras de status - empilhadas em mobile */}
+                {}
                 <div className="grid grid-cols-1 gap-4 sm:gap-6 mt-6 sm:mt-8">
                     <StatusBar
                         label="Pontos de Vida"
@@ -636,7 +626,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 </div>
             </div>
 
-            {/* Seção de Condições */}
+            {}
             <div className="bg-ordem-ooze border border-ordem-border-light rounded-xl overflow-hidden shadow-lg">
                 <button
                     onClick={() => toggleSection('conditions')}
@@ -722,7 +712,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                             </div>
                         ) : null}
 
-                        {/* Grid de atributos - scroll horizontal em mobile */}
+                        {}
                         <div className="flex gap-2 sm:gap-4 mb-6 sm:mb-8 overflow-x-auto touch-scroll pb-2 -mx-2 px-2 sm:mx-0 sm:px-0">
                             {Object.entries(agent.atributos).map(([key, val]) => {
                                 const canIncrease = isEditingMode || (!readOnly && agent.pontosAtributoPendentes && agent.pontosAtributoPendentes > 0 && (agent.classe !== 'Sobrevivente' || val < 3));
@@ -790,7 +780,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                             <span className="w-2 h-2 bg-ordem-text-muted rotate-45 inline-block"></span>
                                             {attr} <span className="text-ordem-text-secondary">({agent.atributos[attr]})</span>
                                         </h4>
-                                        {/* Grid responsivo - 1 coluna em mobile, mais em desktop */}
+                                        {}
                                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2">
                                             {skills.map(([nome, detalhe]) => (
                                                 <div
@@ -800,7 +790,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                                         : 'border-ordem-border-light/50 hover:border-ordem-text-muted'
                                                         }`}
                                                 >
-                                                    {/* Nome da perícia */}
+                                                    {}
                                                     <div
                                                         className={`flex-1 min-w-0 ${isEditingMode ? 'cursor-pointer hover:text-white' : ''}`}
                                                         onClick={() => isEditingMode && toggleSkillGrade(nome as PericiaName)}
@@ -808,9 +798,9 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                                     >
                                                         <span className="text-sm text-ordem-white-muted truncate block">{nome}</span>
                                                     </div>
-                                                    {/* Ações e info - não encolhem */}
+                                                    {}
                                                     <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                                                        {/* Botão de rolar - maior em mobile */}
+                                                        {}
                                                         <button
                                                             type="button"
                                                             onClick={() => {
@@ -824,7 +814,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                                         >
                                                             <Dices size={16} className="sm:w-[14px] sm:h-[14px]" />
                                                         </button>
-                                                        {/* Badge de grau */}
+                                                        {}
                                                         <span
                                                             onClick={() => isEditingMode && toggleSkillGrade(nome as PericiaName)}
                                                             className={`text-[10px] px-1.5 py-0.5 rounded border ${isEditingMode ? 'cursor-pointer hover:opacity-80' : ''} ${(detalhe.grau || 'Destreinado') === 'Destreinado' ? 'border-ordem-border text-ordem-text-secondary' :
@@ -835,7 +825,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                                             {(detalhe.grau || 'Destreinado').substring(0, 3).toUpperCase()}
                                                         </span>
 
-                                                        {/* Bônus numérico */}
+                                                        {}
                                                         {isEditingMode && editingSkill === nome ? (
                                                             <input
                                                                 type="number"
@@ -867,9 +857,9 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 )}
             </div>
 
-            {/* ... Inventory, Abilities, Actions, Progression sections ... */}
+            {}
 
-            {/* Re-adding Inventory, Abilities, Actions, Progression which were truncated in previous edit block logic */}
+            {}
             <div className="bg-ordem-ooze border border-ordem-border-light rounded-xl overflow-hidden shadow-lg">
                 <button
                     onClick={() => toggleSection('inventory')}
@@ -1097,9 +1087,8 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                     agent={agent}
                     onSelect={handleAddRitual}
                     onClose={() => setIsRitualModalOpen(false)}
-                    circuloMaximo={4} // Mestre pode adicionar qualquer ciclo no modo override? Ou segue o NEX?
-                // Se for override, geralmente é irrestrito. 
-                // Vou colocar 4 para permitir tudo.
+                    circuloMaximo={4}
+
                 />
             )}
         </div>

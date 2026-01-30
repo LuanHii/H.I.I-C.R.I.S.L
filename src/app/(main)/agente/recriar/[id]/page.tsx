@@ -19,10 +19,7 @@ export default function RecriarFichaPage({ params }: { params: Promise<{ id: str
   }, [registro]);
 
   const onCreated = (created: Personagem) => {
-    // Recriação deve "corrigir avisos" da ficha original:
-    // - remove overrides (recalcular do zero)
-    // - limpa pendências de progressão (modo permissivo não deve travar a recriação)
-    // - normaliza (patente, máximos, pe/rodada, perturbado, carga, etc)
+
     const cleaned: Personagem = {
       ...created,
       overrides: undefined,
@@ -33,7 +30,6 @@ export default function RecriarFichaPage({ params }: { params: Promise<{ id: str
       habilidadesTrilhaPendentes: undefined,
     };
 
-    // Se Determinação estiver ativa, zera PE/SAN para evitar avisos e refletir o modo PD.
     if (cleaned.usarPd === true) {
       cleaned.pe = { ...cleaned.pe, atual: 0, max: 0 };
       cleaned.san = { ...cleaned.san, atual: 0, max: 0, perturbado: false };
@@ -65,5 +61,4 @@ export default function RecriarFichaPage({ params }: { params: Promise<{ id: str
     </main>
   );
 }
-
 

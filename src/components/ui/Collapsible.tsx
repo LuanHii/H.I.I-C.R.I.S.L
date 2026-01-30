@@ -83,9 +83,7 @@ export function Collapsible({
             </AnimatePresence>
         </div>
     );
-}
-
-// Versão controlada
+}
 interface ControlledCollapsibleProps extends Omit<CollapsibleProps, 'defaultOpen' | 'onOpenChange'> {
     open: boolean;
     onOpenChange: (open: boolean) => void;

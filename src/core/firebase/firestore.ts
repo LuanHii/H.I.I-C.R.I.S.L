@@ -1,6 +1,10 @@
-import { db } from './config';
+import { db, auth } from './config';
 import { doc, setDoc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { Personagem } from '../types';
+import { Personagem } from '../types';
+interface AgentDocument extends Personagem {
+    ownerId?: string;
+    updatedAt?: string;
+}
 
 function removeUndefinedFields<T extends object>(obj: T): T {
     const cleaned = {} as T;
@@ -19,9 +23,17 @@ function removeUndefinedFields<T extends object>(obj: T): T {
     return cleaned;
 }
 
-export const saveAgentToCloud = async (agentId: string, agentData: Personagem) => {
-    try {
-        const cleanedData = removeUndefinedFields(agentData);
+export const saveAgentToCloud = async (agentId: string, agentData: Personagem, ownerId?: string) => {
+    try {
+        const currentUserId = ownerId || auth.currentUser?.uid;
+
+        const dataWithOwner: AgentDocument = {
+            ...agentData,
+            ownerId: currentUserId,
+            updatedAt: new Date().toISOString(),
+        };
+
+        const cleanedData = removeUndefinedFields(dataWithOwner);
         await setDoc(doc(db, "agentes", agentId), cleanedData);
     } catch (e) {
         console.error("Erro ao salvar agente na nuvem: ", e);
@@ -32,7 +44,11 @@ export const saveAgentToCloud = async (agentId: string, agentData: Personagem) =
 export const updateAgentInCloud = async (agentId: string, updates: Partial<Personagem>) => {
     try {
         const agentRef = doc(db, "agentes", agentId);
-        await updateDoc(agentRef, updates);
+        const updatesWithTimestamp = {
+            ...updates,
+            updatedAt: new Date().toISOString(),
+        };
+        await updateDoc(agentRef, updatesWithTimestamp);
     } catch (e) {
         console.error("Erro ao atualizar agente: ", e);
     }
