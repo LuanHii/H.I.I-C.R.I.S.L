@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { useStoredFichas } from '../../core/storage/useStoredFichas';
+import { useCloudFichas } from '../../core/storage';
 import { Personagem, Item } from '../../core/types';
 import { ItemSelectorModal } from './ItemSelectorModal';
 import { calcularRecursosClasse } from '../../logic/rulesEngine';
 import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPersonagem';
 
 export const AgentList: React.FC = () => {
-  const { fichas, salvar } = useStoredFichas();
+  const { fichas, salvar } = useCloudFichas();
   const [search, setSearch] = useState('');
   const [classe, setClasse] = useState<'Todas' | 'Combatente' | 'Especialista' | 'Ocultista' | 'Sobrevivente'>('Todas');
   const [ordem, setOrdem] = useState<'nome' | 'nex' | 'atualizado'>('nome');

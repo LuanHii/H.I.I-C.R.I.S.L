@@ -104,7 +104,8 @@ export function ImportExportModal({
 
       if (onImportComplete) {
         onImportComplete();
-      }
+      }
+
       setTimeout(() => {
         window.location.reload();
       }, 2000);
@@ -140,7 +141,8 @@ export function ImportExportModal({
 
         if (onImportComplete) {
           onImportComplete();
-        }
+        }
+
         setTimeout(() => {
           window.location.reload();
         }, 2000);

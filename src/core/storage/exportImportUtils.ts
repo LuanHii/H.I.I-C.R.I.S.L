@@ -75,10 +75,12 @@ export function downloadJSON(data: string, filename: string): void {
 
 export function validarDadosImportacao(jsonString: string): ExportData | null {
   try {
-    const data = JSON.parse(jsonString) as ExportData;
+    const data = JSON.parse(jsonString) as ExportData;
+
     if (!data || typeof data !== 'object') {
       return null;
-    }
+    }
+
     const validado: ExportData = {
       version: data.version || EXPORT_VERSION,
       exportadoEm: data.exportadoEm || new Date().toISOString(),
@@ -126,20 +128,23 @@ export function importarDados(
     itens: { importados: 0, total: 0 },
     armas: { importadas: 0, total: 0 },
     monstros: { importados: 0, total: 0 },
-  };
+  };
+
   if (data.fichas && data.fichas.length > 0) {
     resultado.fichas.total = data.fichas.length;
 
     if (opcao === 'substituir') {
       window.localStorage.setItem('fichas-origem', JSON.stringify(data.fichas));
       resultado.fichas.importadas = data.fichas.length;
-    } else {
+    } else {
+
       const raw = window.localStorage.getItem('fichas-origem');
       const existentes: FichaRegistro[] = raw ? JSON.parse(raw) : [];
       const idsExistentes = new Set(existentes.map((f) => f.id));
 
       const novas = data.fichas.filter((f) => !idsExistentes.has(f.id));
-      const atualizadas = data.fichas.filter((f) => idsExistentes.has(f.id));
+      const atualizadas = data.fichas.filter((f) => idsExistentes.has(f.id));
+
       const semAtualizadas = existentes.filter(
         (f) => !atualizadas.some((a) => a.id === f.id)
       );
@@ -148,7 +153,8 @@ export function importarDados(
       window.localStorage.setItem('fichas-origem', JSON.stringify(mescladas));
       resultado.fichas.importadas = novas.length + atualizadas.length;
     }
-  }
+  }
+
   if (data.itens && data.itens.length > 0) {
     resultado.itens.total = data.itens.length;
 
@@ -165,7 +171,8 @@ export function importarDados(
       window.localStorage.setItem('custom-items', JSON.stringify(mesclados));
       resultado.itens.importados = novos.length;
     }
-  }
+  }
+
   if (data.armas && data.armas.length > 0) {
     resultado.armas.total = data.armas.length;
 
@@ -182,7 +189,8 @@ export function importarDados(
       window.localStorage.setItem('custom-weapons', JSON.stringify(mescladas));
       resultado.armas.importadas = novas.length;
     }
-  }
+  }
+
   if (data.monstros && data.monstros.length > 0) {
     resultado.monstros.total = data.monstros.length;
 
@@ -275,8 +283,10 @@ export function exportarFichasPorCampanha(
 
 export function validarFichaIndividual(jsonString: string): ExportFichaIndividual | null {
   try {
-    const data = JSON.parse(jsonString);
-    if (data && typeof data === 'object') {
+    const data = JSON.parse(jsonString);
+
+    if (data && typeof data === 'object') {
+
       if (data.tipo === 'ficha-individual' && data.ficha) {
         return {
           version: data.version || EXPORT_VERSION,
@@ -284,7 +294,8 @@ export function validarFichaIndividual(jsonString: string): ExportFichaIndividua
           tipo: 'ficha-individual',
           ficha: data.ficha,
         };
-      }
+      }
+
       if (data.fichas && Array.isArray(data.fichas) && data.fichas.length > 0) {
         return {
           version: data.version || EXPORT_VERSION,
@@ -292,7 +303,8 @@ export function validarFichaIndividual(jsonString: string): ExportFichaIndividua
           tipo: 'ficha-individual',
           ficha: data.fichas[0],
         };
-      }
+      }
+
       if (data.id && data.personagem) {
         return {
           version: EXPORT_VERSION,
@@ -328,11 +340,13 @@ export function importarFichaIndividual(
     const raw = window.localStorage.getItem('fichas-origem');
     const existentes: FichaRegistro[] = raw ? JSON.parse(raw) : [];
 
-    let fichaParaImportar = { ...fichaData.ficha };
+    let fichaParaImportar = { ...fichaData.ficha };
+
     const fichaExistenteIndex = existentes.findIndex(f => f.id === fichaParaImportar.id);
 
     if (fichaExistenteIndex >= 0) {
-      if (opcao === 'substituir-se-existir') {
+      if (opcao === 'substituir-se-existir') {
+
         existentes[fichaExistenteIndex] = fichaParaImportar;
         window.localStorage.setItem('fichas-origem', JSON.stringify(existentes));
         return {
@@ -341,9 +355,11 @@ export function importarFichaIndividual(
           fichaId: fichaParaImportar.id,
           acao: 'atualizada',
         };
-      } else {
+      } else {
+
         const novoId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        const nomeOriginal = fichaParaImportar.personagem.nome;
+        const nomeOriginal = fichaParaImportar.personagem.nome;
+
         const nomeExiste = existentes.some(
           f => f.personagem.nome === nomeOriginal && f.id !== fichaParaImportar.id
         );
@@ -366,10 +382,12 @@ export function importarFichaIndividual(
           acao: 'renomeada',
         };
       }
-    }
+    }
+
     const nomeExiste = existentes.some(f => f.personagem.nome === fichaParaImportar.personagem.nome);
 
-    if (nomeExiste) {
+    if (nomeExiste) {
+
       fichaParaImportar = {
         ...fichaParaImportar,
         personagem: {
@@ -377,7 +395,8 @@ export function importarFichaIndividual(
           nome: `${fichaParaImportar.personagem.nome} (${new Date().toLocaleDateString('pt-BR')})`,
         },
       };
-    }
+    }
+
     existentes.push(fichaParaImportar);
     window.localStorage.setItem('fichas-origem', JSON.stringify(existentes));
 

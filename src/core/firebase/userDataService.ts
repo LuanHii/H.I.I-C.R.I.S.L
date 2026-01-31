@@ -36,6 +36,15 @@ export interface CustomItemsCloud {
   weapons: Weapow[];
 }
 
+export interface WatchedFichaCloud {
+  id: string;
+  agentId: string;
+  nome: string;
+  classe: string;
+  nex: number;
+  adicionadoEm: string;
+}
+
 export interface UserDataCloud {
   fichas: FichaRegistroCloud[];
   campanhas: CampanhaCloud[];
@@ -407,5 +416,67 @@ export async function deleteAllUserData(userId: string): Promise<{ success: bool
   } catch (e) {
     console.error('Erro ao deletar dados do usuário:', e);
     return { success: false, deleted };
+  }
+}
+
+function getWatchedFichasCollectionRef(userId: string) {
+  return collection(db, 'users', userId, 'watchedFichas');
+}
+
+export async function addWatchedFicha(userId: string, ficha: WatchedFichaCloud): Promise<void> {
+  try {
+    const watchedRef = doc(getWatchedFichasCollectionRef(userId), ficha.agentId);
+    await setDoc(watchedRef, ficha);
+  } catch (e) {
+    console.error('Erro ao adicionar ficha observada:', e);
+    throw e;
+  }
+}
+
+export async function removeWatchedFicha(userId: string, agentId: string): Promise<void> {
+  try {
+    const watchedRef = doc(getWatchedFichasCollectionRef(userId), agentId);
+    await deleteDoc(watchedRef);
+  } catch (e) {
+    console.error('Erro ao remover ficha observada:', e);
+    throw e;
+  }
+}
+
+export async function getAllWatchedFichas(userId: string): Promise<WatchedFichaCloud[]> {
+  try {
+    const snapshot = await getDocs(getWatchedFichasCollectionRef(userId));
+    return snapshot.docs.map(d => d.data() as WatchedFichaCloud);
+  } catch (e) {
+    console.error('Erro ao buscar fichas observadas:', e);
+    return [];
+  }
+}
+
+export function subscribeToWatchedFichas(
+  userId: string,
+  callback: (fichas: WatchedFichaCloud[]) => void
+): Unsubscribe {
+  return onSnapshot(
+    getWatchedFichasCollectionRef(userId),
+    (snapshot) => {
+      const fichas = snapshot.docs.map(d => d.data() as WatchedFichaCloud);
+      callback(fichas);
+    },
+    (error) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Erro ao escutar fichas observadas:', error);
+      }
+      callback([]);
+    }
+  );
+}
+
+export async function isWatchingFicha(userId: string, agentId: string): Promise<boolean> {
+  try {
+    const watched = await getAllWatchedFichas(userId);
+    return watched.some(w => w.agentId === agentId);
+  } catch {
+    return false;
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   INITIAL_STATE,
   type CreationState,
@@ -13,6 +13,7 @@ import {
   setEquipamento,
   finalizarCriacao,
 } from '../logic/creationWorkflow';
+import { useCloudFichas } from '../core/storage';
 import { calcularPericiasIniciais, TODAS_PERICIAS } from '../logic/characterUtils';
 import { CLASSES } from '../data/classes';
 import { ORIGENS } from '../data/origins';
@@ -48,6 +49,7 @@ export default function CharacterCreator({
   initialStep?: number;
   onCreated?: (created: Personagem) => void;
 }) {
+  const { salvar: salvarFicha, isCloudMode } = useCloudFichas();
   const [state, setState] = useState<CreationState>(INITIAL_STATE);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -265,16 +267,17 @@ export default function CharacterCreator({
   useEffect(() => {
     if (!resultado) return;
     if (onCreated) return;
-    if (typeof window === 'undefined') return;
-    try {
-      const raw = window.localStorage.getItem('fichas-origem');
-      const lista = raw ? (JSON.parse(raw) as Personagem[]) : [];
-      const atualizada = [resultado, ...lista.filter((ficha) => ficha.nome !== resultado.nome)].slice(0, 20);
-      window.localStorage.setItem('fichas-origem', JSON.stringify(atualizada));
-    } catch (err) {
-      console.error('Falha ao salvar ficha localmente', err);
-    }
-  }, [resultado, onCreated]);
+
+    const saveToStorage = async () => {
+      try {
+        await salvarFicha(resultado);
+      } catch (err) {
+        console.error('Falha ao salvar ficha:', err);
+      }
+    };
+
+    saveToStorage();
+  }, [resultado, onCreated, salvarFicha]);
 
   const handleReset = () => {
     setState(INITIAL_STATE);

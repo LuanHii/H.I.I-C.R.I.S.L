@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,13 +8,13 @@ import { FichasManager } from './master/FichasManager';
 import { GuiaMestre } from './master/GuiaMestre';
 import { CombatManager } from './master/CombatManager';
 import { MestreNavbar } from './master/MestreNavbar';
-import { useStoredFichas } from '../core/storage/useStoredFichas';
+import { useCloudFichas } from '../core/storage';
 
 type TabId = 'inventario' | 'ameacas' | 'fichas' | 'guia' | 'combate';
 
 export const MasterDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>('fichas');
-  const { fichas, salvar } = useStoredFichas();
+  const { fichas, salvar } = useCloudFichas();
 
   const getTabFromUrl = (): TabId | null => {
     if (typeof window === 'undefined') return null;

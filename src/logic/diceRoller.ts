@@ -11,7 +11,8 @@ export interface DiceRollResult {
   bonusO: number;
 }
 
-function secureD20(): number {
+function secureD20(): number {
+
   const g: any = globalThis as any;
   if (g?.crypto?.getRandomValues) {
     const arr = new Uint32Array(1);
@@ -23,7 +24,9 @@ function secureD20(): number {
 
 export function rollPericia(detalhe: PericiaDetalhada): DiceRollResult {
   const baseDice = Math.max(1, Number.isFinite(detalhe.dados) ? detalhe.dados : 1);
-  const bonusO = Number.isFinite(detalhe.bonusO) ? detalhe.bonusO : 0;
+  const bonusO = Number.isFinite(detalhe.bonusO) ? detalhe.bonusO : 0;
+
+
   const wouldBe = baseDice + bonusO;
   const belowOne = wouldBe < 1;
   const diceCount = belowOne ? baseDice + Math.abs(bonusO) : Math.max(1, wouldBe);

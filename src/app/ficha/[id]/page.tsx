@@ -6,7 +6,9 @@ import { subscribeToAgent, saveAgentToCloud } from '../../../core/firebase/fires
 import { Personagem } from '../../../core/types';
 import { RemoteAgentView } from '../../../components/RemoteAgentView';
 import { OverlayView } from './OverlayView';
-import { ExternalLink } from 'lucide-react';
+import { useWatchedFichas } from '../../../core/storage';
+import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { useAuthOptional } from '../../../core/firebase/auth';
 
 function PlayerAgentContent() {
   const params = useParams();
@@ -15,9 +17,15 @@ function PlayerAgentContent() {
   const isOverlay = searchParams.get('overlay') === 'true';
   const overlayMode = (searchParams.get('overlayMode') as 'mini' | 'full' | null) ?? 'mini';
 
+  const auth = useAuthOptional();
+  const { addWatch, removeWatch, isWatching, isAuthenticated } = useWatchedFichas();
+
   const [agent, setAgent] = useState<Personagem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [watchLoading, setWatchLoading] = useState(false);
+
+  const isCurrentlyWatching = isWatching(id);
 
   useEffect(() => {
     if (!id) return;
@@ -34,6 +42,23 @@ function PlayerAgentContent() {
 
     return () => unsubscribe();
   }, [id]);
+
+  const handleToggleWatch = async () => {
+    if (!agent) return;
+    setWatchLoading(true);
+
+    try {
+      if (isCurrentlyWatching) {
+        await removeWatch(id);
+      } else {
+        await addWatch(id, agent);
+      }
+    } catch (err) {
+      console.error('Erro ao alterar observação:', err);
+    } finally {
+      setWatchLoading(false);
+    }
+  };
 
   const handleUpdate = async (updatedAgent: Personagem) => {
     setAgent(updatedAgent);
@@ -82,12 +107,52 @@ function PlayerAgentContent() {
   }
 
   return (
-    <RemoteAgentView
-      agent={agent}
-      connected={true}
-      onOpenOverlayMini={openOverlay}
-      onOpenOverlayFull={openOverlayFull}
-    />
+    <div className="min-h-screen bg-ordem-black">
+      <div className="sticky top-0 z-50 bg-ordem-black/95 backdrop-blur border-b border-ordem-border">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="text-xs font-mono tracking-widest text-ordem-text-muted uppercase">Ficha Compartilhada</div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {isAuthenticated ? (
+              <button
+                onClick={handleToggleWatch}
+                disabled={watchLoading}
+                className={`flex items-center gap-2 px-3 py-2 text-xs font-mono tracking-wider rounded-lg border transition-colors ${
+                  isCurrentlyWatching
+                    ? 'border-ordem-gold text-ordem-gold bg-ordem-gold/10 hover:bg-ordem-gold/20'
+                    : 'border-ordem-green text-ordem-green hover:bg-ordem-green/10'
+                } disabled:opacity-50`}
+              >
+                {watchLoading ? (
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                ) : isCurrentlyWatching ? (
+                  <EyeOff size={16} />
+                ) : (
+                  <Eye size={16} />
+                )}
+                <span className="hidden sm:inline">
+                  {isCurrentlyWatching ? 'OBSERVANDO' : 'ACOMPANHAR'}
+                </span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 text-xs text-ordem-text-muted">
+                <LogIn size={14} />
+                <span className="hidden sm:inline">Faça login para acompanhar</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <RemoteAgentView
+        agent={agent}
+        connected={true}
+        onOpenOverlayMini={openOverlay}
+        onOpenOverlayFull={openOverlayFull}
+      />
+    </div>
   );
 }
 

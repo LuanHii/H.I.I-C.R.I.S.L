@@ -127,7 +127,7 @@ export function useCloudFichas() {
 
   const salvar = useCallback(
     async (personagem: Personagem, id?: string, campanha?: string) => {
-      const fichaId = id ?? personagem.nome ?? crypto.randomUUID();
+      const fichaId = id ?? crypto.randomUUID();
       const now = new Date().toISOString();
 
       if (isAuthenticated && userId) {

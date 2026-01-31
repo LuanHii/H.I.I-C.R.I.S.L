@@ -3,14 +3,14 @@
 import Link from 'next/link';
 import { use as usePromise, useMemo } from 'react';
 import CharacterCreator from '../../../../../components/CharacterCreator';
-import { useStoredFichas } from '../../../../../core/storage/useStoredFichas';
+import { useCloudFichas } from '../../../../../core/storage';
 import { buildRecreateDraftFromPersonagem } from '../../../../../logic/recreateFromPersonagem';
 import type { Personagem } from '../../../../../core/types';
 import { normalizePersonagem } from '../../../../../core/personagemUtils';
 
 export default function RecriarFichaPage({ params }: { params: Promise<{ id: string }> }) {
   const resolved = usePromise(params);
-  const { fichas, salvar } = useStoredFichas();
+  const { fichas, salvar } = useCloudFichas();
   const registro = fichas.find((f) => f.id === resolved.id);
 
   const draft = useMemo(() => {

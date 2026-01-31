@@ -13,8 +13,7 @@ import { AddCombatantModal } from './AddCombatantModal';
 import { DiceRoller } from './DiceRoller';
 import { REGRAS } from '@/data/guiaRegras';
 import { AMEACAS } from '@/data/monsters';
-import { useStoredFichas } from '@/core/storage/useStoredFichas';
-import { useStoredMonsters } from '@/core/storage/useStoredMonsters';
+import { useCloudFichas, useCloudMonsters } from '@/core/storage';
 import { cn } from '@/lib/utils';
 
 const QUICK_ACTIONS = REGRAS.filter(r =>
@@ -35,9 +34,9 @@ interface CombatManagerProps {
 
 export function CombatManager({ creatures = [] }: CombatManagerProps) {
 
-    const { fichas, salvar: salvarFicha } = useStoredFichas();
+    const { fichas, salvar: salvarFicha } = useCloudFichas();
 
-    const { monstros, salvar: salvarMonstro } = useStoredMonsters();
+    const { monstros, salvar: salvarMonstro } = useCloudMonsters();
 
     const userThreats = useMemo(() => monstros.map(m => m.ameaca), [monstros]);
 

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { use as usePromise, useState, useEffect, useCallback } from 'react';
 import { AgentDetailView } from '../../../../components/master/AgentDetailView';
-import { useStoredFichas } from '../../../../core/storage/useStoredFichas';
+import { useCloudFichas } from '../../../../core/storage';
 import { Personagem } from '../../../../core/types';
 import { normalizePersonagem } from '../../../../core/personagemUtils';
 import { MestreNavbar } from '../../../../components/master/MestreNavbar';
@@ -11,7 +11,7 @@ import { WeaponModsButton } from '../../../../components/master/WeaponModsModal'
 
 export default function FichaDetalhePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = usePromise(params);
-  const { fichas, salvar } = useStoredFichas();
+  const { fichas, salvar } = useCloudFichas();
   const registro = fichas.find((ficha) => ficha.id === resolvedParams.id);
   const [personagemView, setPersonagemView] = useState<Personagem | null>(
     registro ? registro.personagem : null,

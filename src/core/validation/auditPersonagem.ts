@@ -24,7 +24,8 @@ function expectedPeRodada(personagem: Personagem): number {
 }
 
 export function auditPersonagem(personagem: Personagem): PersonagemIssue[] {
-  const issues: PersonagemIssue[] = [];
+  const issues: PersonagemIssue[] = [];
+
   if (!personagem.nome || personagem.nome.trim().length === 0) {
     issues.push({ severity: 'erro', code: 'missing_name', message: 'Nome ausente.' });
   }
@@ -37,7 +38,8 @@ export function auditPersonagem(personagem: Personagem): PersonagemIssue[] {
   if (!personagem.atributos) {
     issues.push({ severity: 'erro', code: 'missing_attributes', message: 'Atributos ausentes.' });
     return issues;
-  }
+  }
+
   if (personagem.classe === 'Sobrevivente') {
     if (personagem.nex !== 0) {
       issues.push({
@@ -62,7 +64,8 @@ export function auditPersonagem(personagem: Personagem): PersonagemIssue[] {
         message: `NEX fora dos degraus padrão (esperado: 5,10,...,95,99). Atual: ${personagem.nex}%.`,
       });
     }
-  }
+  }
+
   const rodadaEsperada = expectedPeRodada(personagem);
   if (personagem.pe?.rodada !== rodadaEsperada) {
     issues.push({
@@ -70,7 +73,8 @@ export function auditPersonagem(personagem: Personagem): PersonagemIssue[] {
       code: 'pe_rodada_mismatch',
       message: `Limite de PE por turno divergente. Atual: ${personagem.pe?.rodada ?? '?'}; esperado: ${rodadaEsperada}.`,
     });
-  }
+  }
+
   const derived = calculateDerivedStats(personagem.classe, personagem.atributos, personagem.nex, personagem.estagio);
   const expectedPvMax = personagem.overrides?.pvMax ?? derived.pvMax;
   const expectedPeMax = personagem.overrides?.peMax ?? derived.peMax;
@@ -130,7 +134,8 @@ export function auditPersonagem(personagem: Personagem): PersonagemIssue[] {
       code: 'pd_present_without_rule',
       message: 'PD existe, mas a regra de Determinação não está marcada como ativa.',
     });
-  }
+  }
+
   if (personagem.pv && (personagem.pv.atual < 0 || personagem.pv.atual > personagem.pv.max)) {
     issues.push({
       severity: 'erro',
@@ -159,14 +164,16 @@ export function auditPersonagem(personagem: Personagem): PersonagemIssue[] {
       code: 'pd_out_of_bounds',
       message: `PD atual fora do limite (atual: ${personagem.pd.atual}, max: ${personagem.pd.max}).`,
     });
-  }
+  }
+
   if (!personagem.periciasDetalhadas || Object.keys(personagem.periciasDetalhadas).length === 0) {
     issues.push({
       severity: 'aviso',
       code: 'missing_pericias_detalhadas',
       message: 'Perícias detalhadas ausentes (pode indicar ficha antiga/normalização pendente).',
     });
-  }
+  }
+
   try {
     const cargaCalc = calcularCarga({
       atributos: personagem.atributos,
@@ -187,8 +194,10 @@ export function auditPersonagem(personagem: Personagem): PersonagemIssue[] {
         message: `Carga atual acima da máxima (atual: ${personagem.carga.atual}, max: ${personagem.carga.maxima}).`,
       });
     }
-  } catch {
-  }
+  } catch {
+
+  }
+
   if (personagem.periciasTreinadasPendentes && personagem.periciasTreinadasPendentes > 0) {
     issues.push({
       severity: 'aviso',

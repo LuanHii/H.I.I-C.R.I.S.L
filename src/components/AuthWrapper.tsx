@@ -114,7 +114,7 @@ export function AuthWrapper({ children, showUserMenu = false }: AuthWrapperProps
   return (
     <AuthProvider onLogin={handleLogin}>
       {showUserMenu && (
-        <div className="fixed top-3 right-4 z-[70]">
+        <div className="fixed top-3 right-20 sm:right-24 z-[60]">
           <UserMenu
             migrationStatus={migrationStatus}
             hasPendingLocalData={hasPendingLocalData}

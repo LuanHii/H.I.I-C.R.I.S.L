@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { useCloudFichas, useCloudCampanhas, type FichaRegistro } from '../../core/storage';
+import { useCloudFichas, useCloudCampanhas, useWatchedFichas, type FichaRegistro } from '../../core/storage';
 import { AgentDetailView } from './AgentDetailView';
 import { normalizePersonagem } from '../../core/personagemUtils';
 import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPersonagem';
@@ -11,12 +11,16 @@ import { ImportExportModal } from './ImportExportModal';
 import { downloadJSON, exportarFichaIndividual, exportarFichasPorCampanha } from '../../core/storage/exportImportUtils';
 import { CampanhaSection, NovaCampanhaForm } from './CampanhaSection';
 import { recalcularRecursosPersonagem } from '../../logic/progression';
-import { Cloud, CloudOff, X, ChevronLeft, Menu, Plus, Download, Settings } from 'lucide-react';
+import { Cloud, CloudOff, ChevronLeft, Menu, Plus, Download, Eye } from 'lucide-react';
 import { WeaponModsButton } from './WeaponModsModal';
+import { WatchedFichasSection } from './WatchedFichasSection';
+
+type FichasViewMode = 'minhas' | 'observadas';
 
 export function FichasManager() {
   const { fichas, remover, duplicar, salvar, moverParaCampanha, marcarComoSincronizada, isCloudMode, loading: fichasLoading } = useCloudFichas();
   const { campanhas, criarCampanha, renomearCampanha, removerCampanha, loading: campanhasLoading } = useCloudCampanhas();
+  const { watchedFichas, isAuthenticated: isLoggedIn } = useWatchedFichas();
   const [selecionada, setSelecionada] = useState<string | null>(null);
   const [busca, setBusca] = useState('');
   const [filtroClasse, setFiltroClasse] = useState<'Todas' | 'Combatente' | 'Especialista' | 'Ocultista' | 'Sobrevivente'>('Todas');
@@ -26,6 +30,7 @@ export function FichasManager() {
   const [expandAll, setExpandAll] = useState<boolean | undefined>(undefined);
   const [modalAberto, setModalAberto] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [fichasViewMode, setFichasViewMode] = useState<FichasViewMode>('minhas');
 
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
@@ -493,10 +498,46 @@ export function FichasManager() {
           </div>
         </div>
 
-        {}
-        <div className="space-y-2">
-          <input
-            value={busca}
+        {isLoggedIn && (
+          <div className="flex gap-1 p-1 bg-ordem-ooze/30 rounded-lg">
+            <button
+              onClick={() => setFichasViewMode('minhas')}
+              className={`flex-1 px-3 py-2 text-[10px] font-mono tracking-widest rounded-md transition-colors ${
+                fichasViewMode === 'minhas'
+                  ? 'bg-ordem-green/20 text-ordem-green border border-ordem-green/50'
+                  : 'text-ordem-text-muted hover:text-white'
+              }`}
+            >
+              MINHAS FICHAS
+            </button>
+            <button
+              onClick={() => setFichasViewMode('observadas')}
+              className={`flex-1 px-3 py-2 text-[10px] font-mono tracking-widest rounded-md transition-colors flex items-center justify-center gap-1 ${
+                fichasViewMode === 'observadas'
+                  ? 'bg-ordem-gold/20 text-ordem-gold border border-ordem-gold/50'
+                  : 'text-ordem-text-muted hover:text-white'
+              }`}
+            >
+              <Eye size={12} />
+              OBSERVADAS
+              {watchedFichas.length > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 bg-ordem-gold/30 rounded text-[9px]">
+                  {watchedFichas.length}
+                </span>
+              )}
+            </button>
+          </div>
+        )}
+
+        {fichasViewMode === 'observadas' && isLoggedIn ? (
+          <div className="flex-1 overflow-y-auto -mx-4 px-4 lg:mx-0 lg:px-0">
+            <WatchedFichasSection />
+          </div>
+        ) : (
+          <>
+            <div className="space-y-2">
+              <input
+                value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar fichas..."
             onKeyDown={(e) => {
@@ -684,6 +725,8 @@ export function FichasManager() {
             </div>
           )}
         </div>
+          </>
+        )}
       </section>
 
       {}
