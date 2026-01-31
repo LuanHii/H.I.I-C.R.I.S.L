@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import {
     Skull, Heart, Zap, Brain, Shield, Swords, ChevronDown, ChevronUp,
-    Trash2, Copy, Edit2, Check, X, Minus, Plus, StickyNote
+    Trash2, Copy, Check, X, Minus, Plus, StickyNote, GripVertical
 } from 'lucide-react';
-import { type Combatant, getConditionColor } from './CombatManagerTypes';
+import { type Combatant } from './CombatManagerTypes';
 import { ConditionPicker, ConditionBadges } from './ConditionPicker';
 import { cn } from '@/lib/utils';
 
@@ -16,19 +16,25 @@ interface CombatantCardProps {
     onUpdate: (updates: Partial<Combatant>) => void;
     onRemove: () => void;
     onDuplicate: () => void;
+    isDragging?: boolean;
+    dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
-export function CombatantCard({
+export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(function CombatantCard({
     combatant,
     isCurrentTurn,
     onUpdate,
     onRemove,
-    onDuplicate
-}: CombatantCardProps) {
+    onDuplicate,
+    isDragging,
+    dragHandleProps
+}, ref) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [damageInput, setDamageInput] = useState('');
     const [isEditingName, setIsEditingName] = useState(false);
     const [editedName, setEditedName] = useState(combatant.name);
+    const [isEditingInit, setIsEditingInit] = useState(false);
+    const [editedInit, setEditedInit] = useState(String(combatant.initiative));
 
     const hpPercent = (combatant.hp.current / combatant.hp.max) * 100;
     const isDead = combatant.hp.current <= 0;
@@ -61,6 +67,14 @@ export function CombatantCard({
         setIsEditingName(false);
     };
 
+    const handleInitSave = () => {
+        const newInit = parseInt(editedInit, 10);
+        if (!isNaN(newInit)) {
+            onUpdate({ initiative: newInit });
+        }
+        setIsEditingInit(false);
+    };
+
     const getTypeIcon = () => {
         switch (combatant.type) {
             case 'agent': return <Shield size={14} className="text-ordem-green" />;
@@ -77,22 +91,26 @@ export function CombatantCard({
     };
 
     return (
-        <motion.div
-            layout
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20, scale: 0.9 }}
+        <div
+            ref={ref}
             className={cn(
                 'border rounded-lg overflow-hidden transition-all',
                 'bg-ordem-ooze/50',
                 isCurrentTurn && !isDead && 'ring-2 ring-ordem-green shadow-lg shadow-ordem-green/20',
                 isDead && 'opacity-60 grayscale',
-                !combatant.isActive && 'opacity-40'
+                !combatant.isActive && 'opacity-40',
+                isDragging && 'opacity-90 shadow-2xl ring-2 ring-ordem-gold z-50'
             )}
         >
-            {}
-            <div className="p-3 flex items-center gap-3">
-                {}
+            <div className="p-3 flex items-center gap-2">
+                <div
+                    {...dragHandleProps}
+                    className="cursor-grab active:cursor-grabbing p-1 text-ordem-text-muted hover:text-white transition-colors touch-none"
+                    title="Arrastar para reordenar"
+                >
+                    <GripVertical size={18} />
+                </div>
+
                 {isCurrentTurn && !isDead && (
                     <motion.div
                         animate={{ scale: [1, 1.2, 1] }}
@@ -101,11 +119,34 @@ export function CombatantCard({
                     />
                 )}
 
-                {}
-                <div className="w-10 text-center shrink-0">
-                    <span className="text-lg font-bold text-white">{combatant.initiative}</span>
-                    <p className="text-[9px] text-ordem-text-muted uppercase">INIT</p>
-                </div>
+                {isEditingInit ? (
+                    <div className="w-14 flex items-center gap-0.5">
+                        <input
+                            type="number"
+                            value={editedInit}
+                            onChange={e => setEditedInit(e.target.value)}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter') handleInitSave();
+                                if (e.key === 'Escape') setIsEditingInit(false);
+                            }}
+                            onBlur={handleInitSave}
+                            className="w-10 bg-ordem-black border border-ordem-green rounded px-1 py-0.5 text-center text-sm text-white font-bold"
+                            autoFocus
+                        />
+                    </div>
+                ) : (
+                    <button
+                        onClick={() => {
+                            setEditedInit(String(combatant.initiative));
+                            setIsEditingInit(true);
+                        }}
+                        className="w-10 text-center shrink-0 hover:bg-ordem-ooze rounded p-1 transition-colors group"
+                        title="Clique para editar iniciativa"
+                    >
+                        <span className="text-lg font-bold text-white group-hover:text-ordem-green transition-colors">{combatant.initiative}</span>
+                        <p className="text-[9px] text-ordem-text-muted uppercase">INIT</p>
+                    </button>
+                )}
 
                 {}
                 <div className="flex-1 min-w-0">
@@ -348,6 +389,6 @@ export function CombatantCard({
                     </div>
                 </motion.div>
             )}
-        </motion.div>
+        </div>
     );
-}
+});

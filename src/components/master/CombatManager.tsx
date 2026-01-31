@@ -5,8 +5,25 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Play, Pause, SkipForward, SkipBack, RotateCcw, Plus,
     Swords, Users, BookOpen, RefreshCw,
-    AlertCircle, Dice6
+    AlertCircle, ArrowUpDown, Hash
 } from 'lucide-react';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { type Combatant, type CombatState, type CombatantAbility, generateCombatantId, rollInitiative } from './CombatManagerTypes';
 import { CombatantCard } from './CombatantCard';
 import { AddCombatantModal } from './AddCombatantModal';
@@ -15,6 +32,48 @@ import { REGRAS } from '@/data/guiaRegras';
 import { AMEACAS } from '@/data/monsters';
 import { useCloudFichas, useCloudMonsters } from '@/core/storage';
 import { cn } from '@/lib/utils';
+
+function SortableCombatantCard({
+    combatant,
+    isCurrentTurn,
+    onUpdate,
+    onRemove,
+    onDuplicate,
+}: {
+    combatant: Combatant;
+    isCurrentTurn: boolean;
+    onUpdate: (updates: Partial<Combatant>) => void;
+    onRemove: () => void;
+    onDuplicate: () => void;
+}) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: combatant.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
+
+    return (
+        <div ref={setNodeRef} style={style}>
+            <CombatantCard
+                combatant={combatant}
+                isCurrentTurn={isCurrentTurn}
+                onUpdate={onUpdate}
+                onRemove={onRemove}
+                onDuplicate={onDuplicate}
+                isDragging={isDragging}
+                dragHandleProps={{ ...attributes, ...listeners }}
+            />
+        </div>
+    );
+}
 
 const QUICK_ACTIONS = REGRAS.filter(r =>
     r.categoria === 'combate' || r.categoria === 'ataques' || r.categoria === 'manobras'
@@ -141,6 +200,18 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
     const [showQuickRef, setShowQuickRef] = useState(false);
     const [quickRefTab, setQuickRefTab] = useState<'dice' | 'actions' | 'conditions'>('dice');
     const [quickRefQuery, setQuickRefQuery] = useState('');
+    const [orderMode, setOrderMode] = useState<'initiative' | 'manual'>('initiative');
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
 
     useEffect(() => {
         setQuickRefQuery('');
@@ -173,10 +244,12 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
     }, [state]);
 
     const sortedCombatants = useMemo(() => {
-        return [...state.combatants]
-            .filter(c => c.isActive)
-            .sort((a, b) => b.initiative - a.initiative);
-    }, [state.combatants]);
+        const active = state.combatants.filter(c => c.isActive);
+        if (orderMode === 'manual') {
+            return active;
+        }
+        return [...active].sort((a, b) => b.initiative - a.initiative);
+    }, [state.combatants, orderMode]);
 
     const inactiveCombatants = useMemo(() => {
         return state.combatants.filter(c => !c.isActive);
@@ -324,6 +397,37 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
             })),
             currentTurnIndex: 0,
         }));
+        setOrderMode('initiative');
+    }, []);
+
+    const handleDragEnd = useCallback((event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            setState(prev => {
+                const activeIndex = prev.combatants.findIndex(c => c.id === active.id);
+                const overIndex = prev.combatants.findIndex(c => c.id === over.id);
+
+                return {
+                    ...prev,
+                    combatants: arrayMove(prev.combatants, activeIndex, overIndex),
+                    currentTurnIndex: 0,
+                };
+            });
+            setOrderMode('manual');
+        }
+    }, []);
+
+    const sortByInitiative = useCallback(() => {
+        setState(prev => ({
+            ...prev,
+            combatants: [...prev.combatants].sort((a, b) => {
+                if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
+                return b.initiative - a.initiative;
+            }),
+            currentTurnIndex: 0,
+        }));
+        setOrderMode('initiative');
     }, []);
 
     return (
@@ -456,6 +560,20 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                 </button>
 
                                 <button
+                                    onClick={sortByInitiative}
+                                    disabled={state.combatants.length === 0}
+                                    className={cn(
+                                        "p-2 border rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+                                        orderMode === 'initiative'
+                                            ? 'bg-ordem-green/20 border-ordem-green text-ordem-green'
+                                            : 'bg-ordem-ooze border-ordem-border text-ordem-text-secondary hover:text-white'
+                                    )}
+                                    title="Ordenar por iniciativa"
+                                >
+                                    <Hash size={18} />
+                                </button>
+
+                                <button
                                     onClick={resetCombat}
                                     className="p-2 bg-red-600/20 border border-red-600/30 rounded-lg text-red-400 hover:bg-red-600/40 transition-colors"
                                     title="Resetar combate"
@@ -464,9 +582,25 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                 </button>
                             </div>
                         </div>
+
+                        {state.combatants.length > 0 && (
+                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-ordem-border/50">
+                                <div className="flex items-center gap-2 text-xs text-ordem-text-muted">
+                                    <ArrowUpDown size={14} />
+                                    <span>Arraste para reordenar • Clique na iniciativa para editar</span>
+                                </div>
+                                <div className={cn(
+                                    "text-[10px] px-2 py-1 rounded font-mono",
+                                    orderMode === 'initiative'
+                                        ? 'bg-ordem-green/20 text-ordem-green'
+                                        : 'bg-ordem-gold/20 text-ordem-gold'
+                                )}>
+                                    {orderMode === 'initiative' ? 'ORDEM: INICIATIVA' : 'ORDEM: MANUAL'}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    {}
                     {state.combatants.length === 0 ? (
                         <motion.div
                             initial={{ opacity: 0 }}
@@ -486,41 +620,54 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                             </button>
                         </motion.div>
                     ) : (
-                        <div className="space-y-3">
-                            <AnimatePresence mode="popLayout">
-                                {sortedCombatants.map((combatant, index) => (
-                                    <CombatantCard
-                                        key={combatant.id}
-                                        combatant={combatant}
-                                        isCurrentTurn={state.isActive && index === state.currentTurnIndex}
-                                        onUpdate={(updates) => updateCombatant(combatant.id, updates)}
-                                        onRemove={() => removeCombatant(combatant.id)}
-                                        onDuplicate={() => duplicateCombatant(combatant.id)}
-                                    />
-                                ))}
-                            </AnimatePresence>
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleDragEnd}
+                        >
+                            <SortableContext
+                                items={sortedCombatants.map(c => c.id)}
+                                strategy={verticalListSortingStrategy}
+                            >
+                                <div className="space-y-2">
+                                    {sortedCombatants.map((combatant, index) => (
+                                        <SortableCombatantCard
+                                            key={combatant.id}
+                                            combatant={combatant}
+                                            isCurrentTurn={state.isActive && index === state.currentTurnIndex}
+                                            onUpdate={(updates) => updateCombatant(combatant.id, updates)}
+                                            onRemove={() => removeCombatant(combatant.id)}
+                                            onDuplicate={() => duplicateCombatant(combatant.id)}
+                                        />
+                                    ))}
+                                </div>
+                            </SortableContext>
 
-                            {}
                             {inactiveCombatants.length > 0 && (
                                 <div className="mt-6 pt-4 border-t border-ordem-border">
                                     <h3 className="text-sm text-ordem-text-muted mb-3 flex items-center gap-2">
                                         <AlertCircle size={14} /> Inativos ({inactiveCombatants.length})
                                     </h3>
-                                    <div className="space-y-2 opacity-60">
-                                        {inactiveCombatants.map(combatant => (
-                                            <CombatantCard
-                                                key={combatant.id}
-                                                combatant={combatant}
-                                                isCurrentTurn={false}
-                                                onUpdate={(updates) => updateCombatant(combatant.id, updates)}
-                                                onRemove={() => removeCombatant(combatant.id)}
-                                                onDuplicate={() => duplicateCombatant(combatant.id)}
-                                            />
-                                        ))}
-                                    </div>
+                                    <SortableContext
+                                        items={inactiveCombatants.map(c => c.id)}
+                                        strategy={verticalListSortingStrategy}
+                                    >
+                                        <div className="space-y-2 opacity-60">
+                                            {inactiveCombatants.map(combatant => (
+                                                <SortableCombatantCard
+                                                    key={combatant.id}
+                                                    combatant={combatant}
+                                                    isCurrentTurn={false}
+                                                    onUpdate={(updates) => updateCombatant(combatant.id, updates)}
+                                                    onRemove={() => removeCombatant(combatant.id)}
+                                                    onDuplicate={() => duplicateCombatant(combatant.id)}
+                                                />
+                                            ))}
+                                        </div>
+                                    </SortableContext>
                                 </div>
                             )}
-                        </div>
+                        </DndContext>
                     )}
                 </div>
 
