@@ -7,8 +7,9 @@ import { ActionsTab } from './ActionsTab';
 import { PERICIA_ATRIBUTO } from '../logic/rulesEngine';
 import { auditPersonagem, summarizeIssues } from '../core/validation/auditPersonagem';
 import { rollPericia, type DiceRollResult } from '../logic/diceRoller';
-import { Dices } from 'lucide-react';
+import { Dices, Package } from 'lucide-react';
 import { ActiveConditionsDisplay, ConditionsSummary } from './ConditionBadge';
+import { WeaponStatsDisplay } from './WeaponStatsDisplay';
 
 type RemoteTab = 'status' | 'acoes' | 'pericias' | 'inventario';
 
@@ -229,25 +230,99 @@ export function RemoteAgentView({
         {tab === 'inventario' && (
           <div className="bg-ordem-ooze/30 border border-ordem-border rounded-xl p-5">
             <div className="flex items-center justify-between mb-4">
-              <div className="text-xs font-mono tracking-[0.25em] text-ordem-text-muted uppercase">Itens</div>
-              <div className="text-xs font-mono text-ordem-text-muted">{agent.equipamentos.length} item(ns)</div>
+              <div className="text-xs font-mono tracking-[0.25em] text-ordem-text-muted uppercase flex items-center gap-2">
+                <Package size={14} />
+                Equipamento
+              </div>
+              <div className="text-xs font-mono text-ordem-text-muted">
+                {agent.equipamentos.length} item(ns) • {agent.carga.atual}/{agent.carga.maxima} espaços
+              </div>
             </div>
-            <div className="space-y-2">
-              {agent.equipamentos.map((it, idx) => (
-                <div key={`${it.nome}-${idx}`} className="bg-ordem-black/30 border border-ordem-border rounded-lg p-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="font-bold text-zinc-100 truncate">{it.nome}</div>
-                      <div className="text-[11px] text-ordem-text-muted">
-                        {it.tipo} • Cat {it.categoria} • {it.espaco} espaço
+
+            {(() => {
+              const armas = agent.equipamentos.filter(it => it.tipo === 'Arma' || (it.stats && (it.stats.dano || it.stats.danoBase)));
+              const protecoes = agent.equipamentos.filter(it => it.tipo === 'Proteção' || (it.stats && it.stats.defesa));
+              const outros = agent.equipamentos.filter(it => 
+                !armas.includes(it) && !protecoes.includes(it)
+              );
+
+              return (
+                <div className="space-y-4">
+                  {armas.length > 0 && (
+                    <div>
+                      <div className="text-[10px] font-mono text-ordem-gold uppercase tracking-widest mb-2">
+                        Armas ({armas.length})
+                      </div>
+                      <div className="space-y-2">
+                        {armas.map((it, idx) => (
+                          <WeaponStatsDisplay
+                            key={`arma-${it.nome}-${idx}`}
+                            item={it}
+                            compact={false}
+                            showDescription={true}
+                          />
+                        ))}
                       </div>
                     </div>
-                  </div>
-                  {it.descricao && <div className="text-xs text-ordem-text-secondary mt-2 whitespace-pre-line">{it.descricao}</div>}
+                  )}
+
+                  {protecoes.length > 0 && (
+                    <div>
+                      <div className="text-[10px] font-mono text-blue-400 uppercase tracking-widest mb-2">
+                        Proteções ({protecoes.length})
+                      </div>
+                      <div className="space-y-2">
+                        {protecoes.map((it, idx) => (
+                          <div key={`prot-${it.nome}-${idx}`} className="bg-ordem-black/30 border border-ordem-border rounded-lg p-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <div className="font-bold text-zinc-100 truncate">{it.nome}</div>
+                                <div className="text-[11px] text-ordem-text-muted">
+                                  {it.tipo} • Cat {['0', 'I', 'II', 'III', 'IV'][it.categoria]} • {it.espaco} espaço{it.espaco !== 1 ? 's' : ''}
+                                </div>
+                              </div>
+                              {it.stats?.defesa && (
+                                <div className="text-sm font-mono font-bold text-blue-400">
+                                  DEF +{it.stats.defesa}
+                                </div>
+                              )}
+                            </div>
+                            {it.descricao && <div className="text-xs text-ordem-text-secondary mt-2 whitespace-pre-line">{it.descricao}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {outros.length > 0 && (
+                    <div>
+                      <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest mb-2">
+                        Outros Itens ({outros.length})
+                      </div>
+                      <div className="space-y-2">
+                        {outros.map((it, idx) => (
+                          <div key={`outro-${it.nome}-${idx}`} className="bg-ordem-black/30 border border-ordem-border rounded-lg p-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <div className="font-bold text-zinc-100 truncate">{it.nome}</div>
+                                <div className="text-[11px] text-ordem-text-muted">
+                                  {it.tipo} • Cat {['0', 'I', 'II', 'III', 'IV'][it.categoria]} • {it.espaco} espaço{it.espaco !== 1 ? 's' : ''}
+                                </div>
+                              </div>
+                            </div>
+                            {it.descricao && <div className="text-xs text-ordem-text-secondary mt-2 whitespace-pre-line">{it.descricao}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {agent.equipamentos.length === 0 && (
+                    <div className="text-sm text-ordem-text-muted italic text-center py-4">Inventário vazio.</div>
+                  )}
                 </div>
-              ))}
-              {agent.equipamentos.length === 0 && <div className="text-sm text-ordem-text-muted italic">Inventário vazio.</div>}
-            </div>
+              );
+            })()}
           </div>
         )}
 

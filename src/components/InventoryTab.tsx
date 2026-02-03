@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Personagem } from '../core/types';
+import { WeaponStatsDisplay } from './WeaponStatsDisplay';
 
 interface InventoryTabProps {
   character: Personagem;
@@ -10,8 +11,6 @@ export const InventoryTab: React.FC<InventoryTabProps> = ({ character }) => {
   const cargaAtual = character.carga.atual;
   const cargaMaxima = character.carga.maxima;
   const limiteItens = character.limiteItens;
-
-  const isCursed = (tipo: string) => tipo.includes('Amaldiçoado');
 
   const itemsByCat = useMemo(() => {
     const grouped: Record<number, typeof items> = { 0: [], 1: [], 2: [], 3: [], 4: [] };
@@ -64,63 +63,47 @@ export const InventoryTab: React.FC<InventoryTabProps> = ({ character }) => {
         )}
 
         <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-ordem-border">
-            {renderLimit(1, 'Cat I')}
-            {renderLimit(2, 'Cat II')}
-            {renderLimit(3, 'Cat III')}
-            {renderLimit(4, 'Cat IV')}
+          {renderLimit(1, 'Cat I')}
+          {renderLimit(2, 'Cat II')}
+          {renderLimit(3, 'Cat III')}
+          {renderLimit(4, 'Cat IV')}
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4">
         {items.length === 0 ? (
-            <div className="text-center text-ordem-text-muted py-8 italic">Inventário vazio.</div>
+          <div className="text-center text-ordem-text-muted py-8 italic">Inventário vazio.</div>
         ) : (
-            Object.entries(itemsByCat).map(([catStr, catItems]) => {
-                const cat = Number(catStr);
-                if (catItems.length === 0) return null;
-                return (
-                    <div key={cat}>
-                        <h3 className="text-xs text-ordem-gold uppercase tracking-widest mb-2 sticky top-0 bg-ordem-black/80 backdrop-blur py-1 z-10">
-                            Categoria {cat === 0 ? '0' : ['I', 'II', 'III', 'IV'][cat - 1]}
-                        </h3>
-                        <div className="space-y-2">
-                            {catItems.map((item, idx) => (
-                                <div key={idx} className={`p-3 bg-ordem-black/20 border ${isCursed(item.tipo) ? 'border-purple-900/50 bg-purple-900/10' : 'border-ordem-border'} hover:border-ordem-border-light transition-colors rounded group`}>
-                                    <div className="flex justify-between items-start">
-                                    <div>
-                                        <div className={`font-bold ${isCursed(item.tipo) ? 'text-purple-300' : 'text-gray-200'} group-hover:text-white`}>
-                                            {item.nome}
-                                        </div>
-                                        <div className="text-xs text-ordem-text-muted uppercase flex gap-2">
-                                            <span>{item.tipo}</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xs font-mono text-ordem-text-muted border border-ordem-border px-2 py-0.5 rounded">
-                                        {item.espaco} slots
-                                        </span>
-                                    </div>
-                                    </div>
+          Object.entries(itemsByCat).map(([catStr, catItems]) => {
+            const cat = Number(catStr);
+            if (catItems.length === 0) return null;
 
-                                    {item.stats && (
-                                        <div className="mt-2 flex gap-3 text-xs font-mono text-ordem-white-muted">
-                                            {item.stats.dano && <span>Dano: {item.stats.dano}</span>}
-                                            {item.stats.critico && <span>Crit: {item.stats.critico}</span>}
-                                            {item.stats.defesa && <span>Def: +{item.stats.defesa}</span>}
-                                        </div>
-                                    )}
+            const moddedCount = catItems.filter(it => it.modificacoes && it.modificacoes.length > 0).length;
 
-                                    {item.descricao && (
-                                    <div className="mt-2 text-xs text-ordem-text-secondary border-t border-ordem-border pt-2 leading-relaxed">
-                                        {item.descricao}
-                                    </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                );
-            })
+            return (
+              <div key={cat}>
+                <h3 className="text-xs text-ordem-gold uppercase tracking-widest mb-2 sticky top-0 bg-ordem-black/80 backdrop-blur py-1 z-10 flex items-center justify-between">
+                  <span>Categoria {cat === 0 ? '0' : ['I', 'II', 'III', 'IV'][cat - 1]}</span>
+                  <span className="text-ordem-text-muted font-normal">
+                    {catItems.length} item(ns)
+                    {moddedCount > 0 && (
+                      <span className="ml-2 text-ordem-green">• {moddedCount} modificado(s)</span>
+                    )}
+                  </span>
+                </h3>
+                <div className="space-y-2">
+                  {catItems.map((item, idx) => (
+                    <WeaponStatsDisplay
+                      key={`${cat}-${item.nome}-${idx}`}
+                      item={item}
+                      compact={false}
+                      showDescription={true}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })
         )}
       </div>
     </div>

@@ -1,9 +1,19 @@
 "use client";
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Personagem, ModificacaoArma } from '../../core/types';
-import { MODIFICACOES_ARMAS } from '../../data/modifications';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Plus, Minus, Swords, Target, Zap, Shield, ArrowRight, Info, Check } from 'lucide-react';
+import { Personagem, Item, ModificacaoArma } from '../../core/types';
+import {
+    MODIFICACOES_ARMAS,
+    calcularStatsModificados,
+    parseCritico,
+    parseDano,
+    formatDano,
+    formatCritico
+} from '../../data/modifications';
+import { cn } from '@/lib/utils';
 
 interface WeaponModsModalProps {
     personagem: Personagem;
@@ -12,50 +22,327 @@ interface WeaponModsModalProps {
     onClose: () => void;
 }
 
-function WeaponModsModalContent({ personagem, onUpdate, onClose }: Omit<WeaponModsModalProps, 'isOpen'>) {
-    const armas = personagem.equipamentos.filter(eq => eq.tipo === 'Arma' || (eq.stats && eq.stats.dano));
-    const getModificacoesFromDescricao = (descricao: string): string[] => {
-        const match = descricao.match(/\[Mods: ([^\]]+)\]/);
-        if (!match) return [];
-        return match[1].split(',').map(m => m.trim()).filter(Boolean);
-    };
-    const aplicarModificacao = useCallback((nomeArma: string, mod: ModificacaoArma) => {
+function StatComparison({
+    label,
+    original,
+    modified,
+    icon: Icon,
+    highlight = 'green'
+}: {
+    label: string;
+    original: string | number;
+    modified: string | number;
+    icon?: React.ElementType;
+    highlight?: 'green' | 'red' | 'blue';
+}) {
+    const changed = String(original) !== String(modified);
+    const highlightColor = {
+        green: 'text-ordem-green',
+        red: 'text-ordem-red',
+        blue: 'text-blue-400'
+    }[highlight];
+
+    return (
+        <div className="flex items-center gap-2 text-xs">
+            {Icon && <Icon size={12} className="text-ordem-text-muted" />}
+            <span className="text-ordem-text-muted">{label}:</span>
+            {changed ? (
+                <>
+                    <span className="text-ordem-text-secondary line-through opacity-50">{original}</span>
+                    <ArrowRight size={10} className="text-ordem-text-muted" />
+                    <span className={cn("font-bold", highlightColor)}>{modified}</span>
+                </>
+            ) : (
+                <span className="text-white">{original}</span>
+            )}
+        </div>
+    );
+}
+
+function ModChip({
+    mod,
+    applied,
+    onToggle,
+    disabled = false
+}: {
+    mod: ModificacaoArma;
+    applied: boolean;
+    onToggle: () => void;
+    disabled?: boolean;
+}) {
+    return (
+        <button
+            type="button"
+            onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!disabled) onToggle();
+            }}
+            disabled={disabled && !applied}
+            className={cn(
+                "group relative px-3 py-2 text-xs font-mono rounded-lg border transition-all flex items-center gap-2",
+                applied
+                    ? "bg-ordem-green/20 border-ordem-green text-ordem-green hover:bg-ordem-red/20 hover:border-ordem-red hover:text-ordem-red"
+                    : disabled
+                        ? "bg-ordem-ooze/30 border-ordem-border/50 text-ordem-text-muted cursor-not-allowed opacity-50"
+                        : "bg-ordem-ooze/50 border-ordem-border text-ordem-text-secondary hover:border-ordem-green hover:text-ordem-green"
+            )}
+            title={mod.efeito}
+        >
+            {applied ? <Check size={12} /> : <Plus size={12} />}
+            <span>{mod.nome}</span>
+            {mod.requisito && (
+                <span className="text-[9px] text-ordem-text-muted">({mod.requisito})</span>
+            )}
+        </button>
+    );
+}
+
+function WeaponCard({
+    arma,
+    armaIdx,
+    onApplyMod,
+    onRemoveMod
+}: {
+    arma: Item;
+    armaIdx: number;
+    onApplyMod: (modNome: string) => void;
+    onRemoveMod: (modNome: string) => void;
+}) {
+    const [expanded, setExpanded] = useState(true);
+
+    const modsAplicadas = useMemo(() => arma.modificacoes || [], [arma.modificacoes]);
+    const statsModificados = calcularStatsModificados(arma);
+    const statsBase = arma.stats || {};
+
+    const isArmaFogo = (statsBase.alcance && statsBase.alcance !== 'Corpo a corpo') ||
+        arma.descricao?.toLowerCase().includes('fogo') ||
+        arma.descricao?.toLowerCase().includes('balas') ||
+        arma.descricao?.toLowerCase().includes('disparo');
+
+    const tipoArma: 'cac' | 'fogo' = isArmaFogo ? 'fogo' : 'cac';
+
+    const modsDisponiveis = useMemo(() =>
+        MODIFICACOES_ARMAS.filter(mod => {
+            if (modsAplicadas.includes(mod.nome)) return false;
+            if (mod.tipo === 'universal') return true;
+            if (mod.tipo === 'cac' && tipoArma === 'cac') return true;
+            if (mod.tipo === 'fogo' && tipoArma === 'fogo') return true;
+            if (mod.tipo === 'disparo' && tipoArma === 'fogo') return true;
+            return false;
+        }), [modsAplicadas, tipoArma]);
+
+    const modsAplicadasObj = useMemo(() =>
+        modsAplicadas.map(nome => MODIFICACOES_ARMAS.find(m => m.nome === nome)).filter(Boolean) as ModificacaoArma[]
+        , [modsAplicadas]);
+
+    const podeAdicionar = arma.categoria < 4;
+    const categoriaBase = arma.categoriaBase ?? arma.categoria - modsAplicadas.length;
+
+    const danoBase = parseDano(statsBase.dano || statsBase.danoBase || '1d6');
+    const danoMod = parseDano(statsModificados.dano || '1d6');
+    const criticoBase = parseCritico(statsBase.critico || 'x2');
+    const criticoMod = parseCritico(statsModificados.critico || 'x2');
+
+    return (
+        <motion.div
+            layout
+            className="bg-ordem-ooze/30 border border-ordem-border rounded-xl overflow-hidden"
+        >
+            <button
+                type="button"
+                onClick={() => setExpanded(!expanded)}
+                className="w-full p-4 flex items-center justify-between text-left hover:bg-ordem-ooze/50 transition-colors"
+            >
+                <div className="flex items-center gap-3">
+                    <Swords size={18} className="text-ordem-gold" />
+                    <div>
+                        <div className="font-bold text-white flex items-center gap-2">
+                            {arma.nome}
+                            {modsAplicadas.length > 0 && (
+                                <span className="text-[10px] px-2 py-0.5 bg-ordem-green/20 text-ordem-green rounded-full font-mono">
+                                    +{modsAplicadas.length} mod{modsAplicadas.length > 1 ? 's' : ''}
+                                </span>
+                            )}
+                        </div>
+                        <div className="text-xs text-ordem-text-muted flex items-center gap-2">
+                            <span>Cat: <span className="text-ordem-gold font-bold">{['0', 'I', 'II', 'III', 'IV'][arma.categoria]}</span></span>
+                            {modsAplicadas.length > 0 && (
+                                <span className="text-ordem-text-muted">(base: {['0', 'I', 'II', 'III', 'IV'][Math.max(0, categoriaBase)]})</span>
+                            )}
+                            <span className="text-ordem-border">•</span>
+                            <span className={cn(
+                                tipoArma === 'fogo' ? 'text-orange-400' : 'text-blue-400'
+                            )}>
+                                {tipoArma === 'fogo' ? '🔫 Fogo' : '⚔️ Corpo a Corpo'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <motion.div
+                    animate={{ rotate: expanded ? 180 : 0 }}
+                    className="text-ordem-text-muted"
+                >
+                    ▼
+                </motion.div>
+            </button>
+
+            <AnimatePresence>
+                {expanded && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="border-t border-ordem-border"
+                    >
+                        <div className="p-4 space-y-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-ordem-black/50 rounded-lg">
+                                <StatComparison
+                                    label="Dano"
+                                    original={statsBase.dano || statsBase.danoBase || '1d6'}
+                                    modified={statsModificados.dano || '1d6'}
+                                    icon={Zap}
+                                    highlight="green"
+                                />
+                                <StatComparison
+                                    label="Crítico"
+                                    original={statsBase.critico || 'x2'}
+                                    modified={statsModificados.critico || 'x2'}
+                                    icon={Target}
+                                    highlight="red"
+                                />
+                                <StatComparison
+                                    label="Alcance"
+                                    original={statsBase.alcance || 'CaC'}
+                                    modified={statsModificados.alcance || 'CaC'}
+                                    icon={ArrowRight}
+                                    highlight="blue"
+                                />
+                                {statsModificados.ataqueBonus && statsModificados.ataqueBonus > 0 && (
+                                    <div className="flex items-center gap-2 text-xs">
+                                        <Shield size={12} className="text-ordem-text-muted" />
+                                        <span className="text-ordem-text-muted">Ataque:</span>
+                                        <span className="font-bold text-ordem-green">+{statsModificados.ataqueBonus}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {modsAplicadasObj.length > 0 && (
+                                <div>
+                                    <div className="text-[10px] text-ordem-text-muted uppercase tracking-widest mb-2 flex items-center gap-2">
+                                        <Check size={12} /> Modificações Aplicadas
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {modsAplicadasObj.map(mod => (
+                                            <ModChip
+                                                key={mod.nome}
+                                                mod={mod}
+                                                applied={true}
+                                                onToggle={() => onRemoveMod(mod.nome)}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div>
+                                <div className="text-[10px] text-ordem-text-muted uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <Plus size={12} />
+                                    Adicionar Modificação
+                                    {!podeAdicionar && (
+                                        <span className="text-ordem-red">(Categoria máxima)</span>
+                                    )}
+                                </div>
+
+                                {modsDisponiveis.length === 0 ? (
+                                    <p className="text-xs text-ordem-text-muted italic">
+                                        Todas as modificações disponíveis já foram aplicadas.
+                                    </p>
+                                ) : (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                        {modsDisponiveis.map(mod => (
+                                            <ModChip
+                                                key={mod.nome}
+                                                mod={mod}
+                                                applied={false}
+                                                onToggle={() => onApplyMod(mod.nome)}
+                                                disabled={!podeAdicionar}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {modsAplicadasObj.length > 0 && (
+                                <div className="p-3 bg-ordem-green/5 border border-ordem-green/20 rounded-lg">
+                                    <div className="text-[10px] text-ordem-green uppercase tracking-widest mb-2 flex items-center gap-2">
+                                        <Info size={12} /> Resumo das Modificações
+                                    </div>
+                                    <ul className="text-xs text-ordem-text-secondary space-y-1">
+                                        {modsAplicadasObj.map(mod => (
+                                            <li key={mod.nome} className="flex items-start gap-2">
+                                                <span className="text-ordem-gold">•</span>
+                                                <span>
+                                                    <span className="font-bold text-white">{mod.nome}:</span>{' '}
+                                                    {mod.efeito}
+                                                </span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </motion.div>
+    );
+}
+
+function WeaponModsModalContent({ personagem, onUpdate, onClose }: Omit<WeaponModsModalProps, 'isOpen'>) {
+    const armas = useMemo(() =>
+        personagem.equipamentos
+            .map((eq, idx) => ({ eq, idx }))
+            .filter(({ eq }) => eq.tipo === 'Arma' || (eq.stats && (eq.stats.dano || eq.stats.danoBase)))
+        , [personagem.equipamentos]);
+
+    const aplicarModificacao = useCallback((armaIdx: number, modNome: string) => {
         const equipamentos = [...personagem.equipamentos];
-        const idx = equipamentos.findIndex(eq => eq.nome === nomeArma);
-        if (idx === -1) return;
+        const arma = { ...equipamentos[armaIdx] };
 
-        const arma = equipamentos[idx];
+        if (!arma.categoriaBase) {
+            arma.categoriaBase = arma.categoria;
+        }
+
         const novaCategoria = Math.min(4, arma.categoria + 1) as 0 | 1 | 2 | 3 | 4;
+        const novasMods = [...(arma.modificacoes || []), modNome];
 
-        equipamentos[idx] = {
+        if (!arma.stats) arma.stats = {};
+        if (!arma.stats.danoBase && arma.stats.dano) {
+            arma.stats.danoBase = arma.stats.dano;
+        }
+
+        equipamentos[armaIdx] = {
             ...arma,
             categoria: novaCategoria,
-            descricao: arma.descricao.includes('[Mods:')
-                ? arma.descricao.replace(/\[Mods: ([^\]]+)\]/, `[Mods: $1, ${mod.nome}]`)
-                : `${arma.descricao} [Mods: ${mod.nome}]`
+            modificacoes: novasMods
         };
 
         onUpdate({ ...personagem, equipamentos });
-    }, [personagem, onUpdate]);
-    const removerModificacao = useCallback((nomeArma: string, modNome: string) => {
+    }, [personagem, onUpdate]);
+
+    const removerModificacao = useCallback((armaIdx: number, modNome: string) => {
         const equipamentos = [...personagem.equipamentos];
-        const idx = equipamentos.findIndex(eq => eq.nome === nomeArma);
-        if (idx === -1) return;
+        const arma = { ...equipamentos[armaIdx] };
 
-        const arma = equipamentos[idx];
-        const novaCategoria = Math.max(0, arma.categoria - 1) as 0 | 1 | 2 | 3 | 4;
-        let novaDescricao = arma.descricao
-            .replace(new RegExp(`,\\s*${modNome}`, 'g'), '')
-            .replace(new RegExp(`${modNome},\\s*`, 'g'), '')
-            .replace(new RegExp(`\\[Mods: ${modNome}\\]`, 'g'), '');
-        if (novaDescricao.includes('[Mods: ]')) {
-            novaDescricao = novaDescricao.replace('[Mods: ]', '').trim();
-        }
+        const novasMods = (arma.modificacoes || []).filter(m => m !== modNome);
+        const categoriaBase = arma.categoriaBase ?? arma.categoria;
+        const novaCategoria = Math.min(4, Math.max(0, categoriaBase + novasMods.length)) as 0 | 1 | 2 | 3 | 4;
 
-        equipamentos[idx] = {
+        equipamentos[armaIdx] = {
             ...arma,
             categoria: novaCategoria,
-            descricao: novaDescricao.trim()
+            modificacoes: novasMods.length > 0 ? novasMods : undefined
         };
 
         onUpdate({ ...personagem, equipamentos });
@@ -69,139 +356,86 @@ function WeaponModsModalContent({ personagem, onUpdate, onClose }: Omit<WeaponMo
         }
     }, [onClose]);
 
-    const handleCloseClick = useCallback((e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onClose();
-    }, [onClose]);
-
     return (
         <div
             className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4"
             onClick={handleBackdropClick}
             onMouseDown={(e) => e.stopPropagation()}
         >
-            <div
-                className="bg-ordem-black border border-ordem-border rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col"
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-ordem-black border border-ordem-border rounded-xl max-w-3xl w-full max-h-[85vh] overflow-hidden flex flex-col"
                 onClick={(e) => e.stopPropagation()}
                 onMouseDown={(e) => e.stopPropagation()}
             >
-                <div className="p-4 border-b border-ordem-border flex justify-between items-center">
-                    <h2 className="text-lg font-bold text-white">⚙ Modificações de Armas</h2>
+                <div className="p-4 border-b border-ordem-border flex justify-between items-center bg-ordem-ooze/30">
+                    <div>
+                        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                            <Swords size={20} className="text-ordem-gold" />
+                            Modificações de Armas
+                        </h2>
+                        <p className="text-xs text-ordem-text-muted mt-0.5">
+                            Cada modificação aumenta a categoria em +1
+                        </p>
+                    </div>
                     <button
                         type="button"
-                        onClick={handleCloseClick}
-                        className="text-ordem-text-muted hover:text-white text-xl w-8 h-8 flex items-center justify-center"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onClose();
+                        }}
+                        className="p-2 text-ordem-text-muted hover:text-white hover:bg-ordem-ooze rounded-lg transition-colors"
                     >
-                        ×
+                        <X size={20} />
                     </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
                     {armas.length === 0 ? (
-                        <p className="text-ordem-text-muted text-center py-8">
-                            Nenhuma arma no inventário.
-                        </p>
+                        <div className="text-center py-12">
+                            <Swords size={48} className="mx-auto text-ordem-text-muted mb-4 opacity-50" />
+                            <p className="text-ordem-text-muted">
+                                Nenhuma arma no inventário.
+                            </p>
+                            <p className="text-xs text-ordem-text-muted mt-2">
+                                Adicione armas ao equipamento para aplicar modificações.
+                            </p>
+                        </div>
                     ) : (
-                        armas.map(arma => {
-                            const modsAplicadas = getModificacoesFromDescricao(arma.descricao);
-                            const tipoArma = arma.stats?.alcance ? 'fogo' : 'cac';
-                            const modsDisponiveis = MODIFICACOES_ARMAS.filter(mod => {
-                                if (mod.tipo === 'universal') return true;
-                                if (mod.tipo === 'cac' && tipoArma === 'cac') return true;
-                                if (mod.tipo === 'fogo' && tipoArma === 'fogo') return true;
-                                return false;
-                            }).filter(mod => !modsAplicadas.includes(mod.nome));
-
-                            const podeAdicionar = arma.categoria < 4;
-
-                            return (
-                                <div key={arma.nome} className="bg-ordem-ooze/30 border border-ordem-border rounded-lg p-4">
-                                    <div className="flex justify-between items-start mb-3">
-                                        <div>
-                                            <div className="font-bold text-white">{arma.nome}</div>
-                                            <div className="text-xs text-ordem-text-muted">
-                                                Categoria: <span className="text-ordem-gold">{arma.categoria}</span>
-                                                {arma.stats?.dano && <span className="ml-2">• Dano: {arma.stats.dano}</span>}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {}
-                                    {modsAplicadas.length > 0 && (
-                                        <div className="mb-3">
-                                            <div className="text-[10px] text-ordem-text-muted uppercase tracking-widest mb-2">Aplicadas:</div>
-                                            <div className="flex flex-wrap gap-2">
-                                                {modsAplicadas.map(modNome => {
-                                                    const mod = MODIFICACOES_ARMAS.find(m => m.nome === modNome);
-                                                    return (
-                                                        <button
-                                                            key={modNome}
-                                                            type="button"
-                                                            onClick={(e) => {
-                                                                e.preventDefault();
-                                                                e.stopPropagation();
-                                                                removerModificacao(arma.nome, modNome);
-                                                            }}
-                                                            className="px-2 py-1 text-xs font-mono border border-ordem-gold bg-ordem-gold/10 text-ordem-gold rounded flex items-center gap-1 hover:bg-ordem-red/10 hover:border-ordem-red hover:text-ordem-red transition-all"
-                                                            title={mod?.efeito || modNome}
-                                                        >
-                                                            {modNome}
-                                                            <span className="text-[10px]">×</span>
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {}
-                                    {podeAdicionar && modsDisponiveis.length > 0 && (
-                                        <div>
-                                            <div className="text-[10px] text-ordem-text-muted uppercase tracking-widest mb-2">
-                                                Adicionar (+1 Cat → Cat {arma.categoria + 1}):
-                                            </div>
-                                            <div className="flex flex-wrap gap-2">
-                                                {modsDisponiveis.slice(0, 8).map(mod => (
-                                                    <button
-                                                        key={mod.nome}
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            e.stopPropagation();
-                                                            aplicarModificacao(arma.nome, mod);
-                                                        }}
-                                                        className="px-2 py-1 text-xs font-mono border border-ordem-border text-ordem-text-muted rounded hover:border-ordem-gold hover:text-ordem-gold transition-all"
-                                                        title={mod.efeito}
-                                                    >
-                                                        {mod.nome}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {!podeAdicionar && (
-                                        <div className="text-xs text-ordem-text-muted italic">
-                                            Categoria máxima atingida (IV).
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })
+                        armas.map(({ eq: arma, idx }) => (
+                            <WeaponCard
+                                key={`${arma.nome}-${idx}`}
+                                arma={arma}
+                                armaIdx={idx}
+                                onApplyMod={(modNome) => aplicarModificacao(idx, modNome)}
+                                onRemoveMod={(modNome) => removerModificacao(idx, modNome)}
+                            />
+                        ))
                     )}
                 </div>
 
-                <div className="p-4 border-t border-ordem-border">
-                    <button
-                        type="button"
-                        onClick={handleCloseClick}
-                        className="w-full py-3 text-sm font-mono uppercase tracking-wider bg-ordem-ooze text-white hover:bg-ordem-border transition rounded-lg"
-                    >
-                        Fechar
-                    </button>
+                <div className="p-4 border-t border-ordem-border bg-ordem-ooze/30">
+                    <div className="flex items-center justify-between">
+                        <div className="text-xs text-ordem-text-muted">
+                            <span className="text-ordem-gold font-bold">{armas.length}</span> arma{armas.length !== 1 ? 's' : ''} no inventário
+                        </div>
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onClose();
+                            }}
+                            className="px-6 py-2 text-sm font-mono uppercase tracking-wider bg-ordem-green hover:bg-green-600 text-white rounded-lg transition"
+                        >
+                            Concluído
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 }
@@ -213,12 +447,13 @@ export function WeaponModsModal({ personagem, onUpdate, isOpen, onClose }: Weapo
         setMounted(true);
     }, []);
 
-    if (!isOpen || !mounted) return null;
+    if (!isOpen || !mounted) return null;
     return createPortal(
         <WeaponModsModalContent personagem={personagem} onUpdate={onUpdate} onClose={onClose} />,
         document.body
     );
-}
+}
+
 interface WeaponModsButtonProps {
     personagem: Personagem;
     onUpdate: (updated: Personagem) => void;
@@ -226,8 +461,8 @@ interface WeaponModsButtonProps {
 }
 
 export function WeaponModsButton({ personagem, onUpdate, className = '' }: WeaponModsButtonProps) {
-    const [showModal, setShowModal] = useState(false);
-    const armasCount = personagem.equipamentos.filter(eq => eq.tipo === 'Arma' || (eq.stats && eq.stats.dano)).length;
+    const [showModal, setShowModal] = useState(false);
+    const armasCount = personagem.equipamentos.filter(eq => eq.tipo === 'Arma' || (eq.stats && (eq.stats.dano || eq.stats.danoBase))).length;
 
     const handleOpenModal = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
@@ -247,10 +482,14 @@ export function WeaponModsButton({ personagem, onUpdate, className = '' }: Weapo
                 type="button"
                 onClick={handleOpenModal}
                 onMouseDown={(e) => e.stopPropagation()}
-                className={`px-3 py-2 text-[10px] font-mono tracking-[0.15em] border border-ordem-gold text-ordem-gold hover:bg-ordem-gold/10 rounded-lg transition flex items-center gap-1 ${className}`}
+                className={cn(
+                    "px-3 py-2 text-[10px] font-mono tracking-[0.15em] border border-ordem-gold text-ordem-gold hover:bg-ordem-gold/10 rounded-lg transition flex items-center gap-1.5",
+                    className
+                )}
                 title="Modificar armas"
             >
-                ⚙ MODS
+                <Swords size={12} />
+                MODS ({armasCount})
             </button>
             <WeaponModsModal
                 personagem={personagem}

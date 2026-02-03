@@ -129,9 +129,25 @@ export interface Ameaca {
   livro: 'Regras Básicas' | 'Sobrevivendo ao Horror';
 }
 
+export interface ItemStats {
+  dano?: string;
+  danoBase?: string;
+  tipoDano?: string;
+  critico?: string;
+  alcance?: string;
+  defesa?: number;
+  resistencia?: number;
+  ataqueBonus?: number;
+  danoBonus?: number;
+  margemAmeaca?: number;
+  multiplicadorCritico?: number;
+  automatica?: boolean;
+}
+
 export interface Item {
   nome: string;
   categoria: 0 | 1 | 2 | 3 | 4;
+  categoriaBase?: 0 | 1 | 2 | 3 | 4;
   espaco: number;
   tipo: 'Arma' | 'Proteção' | 'Acessório' | 'Geral' | 'Amaldiçoado' |
   'Modificação Paranormal (Acessório)' |
@@ -139,14 +155,8 @@ export interface Item {
   'Geral (Acessório)' | 'Geral (Utensílio)' | 'Geral (Medicamento)' | 'Geral (Operacional)' |
   'Explosivo' | 'Paranormal';
   descricao: string;
-  stats?: {
-    dano?: string;
-    tipoDano?: string;
-    critico?: string;
-    alcance?: string;
-    defesa?: number;
-    resistencia?: number;
-  };
+  stats?: ItemStats;
+  modificacoes?: string[];
   livro: 'Regras Básicas' | 'Sobrevivendo ao Horror';
 }
 

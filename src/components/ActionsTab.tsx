@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import { Personagem, Poder, Ritual } from '../core/types';
+import { Personagem, Poder, Ritual, Item } from '../core/types';
 import { UNIVERSAL_ACTIONS, INVESTIGATION_ACTIONS, CHASE_ACTIONS, STEALTH_ACTIONS, ActionDefinition } from '../data/actions';
 import { ORIGENS } from '../data/origins';
 import { CLASS_ABILITIES } from '../data/classAbilities';
 import { TRILHAS } from '../data/tracks';
 import { getPenalidadesPericia } from '../logic/combatUtils';
+import { calcularStatsModificados, MODIFICACOES_ARMAS } from '../data/modifications';
 
 interface ActionsTabProps {
   character: Personagem;
@@ -216,24 +217,39 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
   const trackAbilities = trackData?.habilidades.filter(h => h.nex <= character.nex) || [];
 
   const weaponActions = character.equipamentos
-    .filter(item => item.tipo === 'Arma')
+    .filter(item => item.tipo === 'Arma' || (item.stats && (item.stats.dano || item.stats.danoBase)))
     .map(item => {
-      const alcance = item.stats?.alcance?.toLowerCase() || '';
+      const hasMods = item.modificacoes && item.modificacoes.length > 0;
+      const stats = hasMods ? calcularStatsModificados(item) : item.stats;
+      const baseStats = item.stats;
+
+      const alcance = stats?.alcance?.toLowerCase() || '';
       const isMelee = alcance.includes('corpo') || alcance.includes('adjacente') || alcance === '';
       const periciaName = isMelee ? 'Luta' : 'Pontaria';
       const pericia = character.periciasDetalhadas[periciaName];
 
       const penalidade = getPenalidadesPericia(character, pericia.atributoBase);
-      const dados = Math.max(0, pericia.dados + penalidade.dados);
-      const bonus = pericia.bonusFixo + pericia.bonusO + penalidade.valor;
+      let dados = Math.max(0, pericia.dados + penalidade.dados);
+      let bonus = pericia.bonusFixo + pericia.bonusO + penalidade.valor;
+
+      if (stats?.ataqueBonus) {
+        bonus += stats.ataqueBonus;
+      }
+
       const sinal = bonus >= 0 ? '+' : '';
+
+      const modList = hasMods ? item.modificacoes!.join(', ') : null;
 
       return {
         nome: item.nome,
         tipo: 'Ataque',
-        descricao: `Dano: ${item.stats?.dano || '-'} | Crítico: ${item.stats?.critico || '-'} | Alcance: ${item.stats?.alcance || '-'} ${item.stats?.tipoDano ? `| ${item.stats.tipoDano}` : ''}\n${item.descricao}`,
+        descricao: `Dano: ${stats?.dano || '-'} | Crítico: ${stats?.critico || '-'} | Alcance: ${stats?.alcance || '-'} ${stats?.tipoDano ? `| ${stats.tipoDano}` : ''}${stats?.automatica ? ' | AUTOMÁTICA' : ''}\n${item.descricao}`,
         pericia: periciaName,
-        teste: `${dados}d20 ${sinal}${bonus}${penalidade.dados !== 0 ? ` (${penalidade.dados}d)` : ''}${penalidade.valor !== 0 ? ` (${penalidade.valor})` : ''}`
+        teste: `${dados}d20 ${sinal}${bonus}${penalidade.dados !== 0 ? ` (${penalidade.dados}d)` : ''}${penalidade.valor !== 0 ? ` (${penalidade.valor})` : ''}`,
+        modificacoes: modList,
+        itemOriginal: item,
+        statsModificados: hasMods,
+        ataqueBonus: stats?.ataqueBonus
       } as any;
     });
 
@@ -318,7 +334,68 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
             Armas & Ataques
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {filteredWeaponActions.map((a) => renderActionCard(a, 'Equipamento'))}
+            {filteredWeaponActions.map((a) => (
+              <div key={a.nome} className={`bg-ordem-black/40 border ${a.statsModificados ? 'border-ordem-green/30' : 'border-ordem-border'} p-3 rounded hover:border-ordem-red/50 transition-colors group relative overflow-hidden`}>
+                <div className="flex justify-between items-start mb-1 relative z-10">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-bold text-gray-200 group-hover:text-ordem-red transition-colors">{a.nome}</h4>
+                    {a.statsModificados && (
+                      <span className="text-[9px] px-1.5 py-0.5 bg-ordem-green/20 text-ordem-green rounded font-mono">
+                        +{a.itemOriginal.modificacoes.length} mod
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono bg-ordem-ooze px-2 py-0.5 rounded border text-ordem-white-muted border-ordem-border-light">
+                      ALVO DEF {character.defesa ?? 10}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 text-xs text-ordem-text-muted mb-2 relative z-10">
+                  <span className="uppercase tracking-wider">Equipamento</span>
+                  <span className="uppercase tracking-wider">{a.tipo}</span>
+                  <span className="text-ordem-green font-mono font-bold border border-ordem-green/30 px-1 rounded">
+                    {a.teste}
+                  </span>
+                  {a.ataqueBonus && a.ataqueBonus > 0 && (
+                    <span className="text-ordem-gold font-mono font-bold border border-ordem-gold/30 px-1 rounded" title="Bônus de ataque das modificações">
+                      MOD +{a.ataqueBonus}
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-sm text-ordem-text-secondary leading-relaxed relative z-10 whitespace-pre-line">
+                  {a.descricao}
+                </p>
+
+                {a.modificacoes && (
+                  <div className="mt-3 pt-2 border-t border-ordem-border/50 relative z-10">
+                    <div className="text-[9px] text-ordem-text-muted uppercase tracking-widest mb-1.5">Modificações Aplicadas</div>
+                    <div className="flex flex-wrap gap-1">
+                      {a.itemOriginal.modificacoes.map((modNome: string) => {
+                        const mod = MODIFICACOES_ARMAS.find(m => m.nome === modNome);
+                        return (
+                          <div key={modNome} className="group/mod relative">
+                            <span className="text-[9px] px-1.5 py-0.5 bg-ordem-gold/10 text-ordem-gold border border-ordem-gold/30 rounded font-mono cursor-help">
+                              {modNome}
+                            </span>
+                            {mod && (
+                              <div className="absolute bottom-full left-0 mb-1 hidden group-hover/mod:block z-50 pointer-events-none">
+                                <div className="bg-ordem-black border border-ordem-border rounded-lg p-2 shadow-xl max-w-xs whitespace-normal">
+                                  <div className="text-[10px] font-bold text-white mb-1">{mod.nome}</div>
+                                  <div className="text-[9px] text-ordem-text-secondary leading-relaxed">{mod.efeito}</div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
             </div>
         </section>
       )}
