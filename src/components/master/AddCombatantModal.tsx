@@ -518,7 +518,7 @@ export function AddCombatantModal({
                                     <div className="text-center text-ordem-text-muted py-8 flex flex-col items-center">
                                         <Users size={32} className="mb-2 opacity-20" />
                                         <p>Nenhum NPC encontrado</p>
-                                        <p className="text-xs mt-1">Crie NPCs na aba "NPCs" do painel.</p>
+                                        <p className="text-xs mt-1">Crie NPCs na aba &quot;NPCs&quot; do painel.</p>
                                     </div>
                                 ) : (
                                     filteredNpcs.map((npc, idx) => (

@@ -217,10 +217,10 @@ export default function CharacterCreator({
     }
   }, [tipoSelecionado, patenteSelecionada]);
 
-  const getCategoriaEfetiva = (nomeEquipamento: string, categoriaBase: number) => {
+  const getCategoriaEfetiva = useCallback((nomeEquipamento: string, categoriaBase: number) => {
     const mods = modificacoesArmas[nomeEquipamento] || [];
     return Math.min(4, categoriaBase + mods.length);
-  };
+  }, [modificacoesArmas]);
 
   const contagemPorCategoria = useMemo(() => {
     const contagem = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 };
@@ -230,7 +230,7 @@ export default function CharacterCreator({
     }
     return contagem;
 
-  }, [equipamentosSelecionados, modificacoesArmas]);
+  }, [equipamentosSelecionados, getCategoriaEfetiva]);
 
   const podeAdicionarModificacao = (nomeArma: string, categoriaBase: number) => {
     const catAtual = getCategoriaEfetiva(nomeArma, categoriaBase);
@@ -659,7 +659,7 @@ export default function CharacterCreator({
   return (
     <div className="w-full max-w-5xl mx-auto p-4 sm:p-6 md:p-8 safe-x">
       <header className="mb-6 sm:mb-10 flex flex-col gap-4 border-b border-ordem-border pb-4">
-        {}
+        { }
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3">
           <div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif text-white tracking-wider mb-1 sm:mb-2">
@@ -672,7 +672,7 @@ export default function CharacterCreator({
           </div>
         </div>
 
-        {}
+        { }
         <div className="flex items-center gap-1 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-visible touch-scroll no-select">
           {[0, 1, 2, 3, 4, 5, 6, 7].map((step) => {
 
@@ -779,11 +779,11 @@ export default function CharacterCreator({
 
             {tipoSelecionado === 'Agente' && (
               <div className="space-y-4">
-                {}
+                { }
                 <div className="flex flex-col lg:flex-row gap-4">
                   <div className="flex-1 space-y-4">
                     <label className="text-xs font-bold text-ordem-text-secondary uppercase tracking-widest">Classe</label>
-                    {}
+                    { }
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                       {classeEntries.filter(([nome]) => nome !== 'Sobrevivente').map(([nomeClasse, stats]) => (
                         <button
@@ -863,7 +863,7 @@ export default function CharacterCreator({
                     )}
                   </div>
 
-                  {}
+                  { }
                   <div className="w-full lg:w-48 space-y-2 mt-4 lg:mt-0">
                     <div className="grid grid-cols-1 gap-3">
                       <div>
@@ -893,7 +893,7 @@ export default function CharacterCreator({
                       </div>
                     </div>
 
-                    {}
+                    { }
                     <div className={`text-center p-2 border rounded-lg bg-ordem-black/30 ${PATENTES.find(p => p.nome === patenteSelecionada)?.cor.replace('text-', 'border-') || 'border-ordem-border'
                       }`}>
                       <div className="text-[9px] sm:text-[10px] text-ordem-text-muted">
@@ -944,17 +944,17 @@ export default function CharacterCreator({
               </p>
             </div>
 
-            {}
+            { }
             <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-4 md:gap-6 justify-items-center">
               {(Object.entries(atributosTemp) as [keyof Atributos, number][]).map(([chave, valor]) => (
                 <div key={chave} className="flex sm:flex-col items-center gap-4 sm:gap-2 w-full max-w-sm sm:max-w-[100px] p-2 sm:p-0 bg-ordem-black/20 sm:bg-transparent rounded-lg border border-ordem-border/50 sm:border-0">
-                  {}
+                  { }
                   <div className="shrink-0 w-20 h-20 sm:w-full sm:h-28 aspect-square sm:aspect-auto bg-ordem-ooze/80 border border-ordem-border-light rounded-lg flex flex-col items-center justify-center relative">
                     <span className="text-[10px] sm:text-xs font-bold text-ordem-text-muted uppercase tracking-widest mb-1">{chave}</span>
                     <span className="text-3xl sm:text-4xl font-mono text-white">{valor}</span>
                   </div>
 
-                  {}
+                  { }
                   <div className="flex sm:flex-row flex-1 sm:flex-initial gap-2 w-full justify-between items-center sm:justify-center">
                     <button
                       onClick={() => atualizarAtributo(chave, -1)}
@@ -995,27 +995,28 @@ export default function CharacterCreator({
                   ? (origem.pericias.length > 0 ? `${origem.pericias.join(', ')} — ${origem.periciasTexto}` : origem.periciasTexto)
                   : origem.pericias.join(', ');
                 return (
-                <button
-                  key={origem.nome}
-                  onClick={() => setOrigemSelecionada(origem.nome)}
-                  className={`p-4 border text-left transition-all duration-200 rounded-lg group ${origemSelecionada === origem.nome
-                    ? 'border-ordem-gold bg-ordem-gold/10 shadow-[0_0_15px_rgba(255,215,0,0.1)]'
-                    : 'border-ordem-border bg-ordem-black/40 hover:border-ordem-border-light'
-                    }`}
-                >
-                  <div className={`font-bold mb-2 font-serif text-lg ${origemSelecionada === origem.nome ? 'text-ordem-gold' : 'text-ordem-white-muted group-hover:text-white'}`}>
-                    {origem.nome}
-                  </div>
-                  <div className="text-xs text-ordem-text-muted space-y-2">
-                    <p className="line-clamp-3">{textoPericias}</p>
-                    {origemSelecionada === origem.nome && (
-                      <div className="pt-2 border-t border-ordem-gold/20 text-ordem-gold/80 italic">
-                        Selecionado
-                      </div>
-                    )}
-                  </div>
-                </button>
-              )})}
+                  <button
+                    key={origem.nome}
+                    onClick={() => setOrigemSelecionada(origem.nome)}
+                    className={`p-4 border text-left transition-all duration-200 rounded-lg group ${origemSelecionada === origem.nome
+                      ? 'border-ordem-gold bg-ordem-gold/10 shadow-[0_0_15px_rgba(255,215,0,0.1)]'
+                      : 'border-ordem-border bg-ordem-black/40 hover:border-ordem-border-light'
+                      }`}
+                  >
+                    <div className={`font-bold mb-2 font-serif text-lg ${origemSelecionada === origem.nome ? 'text-ordem-gold' : 'text-ordem-white-muted group-hover:text-white'}`}>
+                      {origem.nome}
+                    </div>
+                    <div className="text-xs text-ordem-text-muted space-y-2">
+                      <p className="line-clamp-3">{textoPericias}</p>
+                      {origemSelecionada === origem.nome && (
+                        <div className="pt-2 border-t border-ordem-gold/20 text-ordem-gold/80 italic">
+                          Selecionado
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                )
+              })}
             </div>
           </div>
         )}
@@ -1103,7 +1104,7 @@ export default function CharacterCreator({
               )}
             </div>
 
-            {}
+            { }
             <div className="grid grid-cols-1 gap-4 overflow-y-auto custom-scrollbar pr-2 max-h-[60vh] sm:max-h-none lg:grid-cols-3">
               {trilhasDisponiveis.map((trilha) => {
                 const isSelected = trilhaSelecionada?.nome === trilha.nome;
@@ -1131,7 +1132,7 @@ export default function CharacterCreator({
               })}
             </div>
 
-            {}
+            { }
             {trilhaSelecionada && habilidadesDesbloqueadas.length > 0 && (
               <div className="mt-6 bg-ordem-ooze/30 border border-ordem-border rounded-lg p-4">
                 <h4 className="text-sm font-bold text-ordem-gold uppercase tracking-widest mb-4">
@@ -1148,7 +1149,7 @@ export default function CharacterCreator({
                       </div>
                       <p className="text-xs text-ordem-text-secondary mb-2">{hab.descricao}</p>
 
-                      {}
+                      { }
                       {hab.escolha && (() => {
 
                         let opcoes: string[] = [];
@@ -1391,7 +1392,7 @@ export default function CharacterCreator({
                             )}
                           </div>
 
-                          {}
+                          { }
                           {modsAplicadas.length > 0 && (
                             <div className="mb-3 space-y-1">
                               <div className="text-[10px] text-ordem-text-muted uppercase tracking-widest">Aplicadas:</div>
@@ -1416,7 +1417,7 @@ export default function CharacterCreator({
                             </div>
                           )}
 
-                          {}
+                          { }
                           {podeModificarCategoria && podeModificarLimite && modsDisponiveis.length > 0 && (
                             <div>
                               <div className="text-[10px] text-ordem-text-muted uppercase tracking-widest mb-2">
@@ -1539,7 +1540,7 @@ export default function CharacterCreator({
 
       </div>
 
-      {}
+      { }
       <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 border-t border-ordem-border pt-4 sm:pt-6 safe-bottom">
         <button
           onClick={handleReset}
@@ -1549,7 +1550,7 @@ export default function CharacterCreator({
         </button>
 
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 order-1 sm:order-2">
-          {}
+          { }
           {state.step > 0 && (
             <button
               onClick={() => {

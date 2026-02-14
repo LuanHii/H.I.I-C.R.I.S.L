@@ -81,7 +81,7 @@ export const NpcList: React.FC = () => {
                     <div className="col-span-full flex flex-col items-center justify-center py-12 text-ordem-text-muted bg-ordem-black/20 rounded border border-dashed border-ordem-border-light">
                         <UserMinus size={48} className="mb-4 opacity-20" />
                         <p className="text-lg font-serif">Nenhum NPC encontrado</p>
-                        <p className="text-sm">Clique em "+ Novo NPC" para começar.</p>
+                        <p className="text-sm">Clique em &quot;+ Novo NPC&quot; para começar.</p>
                     </div>
                 )}
             </div>
