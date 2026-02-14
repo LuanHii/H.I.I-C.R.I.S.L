@@ -472,6 +472,7 @@ export function subscribeToWatchedFichas(
   );
 }
 
+
 export async function isWatchingFicha(userId: string, agentId: string): Promise<boolean> {
   try {
     const watched = await getAllWatchedFichas(userId);
@@ -479,4 +480,66 @@ export async function isWatchingFicha(userId: string, agentId: string): Promise<
   } catch {
     return false;
   }
+}
+
+// --- NPCs ---
+
+export interface NPCRegistroCloud {
+  id: string;
+  npc: any; // Using 'any' to avoid strict type dependency here, or import NPC from types
+  atualizadoEm: string;
+}
+
+function getNPCsCollectionRef(userId: string) {
+  return collection(db, 'users', userId, 'npcs');
+}
+
+export async function saveNPCToCloud(userId: string, npc: NPCRegistroCloud): Promise<void> {
+  try {
+    const cleanedData = removeUndefinedFields(npc);
+    const npcRef = doc(getNPCsCollectionRef(userId), npc.id);
+    await setDoc(npcRef, cleanedData);
+  } catch (e) {
+    console.error('Erro ao salvar NPC na nuvem:', e);
+    throw e;
+  }
+}
+
+export async function deleteNPCFromCloud(userId: string, npcId: string): Promise<void> {
+  try {
+    const npcRef = doc(getNPCsCollectionRef(userId), npcId);
+    await deleteDoc(npcRef);
+  } catch (e) {
+    console.error('Erro ao deletar NPC da nuvem:', e);
+    throw e;
+  }
+}
+
+export async function getAllNPCsFromCloud(userId: string): Promise<NPCRegistroCloud[]> {
+  try {
+    const snapshot = await getDocs(getNPCsCollectionRef(userId));
+    return snapshot.docs.map(doc => doc.data() as NPCRegistroCloud);
+  } catch (e) {
+    console.error('Erro ao buscar NPCs da nuvem:', e);
+    return [];
+  }
+}
+
+export function subscribeToNPCs(
+  userId: string,
+  callback: (npcs: NPCRegistroCloud[]) => void
+): Unsubscribe {
+  return onSnapshot(
+    getNPCsCollectionRef(userId),
+    (snapshot) => {
+      const npcs = snapshot.docs.map(d => d.data() as NPCRegistroCloud);
+      callback(npcs);
+    },
+    (error) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Erro ao escutar NPCs:', error);
+      }
+      callback([]);
+    }
+  );
 }

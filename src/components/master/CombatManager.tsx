@@ -30,7 +30,7 @@ import { AddCombatantModal } from './AddCombatantModal';
 import { DiceRoller } from './DiceRoller';
 import { REGRAS } from '@/data/guiaRegras';
 import { AMEACAS } from '@/data/monsters';
-import { useCloudFichas, useCloudMonsters } from '@/core/storage';
+import { useCloudFichas, useCloudMonsters, useCloudNPCs } from '@/core/storage';
 import { cn } from '@/lib/utils';
 
 function SortableCombatantCard({
@@ -137,6 +137,10 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
             abilities
         };
     }), [fichas]);
+
+    const { npcs } = useCloudNPCs();
+    const npcData = useMemo(() => npcs.map(n => n.npc), [npcs]);
+
 
     const allCreatures = useMemo(() => {
 
@@ -432,7 +436,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
 
     return (
         <div className="max-w-7xl mx-auto p-4 sm:p-6">
-            {}
+
             <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -449,7 +453,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                         </p>
                     </div>
 
-                    {}
+
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setShowAddModal(true)}
@@ -479,21 +483,21 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                 </div>
             </motion.div>
 
-            {}
+
             <div className="flex gap-6">
-                {}
+
                 <div className="flex-1 min-w-0">
-                    {}
+
                     <div className="mb-4 p-4 bg-ordem-ooze/50 border border-ordem-border rounded-xl">
                         <div className="flex items-center justify-between flex-wrap gap-3">
                             <div className="flex items-center gap-4">
-                                {}
+
                                 <div className="text-center">
                                     <span className="text-2xl font-bold text-white">{state.round}</span>
                                     <p className="text-[10px] text-ordem-text-muted uppercase">Rodada</p>
                                 </div>
 
-                                {}
+
                                 <div className="text-center">
                                     <span className="text-2xl font-bold text-ordem-green">
                                         {sortedCombatants.length > 0 ? state.currentTurnIndex + 1 : 0}
@@ -502,7 +506,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                     <p className="text-[10px] text-ordem-text-muted uppercase">Turno</p>
                                 </div>
 
-                                {}
+
                                 {currentCombatant && state.isActive && (
                                     <div className="hidden sm:block pl-4 border-l border-ordem-border">
                                         <p className="text-xs text-ordem-text-muted">Vez de:</p>
@@ -511,7 +515,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                 )}
                             </div>
 
-                            {}
+
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={prevTurn}
@@ -671,7 +675,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                     )}
                 </div>
 
-                {}
+
                 <AnimatePresence>
                     {showQuickRef && (
                         <motion.div
@@ -687,7 +691,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                     </h3>
                                 </div>
 
-                                {}
+
                                 <div className="flex border-b border-ordem-border">
                                     <button
                                         onClick={() => setQuickRefTab('dice')}
@@ -718,7 +722,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                     </button>
                                 </div>
 
-                                {}
+
                                 <div className="max-h-[calc(100vh-300px)] overflow-y-auto custom-scrollbar">
                                     {quickRefTab === 'dice' && (
                                         <div className="p-2">
@@ -788,13 +792,14 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                 </AnimatePresence>
             </div>
 
-            {}
+
             <AddCombatantModal
                 isOpen={showAddModal}
                 onClose={() => setShowAddModal(false)}
                 onAdd={addCombatants}
                 agents={agents}
                 creatures={mergedCreatures}
+                npcs={npcData}
                 onCreateThreat={(t) => salvarMonstro(t)}
             />
         </div>

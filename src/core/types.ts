@@ -355,3 +355,34 @@ export interface Personagem {
     periciaFixos?: Partial<Record<PericiaName, number>>;
   };
 }
+
+export interface NPC {
+  nome: string;
+  descricao?: string;
+  vida: number;
+  defesa: number;
+  deslocamento?: string;
+  atributos: Atributos;
+  pericias: Partial<Record<PericiaName, string>>;
+  ataques: {
+    nome: string;
+    teste: string;
+    dano: string;
+    critico?: string;
+    alcance?: string;
+    especial?: string;
+  }[];
+  habilidades: {
+    nome: string;
+    descricao: string;
+  }[];
+  inventario?: string;
+  anotacoes?: string;
+}
+
+export interface NPCRegistro {
+  id: string;
+  npc: NPC;
+  atualizadoEm: string;
+  sincronizadoNaNuvem?: boolean;
+}
