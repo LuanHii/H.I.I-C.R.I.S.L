@@ -9,7 +9,7 @@ import {
   CampanhaCloud,
 } from '../firebase/userDataService';
 
-export interface Campanha {
+export interface CampanhaCloudType {
   id: string;
   nome: string;
   cor?: string;
@@ -18,7 +18,7 @@ export interface Campanha {
 
 const CAMPANHAS_KEY = 'campanhas';
 
-function lerCampanhasLocal(): Campanha[] {
+function lerCampanhasLocal(): CampanhaCloudType[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = window.localStorage.getItem(CAMPANHAS_KEY);
@@ -32,7 +32,7 @@ function lerCampanhasLocal(): Campanha[] {
   }
 }
 
-function gravarCampanhasLocal(campanhas: Campanha[]) {
+function gravarCampanhasLocal(campanhas: CampanhaCloudType[]) {
   if (typeof window === 'undefined') return;
   try {
     window.localStorage.setItem(CAMPANHAS_KEY, JSON.stringify(campanhas));
@@ -47,7 +47,7 @@ export function useCloudCampanhas() {
   const isAuthenticated = auth?.isAuthenticated ?? false;
   const authLoading = auth?.loading ?? true;
 
-  const [campanhas, setCampanhas] = useState<Campanha[]>([]);
+  const [campanhas, setCampanhas] = useState<CampanhaCloudType[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export function useCloudCampanhas() {
 
     setLoading(true);
     const unsubscribe = subscribeToCampanhas(userId, (cloudCampanhas) => {
-      const converted: Campanha[] = cloudCampanhas.map(c => ({
+      const converted: CampanhaCloudType[] = cloudCampanhas.map(c => ({
         id: c.id,
         nome: c.nome,
         cor: c.cor,
@@ -79,7 +79,7 @@ export function useCloudCampanhas() {
   const criarCampanha = useCallback(
     async (nome: string, cor?: string) => {
       const novoId = crypto.randomUUID();
-      const novaCampanha: Campanha = {
+      const novaCampanha: CampanhaCloudType = {
         id: novoId,
         nome,
         cor: cor || '#dc2626',

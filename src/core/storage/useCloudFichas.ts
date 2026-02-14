@@ -11,7 +11,7 @@ import {
 } from '../firebase/userDataService';
 import { saveAgentToCloud } from '../firebase/firestore';
 
-export interface FichaRegistro {
+export interface FichaRegistroCloudType {
   id: string;
   personagem: Personagem;
   atualizadoEm: string;
@@ -22,23 +22,23 @@ export interface FichaRegistro {
 const STORAGE_KEY = 'fichas-origem';
 const LIMITE_FICHAS = 50;
 
-function lerFichasLocal(): FichaRegistro[] {
+function lerFichasLocal(): FichaRegistroCloudType[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.map(normalizarRegistro).filter((r): r is FichaRegistro => r !== null);
+    return parsed.map(normalizarRegistro).filter((r): r is FichaRegistroCloudType => r !== null);
   } catch (err) {
     console.error('Erro ao ler fichas locais', err);
     return [];
   }
 }
 
-function normalizarRegistro(entrada: unknown): FichaRegistro | null {
+function normalizarRegistro(entrada: unknown): FichaRegistroCloudType | null {
   if (!entrada || typeof entrada !== 'object') return null;
-  const registroPossivel = entrada as Partial<FichaRegistro>;
+  const registroPossivel = entrada as Partial<FichaRegistroCloudType>;
   if (registroPossivel.personagem) {
     return {
       id: registroPossivel.id ?? crypto.randomUUID(),
@@ -59,7 +59,7 @@ function normalizarRegistro(entrada: unknown): FichaRegistro | null {
   return null;
 }
 
-function gravarFichasLocal(fichas: FichaRegistro[]) {
+function gravarFichasLocal(fichas: FichaRegistroCloudType[]) {
   if (typeof window === 'undefined') return;
   try {
     const payload = JSON.stringify(fichas.slice(0, LIMITE_FICHAS));
@@ -75,7 +75,7 @@ export function useCloudFichas() {
   const isAuthenticated = auth?.isAuthenticated ?? false;
   const authLoading = auth?.loading ?? true;
 
-  const [fichas, setFichas] = useState<FichaRegistro[]>([]);
+  const [fichas, setFichas] = useState<FichaRegistroCloudType[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -98,7 +98,7 @@ export function useCloudFichas() {
     const setupSubscription = () => {
       unsubscribe = subscribeToFichas(userId, (cloudFichas) => {
         hasReceivedData = true;
-        const converted: FichaRegistro[] = cloudFichas.map(f => ({
+        const converted: FichaRegistroCloudType[] = cloudFichas.map(f => ({
           id: f.id,
           personagem: f.personagem,
           atualizadoEm: f.atualizadoEm,
@@ -149,7 +149,7 @@ export function useCloudFichas() {
 
         setFichas((prev) => {
           const fichaExistente = prev.find((f) => f.id === fichaId);
-          const registro: FichaRegistro = {
+          const registro: FichaRegistroCloudType = {
             id: fichaId,
             personagem,
             atualizadoEm: now,
@@ -235,7 +235,7 @@ export function useCloudFichas() {
         }
       } else {
         setFichas((prev) => {
-          const novo: FichaRegistro = {
+          const novo: FichaRegistroCloudType = {
             id: novoId,
             personagem: novoPersonagem,
             atualizadoEm: now,

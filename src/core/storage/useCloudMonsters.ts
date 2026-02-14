@@ -10,7 +10,7 @@ import {
   MonsterRegistroCloud,
 } from '../firebase/userDataService';
 
-export interface MonsterRegistro {
+export interface MonsterRegistroCloudType {
   id: string;
   ameaca: Ameaca;
   atualizadoEm: string;
@@ -19,7 +19,7 @@ export interface MonsterRegistro {
 const STORAGE_KEY = 'monstros-customizados';
 const LIMITE_MONSTROS = 50;
 
-function lerMonstrosLocal(): MonsterRegistro[] {
+function lerMonstrosLocal(): MonsterRegistroCloudType[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -33,7 +33,7 @@ function lerMonstrosLocal(): MonsterRegistro[] {
   }
 }
 
-function gravarMonstrosLocal(monstros: MonsterRegistro[]) {
+function gravarMonstrosLocal(monstros: MonsterRegistroCloudType[]) {
   if (typeof window === 'undefined') return;
   try {
     const payload = JSON.stringify(monstros.slice(0, LIMITE_MONSTROS));
@@ -49,7 +49,7 @@ export function useCloudMonsters() {
   const isAuthenticated = auth?.isAuthenticated ?? false;
   const authLoading = auth?.loading ?? true;
 
-  const [monstros, setMonstros] = useState<MonsterRegistro[]>([]);
+  const [monstros, setMonstros] = useState<MonsterRegistroCloudType[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -65,7 +65,7 @@ export function useCloudMonsters() {
 
     setLoading(true);
     const unsubscribe = subscribeToMonstros(userId, (cloudMonstros) => {
-      const converted: MonsterRegistro[] = cloudMonstros.map(m => ({
+      const converted: MonsterRegistroCloudType[] = cloudMonstros.map(m => ({
         id: m.id,
         ameaca: m.ameaca,
         atualizadoEm: m.atualizadoEm,
@@ -95,7 +95,7 @@ export function useCloudMonsters() {
         }
       } else {
         setMonstros((prev) => {
-          const registro: MonsterRegistro = {
+          const registro: MonsterRegistroCloudType = {
             id: monsterId,
             ameaca,
             atualizadoEm: now,
