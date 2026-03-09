@@ -110,7 +110,6 @@ const NpcCard: React.FC<NpcCardProps> = ({ npc, onEdit, onDelete, onClone }) => 
     return (
         <div className={`bg-ordem-black/40 border border-ordem-border hover:border-ordem-border-light rounded transition-colors group relative flex flex-col ${expanded ? 'bg-ordem-ooze/10' : ''}`}>
 
-            {/* Header / Summary */}
             <div className="p-4 cursor-pointer" onClick={() => setExpanded(!expanded)}>
                 <div className="flex justify-between items-start mb-2">
                     <div>
@@ -134,12 +133,10 @@ const NpcCard: React.FC<NpcCardProps> = ({ npc, onEdit, onDelete, onClone }) => 
                 )}
             </div>
 
-            {/* Expanded Details */}
             {expanded && (
                 <div className="px-4 pb-4 pt-0 space-y-4 text-sm animate-in fade-in slide-in-from-top-2 duration-200">
                     <hr className="border-ordem-border-light/30" />
 
-                    {/* Attributes */}
                     <div className="grid grid-cols-5 gap-1 text-center bg-black/20 p-2 rounded">
                         {Object.entries(npc.atributos).map(([key, val]) => (
                             <div key={key}>
@@ -149,7 +146,6 @@ const NpcCard: React.FC<NpcCardProps> = ({ npc, onEdit, onDelete, onClone }) => 
                         ))}
                     </div>
 
-                    {/* Attacks */}
                     {npc.ataques.length > 0 && (
                         <div>
                             <h4 className="text-xs font-mono text-ordem-red uppercase mb-2 flex items-center gap-1"><Swords size={12} /> Ataques</h4>
@@ -168,7 +164,6 @@ const NpcCard: React.FC<NpcCardProps> = ({ npc, onEdit, onDelete, onClone }) => 
                         </div>
                     )}
 
-                    {/* Actions */}
                     <div className="flex justify-end gap-2 pt-2">
                         <button
                             onClick={(e) => { e.stopPropagation(); onClone(); }}
@@ -195,7 +190,6 @@ const NpcCard: React.FC<NpcCardProps> = ({ npc, onEdit, onDelete, onClone }) => 
                 </div>
             )}
 
-            {/* Collapsed Actions (Hover only) */}
             {!expanded && (
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button

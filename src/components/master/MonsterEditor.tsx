@@ -54,7 +54,7 @@ export const MonsterEditor: React.FC<MonsterEditorProps> = ({ initialData, onSav
 
   const updateArrayItem = (field: 'acoes' | 'habilidades', index: number, subField: string, value: string) => {
     setMonster(prev => {
-      const newArray = [...prev[field]];
+      const newArray = [...prev[field]];
       newArray[index] = { ...newArray[index], [subField]: value };
       return { ...prev, [field]: newArray };
     });

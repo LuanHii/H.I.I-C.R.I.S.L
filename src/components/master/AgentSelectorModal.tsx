@@ -1,7 +1,6 @@
 import React from 'react';
 import { Personagem } from '../../core/types';
 
-
 interface AgentSelectorModalProps {
   isOpen: boolean;
   onClose: () => void;

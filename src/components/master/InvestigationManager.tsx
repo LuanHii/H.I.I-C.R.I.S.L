@@ -29,7 +29,7 @@ export const InvestigationManager: React.FC = () => {
     const [cenas, setCenas] = useState<CenaInvestigacao[]>([]);
     const [isCreating, setIsCreating] = useState(false);
     const [novaCenaTitulo, setNovaCenaTitulo] = useState('');
-    const [cenaExpandida, setCenaExpandida] = useState<string | null>(null);
+    const [cenaExpandida, setCenaExpandida] = useState<string | null>(null);
     const [adicionandoPistaEm, setAdicionandoPistaEm] = useState<string | null>(null);
     const [novaPista, setNovaPista] = useState<Partial<Pista>>({ tipo: 'Principal' });
 

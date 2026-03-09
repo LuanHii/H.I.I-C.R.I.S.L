@@ -11,14 +11,14 @@ import { ImportExportModal } from './ImportExportModal';
 import { downloadJSON, exportarFichaIndividual, exportarFichasPorCampanha } from '../../core/storage/exportImportUtils';
 import { CampanhaSection, NovaCampanhaForm } from './CampanhaSection';
 import { recalcularRecursosPersonagem } from '../../logic/progression';
-import { Cloud, CloudOff, ChevronLeft, Menu, Plus, Download, Eye } from 'lucide-react';
+import { Cloud, CloudOff, ChevronLeft, Menu, Plus, Download, Eye, PanelLeftClose, PanelLeft, RefreshCw } from 'lucide-react';
 import { WeaponModsButton } from './WeaponModsModal';
 import { WatchedFichasSection } from './WatchedFichasSection';
 
 type FichasViewMode = 'minhas' | 'observadas';
 
 export function FichasManager() {
-  const { fichas, remover, duplicar, salvar, moverParaCampanha, marcarComoSincronizada, isCloudMode, loading: fichasLoading } = useCloudFichas();
+  const { fichas, remover, duplicar, salvar, moverParaCampanha, marcarComoSincronizada, sincronizarFicha, isCloudMode, loading: fichasLoading } = useCloudFichas();
   const { campanhas, criarCampanha, renomearCampanha, removerCampanha, loading: campanhasLoading } = useCloudCampanhas();
   const { watchedFichas, isAuthenticated: isLoggedIn } = useWatchedFichas();
   const [selecionada, setSelecionada] = useState<string | null>(null);
@@ -31,6 +31,8 @@ export function FichasManager() {
   const [modalAberto, setModalAberto] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [fichasViewMode, setFichasViewMode] = useState<FichasViewMode>('minhas');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
@@ -179,6 +181,19 @@ export function FichasManager() {
     }
   };
 
+  const handleSincronizar = async (id: string) => {
+    setIsSyncing(true);
+    try {
+      if (sincronizarFicha) {
+        await sincronizarFicha(id);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const handleExportarFicha = (id: string) => {
     const registro = fichas.find((f) => f.id === id);
     if (!registro) return;
@@ -245,11 +260,10 @@ export function FichasManager() {
               handleSelectFicha(registro.id);
             }
           }}
-          className={`w-full text-left border rounded-lg px-3 py-2 transition relative overflow-hidden touch-active ${
-            selecionada === registro.id
-              ? 'border-ordem-red bg-ordem-red/10'
-              : 'border-ordem-border bg-ordem-black/40 hover:border-ordem-text-muted active:bg-ordem-ooze/50'
-          }`}
+          className={`w-full text-left border rounded-lg px-3 py-2 transition relative overflow-hidden touch-active ${selecionada === registro.id
+            ? 'border-ordem-red bg-ordem-red/10'
+            : 'border-ordem-border bg-ordem-black/40 hover:border-ordem-text-muted active:bg-ordem-ooze/50'
+            }`}
           title={title}
         >
           <div className="flex items-center justify-between gap-2">
@@ -262,11 +276,10 @@ export function FichasManager() {
             <div className="flex items-center gap-2 text-[10px] text-ordem-text-muted">
               {summary.total > 0 && (
                 <span
-                  className={`px-2 py-0.5 rounded border font-mono tracking-widest ${
-                    summary.errors > 0
-                      ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
-                      : 'border-ordem-gold text-ordem-gold bg-ordem-gold/10'
-                  }`}
+                  className={`px-2 py-0.5 rounded border font-mono tracking-widest ${summary.errors > 0
+                    ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
+                    : 'border-ordem-gold text-ordem-gold bg-ordem-gold/10'
+                    }`}
                 >
                   {summary.errors > 0 ? 'ERRO' : 'AVISO'}
                 </span>
@@ -297,7 +310,7 @@ export function FichasManager() {
       >
         <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_20%_0%,rgba(220,38,38,0.08),transparent_55%)]" />
 
-        {}
+        { }
         <div className="flex justify-between items-start text-xs text-ordem-white/60 relative mb-2 gap-2">
           <div className="flex flex-col min-w-0">
             <span className="font-medium">{registro.personagem.classe}</span>
@@ -328,15 +341,15 @@ export function FichasManager() {
           </div>
         </div>
 
-        {}
+        { }
         <p className="text-lg font-semibold text-white relative truncate">{registro.personagem.nome}</p>
 
-        {}
+        { }
         <p className="text-sm text-ordem-text-secondary relative mt-1">
           NEX {registro.personagem.nex}% · {registro.personagem.patente}
         </p>
 
-        {}
+        { }
         <div className="mt-3 flex gap-3 text-xs text-ordem-text-secondary relative">
           <span className="bg-ordem-ooze/50 px-2 py-1 rounded">
             PV {registro.personagem.pv.atual}/{registro.personagem.pv.max}
@@ -349,7 +362,7 @@ export function FichasManager() {
           </span>
         </div>
 
-        {}
+        { }
         <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 relative">
           <button
             type="button"
@@ -414,16 +427,16 @@ export function FichasManager() {
             type="button"
             onClick={(event) => {
               event.stopPropagation();
-                  if (confirm(`Tem certeza que deseja remover "${registro.personagem.nome}"?`)) {
+              if (confirm(`Tem certeza que deseja remover "${registro.personagem.nome}"?`)) {
                 remover(registro.id);
                 if (selecionada === registro.id) {
                   setSelecionada(null);
                   setMobileDetailOpen(false);
                 }
-                    if (typeof window !== 'undefined') {
-                      window.localStorage.removeItem('fichas.selecionada');
-                      setLastSelectedId(null);
-                    }
+                if (typeof window !== 'undefined') {
+                  window.localStorage.removeItem('fichas.selecionada');
+                  setLastSelectedId(null);
+                }
               }
             }}
             className="text-xs px-3 py-2.5 border border-ordem-red text-ordem-red hover:bg-ordem-red/10 active:bg-ordem-red/20 rounded-lg touch-target-sm flex items-center justify-center"
@@ -437,15 +450,15 @@ export function FichasManager() {
 
   return (
     <div className="flex flex-col lg:grid lg:grid-cols-3 h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)] overflow-hidden">
-      {}
+      { }
       <section
         className={`
           flex-1 lg:flex-none lg:border-r border-ordem-border
           p-4 lg:p-6 space-y-4 overflow-hidden flex flex-col
-          ${mobileDetailOpen ? 'hidden lg:flex' : 'flex'}
+          ${mobileDetailOpen || isSidebarCollapsed ? 'hidden' : 'flex'}
         `}
       >
-        {}
+        { }
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
@@ -502,21 +515,19 @@ export function FichasManager() {
           <div className="flex gap-1 p-1 bg-ordem-ooze/30 rounded-lg">
             <button
               onClick={() => setFichasViewMode('minhas')}
-              className={`flex-1 px-3 py-2 text-[10px] font-mono tracking-widest rounded-md transition-colors ${
-                fichasViewMode === 'minhas'
-                  ? 'bg-ordem-green/20 text-ordem-green border border-ordem-green/50'
-                  : 'text-ordem-text-muted hover:text-white'
-              }`}
+              className={`flex-1 px-3 py-2 text-[10px] font-mono tracking-widest rounded-md transition-colors ${fichasViewMode === 'minhas'
+                ? 'bg-ordem-green/20 text-ordem-green border border-ordem-green/50'
+                : 'text-ordem-text-muted hover:text-white'
+                }`}
             >
               MINHAS FICHAS
             </button>
             <button
               onClick={() => setFichasViewMode('observadas')}
-              className={`flex-1 px-3 py-2 text-[10px] font-mono tracking-widest rounded-md transition-colors flex items-center justify-center gap-1 ${
-                fichasViewMode === 'observadas'
-                  ? 'bg-ordem-gold/20 text-ordem-gold border border-ordem-gold/50'
-                  : 'text-ordem-text-muted hover:text-white'
-              }`}
+              className={`flex-1 px-3 py-2 text-[10px] font-mono tracking-widest rounded-md transition-colors flex items-center justify-center gap-1 ${fichasViewMode === 'observadas'
+                ? 'bg-ordem-gold/20 text-ordem-gold border border-ordem-gold/50'
+                : 'text-ordem-text-muted hover:text-white'
+                }`}
             >
               <Eye size={12} />
               OBSERVADAS
@@ -538,208 +549,207 @@ export function FichasManager() {
             <div className="space-y-2">
               <input
                 value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar fichas..."
-            onKeyDown={(e) => {
-              if (e.key === 'Escape') setBusca('');
-            }}
-            className="w-full bg-ordem-black/40 border border-ordem-border text-white px-4 py-3 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-sm touch-target"
-            aria-label="Buscar por nome, classe, NEX ou patente"
-          />
-          <div className="flex flex-wrap items-center gap-2">
-            <select
-              value={filtroClasse}
-              onChange={(e) => setFiltroClasse(e.target.value as any)}
-              className="bg-ordem-black/40 border border-ordem-border text-white px-3 py-2 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-[10px]"
-              aria-label="Filtrar por classe"
-            >
-              <option value="Todas">Todas as classes</option>
-              <option value="Combatente">Combatente</option>
-              <option value="Especialista">Especialista</option>
-              <option value="Ocultista">Ocultista</option>
-              <option value="Sobrevivente">Sobrevivente</option>
-            </select>
-            <select
-              value={filtroPatente}
-              onChange={(e) => setFiltroPatente(e.target.value as any)}
-              className="bg-ordem-black/40 border border-ordem-border text-white px-3 py-2 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-[10px]"
-              aria-label="Filtrar por patente"
-            >
-              <option value="Todas">Todas as patentes</option>
-              <option value="Recruta">Recruta</option>
-              <option value="Operador">Operador</option>
-              <option value="Agente Especial">Agente Especial</option>
-              <option value="Oficial de Operações">Oficial de Operações</option>
-              <option value="Agente de Elite">Agente de Elite</option>
-            </select>
-            {(filtroClasse !== 'Todas' || filtroPatente !== 'Todas') && (
-              <button
-                type="button"
-                onClick={() => {
-                  setFiltroClasse('Todas');
-                  setFiltroPatente('Todas');
+                onChange={(e) => setBusca(e.target.value)}
+                placeholder="Buscar fichas..."
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') setBusca('');
                 }}
-                className="px-3 py-2 rounded-lg border border-ordem-border text-ordem-text-muted text-[10px] font-mono uppercase tracking-widest"
-              >
-                Limpar filtros
-              </button>
-            )}
-          </div>
-          <div className="flex items-center justify-between gap-2 text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">
-            <span>Total: {fichas.length} ficha(s)</span>
-            <span>Campanhas: {campanhas.length}</span>
-          </div>
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">Ordenar</span>
-            <select
-              value={ordem}
-              onChange={(e) => setOrdem(e.target.value as any)}
-              className="bg-ordem-black/40 border border-ordem-border text-white px-3 py-2 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-xs touch-target-sm"
-              aria-label="Ordenar fichas"
-            >
-              <option value="atualizado">Mais recente</option>
-              <option value="nome">Nome (A→Z)</option>
-              <option value="nex">NEX (↓)</option>
-            </select>
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => setViewMode('compact')}
-                className={`px-2 py-2 rounded-lg border text-[10px] font-mono uppercase tracking-widest ${
-                  viewMode === 'compact'
-                    ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
-                    : 'border-ordem-border text-ordem-text-muted'
-                }`}
-              >
-                Compacto
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode('full')}
-                className={`px-2 py-2 rounded-lg border text-[10px] font-mono uppercase tracking-widest ${
-                  viewMode === 'full'
-                    ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
-                    : 'border-ordem-border text-ordem-text-muted'
-                }`}
-              >
-                Detalhado
-              </button>
+                className="w-full bg-ordem-black/40 border border-ordem-border text-white px-4 py-3 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-sm touch-target"
+                aria-label="Buscar por nome, classe, NEX ou patente"
+              />
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  value={filtroClasse}
+                  onChange={(e) => setFiltroClasse(e.target.value as any)}
+                  className="bg-ordem-black/40 border border-ordem-border text-white px-3 py-2 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-[10px]"
+                  aria-label="Filtrar por classe"
+                >
+                  <option value="Todas">Todas as classes</option>
+                  <option value="Combatente">Combatente</option>
+                  <option value="Especialista">Especialista</option>
+                  <option value="Ocultista">Ocultista</option>
+                  <option value="Sobrevivente">Sobrevivente</option>
+                </select>
+                <select
+                  value={filtroPatente}
+                  onChange={(e) => setFiltroPatente(e.target.value as any)}
+                  className="bg-ordem-black/40 border border-ordem-border text-white px-3 py-2 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-[10px]"
+                  aria-label="Filtrar por patente"
+                >
+                  <option value="Todas">Todas as patentes</option>
+                  <option value="Recruta">Recruta</option>
+                  <option value="Operador">Operador</option>
+                  <option value="Agente Especial">Agente Especial</option>
+                  <option value="Oficial de Operações">Oficial de Operações</option>
+                  <option value="Agente de Elite">Agente de Elite</option>
+                </select>
+                {(filtroClasse !== 'Todas' || filtroPatente !== 'Todas') && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFiltroClasse('Todas');
+                      setFiltroPatente('Todas');
+                    }}
+                    className="px-3 py-2 rounded-lg border border-ordem-border text-ordem-text-muted text-[10px] font-mono uppercase tracking-widest"
+                  >
+                    Limpar filtros
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center justify-between gap-2 text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">
+                <span>Total: {fichas.length} ficha(s)</span>
+                <span>Campanhas: {campanhas.length}</span>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">Ordenar</span>
+                <select
+                  value={ordem}
+                  onChange={(e) => setOrdem(e.target.value as any)}
+                  className="bg-ordem-black/40 border border-ordem-border text-white px-3 py-2 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-xs touch-target-sm"
+                  aria-label="Ordenar fichas"
+                >
+                  <option value="atualizado">Mais recente</option>
+                  <option value="nome">Nome (A→Z)</option>
+                  <option value="nex">NEX (↓)</option>
+                </select>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('compact')}
+                    className={`px-2 py-2 rounded-lg border text-[10px] font-mono uppercase tracking-widest ${viewMode === 'compact'
+                      ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
+                      : 'border-ordem-border text-ordem-text-muted'
+                      }`}
+                  >
+                    Compacto
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('full')}
+                    className={`px-2 py-2 rounded-lg border text-[10px] font-mono uppercase tracking-widest ${viewMode === 'full'
+                      ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
+                      : 'border-ordem-border text-ordem-text-muted'
+                      }`}
+                  >
+                    Detalhado
+                  </button>
+                </div>
+                {busca.trim().length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setBusca('')}
+                    className="px-3 py-2 rounded-lg border border-ordem-border text-ordem-text-muted text-[10px] font-mono uppercase tracking-widest"
+                  >
+                    Limpar busca
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">
+                  {fichasFiltradas.length} resultado(s)
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setExpandAll(true)}
+                    className="px-3 py-2 rounded-lg border border-ordem-border text-ordem-text-muted text-[10px] font-mono uppercase tracking-widest"
+                  >
+                    Expandir tudo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setExpandAll(false)}
+                    className="px-3 py-2 rounded-lg border border-ordem-border text-ordem-text-muted text-[10px] font-mono uppercase tracking-widest"
+                  >
+                    Colapsar tudo
+                  </button>
+                </div>
+              </div>
             </div>
-            {busca.trim().length > 0 && (
-              <button
-                type="button"
-                onClick={() => setBusca('')}
-                className="px-3 py-2 rounded-lg border border-ordem-border text-ordem-text-muted text-[10px] font-mono uppercase tracking-widest"
-              >
-                Limpar busca
-              </button>
-            )}
-          </div>
-          <div className="flex items-center justify-between gap-2">
-            <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">
-              {fichasFiltradas.length} resultado(s)
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setExpandAll(true)}
-                className="px-3 py-2 rounded-lg border border-ordem-border text-ordem-text-muted text-[10px] font-mono uppercase tracking-widest"
-              >
-                Expandir tudo
-              </button>
-              <button
-                type="button"
-                onClick={() => setExpandAll(false)}
-                className="px-3 py-2 rounded-lg border border-ordem-border text-ordem-text-muted text-[10px] font-mono uppercase tracking-widest"
-              >
-                Colapsar tudo
-              </button>
-            </div>
-          </div>
-        </div>
 
-        {}
-        <div className="flex-1 overflow-y-auto touch-scroll custom-scrollbar -mx-4 px-4 lg:mx-0 lg:px-0 lg:pr-2 space-y-3">
-          {}
-          {campanhas.map((campanha) => (
-            <CampanhaSection
-              key={campanha.id}
-              campanha={campanha}
-              fichas={fichasPorCampanha.get(campanha.id) || []}
-              selecionada={selecionada}
-              onSelecionar={handleSelectFicha}
-              onMover={moverParaCampanha}
-              campanhasDisponiveis={campanhas}
-              renderFichaCard={renderFichaCard}
-              onRenomear={renomearCampanha}
-              onRemoverCampanha={handleRemoverCampanha}
-              onExportarCampanha={handleExportarCampanha}
-              forceExpanded={expandAll}
-              autoExpand={busca.trim().length > 0}
-            />
-          ))}
+            { }
+            <div className="flex-1 overflow-y-auto touch-scroll custom-scrollbar -mx-4 px-4 lg:mx-0 lg:px-0 lg:pr-2 space-y-3">
+              { }
+              {campanhas.map((campanha) => (
+                <CampanhaSection
+                  key={campanha.id}
+                  campanha={campanha}
+                  fichas={fichasPorCampanha.get(campanha.id) || []}
+                  selecionada={selecionada}
+                  onSelecionar={handleSelectFicha}
+                  onMover={moverParaCampanha}
+                  campanhasDisponiveis={campanhas}
+                  renderFichaCard={renderFichaCard}
+                  onRenomear={renomearCampanha}
+                  onRemoverCampanha={handleRemoverCampanha}
+                  onExportarCampanha={handleExportarCampanha}
+                  forceExpanded={expandAll}
+                  autoExpand={busca.trim().length > 0}
+                />
+              ))}
 
-          {}
-          <CampanhaSection
-            campanha={null}
-            fichas={fichasPorCampanha.get(undefined) || []}
-            selecionada={selecionada}
-            onSelecionar={handleSelectFicha}
-            onMover={moverParaCampanha}
-            campanhasDisponiveis={campanhas}
-            renderFichaCard={renderFichaCard}
-            onExportarCampanha={handleExportarCampanha}
-            forceExpanded={expandAll}
-            autoExpand={busca.trim().length > 0}
-          />
+              { }
+              <CampanhaSection
+                campanha={null}
+                fichas={fichasPorCampanha.get(undefined) || []}
+                selecionada={selecionada}
+                onSelecionar={handleSelectFicha}
+                onMover={moverParaCampanha}
+                campanhasDisponiveis={campanhas}
+                renderFichaCard={renderFichaCard}
+                onExportarCampanha={handleExportarCampanha}
+                forceExpanded={expandAll}
+                autoExpand={busca.trim().length > 0}
+              />
 
-          {}
-          <NovaCampanhaForm onCriar={criarCampanha} />
+              { }
+              <NovaCampanhaForm onCriar={criarCampanha} />
 
-          {fichas.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-sm text-ordem-white/60 mb-4">
-                Nenhuma ficha salva ainda.
-              </p>
-              <Link
-                href="/agente/novo"
-                className="inline-flex items-center gap-2 px-4 py-3 bg-ordem-green/10 border border-ordem-green text-ordem-green rounded-lg touch-target"
-              >
-                <Plus size={18} />
-                Criar primeiro agente
-              </Link>
+              {fichas.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-sm text-ordem-white/60 mb-4">
+                    Nenhuma ficha salva ainda.
+                  </p>
+                  <Link
+                    href="/agente/novo"
+                    className="inline-flex items-center gap-2 px-4 py-3 bg-ordem-green/10 border border-ordem-green text-ordem-green rounded-lg touch-target"
+                  >
+                    <Plus size={18} />
+                    Criar primeiro agente
+                  </Link>
+                </div>
+              )}
+              {fichas.length > 0 && fichasFiltradas.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-sm text-ordem-white/60 mb-4">
+                    Nenhuma ficha corresponde aos filtros atuais.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setBusca('')}
+                    className="inline-flex items-center gap-2 px-4 py-3 border border-ordem-border text-ordem-text-muted rounded-lg"
+                  >
+                    Limpar busca
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-          {fichas.length > 0 && fichasFiltradas.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-sm text-ordem-white/60 mb-4">
-                Nenhuma ficha corresponde aos filtros atuais.
-              </p>
-              <button
-                type="button"
-                onClick={() => setBusca('')}
-                className="inline-flex items-center gap-2 px-4 py-3 border border-ordem-border text-ordem-text-muted rounded-lg"
-              >
-                Limpar busca
-              </button>
-            </div>
-          )}
-        </div>
           </>
         )}
       </section>
 
-      {}
+      { }
       <section
         className={`
-          lg:col-span-2 bg-ordem-black-deep overflow-hidden
-          ${mobileDetailOpen ? 'flex flex-col absolute inset-0 z-50 lg:relative lg:z-auto' : 'hidden lg:block'}
+          lg:col-span-2 bg-ordem-black-deep overflow-hidden flex flex-col
+          ${isSidebarCollapsed ? 'lg:col-span-3' : ''}
+          ${mobileDetailOpen ? 'absolute inset-0 z-50 lg:relative lg:z-auto' : 'hidden lg:flex'}
         `}
       >
         {fichaAtual ? (
-          <div className="h-full flex flex-col">
-            {}
-            <div className="lg:hidden flex items-center gap-3 p-4 border-b border-ordem-border bg-ordem-black safe-top">
+          <div className="flex-1 flex flex-col min-h-0">
+            { }
+            <div className="lg:hidden flex items-center gap-3 p-4 border-b border-ordem-border bg-ordem-black safe-top shrink-0">
               <button
                 onClick={handleCloseDetail}
                 className="p-2 -ml-2 rounded-lg hover:bg-ordem-ooze/50 active:bg-ordem-ooze touch-target"
@@ -753,7 +763,39 @@ export function FichasManager() {
               </div>
             </div>
 
-            {}
+            <div className="hidden lg:flex items-center justify-between p-4 border-b border-ordem-border bg-ordem-black shrink-0">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                  className="p-2 -ml-2 rounded-lg text-ordem-text-muted hover:text-white hover:bg-ordem-ooze/50 active:bg-ordem-ooze transition-colors flex items-center justify-center bg-ordem-ooze/10 border border-ordem-border/50"
+                  title={isSidebarCollapsed ? "Expandir Menu" : "Recolher Menu"}
+                >
+                  {isSidebarCollapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
+                </button>
+                <div className="flex flex-col min-w-0">
+                  <h2 className="font-semibold text-white truncate text-xl leading-none">{fichaAtual.nome}</h2>
+                  <p className="text-sm text-ordem-text-secondary mt-1">{fichaAtual.classe} · NEX {fichaAtual.nex}%</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                {isCloudMode && (
+                  <button
+                    onClick={() => handleSincronizar(selecionada!)}
+                    disabled={isSyncing}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-mono tracking-widest border transition-all ${registroAtual?.sincronizadaNaNuvem
+                      ? 'border-ordem-green/30 text-ordem-green hover:bg-ordem-green/10'
+                      : 'border-ordem-gold/50 text-ordem-gold bg-ordem-gold/10 hover:bg-ordem-gold/20'
+                      } ${isSyncing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    title="Forçar atualizamento de ficha e organização na nuvem"
+                  >
+                    <RefreshCw size={14} className={isSyncing ? 'animate-spin' : ''} />
+                    {isSyncing ? 'SINCRONIZANDO...' : 'ATUALIZAR NA NUVEM'}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            { }
             <div className="flex-1 overflow-y-auto touch-scroll p-4 lg:p-6 safe-bottom">
               <div className="rounded-xl border border-ordem-border overflow-hidden">
                 <AgentDetailView agent={fichaAtual} onUpdate={handleUpdate} readOnly={false} />

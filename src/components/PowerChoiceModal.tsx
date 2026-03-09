@@ -27,27 +27,27 @@ export function PowerChoiceModal({
     const [poderSelecionado, setPoderSelecionado] = useState<string | null>(null);
     const [showParanormalModal, setShowParanormalModal] = useState(false);
 
-    const pendentes = agent.poderesClassePendentes || 0;
+    const pendentes = agent.poderesClassePendentes || 0;
     const { poderesClasse, poderesGerais, todosPoderes } = useMemo(() => {
         const classe = getPoderesClasse(agent.classe);
-        const gerais = getPoderesGerais();
+        const gerais = getPoderesGerais();
         const todos = [...classe, ...gerais].filter((p, idx, arr) =>
             arr.findIndex(x => x.nome === p.nome) === idx
         );
 
         return { poderesClasse: classe, poderesGerais: gerais, todosPoderes: todos };
-    }, [agent.classe]);
+    }, [agent.classe]);
     const poderesFiltrados = useMemo(() => {
         let lista = filtro === 'classe' ? poderesClasse :
             filtro === 'gerais' ? poderesGerais :
-                todosPoderes;
+                todosPoderes;
         const nomesPossuidos = new Set(agent.poderes.map(p => p.nome));
         lista = lista.filter(p => {
             if (p.nome === 'Transcender') return true;
             if (p.nome === 'Treinamento em Perícia') return true;
             if (p.nome === 'Aumento de Atributo') return true;
             return !nomesPossuidos.has(p.nome);
-        });
+        });
         if (busca.trim()) {
             const termo = busca.toLowerCase();
             lista = lista.filter(p =>
@@ -55,7 +55,7 @@ export function PowerChoiceModal({
                 p.descricao.toLowerCase().includes(termo) ||
                 p.requisitos?.toLowerCase().includes(termo)
             );
-        }
+        }
         return lista.map(p => ({
             ...p,
             ...verificarRequisitos(p, agent)
@@ -63,7 +63,7 @@ export function PowerChoiceModal({
     }, [filtro, busca, poderesClasse, poderesGerais, todosPoderes, agent]);
 
     const handleConfirm = () => {
-        if (!poderSelecionado) return;
+        if (!poderSelecionado) return;
         if (poderSelecionado === 'Transcender') {
             setShowParanormalModal(true);
             return;
@@ -73,7 +73,7 @@ export function PowerChoiceModal({
     };
 
     const handleParanormalSelect = (poderParanormal: Poder, ritual?: Ritual) => {
-        setShowParanormalModal(false);
+        setShowParanormalModal(false);
         if (onTranscenderComplete) {
             onTranscenderComplete(poderParanormal, ritual);
         } else {
@@ -81,7 +81,7 @@ export function PowerChoiceModal({
         }
     };
 
-    const isTranscender = (nome: string) => nome === 'Transcender';
+    const isTranscender = (nome: string) => nome === 'Transcender';
     if (showParanormalModal) {
         return (
             <ParanormalPowerModal
@@ -269,4 +269,3 @@ export function PowerChoiceModal({
 }
 
 export default PowerChoiceModal;
-

@@ -53,7 +53,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
     }
 );
 
-Card.displayName = 'Card';
+Card.displayName = 'Card';
 interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> { }
 
 export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(

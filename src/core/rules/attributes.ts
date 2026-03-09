@@ -28,7 +28,6 @@ export function validateAttributes(atributos: Atributos, classe: ClasseName): Va
     return { valid: false, message: 'Apenas um atributo pode ser reduzido para 0.', pointsSpent: 0, pointsAllowed: 0 };
   }
 
-
   const currentSum = Object.values(atributos).reduce((a, b) => a + b, 0);
   const baseSum = 5;
   const pointsSpent = currentSum - baseSum;

@@ -12,17 +12,17 @@ type ModalId =
     | 'pending-choice'
     | null;
 
-interface UIState {
+interface UIState {
     sidebarOpen: boolean;
-    sidebarCollapsed: boolean;
+    sidebarCollapsed: boolean;
     activeModal: ModalId;
-    modalData: unknown;
+    modalData: unknown;
     theme: 'dark' | 'terminal';
-    scanlineEnabled: boolean;
+    scanlineEnabled: boolean;
     mobileMenuOpen: boolean;
-    mobileDetailOpen: boolean;
+    mobileDetailOpen: boolean;
     globalLoading: boolean;
-    loadingMessage: string | null;
+    loadingMessage: string | null;
     toggleSidebar: () => void;
     setSidebarOpen: (open: boolean) => void;
     toggleSidebarCollapsed: () => void;
@@ -39,7 +39,7 @@ interface UIState {
     setGlobalLoading: (loading: boolean, message?: string) => void;
 }
 
-export const useUIStore = create<UIState>((set) => ({
+export const useUIStore = create<UIState>((set) => ({
     sidebarOpen: true,
     sidebarCollapsed: false,
     activeModal: null,
@@ -49,21 +49,21 @@ export const useUIStore = create<UIState>((set) => ({
     mobileMenuOpen: false,
     mobileDetailOpen: false,
     globalLoading: false,
-    loadingMessage: null,
+    loadingMessage: null,
     toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
     setSidebarOpen: (open) => set({ sidebarOpen: open }),
-    toggleSidebarCollapsed: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
+    toggleSidebarCollapsed: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
     openModal: (id, data) => set({ activeModal: id, modalData: data }),
-    closeModal: () => set({ activeModal: null, modalData: null }),
+    closeModal: () => set({ activeModal: null, modalData: null }),
     setTheme: (theme) => set({ theme }),
-    toggleScanline: () => set((state) => ({ scanlineEnabled: !state.scanlineEnabled })),
+    toggleScanline: () => set((state) => ({ scanlineEnabled: !state.scanlineEnabled })),
     setMobileMenuOpen: (open) => set({ mobileMenuOpen: open }),
-    setMobileDetailOpen: (open) => set({ mobileDetailOpen: open }),
+    setMobileDetailOpen: (open) => set({ mobileDetailOpen: open }),
     setGlobalLoading: (loading, message) => set({
         globalLoading: loading,
         loadingMessage: message || null
     }),
-}));
+}));
 export const useModal = () => ({
     activeModal: useUIStore((state) => state.activeModal),
     modalData: useUIStore((state) => state.modalData),

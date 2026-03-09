@@ -83,7 +83,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     }
 );
 
-Button.displayName = 'Button';
+Button.displayName = 'Button';
 interface IconButtonProps extends Omit<ButtonProps, 'icon' | 'iconPosition' | 'children'> {
     icon: React.ReactNode;
     'aria-label': string;

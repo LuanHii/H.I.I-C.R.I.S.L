@@ -224,33 +224,6 @@ export const ORIGENS: Origem[] = [
     livro: 'Regras Básicas'
   },
   {
-    nome: 'Atleta',
-    pericias: ['Acrobacia', 'Atletismo'],
-    poder: {
-      nome: '110%',
-      descricao: 'Quando faz um teste de perícia usando Força ou Agilidade (exceto Luta e Pontaria) você pode gastar 2 PE para receber +5 nesse teste.'
-    },
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Chef de Cozinha',
-    pericias: ['Fortitude', 'Profissão'],
-    poder: {
-      nome: 'Ingrediente Secreto',
-      descricao: 'Em cenas de interlúdio, pode cozinhar prato especial (ação alimentar-se). Você e os membros do grupo que comerem recebem o benefício de dois pratos (benefícios acumulam se repetidos).'
-    },
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Cientista Forense',
-    pericias: ['Ciências', 'Investigação'],
-    poder: {
-      nome: 'Poder Único',
-      descricao: 'A descrição deste poder não está detalhada nas fontes fornecidas, mas compartilha perícias com Acadêmico.'
-    },
-    livro: 'Regras Básicas'
-  },
-  {
     nome: 'Criminoso',
     pericias: ['Crime', 'Furtividade'],
     poder: {
@@ -278,29 +251,11 @@ export const ORIGENS: Origem[] = [
     livro: 'Regras Básicas'
   },
   {
-    nome: 'Dublê',
-    pericias: ['Pilotagem', 'Reflexos'],
-    poder: {
-      nome: 'Poder Único',
-      descricao: 'A descrição deste poder não está detalhada nas fontes fornecidas.'
-    },
-    livro: 'Regras Básicas'
-  },
-  {
     nome: 'Engenheiro',
     pericias: ['Profissão', 'Tecnologia'],
     poder: {
       nome: 'Ferramentas Favoritas',
-      descricao: 'Um item à escolha (exceto armas) conta como uma categoria abaixo e ocupa 1 espaço a menos.'
-    },
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Escritor',
-    pericias: ['Artes', 'Atualidades'],
-    poder: {
-      nome: 'Poder Único',
-      descricao: 'A descrição deste poder não está detalhada nas fontes fornecidas.'
+      descricao: 'Um item à sua escolha (exceto armas) conta como uma categoria abaixo e ocupa 1 espaço a menos.'
     },
     livro: 'Regras Básicas'
   },
@@ -309,25 +264,7 @@ export const ORIGENS: Origem[] = [
     pericias: ['Diplomacia', 'Profissão'],
     poder: {
       nome: 'Processo Otimizado',
-      descricao: 'Fazendo teste de perícia durante teste estendido ou ação para revisar documentos (físicos/digitais), pode pagar 2 PE para receber +5.'
-    },
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Gaudério Abutre',
-    pericias: ['Luta', 'Pilotagem'],
-    poder: {
-      nome: 'Poder Único',
-      descricao: 'A descrição deste poder não está detalhada nas fontes fornecidas.'
-    },
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Ginasta',
-    pericias: ['Acrobacia', 'Reflexos'],
-    poder: {
-      nome: 'Poder Único',
-      descricao: 'A descrição deste poder não está detalhada nas fontes fornecidas.'
+      descricao: 'Sempre que faz um teste de perícia durante um teste estendido ou uma ação de investigação para examinar ou revisar documentos (físicos ou digitais), você pode pagar 2 PE para receber +5.'
     },
     livro: 'Regras Básicas'
   },
@@ -336,16 +273,7 @@ export const ORIGENS: Origem[] = [
     pericias: ['Investigação', 'Percepção'],
     poder: {
       nome: 'Faro para Pistas',
-      descricao: 'Uma vez por cena, fazendo teste para procurar pistas, pode gastar 1 PE para receber +5 nesse teste.'
-    },
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Jornalista',
-    pericias: ['Atualidades', 'Investigação'],
-    poder: {
-      nome: 'Poder Único',
-      descricao: 'A descrição deste poder não está detalhada nas fontes fornecidas.'
+      descricao: 'Uma vez por cena, quando fizer um teste para procurar pistas, você pode gastar 1 PE para rolar +1d20.'
     },
     livro: 'Regras Básicas'
   },
@@ -389,8 +317,8 @@ export const ORIGENS: Origem[] = [
     nome: 'Operário',
     pericias: ['Fortitude', 'Profissão'],
     poder: {
-      nome: 'Poder Único',
-      descricao: 'A descrição deste poder não está detalhada nas fontes fornecidas.'
+      nome: 'Ferramenta de Trabalho',
+      descricao: 'Você escolhe uma arma simples ou tática que seja uma ferramenta da sua profissão (como uma marreta, machadinha, etc.). Você é proficiente com esta arma e ela causa dano como se fosse de uma categoria de tamanho maior e concede +1 na margem de ameaça.'
     },
     livro: 'Regras Básicas'
   },
@@ -418,15 +346,6 @@ export const ORIGENS: Origem[] = [
     poder: {
       nome: 'Acalentar',
       descricao: 'Você recebe +5 em testes de Religião para acalmar. Além disso, quando acalma uma pessoa, ela recebe um número de pontos de Sanidade igual a 1d6 + sua Presença.'
-    },
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Revoltado',
-    pericias: ['Furtividade', 'Vontade'],
-    poder: {
-      nome: 'Poder Único',
-      descricao: 'A descrição deste poder não está detalhada nas fontes fornecidas.'
     },
     livro: 'Regras Básicas'
   },

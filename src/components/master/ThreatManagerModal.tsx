@@ -16,7 +16,7 @@ export const ThreatManagerModal: React.FC<ThreatManagerModalProps> = ({ isOpen, 
   const filteredThreats = useMemo(() => {
     return AMEACAS.filter(threat => {
       const matchesSearch = threat.nome.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesType = selectedType ? threat.tipo === selectedType : true;
+      const matchesType = selectedType ? threat.tipo === selectedType : true;
 
       return matchesSearch && matchesType;
     });

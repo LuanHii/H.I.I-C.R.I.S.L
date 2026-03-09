@@ -723,51 +723,6 @@ export const PODERES: Poder[] = [
     requisitos: 'Pre 2',
     livro: 'Sobrevivendo ao Horror'
   },
-  {
-    nome: 'Tiro Certeiro',
-    descricao: 'Soma sua Agilidade nas rolagens de dano com arma de disparo e ignora a penalidade contra alvos envolvidos em combate corpo a corpo. (Originalmente de Combatente).',
-    tipo: 'Geral',
-    requisitos: 'Treinado em Pontaria',
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Saque Rápido',
-    descricao: 'Você pode sacar ou guardar itens como uma ação livre. Se estiver usando contagem de munição, pode recarregar uma arma de disparo como uma ação livre (1x por rodada). (Originalmente de Combatente).',
-    tipo: 'Geral',
-    requisitos: 'Treinado em Iniciativa',
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Combater com Duas Armas',
-    descricao: 'Usando duas armas (pelo menos uma leve), pode fazer dois ataques (um com cada arma), mas sofre -1d20 em todos os testes de ataque até o próximo turno. (Originalmente de Combatente).',
-    tipo: 'Geral',
-    requisitos: 'Agi 3, Treinado em Luta ou Pontaria',
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Artista Marcial',
-    descricao: 'Seus ataques desarmados causam 1d6 de dano (1d8 em NEX 35%, 1d10 em NEX 70%), podem ser letais e se tornam armas ágeis. (Originalmente de Combatente/Especialista).',
-    tipo: 'Geral',
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Transcender',
-    descricao: 'Escolha um poder paranormal. Você recebe o poder escolhido, mas não ganha Sanidade neste aumento de NEX. Você pode escolher este poder várias vezes.',
-    tipo: 'Geral',
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Treinamento em Perícia',
-    descricao: 'Escolha duas perícias. Você se torna treinado nessas perícias. A partir de NEX 35%, você pode escolher perícias nas quais já é treinado para se tornar veterano. A partir de NEX 70%, pode escolher perícias nas quais já é veterano para se tornar expert.',
-    tipo: 'Geral',
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Aumento de Atributo',
-    descricao: 'Aumenta um atributo em +1 (até o máximo de 5).',
-    tipo: 'Geral',
-    livro: 'Regras Básicas'
-  },
 
   {
     nome: 'Aprender Ritual',
@@ -1019,43 +974,6 @@ export const PODERES: Poder[] = [
     livro: 'Sobrevivendo ao Horror'
   },
 
-  {
-    nome: 'Empenho',
-    descricao: 'Quando faz um teste de perícia, você pode gastar 1 PE para receber +2 nesse teste.',
-    custo: '1 PE',
-    tipo: 'Sobrevivente',
-    livro: 'Sobrevivendo ao Horror'
-  },
-  {
-    nome: 'Cicatrizado',
-    descricao: 'Uma vez por sessão, pode sacrificar 1 PV permanentemente para ignorar um dano mental ou gasto de PE, ou sacrificar permanentemente 1 PE para reduzir um dano físico à metade (Reação).',
-    tipo: 'Sobrevivente',
-    livro: 'Sobrevivendo ao Horror'
-  },
-  {
-    nome: 'Durão (Trilha Sobrevivente Estágio 2)',
-    descricao: 'Você recebe +4 PV. Quando subir para o 3º estágio, recebe +2 PV.',
-    tipo: 'Trilha',
-    livro: 'Sobrevivendo ao Horror'
-  },
-  {
-    nome: 'Pancada Forte (Trilha Durão Estágio 4)',
-    descricao: 'Quando faz um ataque, você pode gastar 1 PE para receber +1d20 no teste de ataque.',
-    tipo: 'Trilha',
-    livro: 'Sobrevivendo ao Horror'
-  },
-  {
-    nome: 'Esotérico (Trilha Sobrevivente Estágio 2)',
-    descricao: 'Você recebe +2 SAN e +1 PE.',
-    tipo: 'Trilha',
-    livro: 'Sobrevivendo ao Horror'
-  },
-  {
-    nome: 'Afinidade Elementar (Trilha Esotérico Estágio 4)',
-    descricao: 'Você sofre -1d20 em testes de resistência contra 1 elemento escolhido (trauma). Contudo, uma vez por sessão de jogo você pode sacrificar 1 PV permanentemente para ignorar 1 dano mental ou gasto de PE, ou sacrificar permanentemente 1 PE para reduzir 1 dano físico à metade (Reação).',
-    tipo: 'Trilha',
-    livro: 'Sobrevivendo ao Horror'
-  }
 ];
 
 import { ClasseName, Personagem, Atributos, PericiaName, GrauTreinamento } from '../core/types';

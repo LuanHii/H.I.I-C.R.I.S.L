@@ -27,7 +27,6 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
         skills.forEach(skill => {
             const skillName = skill as PericiaName;
 
-
             if (habilidade === 'Esperto' || habilidade === 'Carteirada' || habilidade === 'Mascate') {
 
                  const current = updated.pericias[skillName];

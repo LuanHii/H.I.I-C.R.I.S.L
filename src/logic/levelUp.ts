@@ -1,5 +1,3 @@
-
-
 import {
     Personagem,
     PendenciaNex,
@@ -9,40 +7,12 @@ import {
     AtributoKey,
     Elemento,
     Poder,
+    PericiaName,
 } from '../core/types';
 import { TRILHAS } from '../data/tracks';
 import { PODERES, contarPoderesDisponiveis } from '../data/powers';
 import { calculateDerivedStats } from '../core/rules/derivedStats';
-import { getPatentePorNex, getPatenteConfig } from './rulesEngine';
-
-
-const CLASS_RESOURCES: Record<ClasseName, {
-    pv: { base: number; baseAttr: AtributoKey; porNivel: number; porNivelAttr?: AtributoKey };
-    pe: { base: number; baseAttr: AtributoKey; porNivel: number; porNivelAttr?: AtributoKey };
-    san: { base: number; porNivel: number };
-}> = {
-    Combatente: {
-        pv: { base: 20, baseAttr: 'VIG', porNivel: 4, porNivelAttr: 'VIG' },
-        pe: { base: 2, baseAttr: 'PRE', porNivel: 2, porNivelAttr: 'PRE' },
-        san: { base: 12, porNivel: 3 },
-    },
-    Especialista: {
-        pv: { base: 16, baseAttr: 'VIG', porNivel: 3, porNivelAttr: 'VIG' },
-        pe: { base: 3, baseAttr: 'PRE', porNivel: 3, porNivelAttr: 'PRE' },
-        san: { base: 16, porNivel: 4 },
-    },
-    Ocultista: {
-        pv: { base: 12, baseAttr: 'VIG', porNivel: 2, porNivelAttr: 'VIG' },
-        pe: { base: 4, baseAttr: 'PRE', porNivel: 4, porNivelAttr: 'PRE' },
-        san: { base: 20, porNivel: 5 },
-    },
-    Sobrevivente: {
-        pv: { base: 8, baseAttr: 'VIG', porNivel: 2 },
-        pe: { base: 2, baseAttr: 'PRE', porNivel: 1 },
-        san: { base: 8, porNivel: 2 },
-    },
-};
-
+import { getPatentePorNex, getPatenteConfig, calcularRecursosClasse } from './rulesEngine';
 
 const NEX_EVENTOS: { requisito: number; tipo: NexEvento['tipo']; descricao: string }[] = [
     { requisito: 10, tipo: 'Trilha', descricao: 'Escolha de Trilha e 1ª habilidade' },
@@ -63,7 +33,7 @@ const NEX_EVENTOS: { requisito: number; tipo: NexEvento['tipo']; descricao: stri
     { requisito: 90, tipo: 'Poder', descricao: 'Desbloqueia um Poder de Classe' },
     { requisito: 95, tipo: 'Atributo', descricao: '+1 em qualquer atributo' },
     { requisito: 99, tipo: 'Trilha', descricao: '4ª habilidade da Trilha' },
-];
+];
 
 export interface LevelUpResult {
     personagem: Personagem;
@@ -79,19 +49,15 @@ export interface MudancasNex {
     sanGanha: number;
     limitePeRodada: number;
     eventosDesbloqueados: NexEvento[];
-}
-
+}
 
 function gerarIdPendencia(): string {
     return `pend_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
 
-
 export function nexParaNivel(nex: number): number {
     return Math.min(20, Math.max(1, Math.ceil(nex / 5)));
 }
-
-
 
 export function calcularRecursosParaNex(
     classe: ClasseName,
@@ -120,7 +86,6 @@ export function calcularRecursosParaNex(
     };
 }
 
-
 export function calcularEventosDesbloqueados(nexAnterior: number, nexNovo: number): NexEvento[] {
     return NEX_EVENTOS
         .filter(e => e.requisito > nexAnterior && e.requisito <= nexNovo)
@@ -129,7 +94,6 @@ export function calcularEventosDesbloqueados(nexAnterior: number, nexNovo: numbe
             desbloqueado: true,
         }));
 }
-
 
 export function detectingPendenciesAndAutoApply(
     personagem: Personagem,
@@ -162,7 +126,8 @@ export function detectingPendenciesAndAutoApply(
                 break;
 
             case 'Trilha':
-                if (evento.requisito === 10) {
+                if (evento.requisito === 10) {
+
                     if (!personagem.trilha) {
                         pendencias.push({
                             id: gerarIdPendencia(),
@@ -171,10 +136,12 @@ export function detectingPendenciesAndAutoApply(
                             nex: evento.requisito,
                             resolvida: false,
                         });
-                    } else {
+                    } else {
+
                         checkTrilhaAbility(personagem, evento.requisito, pendencias, autoPoderes);
                     }
-                } else {
+                } else {
+
                     if (personagem.trilha) {
                         checkTrilhaAbility(personagem, evento.requisito, pendencias, autoPoderes);
                     }
@@ -194,7 +161,8 @@ export function detectingPendenciesAndAutoApply(
                 });
                 break;
 
-            case 'Afinidade':
+            case 'Afinidade':
+
                 if (personagem.classe === 'Ocultista' && !personagem.afinidade) {
                     pendencias.push({
                         id: gerarIdPendencia(),
@@ -234,7 +202,8 @@ function checkTrilhaAbility(
     if (!trilhaData) return;
 
     const habilidade = trilhaData.habilidades.find(h => h.nex === nex);
-    if (!habilidade) return;
+    if (!habilidade) return;
+
     const jaTem = personagem.poderes.some(p => p.nome === habilidade.nome);
     if (jaTem) return;
 
@@ -244,9 +213,11 @@ function checkTrilhaAbility(
             tipo: 'trilhaHabilidade',
             descricao: `Habilidade de Trilha: ${habilidade.nome} (${personagem.trilha} ${nex}%)`,
             nex: nex,
-            resolvida: false,
+            resolvida: false,
+
         });
-    } else {
+    } else {
+
         autoPoderes.push({
             nome: habilidade.nome,
             descricao: habilidade.descricao,
@@ -256,14 +227,13 @@ function checkTrilhaAbility(
     }
 }
 
-
-
 export function subirNex(
     personagem: Personagem,
     novoNex: number,
     transcenderEscolhido: boolean = false
 ): LevelUpResult {
-    const nexAnterior = personagem.nex;
+    const nexAnterior = personagem.nex;
+
     const recursosAnteriores = calcularRecursosParaNex(
         personagem.classe,
         personagem.atributos,
@@ -282,17 +252,23 @@ export function subirNex(
         personagem.origem,
         personagem.trilha,
         personagem.qtdTranscender
-    );
+    );
+
     const pvGanho = recursosNovos.pv - recursosAnteriores.pv;
     const peGanho = recursosNovos.pe - recursosAnteriores.pe;
-    let sanGanha = recursosNovos.san - recursosAnteriores.san;
+    let sanGanha = recursosNovos.san - recursosAnteriores.san;
+
     if (transcenderEscolhido) {
         sanGanha = 0;
-    }
-    const eventosDesbloqueados = calcularEventosDesbloqueados(nexAnterior, novoNex);
-    const { pendencias: pendenciasNovas, autoPoderes } = detectingPendenciesAndAutoApply(personagem, eventosDesbloqueados);
+    }
+
+    const eventosDesbloqueados = calcularEventosDesbloqueados(nexAnterior, novoNex);
+
+    const { pendencias: pendenciasNovas, autoPoderes } = detectingPendenciesAndAutoApply(personagem, eventosDesbloqueados);
+
     const novaPatenteNome = getPatentePorNex(novoNex);
-    const novaPatenteConfig = getPatenteConfig(novaPatenteNome);
+    const novaPatenteConfig = getPatenteConfig(novaPatenteNome);
+
     const personagemAtualizado: Personagem = {
         ...personagem,
         nex: novoNex,
@@ -346,7 +322,6 @@ export function subirNex(
     };
 }
 
-
 export function resolverPendencia(
     personagem: Personagem,
     pendenciaId: string,
@@ -371,7 +346,8 @@ export function resolverPendencia(
     let personagemAtualizado = {
         ...personagem,
         pendenciasNex: pendenciasAtualizadas,
-    };
+    };
+
     switch (pendencia.tipo) {
         case 'atributo':
             if (typeof valorEscolhido === 'string') {
@@ -402,7 +378,7 @@ export function resolverPendencia(
                 personagemAtualizado = {
                     ...personagemAtualizado,
                     trilha: valorEscolhido,
-                };
+                };
 
                 const trilhaData = TRILHAS.find(t => t.nome === valorEscolhido);
                 if (trilhaData) {
@@ -436,12 +412,13 @@ export function resolverPendencia(
             break;
 
         case 'versatilidade':
-            if (typeof valorEscolhido === 'string') {
+            if (typeof valorEscolhido === 'string') {
 
                 const poderClasse = PODERES.find(p => p.nome === valorEscolhido);
                 if (poderClasse) {
                     personagemAtualizado.poderes = [...personagemAtualizado.poderes, poderClasse];
-                } else {
+                } else {
+
                     let poderTrilha: Poder | undefined;
                     for (const t of TRILHAS) {
                         const h = t.habilidades.find(h => h.nome === valorEscolhido);
@@ -462,13 +439,15 @@ export function resolverPendencia(
             }
             break;
 
-        case 'trilhaHabilidade':
+        case 'trilhaHabilidade':
+
             const nexP = pendencia.nex;
             const trilhaNome = personagem.trilha;
             if (trilhaNome && typeof valorEscolhido === 'string') {
                 const tData = TRILHAS.find(t => t.nome === trilhaNome);
                 const hData = tData?.habilidades.find(h => h.nex === nexP);
-                if (hData) {
+                if (hData) {
+
                     personagemAtualizado.poderes = [
                         ...personagemAtualizado.poderes,
                         {
@@ -477,19 +456,23 @@ export function resolverPendencia(
                             tipo: 'Trilha',
                             livro: tData!.livro as any
                         }
-                    ];
-                    if (hData.escolha?.tipo === 'pericia') {
+                    ];
+
+                    if (hData.escolha?.tipo === 'pericia') {
+
                     }
                 }
             }
             break;
 
         case 'pericia':
-            if (Array.isArray(valorEscolhido)) {
+            if (Array.isArray(valorEscolhido)) {
+
                 const alvo = pendencia.nex === 35 ? 'Veterano' : 'Expert';
 
                 const novasPericias = { ...personagemAtualizado.pericias };
-                valorEscolhido.forEach(pNome => {
+                valorEscolhido.forEach(pNome => {
+
                     novasPericias[pNome as any] = alvo;
                 });
                 personagemAtualizado.pericias = novasPericias;
@@ -500,16 +483,13 @@ export function resolverPendencia(
     return personagemAtualizado;
 }
 
-
 export function getPendenciasNaoResolvidas(personagem: Personagem): PendenciaNex[] {
     return (personagem.pendenciasNex || []).filter(p => !p.resolvida);
 }
 
-
 export function temPendencias(personagem: Personagem): boolean {
     return getPendenciasNaoResolvidas(personagem).length > 0;
 }
-
 
 export function criarPendenciaTranscender(nex: number): PendenciaNex {
     return {
@@ -519,4 +499,131 @@ export function criarPendenciaTranscender(nex: number): PendenciaNex {
         nex,
         resolvida: false,
     };
+}
+
+export function rebaixarNex(
+    personagem: Personagem,
+    novoNex: number
+): Personagem {
+    let atualizado = { ...personagem };
+    const nexAnterior = atualizado.nex;
+
+    if (novoNex >= nexAnterior) return atualizado;
+
+    const pendenciasParaReverter = (atualizado.pendenciasNex || [])
+        .filter(p => p.nex > novoNex)
+        .sort((a, b) => b.nex - a.nex);
+
+    const poderesARemover = new Set<string>();
+
+    for (const ped of pendenciasParaReverter) {
+        if (!ped.resolvida) continue;
+
+        switch (ped.tipo) {
+            case 'atributo':
+                if (typeof ped.valorEscolhido === 'string') {
+                    const attr = ped.valorEscolhido as AtributoKey;
+                    atualizado.atributos = {
+                        ...atualizado.atributos,
+                        [attr]: Math.max(0, atualizado.atributos[attr] - 1)
+                    };
+                }
+                break;
+            case 'afinidade':
+            case 'trilha':
+                if (ped.tipo === 'afinidade') atualizado.afinidade = undefined;
+                if (ped.tipo === 'trilha') atualizado.trilha = undefined;
+                break;
+            case 'versatilidade':
+            case 'transcenderPoder':
+                if (typeof ped.valorEscolhido === 'string') {
+                    poderesARemover.add(ped.valorEscolhido);
+                }
+                if (ped.tipo === 'transcenderPoder') {
+                    atualizado.qtdTranscender = Math.max(0, (atualizado.qtdTranscender || 0) - 1);
+                }
+                break;
+            case 'trilhaHabilidade':
+                const descMatch = ped.descricao.match(/Habilidade de Trilha: (.*?) \(/);
+                if (descMatch && descMatch[1]) {
+                    poderesARemover.add(descMatch[1].trim());
+                }
+                break;
+            case 'pericia':
+                if (Array.isArray(ped.valorEscolhido)) {
+                    const alvoAnterior = ped.nex === 35 ? 'Treinado' : 'Veterano';
+                    const novasPericias = { ...atualizado.pericias };
+                    ped.valorEscolhido.forEach(pNome => {
+                        novasPericias[pNome as PericiaName] = alvoAnterior;
+                    });
+                    atualizado.pericias = novasPericias;
+                }
+                break;
+        }
+    }
+
+    const autoPoderesParaRemover = NEX_EVENTOS
+        .filter(e => e.requisito > novoNex && e.requisito <= nexAnterior)
+        .filter(e => e.tipo === 'Trilha' && e.requisito > 10);
+
+    if (atualizado.trilha) {
+        const tData = TRILHAS.find(t => t.nome === atualizado.trilha);
+        if (tData) {
+            autoPoderesParaRemover.forEach(evento => {
+                const hab = tData.habilidades.find(h => h.nex === evento.requisito);
+                if (hab && !hab.escolha) {
+                    poderesARemover.add(hab.nome);
+                }
+            });
+        }
+    }
+
+    if (poderesARemover.size > 0) {
+        atualizado.poderes = atualizado.poderes.filter(p => !poderesARemover.has(p.nome));
+    }
+
+    atualizado.pendenciasNex = (atualizado.pendenciasNex || []).filter(p => p.nex <= novoNex);
+
+    atualizado.eventosNex = NEX_EVENTOS.map(e => ({
+        ...e,
+        desbloqueado: novoNex >= e.requisito,
+    }));
+
+    atualizado.nex = novoNex;
+
+    const novaPatenteNome = getPatentePorNex(novoNex);
+    atualizado.patente = novaPatenteNome;
+    atualizado.limiteItens = getPatenteConfig(novaPatenteNome).limiteItens;
+
+    const recursosNovos = calcularRecursosParaNex(
+        atualizado.classe,
+        atualizado.atributos,
+        novoNex,
+        atualizado.estagio,
+        atualizado.origem,
+        atualizado.trilha,
+        atualizado.qtdTranscender
+    );
+
+    atualizado.pv = {
+        ...atualizado.pv,
+        max: recursosNovos.pv,
+        atual: Math.min(atualizado.pv.atual, recursosNovos.pv),
+        machucado: Math.floor(recursosNovos.pv / 2),
+    };
+
+    atualizado.pe = {
+        ...atualizado.pe,
+        max: recursosNovos.pe,
+        atual: Math.min(atualizado.pe.atual, recursosNovos.pe),
+        rodada: recursosNovos.limitePeRodada,
+    };
+
+    atualizado.san = {
+        ...atualizado.san,
+        max: recursosNovos.san,
+        atual: Math.min(atualizado.san.atual, recursosNovos.san),
+    };
+
+    return atualizado;
 }

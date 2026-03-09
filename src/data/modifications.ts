@@ -2,7 +2,6 @@ import { ModificacaoArma, Item, ItemStats } from '../core/types';
 
 export const MODIFICACOES_ARMAS: ModificacaoArma[] = [
 
-
     {
         nome: 'Certeira',
         tipo: 'universal',
@@ -38,7 +37,6 @@ export const MODIFICACOES_ARMAS: ModificacaoArma[] = [
         stats: { saqueRapido: true },
         livro: 'Regras Básicas'
     },
-
 
     {
         nome: 'Alongada',
@@ -97,7 +95,34 @@ export const MODIFICACOES_ARMAS: ModificacaoArma[] = [
         stats: { ignoraCamuflagem: true },
         livro: 'Regras Básicas'
     },
-
+    {
+        nome: 'Coronha Rebatível',
+        tipo: 'fogo',
+        efeito: 'Permite usar a arma com uma mão (–2 em testes de ataque).',
+        stats: { empunhaduraUmaMao: true },
+        livro: 'Regras Básicas'
+    },
+    {
+        nome: 'Cano Longo',
+        tipo: 'fogo',
+        efeito: 'Aumenta o dano em +2, mas reduz a margem de ameaça em 1.',
+        stats: { danoBonus: 2, margemAmeaca: -1 },
+        livro: 'Regras Básicas'
+    },
+    {
+        nome: 'Carregador Estendido',
+        tipo: 'fogo',
+        efeito: 'Dobra a capacidade de munição da arma.',
+        stats: { capacidadeMunicaoDupla: true },
+        livro: 'Regras Básicas'
+    },
+    {
+        nome: 'Carregador Rápido',
+        tipo: 'fogo',
+        efeito: 'Permite recarregar como ação livre 1x/rodada.',
+        stats: { recargaLivre: true },
+        livro: 'Sobrevivendo ao Horror'
+    },
 
     {
         nome: 'Dum Dum',

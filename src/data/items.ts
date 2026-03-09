@@ -800,91 +800,11 @@ export const ITENS: Item[] = [
     livro: 'Regras Básicas'
   },
   {
-    nome: 'Componentes Ritualísticos de Sangue',
+    nome: 'Componentes Ritualísticos',
     categoria: 0,
     espaco: 1,
     tipo: 'Paranormal',
-    descricao: 'Conjunto de objetos necessários para conjuração de rituais de Sangue.',
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Componentes Ritualísticos de Morte',
-    categoria: 0,
-    espaco: 1,
-    tipo: 'Paranormal',
-    descricao: 'Conjunto de objetos necessários para conjuração de rituais de Morte.',
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Componentes Ritualísticos de Conhecimento',
-    categoria: 0,
-    espaco: 1,
-    tipo: 'Paranormal',
-    descricao: 'Conjunto de objetos necessários para conjuração de rituais de Conhecimento.',
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Componentes Ritualísticos de Energia',
-    categoria: 0,
-    espaco: 1,
-    tipo: 'Paranormal',
-    descricao: 'Conjunto de objetos necessários para conjuração de rituais de Energia.',
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Emissor de Pulsos Paranormais',
-    categoria: 2,
-    espaco: 1,
-    tipo: 'Paranormal',
-    descricao: 'Ação completa + 1 PE: emite pulso de elemento escolhido. Atrai criaturas do mesmo elemento e afasta do oposto (Vontade DT Pre evita).',
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Escuta de Ruídos Paranormais',
-    categoria: 2,
-    espaco: 1,
-    tipo: 'Paranormal',
-    descricao: 'Ação completa + 2 PE: grava ruídos paranormais (até 24h). Ouvir fornece +5 em Ocultismo para identificar criatura.',
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Medidor de Estabilidade da Membrana',
-    categoria: 1,
-    espaco: 1,
-    tipo: 'Paranormal',
-    descricao: 'Agente treinado em Ocultismo pode usar o medidor para avaliar o estado da Membrana em uma área, indicando a chance de uma entidade se manifestar.',
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Scanner de Manifestação Paranormal de Sangue',
-    categoria: 2,
-    espaco: 1,
-    tipo: 'Paranormal',
-    descricao: 'Ação padrão, 1 PE/rodada: revela direção de todas as manifestações de Sangue em alcance longo.',
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Scanner de Manifestação Paranormal de Morte',
-    categoria: 2,
-    espaco: 1,
-    tipo: 'Paranormal',
-    descricao: 'Ação padrão, 1 PE/rodada: revela direção de todas as manifestações de Morte em alcance longo.',
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Scanner de Manifestação Paranormal de Conhecimento',
-    categoria: 2,
-    espaco: 1,
-    tipo: 'Paranormal',
-    descricao: 'Ação padrão, 1 PE/rodada: revela direção de todas as manifestações de Conhecimento em alcance longo.',
-    livro: 'Regras Básicas'
-  },
-  {
-    nome: 'Scanner de Manifestação Paranormal de Energia',
-    categoria: 2,
-    espaco: 1,
-    tipo: 'Paranormal',
-    descricao: 'Ação padrão, 1 PE/rodada: revela direção de todas as manifestações de Energia em alcance longo.',
+    descricao: 'Conjunto de objetos focados em um Elemento (Sangue, Morte, Energia ou Conhecimento), necessários para conjurar rituais daquele respectivo Elemento.',
     livro: 'Regras Básicas'
   },
 
@@ -923,5 +843,5 @@ export const ITENS: Item[] = [
     descricao: 'Capacete balístico. Fornece +1 na Defesa e RD 2 contra dano na cabeça.',
     stats: { defesa: 1 },
     livro: 'Sobrevivendo ao Horror'
-  },
+  }
 ];

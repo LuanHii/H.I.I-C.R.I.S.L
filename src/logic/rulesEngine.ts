@@ -18,6 +18,7 @@ import {
   BonusContexto,
 } from '../core/types';
 import { validateAttributes } from '../core/rules/attributes';
+import { calculateDerivedStats } from '../core/rules/derivedStats';
 import { CLASSES } from '../data/classes';
 import { ORIGENS } from '../data/origins';
 
@@ -123,49 +124,6 @@ const PATENTE_CONFIGS: PatenteConfig[] = [
   },
 ];
 
-interface ClasseResourceData {
-  pv: { base: number; baseAttr?: AtributoKey; porNivel: number; porNivelAttr?: AtributoKey };
-  pe: { base: number; baseAttr?: AtributoKey; porNivel: number; porNivelAttr?: AtributoKey };
-  san: { base: number; porNivel: number };
-}
-
-const CLASS_RESOURCES = {
-  Combatente: {
-    pv: { base: 20, baseAttr: 'VIG', porNivel: 4, porNivelAttr: 'VIG' },
-    pe: { base: 2, baseAttr: 'PRE', porNivel: 2, porNivelAttr: 'PRE' },
-    san: { base: 12, porNivel: 3 },
-  },
-  Especialista: {
-    pv: { base: 16, baseAttr: 'VIG', porNivel: 3, porNivelAttr: 'VIG' },
-    pe: { base: 3, baseAttr: 'PRE', porNivel: 3, porNivelAttr: 'PRE' },
-    san: { base: 16, porNivel: 4 },
-  },
-  Ocultista: {
-    pv: { base: 12, baseAttr: 'VIG', porNivel: 2, porNivelAttr: 'VIG' },
-    pe: { base: 4, baseAttr: 'PRE', porNivel: 4, porNivelAttr: 'PRE' },
-    san: { base: 20, porNivel: 5 },
-  },
-  Sobrevivente: {
-    pv: { base: 8, baseAttr: 'VIG', porNivel: 2, porNivelAttr: undefined },
-    pe: { base: 2, baseAttr: 'PRE', porNivel: 1, porNivelAttr: undefined },
-    san: { base: 8, porNivel: 2 },
-  },
-} as const;
-
-const PD_NEX_CONFIG = {
-  Combatente: { base: 6, porNivel: 3 },
-  Especialista: { base: 8, porNivel: 4 },
-  Ocultista: { base: 10, porNivel: 5 },
-  Sobrevivente: { base: 4, porNivel: 2 },
-} as const;
-
-const PD_PATENTE_CONFIG: Record<ClasseName, { base: number; porPatente: number }> = {
-  Combatente: { base: 8, porPatente: 4 },
-  Especialista: { base: 12, porPatente: 6 },
-  Ocultista: { base: 16, porPatente: 8 },
-  Sobrevivente: { base: 4, porPatente: 0 },
-};
-
 const NEX_EVENTOS_BASE: { requisito: number; tipo: NexEvento['tipo']; descricao: string }[] = [
   { requisito: 10, tipo: 'Trilha', descricao: 'Escolha de Trilha e 1ª habilidade' },
   { requisito: 15, tipo: 'Poder', descricao: 'Desbloqueia um Poder de Classe' },
@@ -236,13 +194,6 @@ export interface CriacaoInput {
   equipamentos?: Item[];
 }
 
-interface RecursosResultado {
-  pv: number;
-  pe: number;
-  san: number;
-  pd?: number;
-}
-
 interface PericiaBuildResult {
   graus: Record<PericiaName, GrauTreinamento>;
   extrasFixos: Partial<Record<PericiaName, number>>;
@@ -252,7 +203,6 @@ interface PericiaBuildResult {
 }
 
 interface TrilhaEffectResult {
-  pvBonus: number;
   extrasFixos: Partial<Record<PericiaName, number>>;
   extrasDados: Partial<Record<PericiaName, number>>;
   efeitos: string[];
@@ -350,24 +300,23 @@ export function gerarFicha(input: CriacaoInput): Personagem {
     ? calcularBonusPoderOrigem(origem, nexBase, atributos)
     : criarBonusOrigemVazio();
 
-  const recursos = calcularRecursos({
+  const derived = calculateDerivedStats({
     classe: input.classe,
     atributos,
     nex: nexBase,
     estagio,
-    usarPd: input.usarPd ?? false,
-    patente,
-    pvBonus: trilhaEfeito.pvBonus + bonusOrigem.pvBonus,
-    peBonus: bonusOrigem.peBonus,
-    sanBonus: bonusOrigem.sanBonus,
+    origemNome: origem.nome,
+    trilhaNome: input.trilha,
+    sobreviventeBeneficioOrigem: input.sobreviventeBeneficioOrigem,
+    qtdTranscender: 0,
   });
 
   const afinidadeFinal =
     input.afinidade ?? (input.classe === 'Ocultista' && nexBase >= 50 ? 'Conhecimento' : undefined);
 
   const limiteItens = getPatenteConfig(patente).limiteItens;
-  const defesa = 10 + atributos.AGI + (input.bonus?.defesa ?? 0) + bonusOrigem.defesaBonus;
-  const deslocamento = 9 + (input.bonus?.deslocamento ?? 0);
+  const defesa = derived.defesa + (input.bonus?.defesa ?? 0);
+  const deslocamento = derived.deslocamento + (input.bonus?.deslocamento ?? 0);
 
   const poderes = coletarPoderes(origem, input.classe, input.sobreviventeBeneficioOrigem);
   const carga = calcularCarga({
@@ -377,10 +326,18 @@ export function gerarFicha(input: CriacaoInput): Personagem {
     bonusCarga: input.bonus?.carga
   });
 
+  const extrasFixosDerived: Partial<Record<PericiaName, number>> = {};
+  if (derived.furtividadeBonus) extrasFixosDerived.Furtividade = derived.furtividadeBonus;
+  if (derived.percepcaoBonus) extrasFixosDerived.Percepção = derived.percepcaoBonus;
+  if (derived.iniciativaBonus) extrasFixosDerived.Iniciativa = derived.iniciativaBonus;
+  if (derived.enganacaoBonus) extrasFixosDerived.Enganação = derived.enganacaoBonus;
+  if (derived.diplomaciaBonus) extrasFixosDerived.Diplomacia = derived.diplomaciaBonus;
+  if (derived.fortitudeBonus) extrasFixosDerived.Fortitude = derived.fortitudeBonus;
+
   const periciasDetalhadas = gerarDetalhesPericia({
     atributos,
     graus: periciasBase.graus,
-    extrasFixos: combinePericiaBonus(periciasBase.extrasFixos, trilhaEfeito.extrasFixos, input.bonus?.periciaFixos, bonusOrigem.periciaFixos),
+    extrasFixos: combinePericiaBonus(periciasBase.extrasFixos, trilhaEfeito.extrasFixos, extrasFixosDerived, input.bonus?.periciaFixos, bonusOrigem.periciaFixos),
     extrasDados: combinePericiaBonus(periciasBase.extrasDados, trilhaEfeito.extrasDados, input.bonus?.periciaDados, bonusOrigem.periciaDados),
   });
 
@@ -408,24 +365,22 @@ export function gerarFicha(input: CriacaoInput): Personagem {
     periciasDetalhadas,
     periciasTreinadasPendentes: periciasBase.pendentesLivres > 0 ? periciasBase.pendentesLivres : undefined,
     pv: {
-      atual: recursos.pv,
-      max: recursos.pv,
+      atual: derived.pvMax,
+      max: derived.pvMax,
       temp: 0,
-      machucado: Math.floor(recursos.pv / 2),
+      machucado: Math.floor(derived.pvMax / 2),
     },
     pe: {
-      atual: recursos.pe,
-      max: recursos.pe,
-
-      rodada: input.classe === 'Sobrevivente' ? 1 : Math.min(20, Math.max(1, Math.ceil(nexBase / 5))),
+      atual: derived.peMax,
+      max: derived.peMax,
+      rodada: derived.peRodada,
     },
     san: {
-      atual: recursos.san,
-      max: recursos.san,
-
+      atual: derived.sanMax,
+      max: derived.sanMax,
       perturbado: false,
     },
-    pd: recursos.pd ? { atual: recursos.pd, max: recursos.pd } : undefined,
+    pd: input.usarPd ? { atual: derived.pdMax, max: derived.pdMax } : undefined,
     defesa,
     deslocamento,
     carga,
@@ -560,7 +515,6 @@ function aplicarTrilhaEfeitos(params: {
   config?: TrilhaConfigOptions;
 }): TrilhaEffectResult {
   const efeito: TrilhaEffectResult = {
-    pvBonus: 0,
     extrasFixos: {},
     extrasDados: {},
     efeitos: [],
@@ -577,7 +531,6 @@ function aplicarTrilhaEfeitos(params: {
 
   if (nome === 'Monstruoso') {
     if (params.nex >= 10) {
-      efeito.pvBonus += params.atributos.FOR;
       adicionaPenaltySocial(1);
       efeito.efeitos.push('Monstruoso (Traços da Entidade): resistência 5 ao elemento escolhido e +2 em ataques/dano C.A.C.');
     }
@@ -725,77 +678,6 @@ function combinePericiaBonus(
   return resultado;
 }
 
-function calcularRecursos(params: {
-  classe: ClasseName;
-  atributos: Atributos;
-  nex: number;
-  estagio?: number;
-  usarPd: boolean;
-  patente: Patente;
-  pvBonus?: number;
-  peBonus?: number;
-  sanBonus?: number;
-}): RecursosResultado {
-  const data = CLASS_RESOURCES[params.classe];
-
-  const isSurvivor = params.classe === 'Sobrevivente';
-  const niveisExtras = isSurvivor
-    ? Math.max(0, (params.estagio || 1) - 1)
-    : Math.max(0, Math.min(20, Math.max(1, Math.ceil(params.nex / 5))) - 1);
-
-  const pvBase = data.pv.base + (data.pv.baseAttr ? params.atributos[data.pv.baseAttr] : 0);
-  const peBase = data.pe.base + (data.pe.baseAttr ? params.atributos[data.pe.baseAttr] : 0);
-  const sanBase = data.san.base;
-
-  const pv =
-    pvBase +
-    niveisExtras * (data.pv.porNivel + (data.pv.porNivelAttr ? params.atributos[data.pv.porNivelAttr] : 0)) +
-    (params.pvBonus ?? 0);
-  const pe =
-    peBase +
-    niveisExtras * (data.pe.porNivel + (data.pe.porNivelAttr ? params.atributos[data.pe.porNivelAttr] : 0)) +
-    (params.peBonus ?? 0);
-  const san = sanBase + niveisExtras * data.san.porNivel + (params.sanBonus ?? 0);
-
-  const resultado: RecursosResultado = { pv, pe, san };
-
-  if (params.usarPd) {
-    const pd = calcularPd(params.classe, params.atributos, params.nex, params.estagio, params.patente);
-    resultado.pd = pd;
-    resultado.pe = 0;
-    resultado.san = 0;
-  }
-
-  return resultado;
-}
-
-function calcularPd(
-  classe: ClasseName,
-  atributos: Atributos,
-  nex: number,
-  estagio: number | undefined,
-  patente: Patente,
-  modo: 'NEX' | 'PATENTE' = 'NEX'
-): number {
-  const presenca = atributos.PRE;
-
-  const cfg = PD_NEX_CONFIG[classe];
-  const base = cfg.base + presenca;
-
-  if (classe === 'Sobrevivente') {
-    const estagioAtual = estagio ?? 1;
-    const incrementos = Math.max(0, estagioAtual - 1);
-    const valorPorNivel = cfg.porNivel;
-    return base + incrementos * valorPorNivel;
-  }
-
-  const nivel = Math.min(20, Math.max(1, Math.ceil(Math.max(nex, 0) / 5)));
-  const incrementos = Math.max(0, nivel - 1);
-
-  const valorPorNivel = cfg.porNivel + presenca;
-  return base + incrementos * valorPorNivel;
-}
-
 export function calcularPericiasDetalhadas(
   atributos: Atributos,
   graus: Record<PericiaName, GrauTreinamento>,
@@ -821,15 +703,20 @@ export function calcularRecursosClasse(params: {
   usarPd?: boolean;
   pvBonus?: number;
 }) {
-  return calcularRecursos({
+  const derived = calculateDerivedStats({
     classe: params.classe,
     atributos: params.atributos,
     nex: params.nex,
     estagio: params.estagio,
-    usarPd: params.usarPd ?? false,
-    patente: params.patente,
-    pvBonus: params.pvBonus,
   });
+
+  return {
+    pv: derived.pvMax + (params.pvBonus ?? 0),
+    pe: derived.peMax,
+    san: derived.sanMax,
+    pd: params.usarPd ? derived.pdMax : undefined,
+    limitePeRodada: derived.peRodada,
+  };
 }
 
 export function calcularCarga(params: {

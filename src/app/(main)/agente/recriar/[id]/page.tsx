@@ -61,4 +61,3 @@ export default function RecriarFichaPage({ params }: { params: Promise<{ id: str
     </main>
   );
 }
-

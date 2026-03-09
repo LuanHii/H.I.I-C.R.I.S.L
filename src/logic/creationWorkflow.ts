@@ -6,7 +6,7 @@ import {
 } from './characterUtils';
 import type { ClassePreferencias } from './rulesEngine';
 import { ORIGENS } from '../data/origins';
-import { levelUp } from './progression';
+import { subirNex } from './levelUp';
 
 export interface CreationState {
   step: number;
@@ -169,15 +169,14 @@ export function finalizarCriacao(state: CreationState): Personagem {
   const targetEstagio = estagio || 1;
 
   if (personagem.classe === 'Sobrevivente') {
-      for (let i = 1; i < targetEstagio; i++) {
-          personagem = levelUp(personagem);
-      }
+    const { personagem: upado } = subirNex(personagem, targetEstagio, false);
+    personagem = upado;
   } else {
-      const safeTarget = Math.min(99, Math.max(5, targetNex));
-
-      while (personagem.nex < safeTarget) {
-          personagem = levelUp(personagem);
-      }
+    const safeTarget = Math.min(99, Math.max(5, targetNex));
+    if (personagem.nex < safeTarget) {
+      const { personagem: upado } = subirNex(personagem, safeTarget, false);
+      personagem = upado;
+    }
   }
 
   return personagem;

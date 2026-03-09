@@ -37,19 +37,19 @@ export function ParanormalPowerModal({
     const [filtroElemento, setFiltroElemento] = useState<Elemento | 'todos'>('todos');
     const [poderSelecionado, setPoderSelecionado] = useState<string | null>(null);
     const [showRitualModal, setShowRitualModal] = useState(false);
-    const [poderAprenderRitual, setPoderAprenderRitual] = useState<Poder | null>(null);
+    const [poderAprenderRitual, setPoderAprenderRitual] = useState<Poder | null>(null);
     const contagemElementos = useMemo(() => {
         const elementos: Elemento[] = ['Sangue', 'Morte', 'Conhecimento', 'Energia'];
         return elementos.reduce((acc, elem) => {
             acc[elem] = contarPoderesElemento(agent, elem);
             return acc;
         }, {} as Record<Elemento, number>);
-    }, [agent]);
+    }, [agent]);
     const poderesFiltrados = useMemo(() => {
-        let lista = getPoderesParanormaisElegiveis(agent);
+        let lista = getPoderesParanormaisElegiveis(agent);
         if (filtroElemento !== 'todos') {
             lista = lista.filter(p => p.elemento === filtroElemento || !p.elemento);
-        }
+        }
         if (busca.trim()) {
             const termo = busca.toLowerCase();
             lista = lista.filter(p =>
@@ -57,7 +57,7 @@ export function ParanormalPowerModal({
                 p.descricao.toLowerCase().includes(termo) ||
                 p.requisitos?.toLowerCase().includes(termo)
             );
-        }
+        }
         return lista.sort((a, b) => {
             if (a.elegivel !== b.elegivel) return a.elegivel ? -1 : 1;
             if (a.elemento !== b.elemento) {
@@ -73,7 +73,7 @@ export function ParanormalPowerModal({
         if (!poderSelecionado) return;
 
         const poder = poderesFiltrados.find(p => p.nome === poderSelecionado);
-        if (!poder || !poder.elegivel) return;
+        if (!poder || !poder.elegivel) return;
         if (poder.nome === 'Aprender Ritual') {
             setPoderAprenderRitual(poder);
             setShowRitualModal(true);
@@ -98,7 +98,7 @@ export function ParanormalPowerModal({
         return <Icon size={14} className={config.color} />;
     };
 
-    const isAprenderRitual = (nome: string) => nome === 'Aprender Ritual';
+    const isAprenderRitual = (nome: string) => nome === 'Aprender Ritual';
     if (showRitualModal) {
         return (
             <RitualChoiceModal

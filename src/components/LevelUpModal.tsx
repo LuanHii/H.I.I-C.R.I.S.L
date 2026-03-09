@@ -35,8 +35,8 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
     const [personagemAtualizado, setPersonagemAtualizado] = useState<Personagem | null>(null);
     const [mudancas, setMudancas] = useState<MudancasNex | null>(null);
     const [pendenciaSelecionada, setPendenciaSelecionada] = useState<PendenciaNex | null>(null);
-    const [transcenderEscolhido, setTranscenderEscolhido] = useState(false);
-    const novoNex = agent.nex + 5;
+    const [transcenderEscolhido, setTranscenderEscolhido] = useState(false);
+    const novoNex = agent.nex + 5;
     React.useEffect(() => {
         if (!personagemAtualizado) {
             const resultado = subirNex(agent, novoNex, transcenderEscolhido);
@@ -86,10 +86,8 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
         }
     };
 
-
-
     const handleTranscenderComplete = (poderParanormal: Poder, ritual?: Ritual) => {
-        if (!pendenciaSelecionada) return;
+        if (!pendenciaSelecionada) return;
         let novosPoderes = [...personagemAtualizado.poderes, poderParanormal];
         let novosRituais = [...personagemAtualizado.rituais];
 
@@ -99,19 +97,19 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
 
         const infoPendencia = ritual
             ? `Transcender: ${poderParanormal.nome} (${ritual.nome})`
-            : `Transcender: ${poderParanormal.nome}`;
-        const qtdTranscender = (personagemAtualizado.qtdTranscender || 0) + 1;
+            : `Transcender: ${poderParanormal.nome}`;
+        const qtdTranscender = (personagemAtualizado.qtdTranscender || 0) + 1;
         let atualizado: Personagem = {
             ...resolverPendencia(personagemAtualizado, pendenciaSelecionada.id, infoPendencia),
             poderes: novosPoderes,
             rituais: novosRituais,
             qtdTranscender: qtdTranscender
-        };
-        atualizado = recalcularRecursosPersonagem(atualizado);
+        };
+        atualizado = recalcularRecursosPersonagem(atualizado);
         setTranscenderEscolhido(true);
         setPersonagemAtualizado(atualizado);
         setPendenciaSelecionada(null);
-        setModalState('summary');
+        setModalState('summary');
         if (mudancas) {
             setMudancas({
                 ...mudancas,
@@ -121,10 +119,10 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
     };
 
     const handlePowerSelect = (poderNome: string) => {
-        if (!pendenciaSelecionada) return;
-        if (poderNome === 'Transcender') return;
+        if (!pendenciaSelecionada) return;
+        if (poderNome === 'Transcender') return;
         const poder = PODERES.find(p => p.nome === poderNome);
-        if (!poder) return;
+        if (!poder) return;
         const atualizado = {
             ...resolverPendencia(personagemAtualizado, pendenciaSelecionada.id, poderNome),
             poderes: [...personagemAtualizado.poderes, poder],
@@ -173,7 +171,7 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
         setPersonagemAtualizado(atualizado);
         setPendenciaSelecionada(null);
         setModalState('summary');
-    };
+    };
     if (modalState === 'powerChoice' && pendenciaSelecionada) {
         return (
             <PowerChoiceModal
@@ -197,7 +195,7 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
                     let atualizado = {
                         ...resolverPendencia(personagemAtualizado, pendenciaSelecionada.id, poder.nome),
                         poderes: novosPoderes,
-                    };
+                    };
                     if (ritualSelecionado) {
                         atualizado = {
                             ...atualizado,
@@ -216,7 +214,6 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
             />
         );
     }
-
 
     if (modalState === 'attributeChoice' && pendenciaSelecionada) {
         return (
@@ -328,7 +325,7 @@ export function LevelUpModal({ agent, onConfirm, onClose }: LevelUpModalProps) {
                 onCancel={() => { setPendenciaSelecionada(null); setModalState('summary'); }}
             />
         );
-    }
+    }
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -483,7 +480,7 @@ function SkillUpgradeModal({ personagem, pendencia, onConfirm, onCancel }: { per
     const requisitoAtual = pendencia.nex === 35 ? 'Treinado' : 'Veterano';
 
     const eligibleSkills = Object.keys(personagem.pericias).filter(p => {
-        const grau = personagem.pericias[p as PericiaName];
+        const grau = personagem.pericias[p as PericiaName];
         return grau === requisitoAtual;
     });
 
@@ -535,7 +532,7 @@ function SkillUpgradeModal({ personagem, pendencia, onConfirm, onCancel }: { per
 }
 
 function VersatilityChoiceModal({ personagem, onSelect, onCancel, openPowerModal }: { personagem: Personagem, onSelect: (v: string) => void, onCancel: () => void, openPowerModal: () => void }) {
-    const [view, setView] = useState<'main' | 'tracks'>('main');
+    const [view, setView] = useState<'main' | 'tracks'>('main');
     const availableTracks = useMemo(() => {
         return TRILHAS.filter(t => t.classe === personagem.classe && t.nome !== personagem.trilha);
     }, [personagem]);

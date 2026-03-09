@@ -13,7 +13,6 @@ export interface ExportData {
 
 const EXPORT_VERSION = '1.0.0';
 
-
 export function exportarFichas(): string {
   if (typeof window === 'undefined') {
     throw new Error('Exportação só pode ser feita no navegador');
@@ -30,7 +29,6 @@ export function exportarFichas(): string {
 
   return JSON.stringify(data, null, 2);
 }
-
 
 export function exportarTudo(): string {
   if (typeof window === 'undefined') {
@@ -59,7 +57,6 @@ export function exportarTudo(): string {
   return JSON.stringify(data, null, 2);
 }
 
-
 export function downloadJSON(data: string, filename: string): void {
   const blob = new Blob([data], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -71,7 +68,6 @@ export function downloadJSON(data: string, filename: string): void {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
-
 
 export function validarDadosImportacao(jsonString: string): ExportData | null {
   try {
@@ -108,7 +104,6 @@ export function validarDadosImportacao(jsonString: string): ExportData | null {
     return null;
   }
 }
-
 
 export function importarDados(
   data: ExportData,
@@ -218,7 +213,6 @@ export function importarDados(
   return resultado;
 }
 
-
 export function lerArquivoJSON(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -234,14 +228,12 @@ export function lerArquivoJSON(file: File): Promise<string> {
   });
 }
 
-
 export interface ExportFichaIndividual {
   version: string;
   exportadoEm: string;
   tipo: 'ficha-individual';
   ficha: FichaRegistro;
 }
-
 
 export function exportarFichaIndividual(ficha: FichaRegistro): string {
   const data: ExportFichaIndividual = {
@@ -253,7 +245,6 @@ export function exportarFichaIndividual(ficha: FichaRegistro): string {
   return JSON.stringify(data, null, 2);
 }
 
-
 export interface ExportCampanhaData {
   version: string;
   exportadoEm: string;
@@ -262,7 +253,6 @@ export interface ExportCampanhaData {
   campanhaId?: string;
   fichas: FichaRegistro[];
 }
-
 
 export function exportarFichasPorCampanha(
   fichas: FichaRegistro[],
@@ -279,7 +269,6 @@ export function exportarFichasPorCampanha(
   };
   return JSON.stringify(data, null, 2);
 }
-
 
 export function validarFichaIndividual(jsonString: string): ExportFichaIndividual | null {
   try {
@@ -321,7 +310,6 @@ export function validarFichaIndividual(jsonString: string): ExportFichaIndividua
     return null;
   }
 }
-
 
 export function importarFichaIndividual(
   fichaData: ExportFichaIndividual,
@@ -415,5 +403,3 @@ export function importarFichaIndividual(
     };
   }
 }
-
-

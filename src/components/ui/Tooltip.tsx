@@ -50,7 +50,7 @@ export function Tooltip({
             </TooltipPrimitive.Root>
         </TooltipPrimitive.Provider>
     );
-}
+}
 interface RichTooltipProps extends TooltipProps {
     title?: string;
 }

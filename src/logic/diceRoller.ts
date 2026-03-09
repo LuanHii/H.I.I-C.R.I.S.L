@@ -26,7 +26,6 @@ export function rollPericia(detalhe: PericiaDetalhada): DiceRollResult {
   const baseDice = Math.max(1, Number.isFinite(detalhe.dados) ? detalhe.dados : 1);
   const bonusO = Number.isFinite(detalhe.bonusO) ? detalhe.bonusO : 0;
 
-
   const wouldBe = baseDice + bonusO;
   const belowOne = wouldBe < 1;
   const diceCount = belowOne ? baseDice + Math.abs(bonusO) : Math.max(1, wouldBe);
@@ -41,8 +40,3 @@ export function rollPericia(detalhe: PericiaDetalhada): DiceRollResult {
 
   return { dice, chosen, criterio, total, bonusFixo, diceCount, baseDice, bonusO };
 }
-
-
-
-
-

@@ -142,4 +142,3 @@ export function buildCreationStateFromDraft(draft: RecreateDraft): CreationState
   };
   return s;
 }
-

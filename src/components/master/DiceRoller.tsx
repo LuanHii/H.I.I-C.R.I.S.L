@@ -8,12 +8,12 @@ import { cn } from '@/lib/utils';
 interface DiceRollerProps {
     compact?: boolean;
     onRollResult?: (result: number, details: string) => void;
-}
+}
 function rollD20(diceCount: number): { rolls: number[]; total: number } {
     const rolls: number[] = [];
     for (let i = 0; i < Math.abs(diceCount); i++) {
         rolls.push(Math.floor(Math.random() * 20) + 1);
-    }
+    }
     let total: number;
     if (diceCount >= 0) {
         total = rolls.length > 0 ? Math.max(...rolls) : 0;
@@ -22,7 +22,7 @@ function rollD20(diceCount: number): { rolls: number[]; total: number } {
     }
 
     return { rolls, total };
-}
+}
 function rollDice(sides: number, count: number = 1): { rolls: number[]; total: number } {
     const rolls: number[] = [];
     for (let i = 0; i < count; i++) {
@@ -102,7 +102,7 @@ export function DiceRoller({ compact = false, onRollResult }: DiceRollerProps) {
                 </button>
             </div>
 
-            {!showDamage ? (
+            {!showDamage ? (
                 <div className="space-y-3">
                     {}
                     <div className="flex items-center gap-2">
@@ -163,7 +163,7 @@ export function DiceRoller({ compact = false, onRollResult }: DiceRollerProps) {
                         🎲 Rolar Teste
                     </button>
                 </div>
-            ) : (
+            ) : (
                 <div className="space-y-3">
                     {}
                     <div className="grid grid-cols-4 gap-2">
@@ -262,7 +262,7 @@ export function DiceRoller({ compact = false, onRollResult }: DiceRollerProps) {
             </AnimatePresence>
         </div>
     );
-}
+}
 export function QuickDiceButton({
     label,
     diceExpression,
@@ -274,7 +274,7 @@ export function QuickDiceButton({
 }) {
     const [lastResult, setLastResult] = useState<number | null>(null);
 
-    const parseDice = (expr: string): number => {
+    const parseDice = (expr: string): number => {
         const match = expr.match(/(\d+)d(\d+)([+-]\d+)?/);
         if (!match) return 0;
 
@@ -289,7 +289,7 @@ export function QuickDiceButton({
     const handleRoll = () => {
         const result = parseDice(diceExpression);
         setLastResult(result);
-        onResult?.(result, `${diceExpression} = ${result}`);
+        onResult?.(result, `${diceExpression} = ${result}`);
         setTimeout(() => setLastResult(null), 2000);
     };
 

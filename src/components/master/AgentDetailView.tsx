@@ -7,7 +7,8 @@ import { ActionsTab } from '../ActionsTab';
 import { ItemSelectorModal } from './ItemSelectorModal';
 import { AbilitySelectorModal } from './AbilitySelectorModal';
 import { SkillSelectorModal } from './SkillSelectorModal';
-import { levelUp, levelDown, applyAttributePoint, removeAttributePoint, chooseTrack, choosePower, recalcularRecursosPersonagem } from '../../logic/progression';
+import { applyAttributePoint, removeAttributePoint, chooseTrack, choosePower, recalcularRecursosPersonagem } from '../../logic/progression';
+import { subirNex, rebaixarNex } from '../../logic/levelUp';
 import { ProgressionTab } from '../ProgressionTab';
 import { PendingChoiceModal } from '../PendingChoiceModal';
 import { TrackSelectorModal } from '../TrackSelectorModal';
@@ -107,12 +108,16 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     };
 
     const handleLevelUp = () => {
-        const updated = levelUp(agent);
-        onUpdate(updated);
+        const increment = agent.classe === 'Sobrevivente' ? 1 : (agent.nex === 95 ? 4 : 5);
+        const alvo = agent.classe === 'Sobrevivente' ? (agent.estagio || 1) + 1 : Math.min(99, agent.nex + increment);
+        const result = subirNex(agent, alvo, false);
+        onUpdate(result.personagem);
     };
 
     const handleLevelDown = () => {
-        const updated = levelDown(agent);
+        const decrement = agent.classe === 'Sobrevivente' ? 1 : (agent.nex === 99 ? 4 : 5);
+        const alvo = agent.classe === 'Sobrevivente' ? Math.max(1, (agent.estagio || 1) - 1) : Math.max(5, agent.nex - decrement);
+        const updated = rebaixarNex(agent, alvo);
         onUpdate(updated);
     };
 
@@ -361,7 +366,33 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     };
 
     return (
-        <div className="flex flex-col gap-3 sm:gap-4 p-3 sm:p-4 overflow-y-auto custom-scrollbar touch-scroll max-h-full">
+        <div className={`flex flex-col gap-3 sm:gap-4 p-3 sm:p-4 transition-all duration-300 relative h-fit ${isEditingMode ? 'border-4 border-dashed border-red-500/50 bg-red-900/5' : ''}`}>
+
+            {!readOnly && (
+                <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5">
+                    <button
+                        onClick={() => setIsEditingMode(!isEditingMode)}
+                        className={`flex items-center gap-2 px-4 py-3 rounded-full font-bold shadow-xl transition-all ${isEditingMode
+                            ? 'bg-ordem-red text-white shadow-ordem-red/50 animate-pulse hover:bg-red-700'
+                            : 'bg-ordem-ooze text-ordem-text-secondary border border-ordem-border-light hover:border-ordem-text-muted hover:text-white'
+                            }`}
+                        title={isEditingMode ? "Desativar Modo de Edição Livre" : "Ativar Modo de Edição Livre (Override)"}
+                    >
+                        {isEditingMode ? (
+                            <>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                MODO EDIÇÃO ATIVO
+                            </>
+                        ) : (
+                            <>
+                                <Edit2 size={16} />
+                                MODO EDIÇÃO
+                            </>
+                        )}
+                    </button>
+                </div>
+            )}
+
             {hasPendingStuff && isPendingChoiceModalSuppressed && !disableInteractionModals && (
                 <button
                     onClick={() => setIsPendingChoiceModalSuppressed(false)}
@@ -447,7 +478,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 />
             )}
             <div className="bg-ordem-ooze border border-ordem-border-light rounded-xl p-4 sm:p-6 relative overflow-hidden shadow-lg">
-                {}
+                { }
                 {!readOnly && (
                     <button
                         onClick={togglePdMode}
@@ -457,14 +488,14 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                         {agent.usarPd ? <Flame size={18} className="text-violet-300" /> : <Brain size={18} className="text-blue-300" />}
                     </button>
                 )}
-                {}
+                { }
                 <div className="absolute bottom-0 right-0 p-2 sm:p-4 opacity-10 pointer-events-none">
                     <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-[120px] sm:h-[120px]"><circle cx="9" cy="12" r="1" /><circle cx="15" cy="12" r="1" /><path d="M8 20v2h8v-2" /><path d="m12.5 17-.5-1-.5 1h1z" /><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20" /></svg>
                 </div>
 
-                {}
+                { }
                 <div className="relative z-10">
-                    {}
+                    { }
                     <div className="mb-3 sm:mb-0">
                         <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tight mb-2 pr-10 sm:pr-0">{agent.nome}</h2>
                         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-ordem-white-muted font-mono text-[10px] sm:text-xs">
@@ -509,7 +540,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                         </div>
                     </div>
 
-                    {}
+                    { }
                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-ordem-border/50 sm:absolute sm:top-0 sm:right-0 sm:mt-0 sm:pt-0 sm:border-0">
                         <div className="flex items-center gap-2 sm:flex-col sm:items-end">
                             <div className="text-[10px] sm:text-xs text-ordem-text-secondary uppercase tracking-widest">Defesa</div>
@@ -580,7 +611,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                     </div>
                 )}
 
-                {}
+                { }
                 <div className="grid grid-cols-1 gap-4 sm:gap-6 mt-6 sm:mt-8">
                     <StatusBar
                         label="Pontos de Vida"
@@ -626,7 +657,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 </div>
             </div>
 
-            {}
+            { }
             <div className="bg-ordem-ooze border border-ordem-border-light rounded-xl overflow-hidden shadow-lg">
                 <button
                     onClick={() => toggleSection('conditions')}
@@ -681,29 +712,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
 
                 {openSections['attributes'] && (
                     <div className="p-6 animate-in slide-in-from-top-2">
-                        {!readOnly && (
-                            <div className="flex justify-end mb-4">
-                                <button
-                                    onClick={() => setIsEditingMode(!isEditingMode)}
-                                    className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold transition-colors ${isEditingMode
-                                        ? 'bg-ordem-red text-white shadow-lg shadow-ordem-red/50 animate-pulse'
-                                        : 'bg-ordem-ooze text-ordem-text-secondary border border-ordem-border-light hover:bg-ordem-border-light hover:text-ordem-white'
-                                        }`}
-                                >
-                                    {isEditingMode ? (
-                                        <>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                                            MODO EDIÇÃO ATIVO (MESTRE)
-                                        </>
-                                    ) : (
-                                        <>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" /></svg>
-                                            EDITAR DADOS (OVERRIDE)
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                        )}
+
                         {agent.pontosAtributoPendentes && agent.pontosAtributoPendentes !== 0 ? (
                             <div className={`mb-4 p-3 rounded border ${agent.pontosAtributoPendentes > 0 ? 'bg-green-900/20 border-green-800 text-green-400' : 'bg-red-900/20 border-red-800 text-red-400'} text-center font-mono text-sm`}>
                                 {agent.pontosAtributoPendentes > 0
@@ -712,7 +721,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                             </div>
                         ) : null}
 
-                        {}
+                        { }
                         <div className="flex gap-2 sm:gap-4 mb-6 sm:mb-8 overflow-x-auto touch-scroll pb-2 -mx-2 px-2 sm:mx-0 sm:px-0">
                             {Object.entries(agent.atributos).map(([key, val]) => {
                                 const canIncrease = isEditingMode || (!readOnly && agent.pontosAtributoPendentes && agent.pontosAtributoPendentes > 0 && (agent.classe !== 'Sobrevivente' || val < 3));
@@ -780,7 +789,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                             <span className="w-2 h-2 bg-ordem-text-muted rotate-45 inline-block"></span>
                                             {attr} <span className="text-ordem-text-secondary">({agent.atributos[attr]})</span>
                                         </h4>
-                                        {}
+                                        { }
                                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2">
                                             {skills.map(([nome, detalhe]) => (
                                                 <div
@@ -790,7 +799,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                                         : 'border-ordem-border-light/50 hover:border-ordem-text-muted'
                                                         }`}
                                                 >
-                                                    {}
+                                                    { }
                                                     <div
                                                         className={`flex-1 min-w-0 ${isEditingMode ? 'cursor-pointer hover:text-white' : ''}`}
                                                         onClick={() => isEditingMode && toggleSkillGrade(nome as PericiaName)}
@@ -798,9 +807,9 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                                     >
                                                         <span className="text-sm text-ordem-white-muted truncate block">{nome}</span>
                                                     </div>
-                                                    {}
+                                                    { }
                                                     <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                                                        {}
+                                                        { }
                                                         <button
                                                             type="button"
                                                             onClick={() => {
@@ -814,7 +823,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                                         >
                                                             <Dices size={16} className="sm:w-[14px] sm:h-[14px]" />
                                                         </button>
-                                                        {}
+                                                        { }
                                                         <span
                                                             onClick={() => isEditingMode && toggleSkillGrade(nome as PericiaName)}
                                                             className={`text-[10px] px-1.5 py-0.5 rounded border ${isEditingMode ? 'cursor-pointer hover:opacity-80' : ''} ${(detalhe.grau || 'Destreinado') === 'Destreinado' ? 'border-ordem-border text-ordem-text-secondary' :
@@ -825,7 +834,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                                                             {(detalhe.grau || 'Destreinado').substring(0, 3).toUpperCase()}
                                                         </span>
 
-                                                        {}
+                                                        { }
                                                         {isEditingMode && editingSkill === nome ? (
                                                             <input
                                                                 type="number"
@@ -857,9 +866,9 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 )}
             </div>
 
-            {}
+            { }
 
-            {}
+            { }
             <div className="bg-ordem-ooze border border-ordem-border-light rounded-xl overflow-hidden shadow-lg">
                 <button
                     onClick={() => toggleSection('inventory')}
@@ -935,19 +944,24 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 {openSections['abilities'] && (
                     <div className="p-6 animate-in slide-in-from-top-2 space-y-4">
                         {agent.poderes.map((poder, idx) => (
-                            <div key={idx} className="bg-ordem-black-deep/50 p-4 rounded border border-ordem-border-light group relative">
-                                <h4 className="font-bold text-zinc-100 mb-1">{poder.nome}</h4>
-                                <p className="text-sm text-ordem-white-muted">{poder.descricao}</p>
+                            <details key={idx} className="bg-ordem-black-deep/50 rounded border border-ordem-border-light group relative [&_summary::-webkit-details-marker]:hidden overflow-hidden">
+                                <summary className="font-bold text-zinc-100 p-4 cursor-pointer flex justify-between items-center hover:bg-white/5 transition-colors">
+                                    {poder.nome}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-muted transition-transform group-open:rotate-180"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </summary>
+                                <div className="px-4 pb-4">
+                                    <p className="text-sm text-ordem-white-muted pt-2 border-t border-ordem-border/50">{poder.descricao}</p>
+                                </div>
                                 {isEditingMode && (
                                     <button
-                                        onClick={() => handleRemoveAbility(idx)}
-                                        className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 hover:bg-red-900/30 rounded text-ordem-text-secondary hover:text-red-400 transition-all"
+                                        onClick={(e) => { e.preventDefault(); handleRemoveAbility(idx); }}
+                                        className="absolute top-2.5 right-10 p-1.5 opacity-0 group-hover:opacity-100 hover:bg-red-900/30 rounded text-ordem-text-secondary hover:text-red-400 transition-all z-10"
                                         title="Remover Habilidade"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
                                     </button>
                                 )}
-                            </div>
+                            </details>
                         ))}
                         {agent.poderes.length === 0 && <div className="text-sm text-ordem-text-muted italic text-center py-4">Nenhuma habilidade.</div>}
                         {isEditingMode && (
@@ -983,22 +997,27 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 {openSections['rituals'] && (
                     <div className="p-6 animate-in slide-in-from-top-2 space-y-4">
                         {agent.rituais.map((ritual, idx) => (
-                            <div key={idx} className="bg-ordem-black-deep/50 p-4 rounded border border-ordem-border-light group relative">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <h4 className="font-bold text-zinc-100">{ritual.nome}</h4>
-                                    <span className="text-[10px] bg-ordem-border px-1.5 py-0.5 rounded text-ordem-text-secondary uppercase">{ritual.elemento} {ritual.circulo}</span>
+                            <details key={idx} className="bg-ordem-black-deep/50 rounded border border-ordem-border-light group relative [&_summary::-webkit-details-marker]:hidden overflow-hidden">
+                                <summary className="p-4 cursor-pointer flex justify-between items-center hover:bg-white/5 transition-colors">
+                                    <div className="flex items-center gap-2">
+                                        <h4 className="font-bold text-zinc-100">{ritual.nome}</h4>
+                                        <span className="text-[10px] bg-ordem-border px-1.5 py-0.5 rounded text-ordem-text-secondary uppercase">{ritual.elemento} {ritual.circulo}</span>
+                                    </div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-muted transition-transform group-open:rotate-180"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </summary>
+                                <div className="px-4 pb-4">
+                                    <p className="text-sm text-ordem-white-muted pt-2 border-t border-ordem-border/50">{ritual.descricao}</p>
                                 </div>
-                                <p className="text-sm text-ordem-white-muted line-clamp-2">{ritual.descricao}</p>
                                 {isEditingMode && (
                                     <button
-                                        onClick={() => handleRemoveRitual(idx)}
-                                        className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 hover:bg-red-900/30 rounded text-ordem-text-secondary hover:text-red-400 transition-all"
+                                        onClick={(e) => { e.preventDefault(); handleRemoveRitual(idx); }}
+                                        className="absolute top-2.5 right-10 p-1.5 opacity-0 group-hover:opacity-100 hover:bg-red-900/30 rounded text-ordem-text-secondary hover:text-red-400 transition-all z-10"
                                         title="Remover Ritual"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
                                     </button>
                                 )}
-                            </div>
+                            </details>
                         ))}
                         {agent.rituais.length === 0 && <div className="text-sm text-ordem-text-muted italic text-center py-4">Nenhum ritual conhecido.</div>}
                         {isEditingMode && (

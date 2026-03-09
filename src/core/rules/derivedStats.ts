@@ -12,7 +12,7 @@ export interface DerivedStats {
   deslocamento: number;
   danoCorpoACorpoBonus: number;
   danoArmaFogoBonus: number;
-  resistenciaDanoMental: number;
+  resistenciaDanoMental: number;
   iniciativaBonus: number;
   resistenciaParanormal: number;
   furtividadeBonus: number;
@@ -32,7 +32,6 @@ export interface DerivedStatsInput {
   sobreviventeBeneficioOrigem?: 'pericias' | 'poder' | 'ambos';
   qtdTranscender?: number;
 }
-
 
 function calcularBonusOrigem(
   origemNome: string | undefined,
@@ -61,36 +60,35 @@ function calcularBonusOrigem(
   if (!aplicar || !origemNome) return vazio;
 
   switch (origemNome) {
-    case 'Desgarrado':
+    case 'Desgarrado':
       return { ...vazio, pvBonus: Math.floor(nex / 5) };
 
-    case 'Mergulhador':
+    case 'Mergulhador':
       return { ...vazio, pvBonus: 5 };
 
-    case 'Universitário':
+    case 'Universitário':
       const nexImpares = [5, 15, 25, 35, 45, 55, 65, 75, 85, 95, 99].filter(n => nex >= n).length;
       return { ...vazio, peBonus: 1 + nexImpares };
 
-    case 'Vítima':
+    case 'Vítima':
       return { ...vazio, sanBonus: Math.floor(nex / 5) };
 
-    case 'Policial':
+    case 'Policial':
       return { ...vazio, defesaBonus: 2 };
 
-    case 'Lutador':
+    case 'Lutador':
       return { ...vazio, danoCorpoACorpoBonus: 2 };
 
-    case 'Militar':
+    case 'Militar':
       return { ...vazio, danoArmaFogoBonus: 2 };
 
-    case 'Teórico da Conspiração':
+    case 'Teórico da Conspiração':
       return { ...vazio, resistenciaDanoMental: atributos.INT };
 
     default:
       return vazio;
   }
 }
-
 
 interface TrilhaBonus {
   pvBonus: number;
@@ -105,7 +103,6 @@ interface TrilhaBonus {
   diplomaciaBonus: number;
   fortitudeBonus: number;
 }
-
 
 function calcularBonusTrilha(
   trilhaNome: string | undefined,
@@ -126,61 +123,61 @@ function calcularBonusTrilha(
     diplomaciaBonus: 0,
     fortitudeBonus: 0,
   };
-  if (!trilhaNome) return vazio;
+  if (!trilhaNome) return vazio;
   const result = { ...vazio };
 
-  switch (trilhaNome) {
-    case 'Monstruoso':
+  switch (trilhaNome) {
+    case 'Monstruoso':
       if (nex >= 10) {
         result.pvBonus += atributos.FOR;
       }
       break;
 
-    case 'Tropa de Choque':
+    case 'Tropa de Choque':
       if (nex >= 10) {
         result.pvBonus += Math.floor(nex / 5);
       }
       break;
 
-    case 'Caçador':
+    case 'Caçador':
       if (nex >= 65) {
         result.furtividadeBonus += 10;
         result.percepcaoBonus += 10;
       }
       break;
 
-    case 'Operações Especiais':
+    case 'Operações Especiais':
       if (nex >= 10) {
         result.iniciativaBonus += 5;
       }
-      break;
-    case 'Infiltrador':
+      break;
+    case 'Infiltrador':
       if (nex >= 10) {
         result.enganacaoBonus += 5;
         result.diplomaciaBonus += 5;
       }
       break;
 
-    case 'Técnico':
+    case 'Técnico':
       if (nex >= 10) {
         result.defesaBonus += 2;
       }
       break;
 
-    case 'Médico de Campo':
+    case 'Médico de Campo':
       if (nex >= 99) {
         result.fortitudeBonus += 5;
       }
-      break;
-    case 'Intuitivo':
+      break;
+    case 'Intuitivo':
       if (nex >= 10) {
         result.resistenciaParanormal += 5;
-      }
+      }
       if (nex >= 65) {
         result.resistenciaDanoMentalBonus += 10;
       }
-      break;
-    case 'Durão':
+      break;
+    case 'Durão':
       if (estagio >= 2) {
         result.pvBonus += estagio >= 3 ? 6 : 4;
       }
@@ -206,7 +203,7 @@ export function calculateDerivedStats(
   atributos?: Atributos,
   nex?: number,
   estagio: number = 1
-): DerivedStats {
+): DerivedStats {
   let classe: ClasseName;
   let attrs: Atributos;
   let nexValue: number;
@@ -232,12 +229,12 @@ export function calculateDerivedStats(
     estagioValue = estagio;
   }
 
-  const stats = CLASSES[classe];
+  const stats = CLASSES[classe];
   let nivel = Math.ceil(nexValue / 5);
   if (nivel < 1) nivel = 1;
   if (nivel > 20) nivel = 20;
 
-  const growthSteps = Math.max(0, nivel - 1);
+  const growthSteps = Math.max(0, nivel - 1);
   const aplicarPoderOrigem = !(classe === 'Sobrevivente' && sobreviventeBeneficioOrigem === 'pericias');
   const bonusOrigem = calcularBonusOrigem(origemNome, nexValue, attrs, aplicarPoderOrigem);
   const bonusTrilha = calcularBonusTrilha(trilhaNome, nexValue, estagioValue, attrs);
@@ -257,13 +254,13 @@ export function calculateDerivedStats(
     sanMax = stats.sanInicial + (survivorGrowth * stats.sanPorNivel) + bonusOrigem.sanBonus;
     peRodada = 1;
   } else {
-    pdMax = stats.pdInicial + attrs.PRE + (growthSteps * (stats.pdPorNivel + attrs.PRE));
+    pdMax = stats.pdInicial + attrs.PRE + (growthSteps * (stats.pdPorNivel + attrs.PRE));
     peRodada = nivel;
 
     pvMax = stats.pvInicial + attrs.VIG + (growthSteps * (stats.pvPorNivel + attrs.VIG)) + bonusOrigem.pvBonus + bonusTrilha.pvBonus;
     peMax = stats.peInicial + attrs.PRE + (growthSteps * (stats.pePorNivel + attrs.PRE)) + bonusOrigem.peBonus;
     sanMax = stats.sanInicial + (growthSteps * stats.sanPorNivel) + bonusOrigem.sanBonus - (qtdTranscender * stats.sanPorNivel);
-  }
+  }
   const defesa = 10 + attrs.AGI + bonusOrigem.defesaBonus + bonusTrilha.defesaBonus;
 
   return {
@@ -276,7 +273,7 @@ export function calculateDerivedStats(
     deslocamento: 9,
     danoCorpoACorpoBonus: bonusOrigem.danoCorpoACorpoBonus,
     danoArmaFogoBonus: bonusOrigem.danoArmaFogoBonus,
-    resistenciaDanoMental: bonusOrigem.resistenciaDanoMental + bonusTrilha.resistenciaDanoMentalBonus,
+    resistenciaDanoMental: bonusOrigem.resistenciaDanoMental + bonusTrilha.resistenciaDanoMentalBonus,
     iniciativaBonus: bonusTrilha.iniciativaBonus,
     resistenciaParanormal: bonusTrilha.resistenciaParanormal,
     furtividadeBonus: bonusTrilha.furtividadeBonus,

@@ -28,6 +28,14 @@ interface AmeacaData {
     defesa?: number;
     iniciativa?: number;
     abilities?: CombatantAbility[];
+    atributos?: { AGI: number; FOR: number; INT: number; PRE: number; VIG: number };
+    fortitude?: string;
+    reflexos?: string;
+    vontade?: string;
+    resistencias?: string[];
+    imunidades?: string[];
+    vulnerabilidades?: string[];
+    deslocamento?: string;
 }
 
 interface AddCombatantModalProps {
@@ -180,6 +188,14 @@ export function AddCombatantModal({
                     notes: '',
                     isActive: true,
                     abilities: creature.abilities,
+                    atributos: creature.atributos,
+                    fortitude: creature.fortitude,
+                    reflexos: creature.reflexos,
+                    vontade: creature.vontade,
+                    resistencias: creature.resistencias,
+                    imunidades: creature.imunidades,
+                    vulnerabilidades: creature.vulnerabilidades,
+                    deslocamento: creature.deslocamento,
                 });
             }
         });
@@ -285,7 +301,6 @@ export function AddCombatantModal({
                         </button>
                     </div>
 
-
                     <div className="flex border-b border-ordem-border">
                         <button
                             onClick={() => setTab('agents')}
@@ -333,7 +348,6 @@ export function AddCombatantModal({
                         </button>
                     </div>
 
-
                     <div className="p-4">
 
                         {(tab === 'agents' || tab === 'creatures' || tab === 'npcs') && (
@@ -348,9 +362,6 @@ export function AddCombatantModal({
                                 />
                             </div>
                         )}
-
-
-
 
                         {isCreatingThreat ? (
                             <div className="space-y-4">
@@ -441,7 +452,6 @@ export function AddCombatantModal({
                             )
                         )}
 
-
                         {tab === 'agents' && (
                             <div className="max-h-72 overflow-y-auto custom-scrollbar space-y-2">
                                 {filteredAgents.length === 0 ? (
@@ -475,7 +485,6 @@ export function AddCombatantModal({
                                 )}
                             </div>
                         )}
-
 
                         {tab === 'creatures' && (
                             <div className="max-h-72 overflow-y-auto custom-scrollbar space-y-2">
@@ -551,7 +560,6 @@ export function AddCombatantModal({
                             </div>
                         )}
 
-
                         {tab === 'custom' && (
                             <div className="space-y-4">
                                 <div>
@@ -615,7 +623,6 @@ export function AddCombatantModal({
                             </div>
                         )}
                     </div>
-
 
                     {(tab === 'agents' || tab === 'creatures' || tab === 'npcs') && (
                         <div className="px-4 py-3 border-t border-ordem-border bg-ordem-ooze flex items-center justify-between">

@@ -25,7 +25,7 @@ export function PageTransition({ children }: PageTransitionProps) {
             </motion.div>
         </AnimatePresence>
     );
-}
+}
 interface FadeInProps {
     children: React.ReactNode;
     delay?: number;
@@ -43,7 +43,7 @@ export function FadeIn({ children, delay = 0, className }: FadeInProps) {
             {children}
         </motion.div>
     );
-}
+}
 interface StaggerListProps {
     children: React.ReactNode;
     className?: string;

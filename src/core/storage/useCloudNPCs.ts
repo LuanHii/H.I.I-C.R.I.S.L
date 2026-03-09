@@ -20,7 +20,7 @@ function lerNPCsLocal(): NPCRegistro[] {
         if (!raw) return [];
         const parsed = JSON.parse(raw);
         if (!Array.isArray(parsed)) return [];
-        // Basic validation/migration could go here if needed
+
         return parsed;
     } catch (err) {
         console.error('Erro ao ler NPCs locais', err);

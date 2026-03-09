@@ -23,7 +23,6 @@ const ELEMENTO_CONFIG: Record<Elemento, { icon: React.ElementType; color: string
     Medo: { icon: Ghost, color: 'text-gray-400', bg: 'bg-gray-500/20' },
 };
 
-
 function calcularCirculoMaximo(nex: number): number {
     if (nex >= 75) return 3;
     if (nex >= 45) return 2;
@@ -39,22 +38,22 @@ export function RitualChoiceModal({
     const [busca, setBusca] = useState('');
     const [filtroElemento, setFiltroElemento] = useState<Elemento | 'todos'>('todos');
     const [filtroCirculo, setFiltroCirculo] = useState<number | 'todos'>('todos');
-    const [ritualSelecionado, setRitualSelecionado] = useState<string | null>(null);
-    const circuloMaximo = circuloMaximoProp ?? calcularCirculoMaximo(agent.nex);
-    const rituaisConhecidos = useMemo(() => new Set(agent.rituais.map(r => r.nome)), [agent.rituais]);
+    const [ritualSelecionado, setRitualSelecionado] = useState<string | null>(null);
+    const circuloMaximo = circuloMaximoProp ?? calcularCirculoMaximo(agent.nex);
+    const rituaisConhecidos = useMemo(() => new Set(agent.rituais.map(r => r.nome)), [agent.rituais]);
     const rituaisFiltrados = useMemo(() => {
-        let lista = RITUAIS.filter(r => {
-            if (r.circulo > circuloMaximo) return false;
-            if (rituaisConhecidos.has(r.nome)) return false;
+        let lista = RITUAIS.filter(r => {
+            if (r.circulo > circuloMaximo) return false;
+            if (rituaisConhecidos.has(r.nome)) return false;
             if (r.circulo === 4) return false;
             return true;
-        });
+        });
         if (filtroElemento !== 'todos') {
             lista = lista.filter(r => r.elemento === filtroElemento);
-        }
+        }
         if (filtroCirculo !== 'todos') {
             lista = lista.filter(r => r.circulo === filtroCirculo);
-        }
+        }
         if (busca.trim()) {
             const termo = busca.toLowerCase();
             lista = lista.filter(r =>
@@ -62,7 +61,7 @@ export function RitualChoiceModal({
                 r.descricao.toLowerCase().includes(termo) ||
                 r.elemento.toLowerCase().includes(termo)
             );
-        }
+        }
         return lista.sort((a, b) => {
             if (a.circulo !== b.circulo) return a.circulo - b.circulo;
             return a.nome.localeCompare(b.nome);

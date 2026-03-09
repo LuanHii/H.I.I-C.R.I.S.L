@@ -62,9 +62,9 @@ export function RemoteAgentView({
     <button
       type="button"
       onClick={() => setTab(id)}
-      className={`px-3 sm:px-4 py-2.5 sm:py-2 text-[10px] sm:text-xs font-mono tracking-[0.15em] sm:tracking-[0.25em] border rounded-lg transition touch-target-sm whitespace-nowrap ${tab === id
-        ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
-        : 'border-ordem-white/15 text-ordem-white/60 hover:border-ordem-white/40 active:border-ordem-white/60 hover:text-ordem-white'
+      className={`px-4 sm:px-6 py-2 sm:py-2.5 text-[10px] sm:text-xs font-mono tracking-widest border rounded-full transition-all touch-target-sm whitespace-nowrap shadow-sm ${tab === id
+        ? 'border-ordem-gold bg-ordem-gold/15 text-ordem-gold shadow-[0_0_10px_rgba(234,179,8,0.2)]'
+        : 'border-white/10 bg-black/40 text-ordem-white/50 hover:border-white/20 hover:text-white hover:bg-black/60'
         }`}
     >
       {label}
@@ -74,9 +74,9 @@ export function RemoteAgentView({
   return (
     <div className="min-h-screen bg-ordem-black text-white">
       <div className="max-w-5xl mx-auto px-4 py-4 sm:py-6 safe-x safe-top">
-        {}
+        { }
         <div className="flex flex-col gap-3 sm:gap-4 border-b border-ordem-border pb-4 sm:pb-5 mb-4 sm:mb-6">
-          {}
+          { }
           <div className="min-w-0">
             <div className="text-[10px] sm:text-xs font-mono tracking-[0.25em] sm:tracking-[0.35em] text-ordem-text-muted uppercase">Visualização Remota</div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif text-white truncate mt-1 sm:mt-2">{agent.nome}</h1>
@@ -89,7 +89,7 @@ export function RemoteAgentView({
             </div>
           </div>
 
-          {}
+          { }
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {onOpenOverlayMini && (
               <button
@@ -157,62 +157,76 @@ export function RemoteAgentView({
           </div>
         )}
 
-        {}
-        <div className="flex gap-2 mb-4 sm:mb-5 overflow-x-auto touch-scroll -mx-4 px-4 sm:mx-0 sm:px-0 pb-2 no-select">
+        { }
+
+        <div className="flex gap-2 sm:gap-3 mb-4 sm:mb-6 overflow-x-auto touch-scroll -mx-4 px-4 sm:mx-0 sm:px-0 pb-2 no-select sticky top-0 z-20 bg-ordem-black/80 backdrop-blur pt-2">
           <TabButton id="status" label="STATUS" />
           <TabButton id="acoes" label="AÇÕES" />
           <TabButton id="pericias" label="PERÍCIAS" />
           <TabButton id="inventario" label="INVENTÁRIO" />
         </div>
 
-        {}
+        { }
         {tab === 'status' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-ordem-ooze/40 border border-ordem-border rounded-xl p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="text-xs font-mono tracking-[0.25em] text-ordem-text-muted uppercase">Recursos</div>
-                <div className="text-xs font-mono text-ordem-text-secondary">
-                  DEF <span className="text-white font-bold">{agent.defesa}</span>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="bg-gradient-to-br from-ordem-black/90 to-black/60 border border-white/10 shadow-2xl rounded-3xl p-6 sm:p-8 relative overflow-hidden backdrop-blur-md">
+              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+
+              <div className="flex items-center justify-between mb-8">
+                <div className="text-xs font-mono tracking-[0.3em] text-ordem-text-muted uppercase">Recursos Vitais</div>
+                <div className="text-xs font-mono text-ordem-text-secondary px-3 py-1 bg-black/50 rounded-full border border-white/5">
+                  DEF <span className="text-white font-bold ml-1">{agent.defesa}</span>
                 </div>
               </div>
-              <StatusBar label="Vida" current={agent.pv.atual} max={agent.pv.max} color="red" onChange={() => { }} readOnly />
-              {usarDeterminacao ? (
-                <StatusBar
-                  label="Determinação"
-                  current={agent.pd?.atual || 0}
-                  max={agent.pd?.max || 0}
-                  color="purple"
-                  onChange={() => { }}
-                  readOnly
-                />
-              ) : (
-                <>
-                  <StatusBar label="Sanidade" current={agent.san.atual} max={agent.san.max} color="blue" onChange={() => { }} readOnly />
-                  <StatusBar label="Esforço" current={agent.pe.atual} max={agent.pe.max} color="gold" onChange={() => { }} readOnly />
-                </>
-              )}
+
+              <div className="space-y-6">
+                <StatusBar label="Vida" current={agent.pv.atual} max={agent.pv.max} color="red" onChange={() => { }} readOnly />
+                {usarDeterminacao ? (
+                  <StatusBar
+                    label="Determinação"
+                    current={agent.pd?.atual || 0}
+                    max={agent.pd?.max || 0}
+                    color="purple"
+                    onChange={() => { }}
+                    readOnly
+                  />
+                ) : (
+                  <>
+                    <StatusBar label="Sanidade" current={agent.san.atual} max={agent.san.max} color="blue" onChange={() => { }} readOnly />
+                    <StatusBar label="Esforço" current={agent.pe.atual} max={agent.pe.max} color="gold" onChange={() => { }} readOnly />
+                  </>
+                )}
+              </div>
             </div>
 
-            <div className="bg-ordem-ooze/40 border border-ordem-border rounded-xl p-5">
-              <div className="text-xs font-mono tracking-[0.25em] text-ordem-text-muted uppercase mb-4">Resumo</div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-ordem-black/30 border border-ordem-border rounded-lg p-3">
-                  <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">Carga</div>
-                  <div className="text-lg font-bold text-white">
-                    {agent.carga.atual}/{agent.carga.maxima}
+            <div className="bg-gradient-to-bl from-ordem-ooze/40 to-black/40 border border-white/5 shadow-xl rounded-3xl p-6 sm:p-8 relative overflow-hidden backdrop-blur-md flex flex-col">
+              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+
+              <div className="text-xs font-mono tracking-[0.3em] text-ordem-text-muted uppercase mb-6">Resumo Tático</div>
+
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="bg-black/50 border border-white/5 rounded-2xl p-4 flex flex-col items-center justify-center relative overflow-hidden group hover:border-white/10 transition-colors">
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest mb-1 z-10">Carga</div>
+                  <div className="text-2xl font-bold text-white z-10 tracking-tight">
+                    {agent.carga.atual}<span className="text-ordem-text-secondary text-lg">/{agent.carga.maxima}</span>
                   </div>
                 </div>
-                <div className="bg-ordem-black/30 border border-ordem-border rounded-lg p-3">
-                  <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">Desloc.</div>
-                  <div className="text-lg font-bold text-white">{agent.deslocamento}</div>
+                <div className="bg-black/50 border border-white/5 rounded-2xl p-4 flex flex-col items-center justify-center relative overflow-hidden group hover:border-white/10 transition-colors">
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest mb-1 z-10">Deslocamento</div>
+                  <div className="text-2xl font-bold text-white z-10 tracking-tight">{agent.deslocamento}m</div>
                 </div>
               </div>
 
               {agent.efeitosAtivos?.length > 0 && (
-                <div className="mt-4">
-                  <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest mb-2">Condições Ativas</div>
+                <div className="mt-auto bg-red-950/20 border border-red-900/30 rounded-2xl p-4 sm:p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse drop-shadow-[0_0_5px_rgba(239,68,68,1)]"></div>
+                    <div className="text-[10px] font-mono text-red-400 uppercase tracking-[0.2em]">Condições Ativas</div>
+                  </div>
                   <ActiveConditionsDisplay efeitosAtivos={agent.efeitosAtivos} compact />
-                  <div className="mt-3">
+                  <div className="mt-4 pt-4 border-t border-red-900/20">
                     <ConditionsSummary efeitosAtivos={agent.efeitosAtivos} />
                   </div>
                 </div>
@@ -242,7 +256,7 @@ export function RemoteAgentView({
             {(() => {
               const armas = agent.equipamentos.filter(it => it.tipo === 'Arma' || (it.stats && (it.stats.dano || it.stats.danoBase)));
               const protecoes = agent.equipamentos.filter(it => it.tipo === 'Proteção' || (it.stats && it.stats.defesa));
-              const outros = agent.equipamentos.filter(it => 
+              const outros = agent.equipamentos.filter(it =>
                 !armas.includes(it) && !protecoes.includes(it)
               );
 
@@ -329,65 +343,72 @@ export function RemoteAgentView({
         {tab === 'pericias' && (
           <div className="space-y-6">
             {lastRoll && (
-              <div className="bg-ordem-ooze/30 border border-ordem-border rounded-xl p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="text-xs font-mono tracking-[0.25em] text-ordem-text-muted uppercase">
-                    Última rolagem: <span className="text-white tracking-normal font-bold">{lastRoll.pericia}</span>
-                  </div>
-                  <div className="text-xs font-mono text-ordem-text-secondary">
-                    {lastRoll.result.diceCount}d20 ({lastRoll.result.criterio}){' '}
-                    {lastRoll.result.bonusFixo >= 0 ? '+' : ''}{lastRoll.result.bonusFixo}
-                  </div>
+              <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-black/95 text-white rounded-full border border-ordem-gold/50 shadow-[0_10px_40px_rgba(0,0,0,0.8)] px-6 py-3 flex items-center gap-4 animate-in slide-in-from-top-10 fade-in duration-300">
+                <div className="text-3xl font-bold bg-gradient-to-br from-yellow-300 to-yellow-600 bg-clip-text text-transparent drop-shadow-md">
+                  {lastRoll.result.total}
                 </div>
-                <div className="mt-2 text-sm text-ordem-white font-mono">
-                  Dados: [{lastRoll.result.dice.join(', ')}] • Escolhido: {lastRoll.result.chosen} • Total:{' '}
-                  <span className="text-ordem-green font-bold">{lastRoll.result.total}</span>
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold uppercase tracking-widest leading-none mb-1 text-zinc-200">{lastRoll.pericia}</span>
+                  <span className="text-[10px] text-ordem-text-secondary font-mono leading-none">
+                    {lastRoll.result.diceCount}d20 • [{lastRoll.result.dice.join(', ')}] {lastRoll.result.bonusFixo >= 0 ? '+' : ''}{lastRoll.result.bonusFixo}
+                  </span>
                 </div>
+                <button onClick={() => setLastRoll(null)} className="ml-2 w-6 h-6 flex items-center justify-center rounded-full bg-white/10 text-ordem-text-secondary hover:text-white hover:bg-red-500/50 transition-colors pb-0.5">×</button>
               </div>
             )}
-            {(Object.keys(periciasPorAtributo) as AtributoKey[]).map((attr) => (
-              <div key={attr} className="bg-ordem-ooze/30 border border-ordem-border rounded-xl p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-xs font-mono tracking-[0.25em] text-ordem-text-muted uppercase">{attr}</div>
-                  <div className="text-xs font-mono text-ordem-text-secondary">
-                    Valor: <span className="text-white font-bold">{agent.atributos[attr]}</span>
+            {(Object.keys(periciasPorAtributo) as AtributoKey[]).map((attr) => {
+              const skills = periciasPorAtributo[attr];
+              if (skills.length === 0) return null;
+              return (
+                <div key={attr} className="bg-gradient-to-b from-ordem-black/80 to-black/40 border border-white/5 rounded-2xl overflow-hidden backdrop-blur-sm shadow-xl">
+                  <div className="flex items-center justify-between p-4 border-b border-white/5 bg-white/5">
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-6 bg-ordem-text-muted rounded-full mix-blend-screen"></span>
+                      <span className="text-sm font-serif tracking-[0.2em] text-white uppercase">{attr}</span>
+                    </div>
+                    <div className="flex items-center gap-2 font-mono text-xs">
+                      <span className="text-ordem-text-secondary">DADOS</span>
+                      <span className="text-white font-bold text-base px-2.5 py-0.5 bg-black/60 rounded border border-white/10 shadow-inner">{agent.atributos[attr]}</span>
+                    </div>
+                  </div>
+                  <div className="divide-y divide-white/5">
+                    {skills.map(([nome, det]) => (
+                      <div key={nome} className="flex items-center justify-between p-3 sm:p-4 hover:bg-white/5 transition-colors group">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm sm:text-base font-bold text-zinc-200 truncate group-hover:text-white transition-colors">{nome}</span>
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-mono border ${det.grau === 'Treinado' ? 'border-green-900/50 text-green-400 bg-green-900/10' : det.grau === 'Veterano' ? 'border-blue-900/50 text-blue-400 bg-blue-900/10' : det.grau === 'Expert' ? 'border-purple-900/50 text-purple-400 bg-purple-900/10' : 'border-white/10 text-ordem-text-secondary bg-white/5'}`}>
+                              {det.grau || 'Destreinado'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4 shrink-0">
+                          <div className="flex items-center gap-1 text-right">
+                            <span className={`text-lg sm:text-xl font-mono font-bold ${det.bonusFixo >= 10 ? 'text-ordem-gold drop-shadow-[0_0_8px_rgba(234,179,8,0.4)]' : 'text-zinc-300'}`}>
+                              {det.bonusFixo >= 0 ? '+' : ''}{det.bonusFixo}
+                            </span>
+                            {det.bonusO !== 0 && (
+                              <span className="text-[10px] font-mono text-ordem-text-secondary hidden sm:inline-block ml-1">({det.bonusO > 0 ? '+' : ''}{det.bonusO}O)</span>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setLastRoll({ pericia: nome, result: rollPericia(det) })}
+                            className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center bg-black/60 border border-white/10 group-hover:border-ordem-gold/50 group-hover:text-ordem-gold group-hover:shadow-[0_0_15px_rgba(234,179,8,0.15)] group-hover:bg-ordem-gold/5 text-ordem-text-muted transition-all active:scale-95 shrink-0"
+                            title="Rolar teste"
+                          >
+                            <Dices size={20} className="sm:w-6 sm:h-6" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                  {periciasPorAtributo[attr].map(([nome, det]) => (
-                    <div key={nome} className="bg-ordem-black/30 border border-ordem-border rounded-lg p-3 flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="text-sm text-ordem-white truncate">{nome}</div>
-                        <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">
-                          {det.dados}d20 • {det.grau}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setLastRoll({ pericia: nome, result: rollPericia(det) })}
-                          className="p-2 rounded border border-ordem-border bg-ordem-black/20 text-ordem-white-muted hover:border-ordem-text-muted hover:text-white transition-colors"
-                          title="Rolar teste"
-                        >
-                          <Dices size={16} />
-                        </button>
-                        <div className="text-lg font-mono font-bold text-white">
-                          {det.bonusFixo >= 0 ? '+' : ''}
-                          {det.bonusFixo}
-                          {det.bonusO !== 0 && (
-                            <span className="text-xs text-ordem-text-muted ml-1">{det.bonusO > 0 ? `(+${det.bonusO}O)` : `(${det.bonusO}O)`}</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
     </div>
   );
 }
-

@@ -35,6 +35,8 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
     const [editedName, setEditedName] = useState(combatant.name);
     const [isEditingInit, setIsEditingInit] = useState(false);
     const [editedInit, setEditedInit] = useState(String(combatant.initiative));
+    const [isEditingHp, setIsEditingHp] = useState(false);
+    const [editedHp, setEditedHp] = useState(String(combatant.hp.current));
 
     const hpPercent = (combatant.hp.current / combatant.hp.max) * 100;
     const isDead = combatant.hp.current <= 0;
@@ -73,6 +75,15 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
             onUpdate({ initiative: newInit });
         }
         setIsEditingInit(false);
+    };
+
+    const handleHpSave = () => {
+        const newHp = parseInt(editedHp, 10);
+        if (!isNaN(newHp)) {
+            const clampedHp = Math.max(-combatant.hp.max, Math.min(combatant.hp.max, newHp));
+            onUpdate({ hp: { ...combatant.hp, current: clampedHp } });
+        }
+        setIsEditingHp(false);
     };
 
     const getTypeIcon = () => {
@@ -148,7 +159,7 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                     </button>
                 )}
 
-                {}
+                { }
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                         {getTypeIcon()}
@@ -182,7 +193,7 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                         )}
                     </div>
 
-                    {}
+                    { }
                     {combatant.conditions.length > 0 && (
                         <div className="mt-1">
                             <ConditionBadges
@@ -195,15 +206,38 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                     )}
                 </div>
 
-                {}
                 <div className="flex items-center gap-4 shrink-0">
-                    {}
+                    { }
                     <div className="text-center">
-                        <div className="flex items-center gap-1 text-red-400">
+                        <div className="flex items-center justify-center gap-1 text-red-400">
                             <Heart size={12} />
-                            <span className="text-sm font-mono">{combatant.hp.current}/{combatant.hp.max}</span>
+                            {isEditingHp ? (
+                                <input
+                                    type="number"
+                                    value={editedHp}
+                                    onChange={e => setEditedHp(e.target.value)}
+                                    onKeyDown={e => {
+                                        if (e.key === 'Enter') handleHpSave();
+                                        if (e.key === 'Escape') setIsEditingHp(false);
+                                    }}
+                                    onBlur={handleHpSave}
+                                    className="w-12 bg-ordem-black border border-red-500 rounded px-1 py-0 text-center text-sm font-mono text-white"
+                                    autoFocus
+                                />
+                            ) : (
+                                <button
+                                    onClick={() => {
+                                        setEditedHp(String(combatant.hp.current));
+                                        setIsEditingHp(true);
+                                    }}
+                                    className="text-sm font-mono hover:text-white transition-colors cursor-text"
+                                    title="Clique para editar Vida"
+                                >
+                                    {combatant.hp.current}/{combatant.hp.max}
+                                </button>
+                            )}
                         </div>
-                        {}
+                        { }
                         <div className="w-20 h-1.5 bg-ordem-black rounded-full overflow-hidden mt-0.5">
                             <motion.div
                                 className={cn('h-full', getHpColor())}
@@ -214,7 +248,7 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                         </div>
                     </div>
 
-                    {}
+                    { }
                     <div className="text-center">
                         <div className="flex items-center gap-1 text-blue-400">
                             <Shield size={12} />
@@ -224,7 +258,7 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                     </div>
                 </div>
 
-                {}
+                { }
                 <button
                     onClick={() => setIsExpanded(!isExpanded)}
                     className="p-1.5 text-ordem-text-secondary hover:text-white transition-colors"
@@ -233,7 +267,7 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                 </button>
             </div>
 
-            {}
+            { }
             {isExpanded && (
                 <motion.div
                     initial={{ height: 0 }}
@@ -241,7 +275,7 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                     exit={{ height: 0 }}
                     className="border-t border-ordem-border bg-ordem-black/50 p-3 space-y-3"
                 >
-                    {}
+                    { }
                     <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs text-ordem-text-secondary">Dano:</span>
                         <div className="flex items-center gap-1">
@@ -269,7 +303,7 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                         <button onClick={() => applyHealing(10)} className="px-2 py-1 text-xs bg-green-600/20 hover:bg-green-600/40 text-green-400 rounded">+10</button>
                     </div>
 
-                    {}
+                    { }
                     {(combatant.pe || combatant.san) && (
                         <div className="flex items-center gap-4">
                             {combatant.pe && (
@@ -309,7 +343,7 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                         </div>
                     )}
 
-                    {}
+                    { }
                     <div>
                         <span className="text-xs text-ordem-text-secondary mb-1 block">Condições:</span>
                         <ConditionPicker
@@ -320,7 +354,7 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                         />
                     </div>
 
-                    {}
+                    { }
                     <div>
                         <div className="flex items-center gap-1 mb-1">
                             <StickyNote size={12} className="text-ordem-text-muted" />
@@ -334,7 +368,71 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                         />
                     </div>
 
-                    {}
+                    {combatant.atributos && (
+                        <div className="pt-2 border-t border-ordem-border/50 space-y-2">
+                            <span className="text-xs text-ordem-text-secondary mb-1 block font-bold uppercase">Atributos</span>
+                            <div className="flex flex-wrap gap-1">
+                                {Object.entries(combatant.atributos).map(([key, val]) => (
+                                    <span key={key} className="text-[10px] px-2 py-0.5 bg-ordem-ooze border border-ordem-border rounded font-mono text-white">
+                                        {key} {val >= 0 ? '+' : ''}{val}
+                                    </span>
+                                ))}
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                                {combatant.fortitude && (
+                                    <span className="text-[9px] px-1.5 py-0.5 bg-ordem-ooze border border-ordem-border rounded font-mono text-ordem-text-secondary">
+                                        FORT {combatant.fortitude}
+                                    </span>
+                                )}
+                                {combatant.reflexos && (
+                                    <span className="text-[9px] px-1.5 py-0.5 bg-ordem-ooze border border-ordem-border rounded font-mono text-ordem-text-secondary">
+                                        REF {combatant.reflexos}
+                                    </span>
+                                )}
+                                {combatant.vontade && (
+                                    <span className="text-[9px] px-1.5 py-0.5 bg-ordem-ooze border border-ordem-border rounded font-mono text-ordem-text-secondary">
+                                        VON {combatant.vontade}
+                                    </span>
+                                )}
+                                {combatant.deslocamento && (
+                                    <span className="text-[9px] px-1.5 py-0.5 bg-green-900/30 border border-green-700/30 rounded font-mono text-green-400">
+                                        DESL {combatant.deslocamento}
+                                    </span>
+                                )}
+                            </div>
+                            {combatant.resistencias && combatant.resistencias.length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                    <span className="text-[9px] text-yellow-400 font-bold">RD:</span>
+                                    {combatant.resistencias.map((r, i) => (
+                                        <span key={i} className="text-[9px] px-1.5 py-0.5 bg-yellow-900/20 border border-yellow-700/30 rounded font-mono text-yellow-400">
+                                            {r}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                            {combatant.imunidades && combatant.imunidades.length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                    <span className="text-[9px] text-ordem-text-muted font-bold">IMUNE:</span>
+                                    {combatant.imunidades.map((im, i) => (
+                                        <span key={i} className="text-[9px] px-1.5 py-0.5 bg-gray-800 border border-gray-600/30 rounded font-mono text-gray-400">
+                                            {im}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                            {combatant.vulnerabilidades && combatant.vulnerabilidades.length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                    <span className="text-[9px] text-red-400 font-bold">VULN:</span>
+                                    {combatant.vulnerabilidades.map((v, i) => (
+                                        <span key={i} className="text-[9px] px-1.5 py-0.5 bg-red-900/20 border border-red-700/30 rounded font-mono text-red-400">
+                                            {v}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     {combatant.abilities && combatant.abilities.length > 0 && (
                         <div className="pt-2 border-t border-ordem-border/50">
                             <span className="text-xs text-ordem-text-secondary mb-2 block font-bold uppercase">Habilidades & Ações</span>
@@ -361,7 +459,7 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                         </div>
                     )}
 
-                    {}
+                    { }
                     <div className="flex items-center gap-2 pt-2 border-t border-ordem-border/50">
                         <button
                             onClick={onDuplicate}

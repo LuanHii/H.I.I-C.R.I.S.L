@@ -1,6 +1,7 @@
 import { Weapow } from '../core/types';
 
-export const WEAPONS: Weapow[] = [
+export const WEAPONS: Weapow[] = [
+
   {
     nome: 'Ataque Desarmado',
     categoria: 0,
@@ -45,7 +46,8 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Corpo a corpo'
     },
     livro: 'Ordem Paranormal RPG'
-  },
+  },
+
   {
     nome: 'Bastão',
     categoria: 0,
@@ -150,7 +152,8 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Curto'
     },
     livro: 'Ordem Paranormal RPG'
-  },
+  },
+
   {
     nome: 'Arco',
     categoria: 0,
@@ -180,7 +183,8 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Médio'
     },
     livro: 'Ordem Paranormal RPG'
-  },
+  },
+
   {
     nome: 'Pistola',
     categoria: 1,
@@ -225,7 +229,8 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Médio'
     },
     livro: 'Ordem Paranormal RPG'
-  },
+  },
+
   {
     nome: 'Machadinha',
     categoria: 0,
@@ -255,7 +260,8 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Corpo a corpo'
     },
     livro: 'Ordem Paranormal RPG'
-  },
+  },
+
   {
     nome: 'Corrente',
     categoria: 0,
@@ -330,7 +336,8 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Corpo a corpo'
     },
     livro: 'Ordem Paranormal RPG'
-  },
+  },
+
   {
     nome: 'Acha',
     categoria: 1,
@@ -420,7 +427,8 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Corpo a corpo'
     },
     livro: 'Ordem Paranormal RPG'
-  },
+  },
+
   {
     nome: 'Arco Composto',
     categoria: 1,
@@ -450,7 +458,8 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Médio'
     },
     livro: 'Ordem Paranormal RPG'
-  },
+  },
+
   {
     nome: 'Submetralhadora',
     categoria: 2,
@@ -510,7 +519,8 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Extremo'
     },
     livro: 'Ordem Paranormal RPG'
-  },
+  },
+
   {
     nome: 'Bazuca',
     categoria: 3,
@@ -555,7 +565,8 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Longo'
     },
     livro: 'Ordem Paranormal RPG'
-  },
+  },
+
   {
     nome: 'Gancho de Carne',
     categoria: 0,
@@ -585,7 +596,8 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Corpo a corpo'
     },
     livro: 'Sobrevivendo ao Horror'
-  },
+  },
+
   {
     nome: 'Baioneta',
     categoria: 0,
@@ -645,7 +657,8 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Curto'
     },
     livro: 'Sobrevivendo ao Horror'
-  },
+  },
+
   {
     nome: 'Bastão Policial',
     categoria: 1,
@@ -720,7 +733,8 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Curto'
     },
     livro: 'Sobrevivendo ao Horror'
-  },
+  },
+
   {
     nome: 'Balas Curtas (Pacote)',
     categoria: 0,
@@ -810,112 +824,7 @@ export const WEAPONS: Weapow[] = [
       Alcance: '—'
     },
     livro: 'Ordem Paranormal RPG'
-  },
-  {
-    nome: 'Silenciador',
-    categoria: 1,
-    espaco: 0,
-    tipo: 'Modificação',
-    proficiencia: 'N/A',
-    descricao: 'Modificação para armas de fogo. Reduz o som do disparo, dificultando localizar o atirador.',
-    stats: {
-      Dano_Base: '—',
-      Dano_Tipo: '—',
-      Critico: '—',
-      Alcance: '—'
-    },
-    livro: 'Ordem Paranormal RPG'
   },
-  {
-    nome: 'Mira Laser',
-    categoria: 1,
-    espaco: 0,
-    tipo: 'Modificação',
-    proficiencia: 'N/A',
-    descricao: 'Modificação para armas de fogo. Fornece +2 no primeiro ataque contra cada alvo.',
-    stats: {
-      Dano_Base: '—',
-      Dano_Tipo: '—',
-      Critico: '—',
-      Alcance: '—'
-    },
-    livro: 'Ordem Paranormal RPG'
-  },
-  {
-    nome: 'Mira Telescópica',
-    categoria: 1,
-    espaco: 0,
-    tipo: 'Modificação',
-    proficiencia: 'N/A',
-    descricao: 'Modificação para armas de fogo de duas mãos. Aumenta o alcance em um passo.',
-    stats: {
-      Dano_Base: '—',
-      Dano_Tipo: '—',
-      Critico: '—',
-      Alcance: '—'
-    },
-    livro: 'Ordem Paranormal RPG'
-  },
-  {
-    nome: 'Coronha Rebatível',
-    categoria: 1,
-    espaco: 0,
-    tipo: 'Modificação',
-    proficiencia: 'N/A',
-    descricao: 'Modificação para armas de fogo de duas mãos. Permite usar com uma mão (–2 ataque).',
-    stats: {
-      Dano_Base: '—',
-      Dano_Tipo: '—',
-      Critico: '—',
-      Alcance: '—'
-    },
-    livro: 'Ordem Paranormal RPG'
-  },
-  {
-    nome: 'Cano Longo',
-    categoria: 1,
-    espaco: 0,
-    tipo: 'Modificação',
-    proficiencia: 'N/A',
-    descricao: 'Modificação para armas de fogo. Aumenta o dano em +2, mas reduz margem de ameaça em 1.',
-    stats: {
-      Dano_Base: '—',
-      Dano_Tipo: '—',
-      Critico: '—',
-      Alcance: '—'
-    },
-    livro: 'Ordem Paranormal RPG'
-  },
-  {
-    nome: 'Carregador Estendido',
-    categoria: 1,
-    espaco: 0,
-    tipo: 'Modificação',
-    proficiencia: 'N/A',
-    descricao: 'Modificação para armas de fogo. Dobra a capacidade de munição.',
-    stats: {
-      Dano_Base: '—',
-      Dano_Tipo: '—',
-      Critico: '—',
-      Alcance: '—'
-    },
-    livro: 'Ordem Paranormal RPG'
-  },
-  {
-    nome: 'Carregador Rápido',
-    categoria: 1,
-    espaco: 0,
-    tipo: 'Modificação',
-    proficiencia: 'N/A',
-    descricao: 'Modificação para armas de fogo/bestas. Permite recarregar como ação livre 1x/rodada.',
-    stats: {
-      Dano_Base: '—',
-      Dano_Tipo: '—',
-      Critico: '—',
-      Alcance: '—'
-    },
-    livro: 'Sobrevivendo ao Horror'
-  },
   {
     nome: 'Taser',
     categoria: 1,
@@ -945,5 +854,5 @@ export const WEAPONS: Weapow[] = [
       Alcance: 'Corpo a corpo'
     },
     livro: 'Ordem Paranormal RPG'
-  },
+  }
 ];

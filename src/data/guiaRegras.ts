@@ -1,5 +1,3 @@
-
-
 export type RegraCategoria =
     | 'criacao'
     | 'testes'
@@ -24,13 +22,13 @@ export interface Regra {
 }
 
 export const CATEGORIAS: { id: RegraCategoria; nome: string; icone: string; cor: string }[] = [
-    { id: 'criacao', nome: 'Criação', icone: '📝', cor: 'text-emerald-400' },
-    { id: 'testes', nome: 'Testes', icone: '🎲', cor: 'text-blue-400' },
-    { id: 'combate', nome: 'Combate', icone: '⚔️', cor: 'text-red-400' },
-    { id: 'ataques', nome: 'Ataques', icone: '🎯', cor: 'text-orange-400' },
-    { id: 'manobras', nome: 'Manobras', icone: '🤼', cor: 'text-yellow-400' },
-    { id: 'condicoes', nome: 'Condições', icone: '💀', cor: 'text-purple-400' },
-    { id: 'sanidade', nome: 'Sanidade', icone: '🧠', cor: 'text-cyan-400' },
+    { id: 'criacao', nome: 'Criação/Geral', icone: '📝', cor: 'text-emerald-400' },
+    { id: 'testes', nome: 'Testes/Sistema', icone: '🎲', cor: 'text-blue-400' },
+    { id: 'combate', nome: 'Combate (Estrutura)', icone: '⚔️', cor: 'text-red-400' },
+    { id: 'ataques', nome: 'Ações e Ataques', icone: '🎯', cor: 'text-orange-400' },
+    { id: 'manobras', nome: 'Manobras de Combate', icone: '🤼', cor: 'text-yellow-400' },
+    { id: 'condicoes', nome: 'Condições e Ferimentos', icone: '💀', cor: 'text-purple-400' },
+    { id: 'sanidade', nome: 'Sanidade e Loucura', icone: '🧠', cor: 'text-cyan-400' },
     { id: 'rituais', nome: 'Rituais', icone: '✨', cor: 'text-pink-400' },
     { id: 'equipamento', nome: 'Equipamento', icone: '🔧', cor: 'text-green-400' },
     { id: 'investigacao', nome: 'Investigação', icone: '🔍', cor: 'text-amber-400' },
@@ -39,981 +37,494 @@ export const CATEGORIAS: { id: RegraCategoria; nome: string; icone: string; cor:
 export const REGRAS: Regra[] = [
 
     {
-        id: 'passo-a-passo-criacao',
-        titulo: 'Passo a Passo: Criação de Ficha',
-        categoria: 'criacao',
-        resumo: '1. Conceito → 2. Atributos → 3. Origem → 4. Classe → 5. Perícias.',
-        detalhes: '1. CONCEITO: Quem é seu personagem?\n2. ATRIBUTOS: Distribua pontos (base 1, +4 pontos, máx 3)\n3. ORIGEM: Escolha o passado (2 perícias + 1 poder)\n4. CLASSE: Combatente, Especialista ou Ocultista\n5. PERÍCIAS: Anote as perícias da classe e origem\n6. RECURSOS: Calcule PV, PE, SAN iniciais',
-        tags: ['criação', 'ficha', 'passo a passo']
-    },
-    {
-        id: 'atributos-distribuicao',
-        titulo: 'Distribuição de Atributos',
-        categoria: 'criacao',
-        resumo: 'Todos começam em 1. Você tem 4 pontos para distribuir.',
-        detalhes: 'Regras:\n• Todos os atributos começam em 1\n• Você tem 4 pontos para distribuir\n• Máximo inicial: 3 em qualquer atributo\n• Opcional: Reduza um atributo para 0 = +1 ponto extra',
-        tabela: {
-            cabecalho: ['Atributo', 'Uso Principal'],
-            linhas: [
-                ['AGI', 'Defesa, Iniciativa, Acrobacia, Pontaria'],
-                ['FOR', 'Dano corpo a corpo, Carga, Atletismo, Luta'],
-                ['INT', 'Perícias extras, Conhecimentos'],
-                ['PRE', 'PE, Diplomacia, Intuição, DT rituais'],
-                ['VIG', 'PV, Fortitude, resistência física'],
-            ]
-        },
-        tags: ['atributo', 'criação', 'distribuição']
-    },
-    {
-        id: 'classes-resumo',
-        titulo: 'Classes: Resumo Rápido',
-        categoria: 'criacao',
-        resumo: 'Combatente (luta), Especialista (habilidades), Ocultista (rituais).',
-        tabela: {
-            cabecalho: ['Classe', 'PV', 'PE', 'SAN', 'Perícias'],
-            linhas: [
-                ['Combatente', '20+VIG', '2+PRE', '12', 'Luta/Pontaria + Fort/Refl + 1+INT'],
-                ['Especialista', '16+VIG', '3+PRE', '16', '7 + INT'],
-                ['Ocultista', '12+VIG', '4+PRE', '20', 'Ocultismo + Vontade + 3+INT'],
-            ]
-        },
-        dica: 'Combatente: linha de frente. Especialista: utilitário. Ocultista: paranormal.',
-        tags: ['classe', 'criação', 'combatente', 'especialista', 'ocultista']
-    },
-    {
-        id: 'origens-lista',
-        titulo: 'Origens: Lista Completa',
-        categoria: 'criacao',
-        resumo: 'Sua vida antes da Ordem. Dá 2 perícias + 1 poder/habilidade.',
-        detalhes: 'Acadêmico, Amnésico, Artista, Atlético, Chef de Cozinha, Criança, Cult Leader, Desgarrado, Diplomata, Engenheiro, Executivo, Investigador, Lutador, Magnata, Mercenário, Mergulhador, Militar, Operário, Policial, Religioso, Servidor Público, T.I., Teórico da Conspiração, Trabalhador Rural, Trambiqueiro, Universitário, Vítima',
-        dica: 'Cada origem tem um poder único e 2 perícias treinadas!',
-        tags: ['origem', 'criação', 'background']
-    },
-    {
-        id: 'recursos-iniciais',
-        titulo: 'Recursos Iniciais por Classe',
-        categoria: 'criacao',
-        resumo: 'PV, PE e SAN iniciais são base + atributo.',
-        detalhes: 'Fórmulas Iniciais (NEX 5%):\n• PV = Classe Base + VIG\n• PE = Classe Base + PRE\n• SAN = Classe Base\n\nCada nível de NEX aumenta esses valores.',
-        tabela: {
-            cabecalho: ['Classe', 'PV Base', 'PE Base', 'SAN Base'],
-            linhas: [
-                ['Combatente', '20', '2', '12'],
-                ['Especialista', '16', '3', '16'],
-                ['Ocultista', '12', '4', '20'],
-            ]
-        },
-        tags: ['pv', 'pe', 'san', 'recursos', 'criação']
-    },
-    {
-        id: 'proficiencias',
-        titulo: 'Proficiências por Classe',
-        categoria: 'criacao',
-        resumo: 'Combatente: todas. Especialista: simples. Ocultista: simples.',
-        detalhes: 'Armas Simples: pistola, revolver, escopeta, submetralhadora, faca, cassetete.\nArmas Táticas: fuzil, rifle de precisão, metralhadora.\nArmas Pesadas: lança-granadas, lança-chamas, minas.\n\nSem proficiência = -2d20 no ataque.',
-        tabela: {
-            cabecalho: ['Classe', 'Armas', 'Proteções'],
-            linhas: [
-                ['Combatente', 'Todas', 'Todas'],
-                ['Especialista', 'Simples', 'Leves'],
-                ['Ocultista', 'Simples', 'Nenhuma'],
-            ]
-        },
-        tags: ['proficiência', 'arma', 'proteção', 'classe']
-    },
-
-    {
-        id: 'teste-basico',
-        titulo: 'Como Fazer um Teste',
-        categoria: 'testes',
-        resumo: 'Role Xd20 (X = atributo), escolha o melhor, some o treino.',
-        detalhes: '1. Mestre anuncia perícia e DT\n2. Role d20 igual ao atributo-base\n3. Escolha o melhor resultado\n4. Some o modificador de treino\n5. Compare com a DT',
-        tabela: {
-            cabecalho: ['Treino', 'Bônus'],
-            linhas: [
-                ['Leigo', '+1d20'],
-                ['Treinado', '+5'],
-                ['Veterano', '+10'],
-                ['Expert', '+15'],
-            ]
-        },
-        tags: ['teste', 'dado', 'd20', 'perícia']
-    },
-    {
-        id: 'tabela-dt',
-        titulo: 'Tabela de Dificuldades (DT)',
-        categoria: 'testes',
-        resumo: 'DTs padrão para referência rápida do mestre.',
-        tabela: {
-            cabecalho: ['Dificuldade', 'DT'],
-            linhas: [
-                ['Muito Fácil', '10'],
-                ['Fácil', '15'],
-                ['Média', '20'],
-                ['Difícil', '25'],
-                ['Muito Difícil', '30'],
-                ['Quase Impossível', '35+'],
-            ]
-        },
-        tags: ['dt', 'dificuldade', 'teste']
-    },
-    {
-        id: 'modificadores-dados',
-        titulo: 'Modificadores de Dados',
-        categoria: 'testes',
-        resumo: '+1d20 = +1d20 (melhor), -1d20 = -1d20 (pior).',
-        detalhes: 'Se penalidade reduzir dados para menos de 1, role a quantidade como bônus mas escolha o PIOR resultado.',
-        tabela: {
-            cabecalho: ['Modificador', 'Efeito'],
-            linhas: [
-                ['+1d20', 'Rola +1d20 extra, escolhe o melhor'],
-                ['+2d20', 'Rola +2d20 extras'],
-                ['-1d20', 'Rola -1d20, escolhe o pior'],
-                ['-2d20', 'Rola -2d20'],
-            ]
-        },
-        tags: ['modificador', 'bônus', 'penalidade', 'dado']
-    },
-    {
-        id: 'dt-resistencia',
-        titulo: 'DT de Resistência (Habilidades)',
-        categoria: 'testes',
-        resumo: 'DT = 10 + Limite PE + Atributo específico.',
-        detalhes: 'Exemplo: Habilidade "DT Vigor" de personagem com Vigor 3 e NEX 50% (limite PE 10):\nDT = 10 + 10 + 3 = 23',
-        tags: ['dt', 'resistência', 'habilidade', 'pe']
-    },
-
-    {
-        id: 'estrutura-turno',
-        titulo: 'Estrutura do Turno',
+        id: 'estrutura-combate',
+        titulo: 'Estrutura do Combate',
         categoria: 'combate',
-        resumo: 'Padrão + Movimento, OU 2x Movimento, OU Completa.',
-        detalhes: 'Cada turno você pode:\n• 1 Ação Padrão + 1 Ação de Movimento\n• 2 Ações de Movimento\n• 1 Ação Completa\n\nAlém disso: Ações Livres e Reações ilimitadas',
-        tags: ['turno', 'ação', 'rodada']
+        resumo: 'O combate acontece em rodadas de ~6 segundos. Cada personagem tem um turno.',
+        tabela: {
+            cabecalho: ['Passo', 'O que acontece'],
+            linhas: [
+                ['1', 'Cada jogador faz um teste de Iniciativa (Agilidade).'],
+                ['2', 'O mestre rola Iniciativa uma única vez para todos os inimigos (usando o menor bônus).'],
+                ['3', 'O mestre determina surpresa (Percepção vs Furtividade).'],
+                ['4', 'Todos agem na ordem. A ordem se mantém até o fim da cena.']
+            ]
+        },
+        tags: ['rodada', 'turno', 'iniciativa', 'estrutura']
     },
     {
-        id: 'iniciativa',
+        id: 'iniciativa-surpresa',
         titulo: 'Iniciativa e Surpresa',
         categoria: 'combate',
-        resumo: 'Teste de Iniciativa define ordem. Surpreendido não age na 1ª rodada.',
-        detalhes: 'Surpresa:\n• Não percebeu inimigos = Surpreendido\n• Fica desprevenido (-5 DEF)\n• Não age na 1ª rodada\n\nPerceber: Percepção vs Furtividade',
-        tags: ['iniciativa', 'surpresa', 'combate']
+        resumo: 'Teste de Iniciativa define a ordem. Surpresos não agem na 1ª rodada.',
+        detalhes: '• A ordem de Iniciativa se mantém igual durante todo o combate.\n• Empates: Rolar novamente entre os empatados.\n• Surpresa: Quem não percebe o inimigo fica **Surpreendido**.\n• Surpreendido: Fica Desprevenido e **não age na 1ª rodada**.\n• Chegando Atrasado: Se entrar depois que a luta começou, rola Iniciativa e age a partir da rodada seguinte.',
+        tags: ['iniciativa', 'surpreendido', 'desprevenido', 'percepção']
     },
     {
-        id: 'acoes-resumo',
-        titulo: 'Resumo de Ações',
+        id: 'situacoes-modificadores-ataque',
+        titulo: 'Modificadores no Ataque (Atacante)',
         categoria: 'combate',
-        resumo: 'Lista rápida de todas as ações disponíveis.',
+        resumo: 'Posição e condições do atacante afetam o teste de ataque.',
         tabela: {
-            cabecalho: ['Tipo', 'Exemplos'],
+            cabecalho: ['O Atacante está...', 'Modificador no Ataque'],
             linhas: [
-                ['Padrão', 'Atacar, Manobra, Fintar, Conjurar, Preparar'],
-                ['Movimento', 'Mover, Levantar, Mirar, Sacar item'],
-                ['Completa', 'Corrida, Investida, Golpe Misericórdia'],
-                ['Livre', 'Falar (20 palavras), Jogar-se, Largar item'],
-                ['Reação', 'Bloqueio, Esquiva, Contra-ataque'],
+                ['Caído', '-2d20 em ataques corpo a corpo'],
+                ['Cego', '50% de chance de falha'],
+                ['Em posição elevada', '+1d20'],
+                ['Flanqueando o alvo', '+1d20 (apenas corpo a corpo)'],
+                ['Invisível', '+2d20 (não se aplica a alvos cegos)'],
+                ['Ofuscado', '-1d20']
             ]
         },
-        tags: ['ação', 'padrão', 'movimento', 'completa', 'livre', 'reação']
+        tags: ['modificador', 'ataque', 'vantagem', 'desvantagem', 'cego', 'flanquear']
+    },
+    {
+        id: 'situacoes-modificadores-defesa',
+        titulo: 'Modificadores na Defesa (Alvo)',
+        categoria: 'combate',
+        resumo: 'A Defesa do alvo é afetada por condições, camuflagem e coberturas.',
+        tabela: {
+            cabecalho: ['O alvo está...', 'Modificador na Defesa'],
+            linhas: [
+                ['Caído', '-5 vs corpo a corpo, +5 vs distância'],
+                ['Cego', '-5'],
+                ['Desprevenido', '-5'],
+                ['Camuflagem leve', '20% chance de falha (1-2 no d10)'],
+                ['Camuflagem total', '50% chance de falha (1-5 no d10)'],
+                ['Cobertura leve', '+5 Defesa'],
+                ['Cobertura total', 'Não pode ser atacado']
+            ]
+        },
+        tags: ['defesa', 'cobertura', 'camuflagem', 'caído', 'cego']
+    },
+    {
+        id: 'movimentacao-combate',
+        titulo: 'Movimentação em Combate',
+        categoria: 'combate',
+        resumo: 'Padrão é 9m (6 quadrados). Diagonais e terrenos custam dobrado.',
+        tabela: {
+            cabecalho: ['Situação', 'Regra'],
+            linhas: [
+                ['Espaço de aliado', 'Pode atravessar livremente'],
+                ['Espaço de inimigo', 'Apenas se o alvo for indefeso, 3 categorias de tamanho de diferença, usar Acrobacia ou manobra Atropelar'],
+                ['Inimigo caído', 'Conta como uma categoria de tamanho menor para movimentação'],
+                ['Diagonal', 'Custa o dobro do seu deslocamento'],
+                ['Terreno difícil', 'Custa o dobro (move-se metade do normal)'],
+                ['Sobrecarregado', 'Deslocamento reduz em 3m'],
+                ['Subir (voar/nadar)', 'Custa o dobro (triplo em diagonais)'],
+                ['Descer (voar/nadar)', 'Custa metade (normal em diagonais)']
+            ]
+        },
+        tags: ['movimento', 'deslocamento', 'quadrados', 'terreno difícil']
+    },
+    {
+        id: 'defesas-especiais',
+        titulo: 'Ações Especiais de Defesa',
+        categoria: 'combate',
+        resumo: 'Reações feitas ANTES do inimigo rolar ataque (limite de 1/rodada).',
+        tabela: {
+            cabecalho: ['Defesa', 'Requisito', 'Quando', 'Efeito'],
+            linhas: [
+                ['Bloqueio', 'Treinado em Fortitude', 'Alvo de ataque corpo a corpo', 'Ganha RD igual ao bônus de Fortitude contra o ataque'],
+                ['Esquiva', 'Treinado em Reflexos', 'Alvo de qualquer ataque', 'Soma Reflexos à Defesa contra o ataque'],
+                ['Contra-ataque', 'Treinado em Luta', 'Alvo de ataque corpo a corpo DÁ ERRO', 'Faz um ataque contra o atacante após ele errar']
+            ]
+        },
+        dica: 'Atenção: Deve declarar Bloqueio ou Esquiva ANTES de ver o resultado do d20 do inimigo! Já o Contra-ataque precisa esperar que o inimigo erre.',
+        tags: ['defesa', 'bloqueio', 'esquiva', 'contra-ataque', 'reação', 'reações']
     },
 
     {
-        id: 'ataque-basico',
-        titulo: 'Teste de Ataque',
+        id: 'acoes-por-turno',
+        titulo: 'Ações no Turno',
         categoria: 'ataques',
-        resumo: 'Luta (corpo a corpo) ou Pontaria (distância) vs Defesa.',
-        detalhes: 'Corpo a corpo: Luta (AGI ou FOR) + treino vs DEF\nDistância: Pontaria (AGI) + treino vs DEF\n\nDano corpo a corpo: Arma + FOR\nDano distância: Apenas arma',
-        tags: ['ataque', 'luta', 'pontaria', 'dano']
+        resumo: '1 Padrão + 1 Movimento (ou variações).',
+        detalhes: 'Combinações válidas:\n• Opção A: 1 Ação Padrão + 1 Ação de Movimento\n• Opção B: 2 Ações de Movimento\n• Opção C: 1 Ação Completa\n\nAlém disso:\n• Qualquer quantidade de Ações Livres ou Reações\n\n⚠️ IMPORTANTE: Você não pode trocar uma ação de movimento por uma ação padrão. O inverso (Padrão → Movimento) é permitido.',
+        tags: ['ação', 'turno', 'combate', 'livre', 'reação']
     },
     {
-        id: 'critico',
-        titulo: 'Acerto Crítico',
+        id: 'acoes-padrao',
+        titulo: 'Ações Padrão',
         categoria: 'ataques',
-        resumo: 'Se rolar >= margem de ameaça, multiplica dados de dano.',
-        detalhes: 'Margem de ameaça varia por arma (ex: 19, 20)\nMultiplicador: x2, x3 ou x4\n\nNÃO multiplica:\n• Bônus numéricos fixos\n• Dados extras (Ataque Furtivo)',
-        dica: 'Alguns seres são imunes a críticos - sofrem dano normal.',
-        tags: ['crítico', 'ameaça', 'dano']
+        resumo: 'Ação principal: Agredir, Conjurar, Fintar, Preparar Ação.',
+        detalhes: '• Agredir: Teste Corpo a Corpo ou à Distância. Atacar alvos além do alcance nativo penaliza.\n• Conjurar Ritual: Maioria dos rituais gasta ação Padrão.\n• Fintar: Teste de Enganação vs Reflexos do alvo (alcance curto). Se vencer, ele fica desprevenido contra seu primeiro ataque.\n• Preparar uma Ação: Declare "Faço X se Y acontecer" como padrão. Executada como Reação, adiando sua iniciativa para depois do gatilho.',
+        tags: ['ação', 'padrão', 'agredir', 'preparar', 'fintar']
     },
     {
-        id: 'mirar',
-        titulo: 'Ação: Mirar',
+        id: 'acoes-movimento',
+        titulo: 'Ações de Movimento',
         categoria: 'ataques',
-        resumo: 'Ação de movimento. Anula -1d20 ao atirar em alvo em corpo a corpo.',
-        detalhes: 'Requisito: Treinado em Pontaria\nTipo: Ação de Movimento\n\nUse quando seu alvo está adjacente a outro combatente.',
-        dica: 'Essencial quando aliado está lutando corpo a corpo com o inimigo!',
-        tags: ['mirar', 'pontaria', 'distância']
+        resumo: 'Deslocar, Levantar-se, Manipular sacos/portas, Mirar.',
+        tabela: {
+            cabecalho: ['Ação', 'Descricão'],
+            linhas: [
+                ['Movimentar-se', 'Mover até seu limite de deslocamento em metros.'],
+                ['Levantar-se', 'Sair da condição Caído.'],
+                ['Manipular Item', 'Pegar mochila, abrir/fechar porta, sacar item ou jogar para um aliado correr livre.'],
+                ['Sacar/Guardar Item', 'Equipar ou desequipar arma com destreza.'],
+                ['Mirar', 'Requer alvo visível. Cancela passivamente penalidades de atirar contra um alvo engajado com aliados em corpo-a-corpo.']
+            ]
+        },
+        tags: ['ação', 'movimento', 'deslocar', 'levantar', 'sacar', 'mirar']
     },
     {
-        id: 'fintar',
-        titulo: 'Ação: Fintar',
+        id: 'acoes-completas',
+        titulo: 'Ações Completas',
         categoria: 'ataques',
-        resumo: 'Ação padrão. Enganação vs Reflexos = alvo desprevenido.',
-        detalhes: 'Tipo: Ação Padrão\nTeste: Enganação vs Reflexos do alvo\n\nSe passar: Alvo fica desprevenido (-5 DEF) contra seu próximo ataque, até o fim do seu próximo turno.',
-        dica: 'Combinação poderosa: Fintar + Ataque Furtivo!',
-        tags: ['fintar', 'enganação', 'desprevenido']
-    },
-
-    {
-        id: 'manobras-geral',
-        titulo: 'Manobras de Combate',
-        categoria: 'manobras',
-        resumo: 'Ação padrão, teste de Luta oposto. Efeito em vez de dano.',
-        detalhes: 'Só funcionam corpo a corpo!\nSubstitui um ataque por efeito especial.\nTeste: Luta vs Luta do alvo',
-        tags: ['manobra', 'luta', 'corpo a corpo']
-    },
-    {
-        id: 'agarrar',
-        titulo: 'Manobra: Agarrar',
-        categoria: 'manobras',
-        resumo: 'Alvo fica desprevenido, imóvel, -2 ataque, só armas leves.',
-        detalhes: 'Alvo agarrado:\n• Desprevenido + Imóvel\n• -2 em ataques\n• Só armas leves\n\nSoltar: Ação padrão + teste de manobra',
-        dica: 'Ataques à distância contra agarrados: 50% chance de acertar errado!',
-        tags: ['agarrar', 'manobra', 'imóvel']
-    },
-    {
-        id: 'derrubar',
-        titulo: 'Manobra: Derrubar',
-        categoria: 'manobras',
-        resumo: 'Alvo fica caído. Se vencer por 5+, também empurra 1,5m.',
-        detalhes: 'Efeitos de Caído:\n• -5 DEF vs corpo a corpo\n• +5 DEF vs distância\n• -2d20 em ataques',
-        tags: ['derrubar', 'caído', 'manobra']
-    },
-    {
-        id: 'desarmar',
-        titulo: 'Manobra: Desarmar',
-        categoria: 'manobras',
-        resumo: 'Derruba item que o alvo segura. Se vencer por 5+, empurra 1,5m.',
-        tags: ['desarmar', 'manobra', 'item']
-    },
-    {
-        id: 'empurrar',
-        titulo: 'Manobra: Empurrar',
-        categoria: 'manobras',
-        resumo: 'Empurra 1,5m. A cada 5 pontos de diferença, +1,5m.',
-        tags: ['empurrar', 'manobra']
-    },
-    {
-        id: 'investida',
-        titulo: 'Ação: Investida',
-        categoria: 'manobras',
-        resumo: 'Ação completa. Move 2x deslocamento + ataque corpo a corpo.',
-        detalhes: 'Bônus: +1d20 no ataque\nPenalidade: -5 DEF até próximo turno\n\nNão funciona em terreno difícil!',
-        dica: 'Durante investida, pode Atropelar como ação livre!',
-        tags: ['investida', 'movimento', 'ataque']
-    },
-
-    {
-        id: 'acoes-defesa',
-        titulo: 'Ações de Defesa (Reação)',
-        categoria: 'combate',
-        resumo: 'Uma por rodada. Declare ANTES do ataque inimigo.',
-        detalhes: 'Bloqueio (Fortitude): RD igual ao bônus vs corpo a corpo\nEsquiva (Reflexos): +bônus na DEF vs qualquer ataque\nContra-ataque (Luta): Ataque como reação se inimigo errar',
-        tags: ['defesa', 'bloqueio', 'esquiva', 'contra-ataque', 'reação']
-    },
-    {
-        id: 'modificadores-combate',
-        titulo: 'Modificadores de Combate',
-        categoria: 'combate',
-        resumo: 'Modificadores comuns do atacante e do alvo.',
+        resumo: 'Exige foco total: Padrão + Movimento. Corrida, Investida e Golpe de Misericórdia.',
         tabela: {
-            cabecalho: ['Situação', 'Efeito'],
+            cabecalho: ['Ação', 'Descricão'],
             linhas: [
-                ['Flanqueando', '+1d20 no ataque'],
-                ['Posição elevada', '+1d20 no ataque'],
-                ['Invisível', '+2d20 no ataque'],
-                ['Caído (atacando)', '-2d20 no ataque'],
-                ['Alvo desprevenido', '-5 DEF'],
-                ['Alvo caído (corpo a corpo)', '-5 DEF'],
-                ['Alvo com cobertura', '+5 DEF'],
+                ['Corrida', 'Usa testes de Atletismo para duplicar/triplicar passivamente seu movimento no turno.'],
+                ['Golpe de Misericórdia', 'Acerto crítico automático que aplica dano máximo caso o alvo seja um figurante sem importância. Um alvo relevante tem direito a Fortitude para não ceder aos ferimentos imediatamente.'],
+                ['Investida', 'Mova duas vezes o seu deslocamento em linha reta. Ataca no final recebendo +1d20 para jogar, e -5 em Defesa temporária.'],
+                ['Conjurar Ritual', 'Rituais acima de ação padrão (Ex: Verdadeiro) cobram a Ação Completa.']
             ]
         },
-        tags: ['modificador', 'flanquear', 'cobertura']
+        tags: ['ação', 'completa', 'corrida', 'investida', 'misericórdia']
     },
-
     {
-        id: 'abalado',
-        titulo: 'Abalado',
-        categoria: 'condicoes',
-        resumo: '-1d20 em testes. Se abalado de novo, fica Apavorado.',
-        tags: ['abalado', 'medo', 'condição']
+        id: 'acoes-livres-atrasar',
+        titulo: 'Ações Livres e Atrasos',
+        categoria: 'ataques',
+        resumo: 'Falar, Cair no Chão, Soltar coisas, Atrasar o Turno.',
+        detalhes: '• Atrasar o Turno: Adia seu turno para qualquer limite na ordem de Iniciativa, modificando seu índice passivo (Agilidade limita o quão baixo pode descer).\n• Falar: Dialogar curtas 20 palavras e avisos numéricos (Conjurar não é falar para uso de rituais!).\n• Jogar-se no chão: Abdica da defesa perfeitamente indo para a condição Caído.\n• Largar Item: Se desprende do item (Sempre é ação livre soltar coisas de sua mão de forma intencional ao chão).',
+        tags: ['ação', 'livre', 'atrasar', 'falar', 'iniciativa']
     },
     {
-        id: 'apavorado',
-        titulo: 'Apavorado',
-        categoria: 'condicoes',
-        resumo: '-2d20 em testes. Deve fugir da fonte do medo.',
-        tags: ['apavorado', 'medo', 'condição']
+        id: 'teste-ataque-dano',
+        titulo: 'Teste de Ataque e Dano',
+        categoria: 'ataques',
+        resumo: 'Teste de Luta/Pontaria VS Defesa. Soma Força no dano corpo a corpo.',
+        detalhes: 'Teste: O resultado bruto de (Luta/Pontaria + bônus + Ocultismo) igual ou maior a Defesa do Alvo registra Acerto Automático.\n\n⚠️ Atirar em Corpo-a-Corpo: Fazer um teste de ataque de arma a distância na frente do alvo garante uma penalidade universal passiva (-1d20) engajada na rolagem. Aliados próximos ao alvo também fornecem -5 para a precisão do ataque (exceto caso o alvo declare manobra da habilidade `Mirar` ou possua o passivo de pontaria de classe avançada).',
+        tags: ['ataque', 'dano', 'teste', 'pontaria', 'luta']
     },
     {
-        id: 'atordoado',
-        titulo: 'Atordoado',
-        categoria: 'condicoes',
-        resumo: 'Desprevenido (-5 DEF) e não pode fazer ações.',
-        tags: ['atordoado', 'mental', 'condição']
+        id: 'acertos-criticos',
+        titulo: 'Acertos Críticos',
+        categoria: 'ataques',
+        resumo: 'Margem do acerto multiplica os dados de base da arma.',
+        detalhes: '• Margem e Multiplicador: A Margem de Ameaça normal de qualquer coisa é 20, e multiplicador base de dano x2.\n• Critar no D20: A rolagem crítica atua a partir do "valor bruto" puro do dado de vinte lados.\n• Multiplicação de Crítico: Um Crítico multiplica exclusivamente os dados da arma bruta.\n• Restrições: Bônus numéricos fixos, dano de "Ataque Furtivo" (classes e itens Ocultistas), assim como magias/maldições em formato de "+d4" extras raramente acumulam para o cálculo exponencial.',
+        tags: ['crítico', 'margem', 'multiplicador', 'dano']
     },
-    {
-        id: 'caido',
-        titulo: 'Caído',
-        categoria: 'condicoes',
-        resumo: '-5 DEF (corpo a corpo), +5 DEF (distância), -2d20 ataques.',
-        tags: ['caído', 'condição']
-    },
-    {
-        id: 'cego',
-        titulo: 'Cego',
-        categoria: 'condicoes',
-        resumo: 'Desprevenido, lento, -2d20 em AGI e FOR, não observa.',
-        tags: ['cego', 'sentidos', 'condição']
-    },
-    {
-        id: 'desprevenido',
-        titulo: 'Desprevenido',
-        categoria: 'condicoes',
-        resumo: '-5 na Defesa. -1d20 em Reflexos.',
-        tags: ['desprevenido', 'condição']
-    },
-    {
-        id: 'imóvel',
-        titulo: 'Imóvel',
-        categoria: 'condicoes',
-        resumo: 'Deslocamento 0. Não pode se mover.',
-        tags: ['imóvel', 'paralisia', 'condição']
-    },
-    {
-        id: 'inconsciente',
-        titulo: 'Inconsciente',
-        categoria: 'condicoes',
-        resumo: 'Indefeso, desprevenido. Não consegue agir.',
-        tags: ['inconsciente', 'condição']
-    },
-    {
-        id: 'lento',
-        titulo: 'Lento',
-        categoria: 'condicoes',
-        resumo: 'Deslocamento reduzido à metade.',
-        tags: ['lento', 'condição']
-    },
-    {
-        id: 'machucado',
-        titulo: 'Machucado',
-        categoria: 'condicoes',
-        resumo: 'PV atual é igual ou menor que metade do máximo.',
-        detalhes: 'Uma condição de alerta, não impõe penalidades diretamente, mas indica perigo.',
-        tags: ['machucado', 'pv', 'condição']
-    },
-    {
-        id: 'morrendo',
-        titulo: 'Morrendo',
-        categoria: 'condicoes',
-        resumo: 'Com 0 PV. 3 turnos morrendo = morte.',
-        detalhes: 'Se iniciar três turnos morrendo na mesma cena (não necessariamente consecutivos), você morre.\n\nEncerrar:\n• Teste de Medicina (DT 20)\n• Efeitos específicos que curem PV ou estabilizem',
-        tags: ['morrendo', 'morte', 'pv', 'condição']
-    },
-    {
-        id: 'perturbado',
-        titulo: 'Perturbado',
-        categoria: 'condicoes',
-        resumo: 'SAN atual ≤ metade do máximo. Recebe efeito de insanidade.',
-        detalhes: 'Na primeira vez que isso acontece em uma cena, você recebe um efeito de insanidade (p. 111 do livro).\n\nCondição de alerta para instabilidade mental.',
-        tags: ['perturbado', 'sanidade', 'condição', 'insanidade']
-    },
-    {
-        id: 'em-chamas',
-        titulo: 'Em Chamas',
-        categoria: 'condicoes',
-        resumo: '1d6 de fogo por turno. Ação padrão para apagar.',
-        detalhes: 'No início do turno sofre 1d6 de dano de fogo.\n\nApagar:\n• Ação padrão (bater nas chamas)\n• Imersão em água\n• Rolar no chão (ação de movimento)',
-        tags: ['em chamas', 'fogo', 'dano', 'condição']
-    },
-
-    {
-        id: 'sanidade-basico',
-        titulo: 'Sistema de Sanidade',
-        categoria: 'sanidade',
-        resumo: 'SAN 0 = Enlouquecendo. 3 turnos assim = mente sucumbe.',
-        detalhes: 'Perda de SAN:\n• Testemunhar horror\n• Efeitos paranormais\n• Rituais (custo)\n\nRecuperar: Descanso, rituais, ações de acalmar',
-        tags: ['sanidade', 'loucura', 'mental']
-    },
-    {
-        id: 'enlouquecendo',
-        titulo: 'Enlouquecendo',
-        categoria: 'sanidade',
-        resumo: 'SAN 0. 3 turnos = fica insano (NPC).',
-        detalhes: 'Se iniciar três turnos enlouquecendo na mesma cena (não necessariamente consecutivos), você fica insano — seu personagem se torna um NPC.\n\nEncerrar:\n• Teste de Diplomacia (DT 20 +5 por vez que já foi acalmado na cena)\n• Qualquer efeito que cure pelo menos 1 de Sanidade',
-        tags: ['enlouquecendo', 'loucura', 'sanidade']
-    },
-    {
-        id: 'acalmar',
-        titulo: 'Ação: Acalmar',
-        categoria: 'sanidade',
-        resumo: 'Diplomacia DT 20 para tirar alguém de Enlouquecendo.',
-        detalhes: 'Custo: Ação padrão\nTeste: Diplomacia DT 20 (+5 por vez que já tiver sido acalmado na cena)\n\nAlgumas origens dão bônus (ex: Religioso +5)',
-        tags: ['acalmar', 'sanidade', 'diplomacia']
-    },
-
-    {
-        id: 'ritual-basico',
-        titulo: 'Conjurar Ritual',
-        categoria: 'rituais',
-        resumo: 'Ação padrão. Gasta PE. Teste de Ocultismo se houver DT.',
-        detalhes: 'Elementos: Sangue, Morte, Conhecimento, Energia, Medo\n\nCusto: PE indicado no ritual\nAlcance e efeitos variam por ritual',
-        tags: ['ritual', 'conjurar', 'ocultismo']
-    },
-    {
-        id: 'dt-ritual',
-        titulo: 'DT de Rituais',
-        categoria: 'rituais',
-        resumo: 'DT = 10 + Limite PE + PRE (ou outro atributo).',
-        detalhes: 'Rituais que permitem resistência usam essa fórmula.\nO atributo depende do ritual específico.',
-        tags: ['ritual', 'dt', 'resistência']
-    },
-    {
-        id: 'elementos',
-        titulo: 'Elementos dos Rituais',
-        categoria: 'rituais',
-        resumo: 'Sangue (vermelho), Morte (cinza), Conhecimento (amarelo), Energia (roxo), Medo (branco).',
-        tabela: {
-            cabecalho: ['Elemento', 'Temática'],
-            linhas: [
-                ['Sangue', 'Cura, fortalecimento, dano'],
-                ['Morte', 'Necromancias, dreno, espíritos'],
-                ['Conhecimento', 'Adivinhação, informação'],
-                ['Energia', 'Telecinese, luz, raios'],
-                ['Medo', 'Ilusões, medo, loucura'],
-            ]
-        },
-        tags: ['elemento', 'ritual']
-    },
-
-    {
-        id: 'patentes',
-        titulo: 'Limites por Patente',
-        categoria: 'equipamento',
-        resumo: 'Patente define quantidade máxima de itens por categoria.',
-        tabela: {
-            cabecalho: ['Patente', 'Cat 0', 'Cat I', 'Cat II', 'Cat III', 'Cat IV'],
-            linhas: [
-                ['Recruta', '∞', '3', '-', '-', '-'],
-                ['Operador', '∞', '5', '1', '-', '-'],
-                ['Ag. Especial', '∞', '∞', '2', '1', '-'],
-                ['Of. Operações', '∞', '∞', '3', '2', '-'],
-                ['Ag. Elite', '∞', '∞', '∞', '3', '1'],
-            ]
-        },
-        tags: ['patente', 'categoria', 'limite', 'equipamento']
-    },
-    {
-        id: 'modificacoes',
-        titulo: 'Modificações de Armas',
-        categoria: 'equipamento',
-        resumo: 'Cada modificação aumenta a categoria da arma em +1.',
-        detalhes: 'Tipos comuns:\n• Coronha ajustável (+1 ataque)\n• Mira laser (+1 ataque)\n• Carregador estendido\n• Silenciador',
-        tags: ['modificação', 'arma', 'categoria']
-    },
-
-    {
-        id: 'auxiliar',
-        titulo: 'Ação: Auxiliar',
-        categoria: 'investigacao',
-        resumo: 'Ajude um aliado: ele ganha +1d20 no teste.',
-        detalhes: 'Fora de combate: Sem custo\nEm combate: Gasta ação padrão\n\nVocê deve estar perto do aliado e descrever como ajuda.',
-        dica: 'Múltiplos auxílios se acumulam! 3 ajudando = +3d20',
-        tags: ['auxiliar', 'ajudar', 'bônus', 'grupo']
-    },
-    {
-        id: 'teste-estendido',
-        titulo: 'Testes Estendidos',
-        categoria: 'investigacao',
-        resumo: 'Acumule sucessos até atingir o total necessário.',
-        detalhes: 'O mestre define:\n• DT de cada teste\n• Total de sucessos\n• Intervalo entre testes\n\nEx: Arrombar cofre forte = 3 sucessos em Crime (DT 25), 1 teste por minuto.',
-        tags: ['estendido', 'teste', 'sucessos']
-    },
-    {
-        id: 'investigar-cena',
-        titulo: 'Investigar Cena',
-        categoria: 'investigacao',
-        resumo: 'Investigação para pistas físicas, Percepção para detalhes visuais.',
-        detalhes: 'Investigação: Pistas, evidências, padrões\nPercepção: Ver/ouvir algo escondido\nOcultismo: Identificar o paranormal\n\nDT depende de quão escondida está a pista.',
-        tags: ['investigação', 'percepção', 'pista', 'cena']
-    },
-    {
-        id: 'interludio',
-        titulo: 'Interlúdio (Descanso)',
-        categoria: 'investigacao',
-        resumo: 'Recupera PV, PE, SAN e permite ações de downtime.',
-        detalhes: 'Ações de Interlúdio:\n• Alimentar-se: Recupera PE igual a PRE\n• Dormir: Recupera PV igual a metade do máximo\n• Relaxar: Recupera SAN igual a PRE\n• Treinar: Pode estudar ou praticar\n\nDuração típica: 8 horas',
-        tags: ['interlúdio', 'descanso', 'recuperar', 'pv', 'pe', 'san']
-    },
-    {
-        id: 'opostos',
-        titulo: 'Testes Opostos',
-        categoria: 'testes',
-        resumo: 'Perícia vs perícia. Quem tiver o maior resultado vence.',
-        detalhes: 'Exemplos:\n• Furtividade vs Percepção\n• Enganação vs Intuição\n• Intimidação vs Vontade\n• Luta vs Luta (manobras)',
-        tags: ['oposto', 'teste', 'vs']
-    },
-    {
-        id: 'pv-zero',
-        titulo: 'PV 0 - Morrendo',
-        categoria: 'combate',
-        resumo: 'Cai inconsciente. Fortitude DT 15 por turno ou morre.',
-        detalhes: 'Ao chegar a PV 0:\n• Cai inconsciente\n• A cada turno: Fortitude DT 15\n• Falha = morre\n• Sucesso = estabiliza (não precisa mais testar)\n\nGolpe de Misericórdia: Mata automaticamente',
-        tags: ['morrendo', 'pv', 'morte', 'inconsciente']
-    },
-    {
-        id: 'interrogar',
-        titulo: 'Interrogar / Interagir',
-        categoria: 'investigacao',
-        resumo: 'Diplomacia (convencer), Enganação (mentir), Intimidação (ameaçar).',
-        detalhes: 'Diplomacia: Convém sem enganar\nEnganação: Mentiras e falsidades\nIntimidação: Coerção e ameaças\n\nDT base: 10 (indiferente), +5 hostil, -5 amigável',
-        tags: ['interrogar', 'diplomacia', 'enganação', 'intimidação', 'social']
-    },
-    {
-        id: 'bonus-temporarios',
-        titulo: 'Bônus Temporários',
-        categoria: 'testes',
-        resumo: 'Modifidadores que duram até o fim da cena ou efeito.',
-        detalhes: 'Fontes comuns:\n• Rituais (+X em perícia)\n• Poderes de classe\n• Itens consumo (poções)\n• Auxiliar (+1d20)\n\nBônus do mesmo tipo não acumulam (usar o maior).',
-        tags: ['bônus', 'temporário', 'modificador']
-    },
-    {
-        id: 'retentativa',
-        titulo: 'Retentativa de Teste',
-        categoria: 'testes',
-        resumo: 'Só pode tentar de novo se as circunstâncias mudarem.',
-        detalhes: 'Não pode repetir o mesmo teste imediatamente.\n\nMudando circunstâncias:\n• Usar outra abordagem\n• Receber auxílio\n• Usar equipamento diferente\n• Passar tempo significativo',
-        tags: ['retentativa', 'teste', 'repetir']
-    },
-
-    {
-        id: 'dano-massivo',
-        titulo: 'Dano Massivo',
-        categoria: 'combate',
-        resumo: 'Se sofrer metade do PV máximo em um único golpe, teste Fortitude DT 15.',
-        detalhes: 'Quando sofre dano igual ou maior à metade do seu PV máximo de uma única fonte:\n\nFortitude DT 15:\n• Sucesso: sofre o dano normalmente\n• Falha: cai a 0 PV (morrendo)',
-        dica: 'Criaturas não precisam fazer esse teste.',
-        tags: ['dano', 'massivo', 'morte', 'fortitude']
-    },
-    {
-        id: 'perda-de-vida',
-        titulo: 'Perda de Vida',
-        categoria: 'combate',
-        resumo: 'Reduz PV do alvo e ignora resistência a dano.',
-        detalhes: 'Perda de Vida reduz diretamente os PV do alvo, mas não é afetada por resistência a dano.',
-        tags: ['perda de vida', 'pv', 'combate']
-    },
-    {
-        id: 'queda',
-        titulo: 'Dano de Queda',
-        categoria: 'combate',
-        resumo: '1d6 de impacto por 1,5m de altura. Máximo 20d6.',
-        detalhes: 'Altura → Dano:\n• 1,5m: 1d6\n• 3m: 2d6\n• 6m: 4d6\n• 15m: 10d6\n• 30m+: 20d6 (máximo)\n\nAcrobacia DT 15: reduz 1,5m da queda efetiva',
-        tags: ['queda', 'dano', 'ambiente']
-    },
-    {
-        id: 'asfixia',
-        titulo: 'Asfixia / Afogamento',
-        categoria: 'combate',
-        resumo: 'Prende a respiração por rodadas igual ao Vigor. Depois, Fortitude por rodada.',
-        detalhes: 'Sem ar:\n• Pode prender fôlego por [Vigor] rodadas\n• Depois disso: Fortitude por rodada (DT 5 +5 por teste anterior)\n• Falha: inconsciente e perde 1d6 PV por rodada até respirar ou morrer\n\nNadar: Atletismo. Armadura pesada = -5.',
-        tags: ['asfixia', 'afogamento', 'água', 'vigor']
-    },
-    {
-        id: 'fogo-ambiente',
-        titulo: 'Em Chamas',
-        categoria: 'condicoes',
-        resumo: '1d6 de fogo por turno. Ação padrão para apagar.',
-        detalhes: 'No início de cada turno sofre 1d6 de fogo.\n\nApagar:\n• Ação padrão (bater nas chamas)\n• Imersão em água (automático)\n• Rolar no chão (ação de movimento)',
-        tags: ['fogo', 'chamas', 'dano', 'condição']
-    },
-    {
-        id: 'veneno',
-        titulo: 'Venenos',
-        categoria: 'combate',
-        resumo: 'Fortitude para resistir. Efeito varia por veneno.',
-        detalhes: 'Aplicar veneno: ação de movimento.\nSe o tipo de dano não for especificado, é químico.\n\nTipos de veneno:\n• Contato: toca a pele\n• Ingestão: engolido\n• Inalação: respirado\n• Ferimento: entra por ferida\n\nEfeitos: condições, dano recorrente, ou ambos.',
-        tags: ['veneno', 'fortitude', 'condição']
-    },
-    {
-        id: 'doenca',
-        titulo: 'Doenças',
-        categoria: 'combate',
-        resumo: 'Fortitude para resistir. Efeitos progressivos.',
-        detalhes: 'Funcionam como venenos, mas:\n• Período de incubação maior\n• Podem piorar com o tempo\n• Medicina ou rituais para curar',
-        tags: ['doença', 'fortitude', 'medicina']
-    },
-    {
-        id: 'fome-sede',
-        titulo: 'Fome e Sede',
-        categoria: 'combate',
-        resumo: 'Após dias sem comer/beber, fica Fatigado, depois Exausto.',
-        detalhes: 'Sem comida: Fatigado após [Vigor] dias\nSem água: Fatigado após [Vigor/2] dias\n\nCada dia extra: piora para Exausto, depois Morrendo.',
-        tags: ['fome', 'sede', 'sobrevivência']
-    },
-
-    {
-        id: 'alcances',
-        titulo: 'Categorias de Alcance',
-        categoria: 'combate',
-        resumo: 'Curto 9m, Médio 18m, Longo 36m, Extremo 90m.',
-        tabela: {
-            cabecalho: ['Alcance', 'Metros', 'Quadrados'],
-            linhas: [
-                ['Adjacente', '1,5m', '1'],
-                ['Curto', '9m', '6'],
-                ['Médio', '18m', '12'],
-                ['Longo', '36m', '24'],
-                ['Extremo', '90m', '60'],
-            ]
-        },
-        dica: 'Pode atacar até 2x o alcance com -2 no teste.',
-        tags: ['alcance', 'distância', 'movimento']
-    },
-    {
-        id: 'deslocamento',
-        titulo: 'Deslocamento',
-        categoria: 'combate',
-        resumo: 'Humanos: 9m por ação de movimento. Corrida: 4x.',
-        detalhes: 'Ação de Movimento: deslocamento normal (9m)\nCorrida (completa): 4x deslocamento (36m)\n\nModificadores:\n• Terreno difícil: custo dobrado\n• Lento: metade\n• Sobrecarregado: -3m',
-        tags: ['movimento', 'corrida', 'deslocamento']
-    },
-    {
-        id: 'terreno-dificil',
-        titulo: 'Terreno Difícil',
-        categoria: 'combate',
-        resumo: 'Cada 1,5m custa 3m de movimento. Não pode correr/investir.',
-        detalhes: 'Exemplos:\n• Escombros, entulho\n• Lama, neve profunda\n• Mata fechada\n• Escadas, escadas de mão\n• Multidão',
-        tags: ['terreno', 'movimento', 'difícil']
-    },
-
-    {
-        id: 'iluminacao',
-        titulo: 'Iluminação',
-        categoria: 'combate',
-        resumo: 'Escuro = cego, penumbra = camuflagem.',
-        tabela: {
-            cabecalho: ['Iluminação', 'Efeito'],
-            linhas: [
-                ['Luz plena', 'Normal'],
-                ['Penumbra', 'Camuflagem (20% chance de falha)'],
-                ['Escuridão', 'Camuflagem total (50%) + cego'],
-            ]
-        },
-        tags: ['iluminação', 'escuridão', 'visão']
-    },
-    {
-        id: 'camuflagem',
-        titulo: 'Camuflagem e Cobertura',
-        categoria: 'combate',
-        resumo: 'Camuflagem = chance de errar. Cobertura = +5 DEF.',
-        detalhes: 'Camuflagem: Chance de falha mesmo acertando\n• Leve: 20%\n• Total: 50%\n\nCobertura: Barreira física\n• Normal: +5 DEF\n• Total: não pode ser atacado diretamente',
-        tags: ['camuflagem', 'cobertura', 'defesa']
-    },
-
-    {
-        id: 'agarrado',
-        titulo: 'Agarrado',
-        categoria: 'condicoes',
-        resumo: 'Desprevenido, imóvel, -1d20 ataque, só armas leves.',
-        detalhes: 'Um personagem agarrado:\n• Fica desprevenido + imóvel\n• -1d20 em ataques\n• Só pode usar armas leves\n\n50% de chance de acertar alvo errado com ataques à distância.',
-        tags: ['agarrado', 'condição', 'manobra']
-    },
-    {
-        id: 'confuso',
-        titulo: 'Confuso',
-        categoria: 'condicoes',
-        resumo: 'Role 1d6: move aleatório, balbucia, ataca aliado, ou recupera.',
-        detalhes: '1d6 no início do turno:\n1: Move direção aleatória\n2-3: Balbucia, sem ação\n4-5: Ataca ser mais próximo\n6: Recupera, age normal',
-        tags: ['confuso', 'condição', 'mental']
-    },
-    {
-        id: 'debilitado',
-        titulo: 'Debilitado',
-        categoria: 'condicoes',
-        resumo: '-2d20 em AGI, FOR e VIG. Se de novo, fica inconsciente.',
-        tags: ['debilitado', 'condição', 'físico']
-    },
-    {
-        id: 'doente-cond',
-        titulo: 'Doente',
-        categoria: 'condicoes',
-        resumo: 'Sob efeito de uma doença. Efeito varia.',
-        tags: ['doente', 'condição', 'doença']
-    },
-    {
-        id: 'enjoado',
-        titulo: 'Enjoado',
-        categoria: 'condicoes',
-        resumo: 'Só pode fazer 1 ação (padrão OU movimento) por turno.',
-        tags: ['enjoado', 'condição']
-    },
-    {
-        id: 'enredado',
-        titulo: 'Enredado',
-        categoria: 'condicoes',
-        resumo: 'Lento, vulnerável, -1d20 em ataques.',
-        tags: ['enredado', 'condição', 'paralisia']
-    },
-    {
-        id: 'envenenado',
-        titulo: 'Envenenado',
-        categoria: 'condicoes',
-        resumo: 'Efeito varia. Dano recorrente sempre acumula.',
-        tags: ['envenenado', 'condição', 'veneno']
-    },
-    {
-        id: 'esmorecido',
-        titulo: 'Esmorecido',
-        categoria: 'condicoes',
-        resumo: '-2d20 em INT e PRE.',
-        tags: ['esmorecido', 'condição', 'mental']
-    },
-    {
-        id: 'exausto',
-        titulo: 'Exausto',
-        categoria: 'condicoes',
-        resumo: 'Debilitado + lento + vulnerável. Se de novo, inconsciente.',
-        tags: ['exausto', 'condição', 'fadiga']
-    },
-    {
-        id: 'fascinado',
-        titulo: 'Fascinado',
-        categoria: 'condicoes',
-        resumo: '-2d20 Percepção, não age. Ação hostil cancela.',
-        tags: ['fascinado', 'condição', 'mental']
-    },
-    {
-        id: 'fatigado',
-        titulo: 'Fatigado',
-        categoria: 'condicoes',
-        resumo: 'Fraco + vulnerável. Se de novo, fica exausto.',
-        tags: ['fatigado', 'condição', 'fadiga']
-    },
-    {
-        id: 'fraco',
-        titulo: 'Fraco',
-        categoria: 'condicoes',
-        resumo: '-1d20 em AGI, FOR e VIG. Se de novo, debilitado.',
-        tags: ['fraco', 'condição', 'físico']
-    },
-    {
-        id: 'frustrado',
-        titulo: 'Frustrado',
-        categoria: 'condicoes',
-        resumo: '-1d20 em INT e PRE. Se de novo, esmorecido.',
-        tags: ['frustrado', 'condição', 'mental']
-    },
-    {
-        id: 'indefeso',
-        titulo: 'Indefeso',
-        categoria: 'condicoes',
-        resumo: '-10 DEF, falha em Reflexos, pode sofrer golpe de misericórdia.',
-        tags: ['indefeso', 'condição']
-    },
-    {
-        id: 'ofuscado',
-        titulo: 'Ofuscado',
-        categoria: 'condicoes',
-        resumo: '-1d20 em ataques e Percepção.',
-        tags: ['ofuscado', 'condição', 'sentidos']
-    },
-    {
-        id: 'paralisado',
-        titulo: 'Paralisado',
-        categoria: 'condicoes',
-        resumo: 'Imóvel + indefeso. Só ações mentais.',
-        tags: ['paralisado', 'condição', 'paralisia']
-    },
-    {
-        id: 'pasmo',
-        titulo: 'Pasmo',
-        categoria: 'condicoes',
-        resumo: 'Não pode fazer ações.',
-        tags: ['pasmo', 'condição', 'mental']
-    },
-    {
-        id: 'petrificado',
-        titulo: 'Petrificado',
-        categoria: 'condicoes',
-        resumo: 'Inconsciente + RD 10.',
-        tags: ['petrificado', 'condição']
-    },
-    {
-        id: 'sangrando',
-        titulo: 'Sangrando',
-        categoria: 'condicoes',
-        resumo: 'Início do turno: 1d6 dano. Ação completa + Medicina DT 20 para estabilizar.',
-        detalhes: 'No início do turno: perde 1d6 PV.\n\nEncerrar:\n• Primeiros socorros (ação padrão + Medicina DT 20)\n• Ação completa + Medicina DT 20 para estabilizar alguém\n• Efeitos que curem PV',
-        tags: ['sangrando', 'condição', 'dano']
-    },
-    {
-        id: 'surdo',
-        titulo: 'Surdo',
-        categoria: 'condicoes',
-        resumo: 'Não ouve. -2d20 em Iniciativa.',
-        tags: ['surdo', 'condição', 'sentidos']
-    },
-    {
-        id: 'surpreendido',
-        titulo: 'Surpreendido',
-        categoria: 'condicoes',
-        resumo: 'Desprevenido e não pode agir.',
-        tags: ['surpreendido', 'condição', 'iniciativa']
-    },
-    {
-        id: 'vulneravel',
-        titulo: 'Vulnerável',
-        categoria: 'condicoes',
-        resumo: '-2 na Defesa.',
-        tags: ['vulnerável', 'condição', 'defesa']
-    },
-    {
-        id: 'alquebrado',
-        titulo: 'Alquebrado',
-        categoria: 'condicoes',
-        resumo: '+1 PE no custo de habilidades e rituais.',
-        tags: ['alquebrado', 'condição', 'mental', 'pe']
-    },
-
-    {
-        id: 'hierarquia-condicoes',
-        titulo: 'Hierarquia de Condições',
-        categoria: 'condicoes',
-        resumo: 'Condições que pioram quando aplicadas de novo.',
-        detalhes: 'Progressões:\n• Abalado → Apavorado\n• Frustrado → Esmorecido\n• Fraco → Debilitado → Inconsciente\n• Fatigado → Exausto → Inconsciente',
-        tags: ['hierarquia', 'condição', 'acúmulo']
-    },
-
-    {
-        id: 'golpe-misericordia',
-        titulo: 'Golpe de Misericórdia',
-        categoria: 'combate',
-        resumo: 'Ação completa. Mata automaticamente alvo indefeso.',
-        detalhes: 'Requisitos:\n• Alvo indefeso\n• Você adjacente ao alvo\n• Gasta ação completa\n\nEfeito: morte automática (sem rolagem).',
-        tags: ['golpe', 'misericórdia', 'morte', 'indefeso']
-    },
-    {
-        id: 'ataque-oportunidade',
-        titulo: 'Ataque de Oportunidade',
-        categoria: 'combate',
-        resumo: 'Reação ao inimigo sair do seu alcance ou fazer ação descuidada.',
-        detalhes: 'Provoca ataque de oportunidade:\n• Sair do alcance corpo a corpo\n• Fazer ataque à distância adjacente\n• Conjurar ritual adjacente\n\nUm por rodada, como reação.',
-        tags: ['oportunidade', 'reação', 'ataque']
-    },
-    {
-        id: 'combater-duas-armas',
-        titulo: 'Combater com Duas Armas',
-        categoria: 'combate',
-        resumo: 'Ataque extra com arma secundária leve, ambos com -1d20.',
-        detalhes: 'Requisitos:\n• Arma leve na mão secundária\n• Treinado em Luta ou Pontaria\n\nEfeito: Ataque adicional\nPenalidade: -1d20 em ambos os ataques',
-        tags: ['duas armas', 'ataque', 'leve']
-    },
-    {
-        id: 'atacar-distancia-cac',
-        titulo: 'Ataque à Distância em Corpo a Corpo',
-        categoria: 'combate',
-        resumo: '-1d20 no teste e provoca ataque de oportunidade.',
-        detalhes: 'Atirar/arremessar estando adjacente a inimigo:\n• -1d20 no teste de ataque\n• Provoca ataque de oportunidade\n\nMirar elimina a penalidade de -1d20.',
-        tags: ['distância', 'corpo a corpo', 'penalidade']
-    },
-    {
-        id: 'arma-automatica',
-        titulo: 'Armas Automáticas (Rajada)',
-        categoria: 'equipamento',
-        resumo: '-1d20 no ataque, +1 dado de dano.',
-        detalhes: 'Armas automáticas podem disparar rajadas:\n• Penalidade: -1d20 no ataque\n• Bônus: +1 dado de dano do mesmo tipo\n\nFuzis, submetralhadoras, metralhadoras.',
-        tags: ['automática', 'rajada', 'arma']
-    },
-    {
-        id: 'arma-agil',
-        titulo: 'Armas Ágeis',
-        categoria: 'equipamento',
-        resumo: 'Pode usar AGI em vez de FOR para ataque e dano.',
-        detalhes: 'Armas ágeis: Faca, punhal, cajado, nunchaku, florete, katana.\n\nVocê pode usar Agilidade em vez de Força para:\n• Testes de ataque\n• Rolagens de dano',
-        tags: ['ágil', 'agilidade', 'arma']
-    },
-
-    {
-        id: 'capacidade-carga',
-        titulo: 'Capacidade de Carga',
-        categoria: 'equipamento',
-        resumo: '5 espaços por ponto de Força. FOR 0 = 2 espaços.',
-        detalhes: 'Espaços de carga = FOR x 5\n(FOR 0 = 2 espaços)\n\nSobrecarregado (acima do limite):\n• -5 Defesa\n• -5 em perícias afetadas\n• -3m deslocamento\n\nMáximo: 2x limite',
-        tags: ['carga', 'força', 'equipamento']
-    },
-    {
-        id: 'espacos-itens',
-        titulo: 'Espaços de Itens',
-        categoria: 'equipamento',
-        resumo: 'Normal 1, arma 2 mãos 2, proteção pesada 5, pessoa 10.',
-        tabela: {
-            cabecalho: ['Item', 'Espaços'],
-            linhas: [
-                ['Item comum', '1'],
-                ['Arma de duas mãos', '2'],
-                ['Proteção leve', '2'],
-                ['Proteção pesada', '5'],
-                ['Pessoa (carregar)', '10'],
-            ]
-        },
-        tags: ['espaço', 'carga', 'item']
-    },
-
     {
         id: 'tipos-dano',
         titulo: 'Tipos de Dano',
-        categoria: 'combate',
-        resumo: 'Corte, impacto, perfuração, balístico, e especiais.',
+        categoria: 'ataques',
+        resumo: 'Físico, Elemental e Paranormal.',
         tabela: {
-            cabecalho: ['Tipo', 'Exemplos'],
+            cabecalho: ['Tipo', 'Fontes Comuns'],
             linhas: [
-                ['Corte (C)', 'Espadas, facas, garras'],
-                ['Impacto (I)', 'Martelos, socos, quedas'],
-                ['Perfuração (P)', 'Lanças, flechas, presas'],
-                ['Balístico (B)', 'Armas de fogo'],
-                ['Fogo', 'Incêndio, explosões'],
-                ['Eletricidade', 'Raios, tasers'],
-                ['Frio', 'Gelo, baixas temperaturas'],
-                ['Químico', 'Ácido, venenos'],
-                ['Mental', 'Paranormal, terror'],
+                ['Balístico / Corte', 'Projéteis / Facas e Espadas'],
+                ['Impacto / Perfuração', 'Bastões, Quedas / Garras, Flechas'],
+                ['Eletricidade / Fogo / Frio', 'Choques, Climático, Rituais de Energia/Sangue'],
+                ['Químico / Mental', 'Ácidos, Venenos / Choques psicológicos (Reduz SAN)'],
+                ['Paranormal', 'Conhecimento, Energia, Medo, Morte, Sangue']
             ]
         },
-        tags: ['dano', 'tipo', 'resistência']
-    },
-    {
-        id: 'resistencia-dano',
-        titulo: 'Resistência a Dano (RD)',
-        categoria: 'combate',
-        resumo: 'Reduz dano do tipo específico pelo valor da RD.',
-        detalhes: 'RD X (tipo): reduz dano daquele tipo em X.\nExemplo: RD 5 balístico reduz dano por arma de fogo em 5.\n\nProteção Pesada: RD 2 (corte, impacto, perfuração, balístico).',
-        tags: ['resistência', 'dano', 'rd', 'proteção']
+        tags: ['dano', 'elementos', 'físico', 'paranormal', 'RD']
     },
 
     {
-        id: 'ritual-componentes',
-        titulo: 'Componentes Ritualísticos',
-        categoria: 'rituais',
-        resumo: 'Necessários para conjurar. Cada elemento tem seus itens.',
-        detalhes: 'Sangue: órgãos, sangue, navalhas\nMorte: ossos, cinzas, plantas mortas\nConhecimento: livros, pergaminhos, ouro\nEnergia: eletrônicos, pilhas, pólvora\n\nSem componente = não pode conjurar.',
-        tags: ['componente', 'ritual', 'elemento']
+        id: 'manobra-geral',
+        titulo: 'Regras de Manobras de Combate',
+        categoria: 'manobras',
+        resumo: 'Manobra usa 1 ataque CC. Teste oposto de manobra vs Luta do alvo.',
+        detalhes: '• É um ataque corpo a corpo feito com objetivo diferente (derrubar, desarmar).\n• NÃO pode com arma à distância (salvo exceções).\n• O teste do ATACANTE (usando arma que usa / manobra) contra um Teste do ALVO. O Alvo rola Luta pra resistir, mesmo se tiver segurando uma pistola.\n• Empate: Nada acontece. Alvo se mantém seguro.',
+        tags: ['manobra', 'luta', 'teste oposto']
     },
     {
-        id: 'ritual-execucao',
-        titulo: 'Tempo de Execução',
-        categoria: 'rituais',
-        resumo: 'Padrão (1 ação) ou longo (ação completa ou mais).',
-        detalhes: 'Padrão: gasta 1 ação padrão\nCompleta: gasta 1 ação completa\n\nRituais complexos podem levar minutos ou até horas.',
-        tags: ['execução', 'ritual', 'tempo']
+        id: 'manobra-agarrar',
+        titulo: '🤼 Agarrar',
+        categoria: 'manobras',
+        resumo: 'Imobiliza. Você fica com -1 mão e lento. O alvo fica Desprevenido e Imóvel.',
+        detalhes: 'Requisito: Mão livre (Ataque desarmado).\nO Alvo Agarrado:\n- Fica Desprevenido e Imóvel.\n- Sofre -1d20 em testes de ataque e só pode atacar com armas leves.\nO Agarrador:\n- Fica com 1 mão ocupada.\n- Move-se com metade do deslocamento normal.\n\nSufocar/Esmagar:\nO agarrador pode usar uma ação padrão para fazer um novo teste de manobra. Se vencer, causa o dano de seu ataque desarmado automaticamente.\n\nEscapar:\nO alvo pode usar uma ação padrão para tentar escapar fazendo um teste de manobra. Se vencer, ele se liberta.\n⚠️ Atirar corpor a corpo: Atirar com arma à distância numa criatura envolvida na manobra agarrar tem 50% de chance de atingir o alvo errado.',
+        tags: ['agarrar', 'prender', 'imóvel', 'manobra']
     },
+    {
+        id: 'manobra-derrubar',
+        titulo: '⬇️ Derrubar',
+        categoria: 'manobras',
+        resumo: 'Alvo fica Caído. Vencer por 5+ de diferença causa um Empurrão junto.',
+        detalhes: 'Ao vencer, alvo fica Caído.\nSe diferença > 5, empurra 1,5m em direção escolhida.\nSe bater em borda/precipício: o alvo rola Reflexos DT 20 pra se salvar no parapeito.',
+        tags: ['derrubar', 'chão', 'caído', 'manobra']
+    },
+    {
+        id: 'manobras-outras',
+        titulo: 'Outras Manobras (Desarmar, Empurrar, Quebrar, Atropelar)',
+        categoria: 'manobras',
+        resumo: 'Desarme e Atropelo.',
+        tabela: {
+            cabecalho: ['Manobra', 'Se tiver Sucesso', 'Detalhe (Margem +5)'],
+            linhas: [
+                ['🔫 Desarmar', 'Item cai na frente do alvo', 'Empurrar item 1,5m'],
+                ['🏃 Empurrar', 'Empurra alvo 1,5m p/ trás', '+1,5m por cada +5 pt de dif.'],
+                ['💥 Quebrar', 'Bate direto no PV do item', '---'],
+                ['🐂 Atropelar', 'Mover por cima do alvo. Se resistir e perder, Alvo Caído', 'Ação Gasta em Meio ao Movimento / Investida (Livre)']
+            ]
+        },
+        tags: ['desarmar', 'empurrar', 'quebrar', 'atropelar', 'investida']
+    },
+
+    {
+        id: 'ferimento-morte',
+        titulo: 'Condições Fatais (Morrendo e Inconsciente)',
+        categoria: 'condicoes',
+        resumo: 'Regras de PV, Estabilização e Morte.',
+        detalhes: '• Machucado: PV ≤ metade do PV Máximo.\n• Morrendo (PV = 0): Você cai Caído, e fica Inconsciente e Morrendo.\n• Morte Definitiva: Falhar em 3 testes de Morte ou Iniciar 3 turnos na condição "Morrendo" em uma mesma cena.\n\nCura vs Morrendo:\n- Acordar da condição INCONSCIENTE ocorre ao ser curado para 1 ou mais PV.\n- A condição MORRENDO termina ao receber cura para 1+ PV ou ao ser alvo de Primeiros Socorros (Medicina DT 20, feito por um aliado).\n\nDano Massivo:\nSofrer dano ≥ 50% do PV Máximo em um único ataque (sem zerar sua vida) exige um teste de Fortitude (DT 15 ou metade do dano). Em caso de falha, cai a 0 PV e fica Morrendo.',
+        tags: ['morte', 'morrendo', 'pv', 'dano massivo', 'inconsciente', 'machucado']
+    },
+    {
+        id: 'dano-nao-letal',
+        titulo: 'Dano Não Letal',
+        categoria: 'condicoes',
+        resumo: 'Ataques nocautes dão -5 no acerto.',
+        detalhes: '• Se um ataque que lida dano letal for declarado para dar dano não letal, sofre -5 no teste de ataque.\n• Dano não letal é acumulado junto aos danos recebidos para verificação da saúde máxima.\n• Se o seu PV for zerado por uma fonte que causou apenas dano NÃO LETAL, o personagem fica apenas Inconsciente, porém estável (não recebe a condição Morrendo).\n• Qualquer cura recobre todo dano não letal igual ao dobro do valor da cura.',
+        tags: ['não letal', 'nocaute', 'apagar']
+    },
+    {
+        id: 'condicoes-debilitantes',
+        titulo: 'Debuffs Escaláveis (Atributos e Fadiga)',
+        categoria: 'condicoes',
+        resumo: 'Condições que pioram ao aplicar repetidas vezes.',
+        tabela: {
+            cabecalho: ['Tipo', 'Progressão', 'Efeito Final'],
+            linhas: [
+                ['Físicos (FOR, AGI, VIG)', 'Fraco (-1d20 nas três skills) → Debilitado (-2d20)', 'Terceira vez = Inconsciente'],
+                ['Mentais (INT, PRE)', 'Frustrado (-1d20 nas duas skills) → Esmorecido (-2d20)', 'Fim de linha'],
+                ['Fadiga', 'Fatigado (Fraco + Vulnerável) → Exausto (Debilitado + Lento + Vulnerável)', 'Terceira vez = Inconsciente']
+            ]
+        },
+        tags: ['fadiga', 'fraco', 'debilitado', 'exausto', 'físico', 'mental', 'esmorecido']
+    },
+    {
+        id: 'condicoes-paralisia-dano',
+        titulo: 'Condições Punitivas (Chamas, Sangramento)',
+        categoria: 'condicoes',
+        resumo: 'Fogo, Venenos e asfixia causam dano por turno.',
+        tabela: {
+            cabecalho: ['Doença/Situação', 'Regra da Condição'],
+            linhas: [
+                ['Sangrando', 'No início de seus turnos, faz Fortitude DT 20. Se falhar, perde 1d6 PV. Se passar, sangramento termina. Pode ser retirado com Medicina (DT 20) no aliado.'],
+                ['Em Chamas', 'No início de seus turnos, sofre 1d6 de dano de Fogo. Um personagem pode gastar uma ação padrão para apagar as chamas de si ou adjacente.'],
+                ['Asfixiado', 'Pode prender a respiração por turnos iguais a sua Vigília. Depois, Fortitude (DT 5 +5 inst.); falha causa 1d6 dano contínuo.'],
+                ['Envenenado', 'Sofre o efeito do veneno. Efeitos iguais não acumulam, apenas prolongam a duração do debuff ou se resistem individualmente.'],
+                ['Enjoado', 'Só pode realizar uma ação padrão ou de movimento (não ambas) em seu turno.']
+            ]
+        },
+        tags: ['sangrando', 'chamas', 'asfixiado', 'envenenado', 'enjoado']
+    },
+    {
+        id: 'condicoes-sentidos-mente',
+        titulo: 'Condições Mentais, Sentidos e Medo',
+        categoria: 'condicoes',
+        resumo: 'Cego, Surdo, Pasmo, Confuso e Tabela de Medo.',
+        tabela: {
+            cabecalho: ['Condição', 'Problema Mecânico'],
+            linhas: [
+                ['Ofuscado', 'Sofre -1d20 em testes de ataque e Percepção para observar.'],
+                ['Cego', 'Fica desprevenido e lento, falha em Percepção visual, e sofre -1d20 em testes de atributos FOR ou AGI. Ataques de seus inimigos ganham camuflagem total (50% de falha).'],
+                ['Surdo', 'Falha em testes de Percepção baseados em audição. Sofre -1d20 em Iniciativa e tem 50% de chance de falhar em conjurações não mentais.'],
+                ['Pasmo', 'Não pode realizar ações (mas pode realizar reações).'],
+                ['Confuso', 'Ações determinadas por d6: 1) afasta-se para longe; 2-3) não faz nada; 4-5) ataca criatura adjacente aleatória; 6) age normalmente.'],
+                ['Fascinado', 'Sofre -2d20 em Percepção e não pode realizar ações além de focar na atração.'],
+                ['Atordoado', 'Fica desprevenido e não pode realizar ações.'],
+                ['Alquebrado', 'O custo em PE das habilidades e rituais do personagem aumenta em +1.'],
+                ['Abalado / Apavorado', 'Abalado: -1d20 em testes. Apavorado: -2d20 em testes e tenta fugir da fonte do medo.']
+            ]
+        },
+        tags: ['cego', 'confuso', 'atordoado', 'surdo', 'alquebrado', 'medo', 'apavorado']
+    },
+    {
+        id: 'outras-condicoes',
+        titulo: 'Condições Clássicas (Indefeso, Vulnerável, etc)',
+        categoria: 'condicoes',
+        resumo: 'Penalidades de defesa do grid.',
+        tabela: {
+            cabecalho: ['Nome', 'Regra'],
+            linhas: [
+                ['Vulnerável', 'Sofre -2 na Defesa.'],
+                ['Desprevenido', 'Sofre -5 na Defesa e -1d20 nas rolagens de Reflexos.'],
+                ['Indefeso', 'Fica Desprevenido, sofre -10 na Defesa, falha em testes de Reflexos e pode sofrer Golpe de Misericórdia.'],
+                ['Caído', 'Sofre -2d20 em ataques corpo a corpo. Sua Defesa diminui em 5 contra ataques corpo a corpo e aumenta em 5 contra longo alcance. Deslocamento reduzido a 1,5m.'],
+                ['Enredado', 'Fica lento e vulnerável, e sofre -1d20 em testes de ataque e Agilidade.'],
+                ['Paralisado', 'Fica imóvel e indefeso. Só pode realizar ações puramente mentais.']
+            ]
+        },
+        tags: ['indefeso', 'desprevenido', 'vulnerável', 'caído', 'enredado', 'paralisado']
+    },
+
+    {
+        id: 'sanidade-perda-morte',
+        titulo: 'Fluxo da Loucura e Sanidade',
+        categoria: 'sanidade',
+        resumo: 'Perturbado, Enlouquecendo, Insano.',
+        detalhes: '• Perturbado (SAN ≤ metade): O personagem entra num breve colapso psicológico narrativo no primeiro instante que sua sanidade cai abaixo da metade.\n• Enlouquecendo (SAN = 0): O personagem sofre de surtos e fica "Enlouquecendo". Ele se torna um NPC fora do controle no fim da cena (Insano).\n\nAcalmando o Surto de Enlouquecendo:\n- Um teste de Diplomacia (DT 20 + 5 por tentativa anterior na mesma cena) feito por um aliado adia a loucura.\n- Qualquer efeito que cure +1 de Sanidade (como Rituais ou descanso) retira o personagem do estado Enlouquecendo.\n\nNota: Poder "Transcender": Você abdica de ganhar a SAN máxima do respectivo avanço de NEX.',
+        tags: ['sanidade', 'loucura', 'perturbado', 'enlouquecendo']
+    },
+    {
+        id: 'insanidade-nao-letal',
+        titulo: 'A Loucura (Não Letal) - Opcional',
+        categoria: 'sanidade',
+        resumo: 'Efeitos randômicos gerados ao se chegar a 0 de Sanidade, para campanhas mais brandas.',
+        tabela: {
+            cabecalho: ['D6', 'Trauma'],
+            linhas: [
+                ['1. Paranoia', 'Torna-se hostil e não pode beneficiar ou ser beneficiado por aliados.'],
+                ['2. Euforia', 'Agita-se freneticamente. Custo e limite de PE dobrados. Sofre 1 dano PV/PE por turno.'],
+                ['3. Alucina', 'Vê ameaças que não existem. Vontade (DT 20) inverte o turno; se falhar, perde a ação padrão.'],
+                ['4. Fúria Homicida', 'Ataca violentamente a criatura mais próxima (+2 ataque CC). Se for aliado, Vontade (DT 20) para evitar.'],
+                ['5. Amnésia', 'Esquece de quem é. Perde a habilidade de conjurar rituais e poderes paranormais.'],
+                ['6. Inversão', 'Tem tendências suicidas. Causa dano a si mesmo no início do turno se empunhar arma cortante/impacto.']
+            ]
+        },
+        tags: ['sanidade', 'loucura não letal']
+    },
+    {
+        id: 'efeitos-de-medo',
+        titulo: 'A Loucura (Medo) - Tabela 2d10',
+        categoria: 'sanidade',
+        resumo: 'Efeitos randômicos de trauma gerados ao se chegar a 0 de Sanidade, utilizando a mecânica narrativa de Medo.',
+        detalhes: 'Ao invés de ficar apenas "Enlouquecendo", o personagem entra em colapso. Um aliado pode acalmar (+1 SAN) rolando Diplomacia/Religião/Psicólogo dependendo da regra ou origem.\n\nSe Entregar para o Medo:\nUm personagem a 0 SAN pode escolher se entregar. Rola 2d10+5 na tabela (ou +6, +7 a cada nova vez). Interpreta o trauma de forma exagerada, mas na rodada seguinte recupera 1d4 SAN por nível e se livra de condições incapacitantes como Paralisia ou Inconsciência (Limitação: 1x por sessão de jogo).',
+        tabela: {
+            cabecalho: ['2d10', 'Efeito', 'Descrição'],
+            linhas: [
+                ['2', 'Encorajamento', 'Recupera 1 SAN para cada 5% de NEX e +1d20 num teste qualquer à escolha até o fim da cena.'],
+                ['3', 'Surto de adrenalina', '+5 em testes de ataque e rolagens de dano na cena. Outras ações exigem Vontade DT 20 (falha perde ação).'],
+                ['4', 'Hesitação', 'Fica atordoado por 1 rodada.'],
+                ['5', 'Fraqueza', 'Começa a passar mal e a suar. Fica fraco.'],
+                ['6', 'Lapso', 'Eventos da última hora ficam nebulosos. Fica frustrado.'],
+                ['7', 'Ansiedade', 'Falha automática no próximo teste (pode gastar Padrão fazendo algo inútil para se livrar).'],
+                ['8', 'Desorientação', 'Dificuldade de entender onde está. Fica desprevenido.'],
+                ['9', 'Desespero', 'Atacado por tristeza avassaladora. Falha automaticamente em qualquer teste de Vontade.'],
+                ['10', 'Histeria', 'Ri ou chora descontroladamente por 1d4 rodadas (-1d20 em todos testes).'],
+                ['11', 'Abalo', 'Fica tremendo e ofegante. Fica abalado.'],
+                ['12', 'Alucinação', 'Maior dado de qualquer teste ímpar = falha automática.'],
+                ['13', 'Susto', 'Passa a tremer e arfar de forma incontrolável. Fica apavorado.'],
+                ['14', 'Confusão', 'Perde o controle de suas ações e fica confuso.'],
+                ['15', 'Paralisia', '"Congela", ficando paralisado por 1d4 rodadas e então abalado.'],
+                ['16', 'Pavor', 'Deve fugir. Ações que exigem concentração têm 50% de falha. Se não fugir, fica encolhido. Se fugir, fica abalado.'],
+                ['17', 'Desmaio', 'A mente se desliga para se proteger. Cai inconsciente.'],
+                ['18', 'Trauma', 'Fica paralisado e rola 1d6. De 1 a 5, perde 1 ponto permanente num atributo. No 6 não perde atributo.'],
+                ['19', 'Loucura', 'A mente começa a sucumbir. Fica enlouquecendo de acordo com o Livro Básico.'],
+                ['20+', 'Choque sistêmico', 'O corpo entra em choque cardiorrespiratório. Fica com 0 PV e morrendo.']
+            ]
+        },
+        tags: ['medo', 'tabela 2d10', 'trauma', 'se entregar']
+    },
+    {
+        id: 'insanidade-efeitos-1d20',
+        titulo: 'Tabela de Insanidade (1d20)',
+        categoria: 'sanidade',
+        resumo: 'Efeitos narrativos para quando o personagem fica Perturbado (SAN ≤ metade) pela 1ª vez na cena.',
+        detalhes: 'Quando ocorre o colapso do personagem por atingir a marca de "Perturbado", ele pode desenvolver um tique ou trauma provisório. Se a SAN zerar na missão, este sintoma vira permanente narrativo até o fim da mesma.',
+        tabela: {
+            cabecalho: ['1d20', 'Efeito de Insanidade'],
+            linhas: [
+                ['1', 'Busca dor. Sentir ou causar.'],
+                ['2', 'Vê o rosto das pessoas mesclados com monstros.'],
+                ['3', 'Vozes se tornam assustadoras como monstros.'],
+                ['4', 'Voz na cabeça repetindo constantemente que você mente.'],
+                ['5', 'Seu sangue queima, querendo sair do corpo.'],
+                ['6', 'Vê rostos encardidos nas sombras te encarando.'],
+                ['7', 'Fome devoradora te domina insaciavelmente.'],
+                ['8', 'Gosto de sangue/ferro constante na boca.'],
+                ['9', 'Luz ambiente machuca absurdamente os olhos.'],
+                ['10', 'Falar se torna impossível, mudo temporário.'],
+                ['11', 'Seus olhos coçam pedindo para serem arrancados.'],
+                ['12', 'Sua memória recente apaga tudo da última hora.'],
+                ['13', 'Emoções invertidas (dor gera riso, felicidade gera choro).'],
+                ['14', 'Necessidade psicótica de descrever coisas com muito sangue.'],
+                ['15', 'Sente vermes correndo grossos debaixo da pele.'],
+                ['16', 'Acredita arrogância estar sob efeito de um ritual divino invencível.'],
+                ['17', 'Bolsos furados e mãos bambas (as coisas começam a cair).'],
+                ['18', 'Acredita puramente apenas na sorte de rolagens e acaso.'],
+                ['19', 'A temperatura parece ferver, mas você sente prazer.'],
+                ['20', 'O fim de tudo deve ser celebrado. Precisa antecipar o "fim".']
+            ]
+        },
+        tags: ['insanidade', 'tabela d20', 'tabela 1d20', 'perturbado']
+    },
+
+    {
+        id: 'ritual-acao-limite',
+        titulo: 'Conjuração e Rituais Limitadores',
+        categoria: 'rituais',
+        resumo: 'Ritual custa PE. Elementos têm relações de Opressão contra Criaturas (+Dmg).',
+        detalhes: 'Tempos de Conjuração:\nAção Padrão (maioria), Movimento, Livre, Reação, ou Ação Completa.\n\nGrau de Magia:\n- Básico (Normal)\n- Discente (+ Custo. Potencializa o efeito Base).\n- Verdadeiro (+ Custo e exige Afinidade com a classe do Elemento).\n\nLimite de PE por Turno:\nO personagem não pode gastar mais PE por rodada do que seu limite estabelecido (seu NEX determina o Limite de PE). EX: NEX 50% = limite de 10 PE por turno somados (entre ataques especiais, rituais e esquivas).\n⚠️ REGRA SALVADORA: Independentemente do limite excedido de PE, você SEMPRE PODE PAGAR o custo base mínimo de uma habilidade de classe ou ritual.',
+        tags: ['ritual', 'conjurar', 'PE', 'ciclo', 'elementos']
+    },
+    {
+        id: 'ritual-ciclo',
+        titulo: 'Ciclo dos Elementos (Opressão)',
+        categoria: 'rituais',
+        resumo: 'Sangue > Conhecimento > Energia > Morte > Sangue. Medo domina tudo.',
+        detalhes: 'Opressor ganha bônus e passa por resistências de oprimidos. Medo machuca geral.',
+        tags: ['elementos', 'opressão', 'fraqueza']
+    },
+    {
+        id: 'buffs',
+        titulo: 'PV Temporários e Cura Acelerada',
+        categoria: 'rituais',
+        resumo: 'Regras de bônus flutuantes no PV.',
+        detalhes: '• PV Temporários: Bônus garantidos por certas habilidades. O Dano sempre abate de PV Temporários antes de tocar na vida letal. PV Temporário de fontes diferentes não acumulam (apenas substitui pelo de valor maior) e desaparecem ao final da cena.\n• Cura Acelerada: O personagem com isso naturaliza parte vital de sua essência por turno (Início de seu turno). Valores de Cura Acelerada não se acumulam.',
+        tags: ['cura', 'cura rápido', 'temp', 'buffs']
+    },
+
+    {
+        id: 'quebrando-objetos',
+        titulo: 'PV, Defesa e RD de Itens',
+        categoria: 'equipamento',
+        resumo: 'Destruição de cenário e objetos. Usado para quebrar portas ou armas ativas.',
+        tabela: {
+            cabecalho: ['Material', 'RD Fixo', 'Tamanho e Defesa'],
+            linhas: [
+                ['Papel/Corda', 'RD 0 - PV 1 a 2', 'Minusculo: 15'],
+                ['Arma de Madeira', 'RD 5 - PV 5', 'Pequeno: 12'],
+                ['Porta de Madeira', 'RD 5 - PV 20', 'Grande: 8'],
+                ['Porta de Ferro/Grade', 'RD 8 até 10 / PV 50', 'Grande: 8'],
+                ['Espada Metal', 'RD 10 - PV 10', 'Médio: 10'],
+                ['Carro', 'RD 10 - PV 100', 'Enorme: 5']
+            ]
+        },
+        dica: 'Atacar um objeto empunhado exige a manobra Quebrar. Para atacar um objeto solto, apenas faça o teste contra a Defesa do objeto. RD conta por cada golpe recebido.',
+        tags: ['quebrar', 'portas', 'pv item', 'tamanho']
+    },
+    {
+        id: 'regras-acumulos',
+        titulo: 'Acumulando Bônus Mecânicos',
+        categoria: 'testes',
+        resumo: 'Regras de empilhamento de habilidades em RPG (Stacking Rules).',
+        detalhes: '⚠️ Mesma Fonte: Bônus da mesma origem ou mesmo tipo de ritual não se acumulam (Ex: lançar duas magias da mesma escola no alvo só resulta no bônus de maior valor).\n⚠️ Aumentos e Diminuições: Habilidades somam entre si se forem de fontes diferentes; Itens nunca acumulam duas proteções ou armaduras, você sempre escolhe o bônus final de maior valor.\n⚠️ Chance Falha (Camuflar): Chances de falha não são cumulativas. Você joga a maior chance de falha aplicável (O máximo é sempre 50% da Camuflagem Total).\n⚠️ Condições: Podem se somar caso o status final progrida para o estado seguinte (Exemplo: Fraco + Fraco = Debilitado).',
+        tags: ['bônus', 'acumular', 'matemática', 'falha']
+    },
+
+    {
+        id: 'interludios-descanco',
+        titulo: 'Ações de Interlúdio (Descanso)',
+        categoria: 'investigacao',
+        resumo: 'Ações que os jogadores tomam durante as rodadas de narrativa segura entre cenas tensas (Intervalo/Repouso).',
+        tabela: {
+            cabecalho: ['Ação Fogueira', 'Restituição / Efeito'],
+            linhas: [
+                ['Dormir', 'Obriga um período de repouso longo. Recupera PV e PE igual a Nível de Exp (NEX) x 1 ou x3 dependendo do local.'],
+                ['Alimentar', 'Cria o efeito bônus positivo temporário por dia (+5 nos PV temp máximos da equipe até a final).'],
+                ['Relaxar', 'Maneira principal de recobrar Sanidade (-SAN). Se juntar com alguém que também está Relaxando, amplifica o ganho.'],
+                ['Exercitar / Ler', 'Ganha um dado bônus (+1d20) engatilhado pro seu próximo teste a realizar dos pilares Força/Agilidade (físicos) ou Inteligencia/Presença (Mentais).'],
+                ['Revisar Caso', 'Soma tudo que os jogadores discutiram ou acharam da Investigação para receber as pistas complementares fornecidas pelo Mestre sobre o Enigma.']
+            ]
+        },
+        tags: ['fogueira', 'descanso', 'dormir', 'interlúdio', 'cura']
+    }
 ];
 
-export function buscarRegras(termo: string): Regra[] {
-    const termoLower = termo.toLowerCase();
+export function buscarRegras(query: string): Regra[] {
+    const q = query.toLowerCase();
     return REGRAS.filter(r =>
-        r.titulo.toLowerCase().includes(termoLower) ||
-        r.resumo.toLowerCase().includes(termoLower) ||
-        r.tags.some(t => t.includes(termoLower)) ||
-        r.detalhes?.toLowerCase().includes(termoLower)
+        r.titulo.toLowerCase().includes(q) ||
+        r.resumo.toLowerCase().includes(q) ||
+        (r.detalhes && r.detalhes.toLowerCase().includes(q)) ||
+        r.tags.some(tag => tag.toLowerCase().includes(q))
     );
 }
 

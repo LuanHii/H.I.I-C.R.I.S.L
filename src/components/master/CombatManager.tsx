@@ -141,7 +141,6 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
     const { npcs } = useCloudNPCs();
     const npcData = useMemo(() => npcs.map(n => n.npc), [npcs]);
 
-
     const allCreatures = useMemo(() => {
 
         const parseIniciativa = (sentidos: string | undefined): number => {
@@ -181,7 +180,15 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                 pv: a.vida ?? 0,
                 defesa: a.defesa ?? 10,
                 iniciativa: parseIniciativa(a.sentidos),
-                abilities
+                abilities,
+                atributos: a.atributos,
+                fortitude: (a as any).fortitude,
+                reflexos: (a as any).reflexos,
+                vontade: (a as any).vontade,
+                resistencias: (a as any).resistencias,
+                imunidades: (a as any).imunidades,
+                vulnerabilidades: (a as any).vulnerabilidades,
+                deslocamento: (a as any).deslocamento,
             };
         });
     }, [userThreats]);
@@ -453,7 +460,6 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                         </p>
                     </div>
 
-
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setShowAddModal(true)}
@@ -483,7 +489,6 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                 </div>
             </motion.div>
 
-
             <div className="flex gap-6">
 
                 <div className="flex-1 min-w-0">
@@ -497,7 +502,6 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                     <p className="text-[10px] text-ordem-text-muted uppercase">Rodada</p>
                                 </div>
 
-
                                 <div className="text-center">
                                     <span className="text-2xl font-bold text-ordem-green">
                                         {sortedCombatants.length > 0 ? state.currentTurnIndex + 1 : 0}
@@ -506,7 +510,6 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                     <p className="text-[10px] text-ordem-text-muted uppercase">Turno</p>
                                 </div>
 
-
                                 {currentCombatant && state.isActive && (
                                     <div className="hidden sm:block pl-4 border-l border-ordem-border">
                                         <p className="text-xs text-ordem-text-muted">Vez de:</p>
@@ -514,7 +517,6 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                     </div>
                                 )}
                             </div>
-
 
                             <div className="flex items-center gap-2">
                                 <button
@@ -675,7 +677,6 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                     )}
                 </div>
 
-
                 <AnimatePresence>
                     {showQuickRef && (
                         <motion.div
@@ -690,7 +691,6 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                         <BookOpen size={16} /> Referência Rápida
                                     </h3>
                                 </div>
-
 
                                 <div className="flex border-b border-ordem-border">
                                     <button
@@ -721,7 +721,6 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                         Condições
                                     </button>
                                 </div>
-
 
                                 <div className="max-h-[calc(100vh-300px)] overflow-y-auto custom-scrollbar">
                                     {quickRefTab === 'dice' && (
@@ -791,7 +790,6 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                     )}
                 </AnimatePresence>
             </div>
-
 
             <AddCombatantModal
                 isOpen={showAddModal}

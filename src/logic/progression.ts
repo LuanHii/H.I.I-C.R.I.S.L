@@ -1,123 +1,10 @@
-import { Personagem, AtributoKey, Trilha, Poder, PericiaName } from '../core/types';
+import { Personagem, AtributoKey, Poder, PericiaName } from '../core/types';
 import { calculateDerivedStats } from '../core/rules/derivedStats';
 import { TRILHAS } from '../data/tracks';
 import { PODERES, verificarRequisitos } from '../data/powers';
 import { calcularPericiasDetalhadas, calcularCarga } from './rulesEngine';
 
-const NEX_ATRIBUTO = [20, 50, 80, 95];
-const ESTAGIO_ATRIBUTO = [3];
-
-const NEX_HABILIDADE = [10, 40, 65, 99];
-const ESTAGIO_HABILIDADE = [2, 4];
-const NEX_PODER = [15, 30, 45, 60, 75, 90];
-
-export function levelUp(character: Personagem): Personagem {
-  const newChar = { ...character };
-
-  if (newChar.classe === 'Sobrevivente') {
-    const currentStage = newChar.estagio || 1;
-    const newStage = currentStage + 1;
-    newChar.estagio = newStage;
-
-    if (ESTAGIO_ATRIBUTO.includes(newStage)) {
-      newChar.pontosAtributoPendentes = (newChar.pontosAtributoPendentes || 0) + 1;
-    }
-
-    if (ESTAGIO_HABILIDADE.includes(newStage)) {
-      if (!newChar.trilha && newStage === 2) {
-        newChar.escolhaTrilhaPendente = true;
-      } else if (newChar.trilha) {
-        addTrackAbility(newChar, newStage, true);
-      }
-    }
-
-  } else {
-    const currentNex = newChar.nex;
-    if (currentNex >= 99) return newChar;
-    const newNex = currentNex === 95 ? 99 : currentNex + 5;
-    newChar.nex = newNex;
-    if (newNex === 35 || newNex === 70) {
-      const basePorClasse: Record<string, number> = {
-        Combatente: 2,
-        Especialista: 5,
-        Ocultista: 3,
-      };
-      const base = basePorClasse[newChar.classe] ?? 0;
-      const qtd = Math.max(0, base + newChar.atributos.INT);
-      if (qtd > 0) {
-        const alvo = newNex === 35 ? 'Veterano' : 'Expert';
-        const atual = newChar.periciasPromocaoPendentes;
-        newChar.periciasPromocaoPendentes = {
-          alvo,
-          restante: (atual && atual.alvo === alvo ? atual.restante : 0) + qtd,
-        };
-      }
-    }
-
-    if (NEX_ATRIBUTO.includes(newNex)) {
-      newChar.pontosAtributoPendentes = (newChar.pontosAtributoPendentes || 0) + 1;
-    }
-
-    if (NEX_HABILIDADE.includes(newNex)) {
-      if (!newChar.trilha && newNex === 10) {
-        newChar.escolhaTrilhaPendente = true;
-      } else if (newChar.trilha) {
-        addTrackAbility(newChar, newNex, false);
-      }
-    }
-    if (NEX_PODER.includes(newNex)) {
-      newChar.poderesClassePendentes = (newChar.poderesClassePendentes || 0) + 1;
-    }
-  }
-
-  recalculateStats(newChar);
-
-  return newChar;
-}
-
-export function levelDown(character: Personagem): Personagem {
-  const newChar = { ...character };
-
-  if (newChar.classe === 'Sobrevivente') {
-    const currentStage = newChar.estagio || 1;
-    if (currentStage <= 1) return newChar;
-
-    const oldStage = currentStage;
-    newChar.estagio = currentStage - 1;
-
-    if (ESTAGIO_ATRIBUTO.includes(oldStage)) {
-      newChar.pontosAtributoPendentes = (newChar.pontosAtributoPendentes || 0) - 1;
-    }
-
-    if (ESTAGIO_HABILIDADE.includes(oldStage) && newChar.trilha) {
-      removeTrackAbility(newChar, oldStage, true);
-    }
-
-  } else {
-    const currentNex = newChar.nex;
-    if (currentNex <= 5) return newChar;
-
-    const oldNex = currentNex;
-    newChar.nex = currentNex === 99 ? 95 : currentNex - 5;
-
-    if (NEX_ATRIBUTO.includes(oldNex)) {
-      newChar.pontosAtributoPendentes = (newChar.pontosAtributoPendentes || 0) - 1;
-    }
-
-    if (NEX_HABILIDADE.includes(oldNex) && newChar.trilha) {
-      removeTrackAbility(newChar, oldNex, false);
-    }
-  }
-
-  recalculateStats(newChar);
-
-  return newChar;
-}
-
 export function applyAttributePoint(character: Personagem, attribute: AtributoKey): Personagem {
-  if (!character.pontosAtributoPendentes || character.pontosAtributoPendentes <= 0) {
-    return character;
-  }
   if (character.classe === 'Sobrevivente' && character.atributos[attribute] >= 3) {
     return character;
   }
@@ -154,13 +41,12 @@ export function chooseTrack(character: Personagem, trackName: string): Personage
   newChar.escolhaTrilhaPendente = false;
 
   const currentLevel = newChar.classe === 'Sobrevivente' ? (newChar.estagio || 0) : newChar.nex;
-  const isStage = newChar.classe === 'Sobrevivente';
 
   const trilhaData = TRILHAS.find(t => t.nome === trackName);
   if (trilhaData) {
     trilhaData.habilidades.forEach(h => {
       if (h.nex <= currentLevel) {
-        addTrackAbility(newChar, h.nex, isStage);
+        addTrackAbility(newChar, h.nex);
       }
     });
   }
@@ -196,7 +82,8 @@ function recalculateStats(char: Personagem) {
   char.pe.rodada = derived.peRodada;
 
   char.san.max = targetSanMax;
-  char.san.atual = Math.min(char.san.max, Math.max(0, char.san.atual + diffSAN));
+  char.san.atual = Math.min(char.san.max, Math.max(0, char.san.atual + diffSAN));
+
   if (char.defesa !== undefined && !char.overrides?.defesa) {
     char.defesa = derived.defesa;
   }
@@ -211,7 +98,8 @@ function recalculateStats(char: Personagem) {
       char.pd.max = targetPdMax;
       char.pd.atual = Math.min(char.pd.max, Math.max(0, char.pd.atual + diffPD));
     }
-  }
+  }
+
   const cargaInfo = calcularCarga({
     atributos: char.atributos,
     itens: char.equipamentos,
@@ -221,15 +109,18 @@ function recalculateStats(char: Personagem) {
   char.carga = {
     atual: cargaInfo.atual,
     maxima: cargaInfo.maxima
-  };
+  };
+
   const extrasFixos: Partial<Record<PericiaName, number>> = {};
   if (derived.furtividadeBonus) extrasFixos.Furtividade = (extrasFixos.Furtividade || 0) + derived.furtividadeBonus;
   if (derived.percepcaoBonus) extrasFixos.Percepção = (extrasFixos.Percepção || 0) + derived.percepcaoBonus;
   if (derived.iniciativaBonus) extrasFixos.Iniciativa = (extrasFixos.Iniciativa || 0) + derived.iniciativaBonus;
   if (derived.enganacaoBonus) extrasFixos.Enganação = (extrasFixos.Enganação || 0) + derived.enganacaoBonus;
   if (derived.diplomaciaBonus) extrasFixos.Diplomacia = (extrasFixos.Diplomacia || 0) + derived.diplomaciaBonus;
-  if (derived.fortitudeBonus) extrasFixos.Fortitude = (extrasFixos.Fortitude || 0) + derived.fortitudeBonus;
-  const overridesFixos = char.overrides?.periciaFixos || {};
+  if (derived.fortitudeBonus) extrasFixos.Fortitude = (extrasFixos.Fortitude || 0) + derived.fortitudeBonus;
+
+  const overridesFixos = char.overrides?.periciaFixos || {};
+
   const finalExtrasFixos: Partial<Record<PericiaName, number>> = { ...extrasFixos };
   for (const [key, val] of Object.entries(overridesFixos)) {
     const k = key as PericiaName;
@@ -240,12 +131,12 @@ function recalculateStats(char: Personagem) {
     char.atributos,
     char.pericias,
     {
-      fixos: finalExtrasFixos,
+      fixos: finalExtrasFixos,
+
       dados: char.bonus?.periciaDados
     }
   );
 }
-
 
 export function recalcularRecursosPersonagem(personagem: Personagem): Personagem {
   const char = { ...personagem };
@@ -253,7 +144,7 @@ export function recalcularRecursosPersonagem(personagem: Personagem): Personagem
   return char;
 }
 
-function addTrackAbility(char: Personagem, level: number, isStage: boolean) {
+function addTrackAbility(char: Personagem, level: number) {
   const trilhaData = TRILHAS.find(t => t.nome === char.trilha);
   if (!trilhaData) return;
 
@@ -284,37 +175,29 @@ function addTrackAbility(char: Personagem, level: number, isStage: boolean) {
   }
 }
 
-function removeTrackAbility(char: Personagem, level: number, isStage: boolean) {
-  const trilhaData = TRILHAS.find(t => t.nome === char.trilha);
-  if (!trilhaData) return;
-
-  const habilidade = trilhaData.habilidades.find(h => h.nex === level);
-  if (habilidade) {
-    char.poderes = char.poderes.filter(p => p.nome !== habilidade.nome);
-    if (char.habilidadesTrilhaPendentes) {
-      char.habilidadesTrilhaPendentes = char.habilidadesTrilhaPendentes.filter(p => p.habilidade !== habilidade.nome);
-    }
-  }
-}
-
-
 export function choosePower(character: Personagem, poderNome: string): Personagem {
-  const newChar = { ...character };
+  const newChar = { ...character };
+
   if (!newChar.poderesClassePendentes || newChar.poderesClassePendentes <= 0) {
     throw new Error('Não há poderes de classe pendentes para escolher.');
-  }
+  }
+
   const poder = PODERES.find(p => p.nome === poderNome);
   if (!poder) {
     throw new Error(`Poder "${poderNome}" não encontrado.`);
-  }
+  }
+
   if (newChar.poderes.some(p => p.nome === poderNome)) {
     throw new Error(`Você já possui o poder "${poderNome}".`);
-  }
+  }
+
   const { elegivel, motivo } = verificarRequisitos(poder, newChar);
   if (!elegivel) {
     throw new Error(`Requisito não atendido: ${motivo}`);
-  }
-  newChar.poderes = [...newChar.poderes, poder];
+  }
+
+  newChar.poderes = [...newChar.poderes, poder];
+
   newChar.poderesClassePendentes = (newChar.poderesClassePendentes || 1) - 1;
   if (newChar.poderesClassePendentes <= 0) {
     newChar.poderesClassePendentes = undefined;

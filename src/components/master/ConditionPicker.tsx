@@ -12,14 +12,14 @@ interface ConditionPickerProps {
     onAdd: (conditionId: string) => void;
     onRemove: (conditionId: string) => void;
     compact?: boolean;
-}
+}
 const CONDITIONS = REGRAS.filter(r => r.categoria === 'condicoes');
 
 export function ConditionPicker({ selectedConditions, onAdd, onRemove, compact = false }: ConditionPickerProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');
     const [hoveredCondition, setHoveredCondition] = useState<Regra | null>(null);
-    const dropdownRef = useRef<HTMLDivElement>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -174,7 +174,7 @@ export function ConditionPicker({ selectedConditions, onAdd, onRemove, compact =
             </AnimatePresence>
         </div>
     );
-}
+}
 export function ConditionBadges({
     conditions,
     onRemove,

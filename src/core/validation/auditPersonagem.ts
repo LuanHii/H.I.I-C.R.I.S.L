@@ -242,8 +242,3 @@ export function summarizeIssues(issues: PersonagemIssue[]) {
   const warns = issues.filter((i) => i.severity === 'aviso').length;
   return { errors, warns, total: errors + warns };
 }
-
-
-
-
-

@@ -130,30 +130,40 @@ export function useCloudFichas() {
       const fichaId = id ?? crypto.randomUUID();
       const now = new Date().toISOString();
 
-      if (isAuthenticated && userId) {
+      setFichas((prev) => {
+        const fichaExistente = prev.find((f) => f.id === fichaId);
+        const campanhaFinal = campanha !== undefined ? campanha : fichaExistente?.campanha;
 
-        const fichaCloud: FichaRegistroCloud = {
-          id: fichaId,
-          personagem,
-          atualizadoEm: now,
-          campanha,
-        };
-        try {
-          await saveFichaToCloud(userId, fichaCloud);
+        if (isAuthenticated && userId) {
+          const fichaCloud: FichaRegistroCloud = {
+            id: fichaId,
+            personagem,
+            atualizadoEm: now,
+            campanha: campanhaFinal,
+          };
 
-          await saveAgentToCloud(fichaId, personagem);
-        } catch (err) {
-          console.error('Erro ao salvar ficha na nuvem:', err);
-        }
-      } else {
+          saveFichaToCloud(userId, fichaCloud).catch((err) =>
+            console.error('Erro ao salvar ficha na nuvem:', err)
+          );
+          saveAgentToCloud(fichaId, personagem).catch((err) =>
+            console.error('Erro saveAgent:', err)
+          );
 
-        setFichas((prev) => {
-          const fichaExistente = prev.find((f) => f.id === fichaId);
           const registro: FichaRegistroCloudType = {
             id: fichaId,
             personagem,
             atualizadoEm: now,
-            campanha: campanha ?? fichaExistente?.campanha,
+            campanha: campanhaFinal,
+            sincronizadaNaNuvem: true,
+          };
+          const existentes = prev.filter((f) => f.id !== fichaId);
+          return [registro, ...existentes];
+        } else {
+          const registro: FichaRegistroCloudType = {
+            id: fichaId,
+            personagem,
+            atualizadoEm: now,
+            campanha: campanhaFinal,
             sincronizadaNaNuvem: fichaExistente?.sincronizadaNaNuvem,
           };
           const existentes = prev.filter((f) => f.id !== fichaId);
@@ -165,10 +175,38 @@ export function useCloudFichas() {
           }
 
           return atualizadas;
-        });
-      }
+        }
+      });
     },
     [isAuthenticated, userId]
+  );
+
+  const sincronizarFicha = useCallback(
+    async (id: string) => {
+      if (!isAuthenticated || !userId) return;
+
+      const alvo = fichas.find((f) => f.id === id);
+      if (!alvo) return;
+
+      const now = new Date().toISOString();
+      const fichaCloud: FichaRegistroCloud = {
+        id: alvo.id,
+        personagem: alvo.personagem,
+        atualizadoEm: now,
+        campanha: alvo.campanha,
+      };
+
+      try {
+        await saveFichaToCloud(userId, fichaCloud);
+        await saveAgentToCloud(alvo.id, alvo.personagem);
+
+        setFichas((prev) => prev.map(f => f.id === id ? { ...f, sincronizadaNaNuvem: true, atualizadoEm: now } : f));
+      } catch (err) {
+        console.error('Erro ao sincronizar ficha manualmente:', err);
+        throw err;
+      }
+    },
+    [isAuthenticated, userId, fichas]
   );
 
   const marcarComoSincronizada = useCallback(
@@ -252,32 +290,31 @@ export function useCloudFichas() {
 
   const moverParaCampanha = useCallback(
     async (fichaId: string, campanhaId: string | undefined) => {
-      const ficha = fichas.find((f) => f.id === fichaId);
-      if (!ficha) return;
+      setFichas((prev) => {
+        const ficha = prev.find((f) => f.id === fichaId);
+        if (!ficha) return prev;
 
-      if (isAuthenticated && userId) {
-        const updated: FichaRegistroCloud = {
-          id: fichaId,
-          personagem: ficha.personagem,
-          atualizadoEm: new Date().toISOString(),
-          campanha: campanhaId,
-        };
-        try {
-          await saveFichaToCloud(userId, updated);
-        } catch (err) {
-          console.error('Erro ao mover ficha de campanha:', err);
-        }
-      } else {
-        setFichas((prev) => {
-          const atualizadas = prev.map((f) =>
-            f.id === fichaId ? { ...f, campanha: campanhaId, atualizadoEm: new Date().toISOString() } : f
+        const atualizadas = prev.map((f) =>
+          f.id === fichaId ? { ...f, campanha: campanhaId, atualizadoEm: new Date().toISOString() } : f
+        );
+
+        if (isAuthenticated && userId) {
+          const updated: FichaRegistroCloud = {
+            id: fichaId,
+            personagem: ficha.personagem,
+            atualizadoEm: new Date().toISOString(),
+            campanha: campanhaId,
+          };
+          saveFichaToCloud(userId, updated).catch((err) =>
+            console.error('Erro ao mover ficha de campanha:', err)
           );
+        } else {
           gravarFichasLocal(atualizadas);
-          return atualizadas;
-        });
-      }
+        }
+        return atualizadas;
+      });
     },
-    [fichas, isAuthenticated, userId]
+    [isAuthenticated, userId]
   );
 
   return useMemo(
@@ -289,8 +326,9 @@ export function useCloudFichas() {
       duplicar,
       moverParaCampanha,
       marcarComoSincronizada,
+      sincronizarFicha,
       isCloudMode: isAuthenticated,
     }),
-    [fichas, loading, salvar, remover, duplicar, moverParaCampanha, marcarComoSincronizada, isAuthenticated]
+    [fichas, loading, salvar, remover, duplicar, moverParaCampanha, marcarComoSincronizada, sincronizarFicha, isAuthenticated]
   );
 }

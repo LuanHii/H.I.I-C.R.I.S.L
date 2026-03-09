@@ -472,7 +472,6 @@ export function subscribeToWatchedFichas(
   );
 }
 
-
 export async function isWatchingFicha(userId: string, agentId: string): Promise<boolean> {
   try {
     const watched = await getAllWatchedFichas(userId);
@@ -482,11 +481,9 @@ export async function isWatchingFicha(userId: string, agentId: string): Promise<
   }
 }
 
-// --- NPCs ---
-
 export interface NPCRegistroCloud {
   id: string;
-  npc: any; // Using 'any' to avoid strict type dependency here, or import NPC from types
+  npc: any;
   atualizadoEm: string;
 }
 

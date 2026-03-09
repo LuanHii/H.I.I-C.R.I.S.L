@@ -1,6 +1,6 @@
 import { db, auth } from './config';
 import { doc, setDoc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { Personagem } from '../types';
+import { Personagem } from '../types';
 interface AgentDocument extends Personagem {
     ownerId?: string;
     updatedAt?: string;
@@ -24,7 +24,7 @@ function removeUndefinedFields<T extends object>(obj: T): T {
 }
 
 export const saveAgentToCloud = async (agentId: string, agentData: Personagem, ownerId?: string) => {
-    try {
+    try {
         const currentUserId = ownerId || auth.currentUser?.uid;
 
         const dataWithOwner: AgentDocument = {

@@ -81,7 +81,6 @@ export const NpcEditor: React.FC<NpcEditorProps> = ({ initialData, onSave, onCan
         <div className="fixed inset-0 bg-ordem-black/95 z-50 flex items-center justify-center p-4 overflow-y-auto backdrop-blur-sm">
             <div className="bg-ordem-ooze border border-ordem-border-light rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl shadow-black/50">
 
-                {/* Header */}
                 <div className="flex justify-between items-center p-6 border-b border-ordem-border bg-ordem-black/40 rounded-t-lg">
                     <div className="flex items-center gap-3">
                         <div className="bg-ordem-red/20 p-2 rounded text-ordem-red border border-ordem-red/30">
@@ -102,7 +101,6 @@ export const NpcEditor: React.FC<NpcEditorProps> = ({ initialData, onSave, onCan
                     </div>
                 </div>
 
-                {/* Tabs */}
                 <div className="flex border-b border-ordem-border bg-ordem-black/20">
                     <button
                         onClick={() => setActiveTab('geral')}
@@ -124,7 +122,6 @@ export const NpcEditor: React.FC<NpcEditorProps> = ({ initialData, onSave, onCan
                     </button>
                 </div>
 
-                {/* Content */}
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-ordem-black/20">
                     {activeTab === 'geral' && (
                         <div className="space-y-8">

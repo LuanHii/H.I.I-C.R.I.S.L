@@ -197,6 +197,9 @@ export interface ModificacaoArma {
     ignoraCamuflagem?: boolean;
     multiplicadorCritico?: number;
     danoExtraFixo?: string;
+    empunhaduraUmaMao?: boolean;
+    capacidadeMunicaoDupla?: boolean;
+    recargaLivre?: boolean;
   };
   livro: 'Regras Básicas' | 'Sobrevivendo ao Horror';
 }
