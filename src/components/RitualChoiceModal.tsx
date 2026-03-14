@@ -2,9 +2,10 @@
 
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Search, BookOpen, Lock, Check, Flame, Skull, Brain, Zap, Ghost } from 'lucide-react';
+import { X, Search, BookOpen, Check } from 'lucide-react';
 import { Personagem, Ritual, Elemento } from '../core/types';
 import { RITUAIS } from '../data/rituals';
+import { ELEMENTO_CONFIG } from '../data/elementColors';
 import { cn } from '../lib/utils';
 
 interface RitualChoiceModalProps {
@@ -14,14 +15,6 @@ interface RitualChoiceModalProps {
 
     circuloMaximo?: number;
 }
-
-const ELEMENTO_CONFIG: Record<Elemento, { icon: React.ElementType; color: string; bg: string }> = {
-    Sangue: { icon: Flame, color: 'text-red-400', bg: 'bg-red-500/20' },
-    Morte: { icon: Skull, color: 'text-purple-400', bg: 'bg-purple-500/20' },
-    Conhecimento: { icon: Brain, color: 'text-blue-400', bg: 'bg-blue-500/20' },
-    Energia: { icon: Zap, color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
-    Medo: { icon: Ghost, color: 'text-gray-400', bg: 'bg-gray-500/20' },
-};
 
 function calcularCirculoMaximo(nex: number): number {
     if (nex >= 75) return 3;
@@ -68,9 +61,11 @@ export function RitualChoiceModal({
         });
     }, [circuloMaximo, rituaisConhecidos, filtroElemento, filtroCirculo, busca]);
 
+    const ritualId = (r: Ritual) => `${r.nome}|${r.elemento}`;
+
     const handleConfirm = () => {
         if (!ritualSelecionado) return;
-        const ritual = rituaisFiltrados.find(r => r.nome === ritualSelecionado);
+        const ritual = rituaisFiltrados.find(r => ritualId(r) === ritualSelecionado);
         if (ritual) {
             onSelect(ritual);
         }
@@ -207,15 +202,15 @@ export function RitualChoiceModal({
                         ) : (
                             rituaisFiltrados.map((ritual) => (
                                 <motion.div
-                                    key={ritual.nome}
+                                    key={ritualId(ritual)}
                                     layout
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
-                                    onClick={() => setRitualSelecionado(ritual.nome)}
+                                    onClick={() => setRitualSelecionado(ritualId(ritual))}
                                     className={cn(
                                         'p-3 rounded-lg border cursor-pointer transition-all',
-                                        ritualSelecionado === ritual.nome
+                                        ritualSelecionado === ritualId(ritual)
                                             ? 'border-blue-500 bg-blue-500/10'
                                             : 'border-ordem-border hover:border-ordem-border-light bg-ordem-bg/50'
                                     )}
@@ -228,7 +223,7 @@ export function RitualChoiceModal({
                                                 <span className="text-xs px-1.5 py-0.5 bg-ordem-border rounded">
                                                     {ritual.circulo}º círculo
                                                 </span>
-                                                {ritualSelecionado === ritual.nome && (
+                                                {ritualSelecionado === ritualId(ritual) && (
                                                     <Check size={16} className="text-blue-400" />
                                                 )}
                                             </div>

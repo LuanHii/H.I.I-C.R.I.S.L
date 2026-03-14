@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import type { ComponentProps } from 'react';
@@ -114,7 +114,7 @@ export function MestreNavbar({
             <Link
               href="/"
               className="p-2 text-ordem-text-secondary hover:text-white active:text-ordem-red transition-colors touch-target-sm"
-              aria-label="Sair"
+              aria-label="Voltar ao início"
             >
               <Home size={20} />
             </Link>
@@ -134,11 +134,11 @@ export function MestreNavbar({
             </>
           ) : (
             <>
-              <MestreLink href={{ pathname: '/mestre', query: { tab: 'ameacas' } }} label="AMEAÇAS" active={inMestreRoot && tab === 'ameacas'} />
-              <MestreLink href={{ pathname: '/mestre', query: { tab: 'combate' } }} label="COMBATE" active={inMestreRoot && tab === 'combate'} />
-              <MestreLink href={{ pathname: '/mestre', query: { tab: 'inventario' } }} label="INVENTÁRIO" active={inMestreRoot && tab === 'inventario'} />
-              <MestreLink href={{ pathname: '/mestre', query: { tab: 'guia' } }} label="GUIA" active={inMestreRoot && tab === 'guia'} />
-              <MestreLink href={{ pathname: '/mestre', query: { tab: 'npcs' } }} label="NPCs" active={inMestreRoot && tab === 'npcs'} />
+              <MestreLink href="/mestre?tab=ameacas" label="AMEAÇAS" active={inMestreRoot && tab === 'ameacas'} />
+              <MestreLink href="/mestre?tab=combate" label="COMBATE" active={inMestreRoot && tab === 'combate'} />
+              <MestreLink href="/mestre?tab=inventario" label="INVENTÁRIO" active={inMestreRoot && tab === 'inventario'} />
+              <MestreLink href="/mestre?tab=guia" label="GUIA" active={inMestreRoot && tab === 'guia'} />
+              <MestreLink href="/mestre?tab=npcs" label="NPCs" active={inMestreRoot && tab === 'npcs'} />
               <MestreLink href="/mestre/fichas" label="FICHAS" active={inFichas} />
             </>
           )}

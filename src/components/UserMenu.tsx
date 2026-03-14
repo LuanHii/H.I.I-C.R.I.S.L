@@ -4,7 +4,9 @@ import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { useAuth } from '@/core/firebase/auth';
 import { deleteAllUserData } from '@/core/firebase/userDataService';
+import { useUIStore } from '@/stores/useUIStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from './ui/Modal';
 
 interface MigrationStatus {
   inProgress: boolean;
@@ -24,7 +26,13 @@ interface UserMenuProps {
 
 export function UserMenu({ migrationStatus, hasPendingLocalData, onMigrateClick }: UserMenuProps) {
   const { user, loading, error, signInWithGoogle, signOut, isAuthenticated } = useAuth();
+  const scanlineEnabled = useUIStore((s) => s.scanlineEnabled);
+  const toggleScanline = useUIStore((s) => s.toggleScanline);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteModalStep, setDeleteModalStep] = useState<1 | 2>(1);
+  const [deleteInProgress, setDeleteInProgress] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -174,6 +182,17 @@ export function UserMenu({ migrationStatus, hasPendingLocalData, onMigrateClick 
 
             <div className="p-2 space-y-1">
               <button
+                type="button"
+                onClick={() => toggleScanline()}
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-ordem-white/70 hover:text-ordem-white hover:bg-ordem-white/5 rounded-sm transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <span>{scanlineEnabled ? 'Desativar efeito scanline' : 'Ativar efeito scanline'}</span>
+              </button>
+              <button
                 onClick={() => {
                   setMenuOpen(false);
                   signOut();
@@ -186,30 +205,10 @@ export function UserMenu({ migrationStatus, hasPendingLocalData, onMigrateClick 
                 <span>Sair da conta</span>
               </button>
               <button
-                onClick={async () => {
-                  if (!user) return;
-                  const confirmed = window.confirm(
-                    'ATENÇÃO: Isso irá DELETAR PERMANENTEMENTE todos os seus dados na nuvem (fichas, campanhas, monstros, itens).\n\nEssa ação NÃO PODE ser desfeita.\n\nDeseja continuar?'
-                  );
-                  if (!confirmed) return;
-
-                  const doubleConfirm = window.confirm(
-                    'Tem CERTEZA ABSOLUTA? Digite OK para confirmar a exclusão de todos os dados.'
-                  );
-                  if (!doubleConfirm) return;
-
+                onClick={() => {
                   setMenuOpen(false);
-                  try {
-                    const result = await deleteAllUserData(user.uid);
-                    if (result.success) {
-                      alert(`${result.deleted} item(ns) deletado(s). Seus dados na nuvem foram removidos.`);
-                      signOut();
-                    } else {
-                      alert('Erro ao deletar alguns dados. Tente novamente.');
-                    }
-                  } catch {
-                    alert('Erro ao deletar dados.');
-                  }
+                  setDeleteModalStep(1);
+                  setDeleteModalOpen(true);
                 }}
                 className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-400/70 hover:text-red-400 hover:bg-red-500/10 rounded-sm transition-colors"
               >
@@ -236,11 +235,85 @@ export function UserMenu({ migrationStatus, hasPendingLocalData, onMigrateClick 
         </div>
       )}
 
-      {error && (
-        <div className="absolute right-0 top-full mt-2 p-2 bg-red-500/20 border border-red-500/50 text-red-400 text-xs rounded-sm">
-          {error}
+      {(error || deleteError) && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] px-4 py-3 bg-ordem-black border border-ordem-red rounded-lg shadow-lg text-ordem-red text-sm font-mono max-w-[90vw]">
+          {error || deleteError}
         </div>
       )}
+
+      <Modal open={deleteModalOpen} onOpenChange={(open) => {
+        if (!deleteInProgress) {
+          setDeleteModalOpen(open);
+          if (!open) setDeleteModalStep(1);
+        }
+      }}>
+        <ModalContent size="md" showCloseButton={!deleteInProgress}>
+          <ModalHeader>
+            <h2 className="text-lg font-bold text-ordem-red">
+              {deleteModalStep === 1 ? 'Excluir todos os dados' : 'Confirmação final'}
+            </h2>
+          </ModalHeader>
+          <ModalBody>
+            {deleteInProgress ? (
+              <div className="flex flex-col items-center gap-4 py-4">
+                <div className="w-10 h-10 border-2 border-ordem-red/50 border-t-ordem-red rounded-full animate-spin" />
+                <p className="text-ordem-text-secondary text-sm">Excluindo dados...</p>
+              </div>
+            ) : deleteModalStep === 1 ? (
+              <p className="text-ordem-text-secondary text-sm">
+                Isso irá DELETAR PERMANENTEMENTE todos os seus dados na nuvem (fichas, campanhas, monstros, itens). Essa ação NÃO PODE ser desfeita.
+              </p>
+            ) : (
+              <p className="text-ordem-text-secondary text-sm">
+                Tem CERTEZA ABSOLUTA? Esta é a última confirmação antes de excluir todos os seus dados.
+              </p>
+            )}
+          </ModalBody>
+          {!deleteInProgress && (
+            <ModalFooter>
+              <button
+                onClick={() => setDeleteModalOpen(false)}
+                className="px-4 py-2 border border-ordem-border text-ordem-text-secondary hover:text-white rounded-lg text-sm"
+              >
+                Cancelar
+              </button>
+              {deleteModalStep === 1 ? (
+                <button
+                  onClick={() => setDeleteModalStep(2)}
+                  className="px-4 py-2 bg-ordem-red hover:bg-red-700 text-white rounded-lg text-sm font-medium"
+                >
+                  Continuar
+                </button>
+              ) : (
+                <button
+                  onClick={async () => {
+                    if (!user) return;
+                    setDeleteInProgress(true);
+                    setDeleteError(null);
+                    try {
+                      const result = await deleteAllUserData(user.uid);
+                      setDeleteModalOpen(false);
+                      if (result.success) {
+                        signOut();
+                      } else {
+                        setDeleteError('Erro ao deletar alguns dados. Tente novamente.');
+                      }
+                    } catch {
+                      setDeleteModalOpen(false);
+                      setDeleteError('Erro ao deletar dados.');
+                    } finally {
+                      setDeleteInProgress(false);
+                    }
+                  }}
+                  className="px-4 py-2 bg-ordem-red hover:bg-red-700 text-white rounded-lg text-sm font-medium"
+                >
+                  Excluir tudo
+                </button>
+              )}
+            </ModalFooter>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

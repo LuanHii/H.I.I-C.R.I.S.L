@@ -65,9 +65,18 @@ export const MasterDashboard: React.FC = () => {
     }
   };
 
+  const tabSubtitles: Record<TabId, string> = {
+    fichas: 'ARQUIVO // FICHAS',
+    ameacas: 'AMEAÇAS',
+    combate: 'COMBATE',
+    inventario: 'INVENTÁRIO',
+    guia: 'GUIA MESTRE',
+    npcs: 'NPCs',
+  };
+
   return (
     <div className="flex flex-col w-full min-h-screen bg-ordem-black text-ordem-white">
-      <MestreNavbar activeTab={activeTab} onTabSelect={setTab} />
+      <MestreNavbar activeTab={activeTab} onTabSelect={setTab} subtitle={tabSubtitles[activeTab]} />
 
       <main className="flex-1 relative overflow-hidden bg-ordem-black-deep">
         { }

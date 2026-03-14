@@ -15,16 +15,19 @@ import {
 } from '../logic/creationWorkflow';
 import { useCloudFichas } from '../core/storage';
 import { calcularPericiasIniciais, TODAS_PERICIAS } from '../logic/characterUtils';
-import { CLASSES } from '../data/classes';
 import { ORIGENS } from '../data/origins';
 import { RITUAIS } from '../data/rituals';
-import { ITENS } from '../data/items';
-import { WEAPONS } from '../data/weapons';
 import { TRILHAS } from '../data/tracks';
-import { MODIFICACOES_ARMAS, getModificacoesParaArma } from '../data/modifications';
-import { Atributos, ClasseName, ClasseStats, Personagem, PericiaName, Ritual, Item, Elemento, Trilha, Poder, ModificacaoArma, Patente } from '../core/types';
-import { ClassePreferencias, listarPatentes, getPatenteConfig } from '../logic/rulesEngine';
+import { Atributos, ClasseName, Personagem, PericiaName, Ritual, Item, Elemento, Trilha, Poder, ModificacaoArma, Patente } from '../core/types';
+import { ClassePreferencias, getPatenteConfig } from '../logic/rulesEngine';
 import type { RecreateDraft } from '../logic/recreateFromPersonagem';
+import { TipoStep } from './creation/TipoStep';
+import { ConceitoClasseStep } from './creation/ConceitoClasseStep';
+import { AtributosStep } from './creation/AtributosStep';
+import { OrigemStep } from './creation/OrigemStep';
+import { PericiasStep } from './creation/PericiasStep';
+import { RituaisStep } from './creation/RituaisStep';
+import { EquipamentoStep } from './creation/EquipamentoStep';
 
 const ELEMENTO_COLORS: Record<Elemento, string> = {
   Sangue: 'border-red-600 text-red-500',
@@ -32,12 +35,6 @@ const ELEMENTO_COLORS: Record<Elemento, string> = {
   Conhecimento: 'border-yellow-600 text-yellow-500',
   Energia: 'border-purple-500 text-purple-400',
   Medo: 'border-white text-white',
-};
-
-const CLASSE_DESCRICOES: Record<string, string> = {
-  Combatente: 'Treinado para lutar com todo tipo de armas, com força e coragem para encarar perigos de frente. Prefere abordagens diretas e costuma atirar primeiro e perguntar depois.',
-  Especialista: 'Confia mais em esperteza do que em força bruta. Se vale de conhecimento técnico, raciocínio rápido ou lábia para resolver mistérios e enfrentar o paranormal.',
-  Ocultista: 'Não é apenas um conhecedor do oculto, como também possui talento para se conectar com elementos paranormais. Visa compreender e dominar os mistérios para combater o Outro Lado.',
 };
 
 export default function CharacterCreator({
@@ -54,7 +51,6 @@ export default function CharacterCreator({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [resultado, setResultado] = useState<Personagem | null>(null);
-  const classeEntries = useMemo(() => Object.entries(CLASSES) as [ClasseName, ClasseStats][], []);
 
   const [tipoSelecionado, setTipoSelecionado] = useState<'Agente' | 'Sobrevivente' | ''>('');
 
@@ -67,24 +63,6 @@ export default function CharacterCreator({
     defensiva: 'Fortitude',
   });
   const [nivelSelecionado, setNivelSelecionado] = useState<number>(0);
-
-  const PATENTES = useMemo(() => {
-    const configs = listarPatentes();
-    const uiProps: Record<string, { cor: string; icone: string }> = {
-      'Recruta': { cor: 'text-ordem-text-secondary', icone: '○' },
-      'Operador': { cor: 'text-ordem-green', icone: '●' },
-      'Agente Especial': { cor: 'text-blue-400', icone: '◇' },
-      'Oficial de Operações': { cor: 'text-purple-400', icone: '◆' },
-      'Agente de Elite': { cor: 'text-ordem-gold', icone: '★' },
-    };
-
-    return configs.map(cfg => ({
-      nome: cfg.nome,
-      nexMinimo: cfg.nexMin,
-      cor: uiProps[cfg.nome]?.cor || 'text-white',
-      icone: uiProps[cfg.nome]?.icone || '•'
-    }));
-  }, []);
   const [patenteSelecionada, setPatenteSelecionada] = useState<Patente>('Recruta');
 
   useEffect(() => {
@@ -149,7 +127,6 @@ export default function CharacterCreator({
   const [rituaisSelecionados, setRituaisSelecionados] = useState<Ritual[]>([]);
 
   const [equipamentosSelecionados, setEquipamentosSelecionados] = useState<Item[]>([]);
-  const [activeTab, setActiveTab] = useState<'items' | 'weapons' | 'mods'>('items');
 
   const [modificacoesArmas, setModificacoesArmas] = useState<Record<string, ModificacaoArma[]>>({});
   const [armaParaModificar, setArmaParaModificar] = useState<string | null>(null);
@@ -191,61 +168,7 @@ export default function CharacterCreator({
         state.data.classe === 'Combatente' ? (state.data.preferenciasClasse ?? preferenciasCombatente) : undefined,
       )
       : null;
-  const totalEscolhas = periciaMeta
-    ? periciaMeta.qtdEscolhaLivre + (periciaMeta.qtdEscolhaOrigem ?? 0)
-    : 0;
-  const excedeuLimite = periciaMeta ? periciasSelecionadas.length > totalEscolhas : false;
-  const faltandoPericias = periciaMeta ? Math.max(0, totalEscolhas - periciasSelecionadas.length) : 0;
-
-  const rituaisDisponiveis = useMemo(() => RITUAIS.filter(r => r.circulo === 1), []);
   const limiteRituais = 3;
-
-  const itensDisponiveis = useMemo(() => ITENS.filter(i => i.categoria <= 1), []);
-  const armasDisponiveis = useMemo(() => WEAPONS.filter(w => w.categoria <= 1), []);
-
-  const limitesCategoria = useMemo(() => {
-    if (tipoSelecionado === 'Sobrevivente') {
-      return { 0: Infinity, 1: 1, 2: 0, 3: 0, 4: 0 };
-    }
-
-    try {
-      const config = getPatenteConfig(patenteSelecionada);
-      return config.limiteItens;
-    } catch (e) {
-
-      return { I: 2, II: 0, III: 0, IV: 0 };
-    }
-  }, [tipoSelecionado, patenteSelecionada]);
-
-  const getCategoriaEfetiva = useCallback((nomeEquipamento: string, categoriaBase: number) => {
-    const mods = modificacoesArmas[nomeEquipamento] || [];
-    return Math.min(4, categoriaBase + mods.length);
-  }, [modificacoesArmas]);
-
-  const contagemPorCategoria = useMemo(() => {
-    const contagem = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 };
-    for (const eq of equipamentosSelecionados) {
-      const catEfetiva = getCategoriaEfetiva(eq.nome, eq.categoria) as 0 | 1 | 2 | 3 | 4;
-      contagem[catEfetiva]++;
-    }
-    return contagem;
-
-  }, [equipamentosSelecionados, getCategoriaEfetiva]);
-
-  const podeAdicionarModificacao = (nomeArma: string, categoriaBase: number) => {
-    const catAtual = getCategoriaEfetiva(nomeArma, categoriaBase);
-    const catNova = catAtual + 1;
-    if (catNova > 4) return false;
-
-    const contagemSimulada = { ...contagemPorCategoria };
-    contagemSimulada[catAtual as 0 | 1 | 2 | 3 | 4]--;
-    contagemSimulada[catNova as 0 | 1 | 2 | 3 | 4]++;
-
-    return contagemSimulada[catNova as 0 | 1 | 2 | 3 | 4] <= limitesCategoria[catNova as 0 | 1 | 2 | 3 | 4];
-  };
-
-  const limiteCatI = limitesCategoria[1] === Infinity ? 999 : limitesCategoria[1];
-  const contagemCatI = contagemPorCategoria[1];
 
   const isNextDisabled = false;
 
@@ -718,374 +641,48 @@ export default function CharacterCreator({
         <div className="absolute inset-0 bg-[linear-gradient(rgba(30,30,30,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(30,30,30,0.5)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none -z-10 opacity-20" />
 
         {state.step === 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 h-full items-stretch animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <button
-              onClick={() => setTipoSelecionado('Agente')}
-              className={`min-h-[160px] sm:h-64 border-2 p-6 sm:p-8 flex flex-col items-center justify-center gap-3 sm:gap-4 transition-all active:scale-[0.98] rounded-xl ${tipoSelecionado === 'Agente' ? 'border-ordem-green bg-ordem-green/10 shadow-[0_0_30px_rgba(0,255,0,0.2)]' : 'border-ordem-border-light hover:border-ordem-border-light'}`}
-            >
-              <span className="text-3xl sm:text-4xl">🛡️</span>
-              <h3 className="text-xl sm:text-2xl font-serif text-white text-center">AGENTE DA ORDEM</h3>
-              <p className="text-ordem-white-muted text-center text-xs sm:text-sm">Recruta (NEX 5%). Treinado para enfrentar o paranormal.</p>
-            </button>
-            <button
-              onClick={() => setTipoSelecionado('Sobrevivente')}
-              className={`min-h-[160px] sm:h-64 border-2 p-6 sm:p-8 flex flex-col items-center justify-center gap-3 sm:gap-4 transition-all active:scale-[0.98] rounded-xl ${tipoSelecionado === 'Sobrevivente' ? 'border-ordem-red bg-ordem-red/10 shadow-[0_0_30px_rgba(220,38,38,0.2)]' : 'border-ordem-border-light hover:border-ordem-border-light'}`}
-            >
-              <span className="text-3xl sm:text-4xl">🩸</span>
-              <h3 className="text-xl sm:text-2xl font-serif text-white text-center">SOBREVIVENTE</h3>
-              <p className="text-ordem-white-muted text-center text-xs sm:text-sm">Civil (NEX 0%). Uma pessoa comum arrastada para o horror.</p>
-            </button>
-          </div>
+          <TipoStep value={tipoSelecionado} onChange={setTipoSelecionado} />
         )}
 
         {state.step === 1 && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-ordem-text-secondary uppercase tracking-widest">Nome do Personagem</label>
-                <input
-                  type="text"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  placeholder="Ex: Arthur Cervero"
-                  className="w-full bg-ordem-black/50 border border-ordem-border-light p-4 text-white focus:border-ordem-red focus:outline-none focus:ring-1 focus:ring-ordem-red/50 transition-all font-mono rounded"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-ordem-text-secondary uppercase tracking-widest">Conceito / Passado</label>
-                <input
-                  type="text"
-                  value={conceito}
-                  onChange={(e) => setConceito(e.target.value)}
-                  placeholder="Ex: Músico fracassado que viu o que não devia..."
-                  className="w-full bg-ordem-black/50 border border-ordem-border-light p-4 text-white focus:border-ordem-red focus:outline-none focus:ring-1 focus:ring-ordem-red/50 transition-all font-mono rounded"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-4 bg-ordem-black/30 border border-ordem-border rounded-lg">
-              <input
-                type="checkbox"
-                id="usarPd"
-                checked={usarPd}
-                onChange={(e) => setUsarPd(e.target.checked)}
-                className="w-5 h-5 rounded border-ordem-border-light bg-ordem-black/50 text-ordem-red focus:ring-ordem-red/50"
-              />
-              <label htmlFor="usarPd" className="cursor-pointer">
-                <span className="block text-sm font-bold text-ordem-white-muted">Usar Regra de Determinação (Sobrevivendo ao Horror)</span>
-                <span className="block text-xs text-ordem-text-secondary">Substitui Sanidade e PE por Pontos de Determinação (PD).</span>
-              </label>
-            </div>
-
-            {tipoSelecionado === 'Agente' && (
-              <div className="space-y-4">
-                { }
-                <div className="flex flex-col lg:flex-row gap-4">
-                  <div className="flex-1 space-y-4">
-                    <label className="text-xs font-bold text-ordem-text-secondary uppercase tracking-widest">Classe</label>
-                    { }
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                      {classeEntries.filter(([nome]) => nome !== 'Sobrevivente').map(([nomeClasse, stats]) => (
-                        <button
-                          key={nomeClasse}
-                          onClick={() => setClasseSelecionada(nomeClasse)}
-                          className={`p-4 sm:p-6 border text-left transition-all duration-300 relative overflow-hidden group rounded-lg active:scale-[0.98] ${classeSelecionada === nomeClasse
-                            ? 'border-ordem-red bg-ordem-red/10 shadow-[0_0_20px_rgba(220,38,38,0.2)]'
-                            : 'border-ordem-border bg-ordem-black/20 hover:border-ordem-border-light'
-                            }`}
-                        >
-                          <div className="relative z-10 flex flex-col h-full justify-between">
-                            <div>
-                              <h3 className={`text-base sm:text-lg font-serif mb-1 ${classeSelecionada === nomeClasse ? 'text-white' : 'text-ordem-text-secondary group-hover:text-white'}`}>
-                                {nomeClasse}
-                              </h3>
-                              <ul className="text-[10px] sm:text-xs text-ordem-text-secondary space-y-0.5 font-mono mb-1 sm:mb-2">
-                                <li>PV: {stats.pvInicial} (+{stats.pvPorNivel})</li>
-                                <li>PE: {stats.peInicial} (+{stats.pePorNivel})</li>
-                                <li>SAN: {stats.sanInicial} (+{stats.sanPorNivel})</li>
-                              </ul>
-                            </div>
-                            <p className="hidden md:block text-[10px] text-ordem-text-muted leading-relaxed mt-2">
-                              {CLASSE_DESCRICOES[nomeClasse]}
-                            </p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-
-                    {classeSelecionada === 'Combatente' && (
-                      <div className="mt-4 p-4 border border-ordem-border bg-ordem-black/20 rounded-lg">
-                        <div className="text-xs font-bold text-ordem-text-secondary uppercase tracking-widest mb-3">
-                          Preferências do Combatente
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest mb-2">Ofensiva</div>
-                            <div className="flex gap-2">
-                              {(['Luta', 'Pontaria'] as const).map((p) => (
-                                <button
-                                  key={p}
-                                  type="button"
-                                  onClick={() => setPreferenciasCombatente((prev) => ({ ...prev, ofensiva: p }))}
-                                  className={`flex-1 px-2 sm:px-3 py-2.5 text-xs font-mono border rounded-lg transition-colors touch-target-sm ${preferenciasCombatente.ofensiva === p
-                                    ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
-                                    : 'border-ordem-border text-ordem-text-secondary active:bg-ordem-ooze/50'
-                                    }`}
-                                >
-                                  {p}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest mb-2">Defensiva</div>
-                            <div className="flex gap-2">
-                              {(['Fortitude', 'Reflexos'] as const).map((p) => (
-                                <button
-                                  key={p}
-                                  type="button"
-                                  onClick={() => setPreferenciasCombatente((prev) => ({ ...prev, defensiva: p }))}
-                                  className={`flex-1 px-2 sm:px-3 py-2.5 text-xs font-mono border rounded-lg transition-colors touch-target-sm ${preferenciasCombatente.defensiva === p
-                                    ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
-                                    : 'border-ordem-border text-ordem-text-secondary active:bg-ordem-ooze/50'
-                                    }`}
-                                >
-                                  {p}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="mt-3 text-xs text-ordem-text-muted">
-                          Define quais perícias o Combatente recebe como treinadas.
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  { }
-                  <div className="w-full lg:w-48 space-y-2 mt-4 lg:mt-0">
-                    <div className="grid grid-cols-1 gap-3">
-                      <div>
-                        <label className="text-xs font-bold text-ordem-text-secondary uppercase tracking-widest block mb-2">NEX</label>
-                        <select
-                          value={nivelSelecionado}
-                          onChange={(e) => setNivelSelecionado(Number(e.target.value))}
-                          className="w-full bg-ordem-black/50 border border-ordem-border-light p-3 text-white focus:border-ordem-red focus:outline-none transition-all font-mono rounded-lg"
-                        >
-                          {[5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 99].map(nex => (
-                            <option key={nex} value={nex}>{nex}%</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="text-xs font-bold text-ordem-text-secondary uppercase tracking-widest block mb-2">Patente</label>
-                        <select
-                          value={patenteSelecionada}
-                          onChange={(e) => setPatenteSelecionada(e.target.value as typeof patenteSelecionada)}
-                          className="w-full bg-ordem-black/50 border border-ordem-border-light p-3 text-white focus:border-ordem-red focus:outline-none transition-all font-mono rounded-lg text-sm"
-                        >
-                          {PATENTES.map(p => (
-                            <option key={p.nome} value={p.nome}>{p.icone} {p.nome}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    { }
-                    <div className={`text-center p-2 border rounded-lg bg-ordem-black/30 ${PATENTES.find(p => p.nome === patenteSelecionada)?.cor.replace('text-', 'border-') || 'border-ordem-border'
-                      }`}>
-                      <div className="text-[9px] sm:text-[10px] text-ordem-text-muted">
-                        {patenteSelecionada === 'Agente de Elite' ? 'Cat I-II: ∞ | III: 3 | IV: 1' :
-                          patenteSelecionada === 'Oficial de Operações' ? 'Cat I-II: ∞ | III: 2' :
-                            patenteSelecionada === 'Agente Especial' ? 'Cat I: ∞ | II: 2 | III: 1' :
-                              patenteSelecionada === 'Operador' ? 'Cat I: 5 | II: 1' :
-                                'Cat I: 3'}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {tipoSelecionado === 'Sobrevivente' && (
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1 p-6 border border-ordem-red/30 bg-ordem-red/5 rounded-lg text-center flex flex-col justify-center">
-                  <h3 className="text-lg sm:text-xl font-serif text-white mb-2">CLASSE: SOBREVIVENTE</h3>
-                  <p className="text-ordem-white-muted text-sm">Você não possui treinamento especial. Sua única arma é sua vontade de viver.</p>
-                </div>
-                <div className="w-full sm:w-32 space-y-2">
-                  <label className="text-xs font-bold text-ordem-text-secondary uppercase tracking-widest">Estágio</label>
-                  <select
-                    value={nivelSelecionado}
-                    onChange={(e) => setNivelSelecionado(Number(e.target.value))}
-                    className="w-full bg-ordem-black/50 border border-ordem-border-light p-4 text-white focus:border-ordem-red focus:outline-none focus:ring-1 focus:ring-ordem-red/50 transition-all font-mono rounded-lg touch-target"
-                  >
-                    {[1, 2, 3, 4, 5].map(estagio => (
-                      <option key={estagio} value={estagio}>Estágio {estagio}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            )}
-          </div>
+          <ConceitoClasseStep
+            tipo={tipoSelecionado}
+            nome={nome}
+            onNomeChange={setNome}
+            conceito={conceito}
+            onConceitoChange={setConceito}
+            usarPd={usarPd}
+            onUsarPdChange={setUsarPd}
+            classeSelecionada={classeSelecionada}
+            onClasseSelecionadaChange={setClasseSelecionada}
+            preferenciasCombatente={preferenciasCombatente}
+            onPreferenciasCombatenteChange={setPreferenciasCombatente}
+            nivelSelecionado={nivelSelecionado}
+            onNivelSelecionadoChange={setNivelSelecionado}
+            patenteSelecionada={patenteSelecionada}
+            onPatenteSelecionadaChange={setPatenteSelecionada}
+          />
         )}
 
         {state.step === 2 && (
-          <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-            <div className="text-center space-y-2">
-              <h3 className="text-lg sm:text-xl font-serif text-white">Distribuição de Atributos</h3>
-              <p className="text-ordem-text-secondary text-sm">
-                Pontos Restantes: <span className={`font-mono font-bold text-lg ${pontosRestantes > 0 ? 'text-ordem-green' : 'text-ordem-text-muted'}`}>{pontosRestantes}</span>
-              </p>
-              <p className="text-xs text-ordem-text-muted px-4">
-                {tipoSelecionado === 'Sobrevivente' ? 'Sobreviventes começam com 3 pontos.' : 'Agentes começam com 4 pontos.'} Máximo de 3 por atributo.
-              </p>
-            </div>
-
-            { }
-            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-4 md:gap-6 justify-items-center">
-              {(Object.entries(atributosTemp) as [keyof Atributos, number][]).map(([chave, valor]) => (
-                <div key={chave} className="flex sm:flex-col items-center gap-4 sm:gap-2 w-full max-w-sm sm:max-w-[100px] p-2 sm:p-0 bg-ordem-black/20 sm:bg-transparent rounded-lg border border-ordem-border/50 sm:border-0">
-                  { }
-                  <div className="shrink-0 w-20 h-20 sm:w-full sm:h-28 aspect-square sm:aspect-auto bg-ordem-ooze/80 border border-ordem-border-light rounded-lg flex flex-col items-center justify-center relative">
-                    <span className="text-[10px] sm:text-xs font-bold text-ordem-text-muted uppercase tracking-widest mb-1">{chave}</span>
-                    <span className="text-3xl sm:text-4xl font-mono text-white">{valor}</span>
-                  </div>
-
-                  { }
-                  <div className="flex sm:flex-row flex-1 sm:flex-initial gap-2 w-full justify-between items-center sm:justify-center">
-                    <button
-                      onClick={() => atualizarAtributo(chave, -1)}
-                      className="flex-1 h-12 sm:h-9 bg-ordem-black border border-ordem-border-light text-ordem-text-secondary hover:text-white hover:border-white active:bg-ordem-ooze rounded-lg flex items-center justify-center text-xl sm:text-lg font-bold touch-target"
-                      aria-label={`Diminuir ${chave}`}
-                    >
-                      −
-                    </button>
-                    <button
-                      onClick={() => atualizarAtributo(chave, 1)}
-                      className="flex-1 h-12 sm:h-9 bg-ordem-black border border-ordem-border-light text-ordem-text-secondary hover:text-white hover:border-white active:bg-ordem-ooze rounded-lg flex items-center justify-center text-xl sm:text-lg font-bold touch-target"
-                      aria-label={`Aumentar ${chave}`}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <AtributosStep
+            tipo={tipoSelecionado}
+            atributos={atributosTemp}
+            pontosRestantes={pontosRestantes}
+            onAtributoChange={atualizarAtributo}
+          />
         )}
 
         {state.step === 3 && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500 h-full flex flex-col">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-xl font-serif text-white">Origem</h3>
-                <p className="text-ordem-text-secondary text-sm">O que você fazia antes?</p>
-              </div>
-              <div className="text-xs font-mono text-ordem-text-muted">
-                {ORIGENS.length} REGISTROS DISPONÍVEIS
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto custom-scrollbar pr-2 max-h-[60vh] sm:max-h-[400px]">
-              {ORIGENS.map((origem) => {
-                const textoPericias = origem.periciasTexto
-                  ? (origem.pericias.length > 0 ? `${origem.pericias.join(', ')} — ${origem.periciasTexto}` : origem.periciasTexto)
-                  : origem.pericias.join(', ');
-                return (
-                  <button
-                    key={origem.nome}
-                    onClick={() => setOrigemSelecionada(origem.nome)}
-                    className={`p-4 border text-left transition-all duration-200 rounded-lg group ${origemSelecionada === origem.nome
-                      ? 'border-ordem-gold bg-ordem-gold/10 shadow-[0_0_15px_rgba(255,215,0,0.1)]'
-                      : 'border-ordem-border bg-ordem-black/40 hover:border-ordem-border-light'
-                      }`}
-                  >
-                    <div className={`font-bold mb-2 font-serif text-lg ${origemSelecionada === origem.nome ? 'text-ordem-gold' : 'text-ordem-white-muted group-hover:text-white'}`}>
-                      {origem.nome}
-                    </div>
-                    <div className="text-xs text-ordem-text-muted space-y-2">
-                      <p className="line-clamp-3">{textoPericias}</p>
-                      {origemSelecionada === origem.nome && (
-                        <div className="pt-2 border-t border-ordem-gold/20 text-ordem-gold/80 italic">
-                          Selecionado
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
+          <OrigemStep value={origemSelecionada} onChange={setOrigemSelecionada} />
         )}
 
         {state.step === 4 && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-            <div className="text-center">
-              <h3 className="text-xl font-serif text-white mb-2">Especialização</h3>
-              <p className="text-ordem-text-secondary text-sm">
-                Selecione suas perícias treinadas.
-              </p>
-              {periciaMeta && (
-                <div className={`mt-4 inline-block px-4 py-1 rounded-full text-xs font-mono border ${(excedeuLimite || faltandoPericias > 0)
-                  ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
-                  : 'border-ordem-green text-ordem-green bg-ordem-green/10'
-                  }`}>
-                  ESCOLHAS: {periciasSelecionadas.length} / {totalEscolhas}
-                </div>
-              )}
-              {periciaMeta?.qtdEscolhaOrigem ? (
-                <div className="mt-2 text-[11px] text-ordem-text-muted font-mono">
-                  Inclui {periciaMeta.qtdEscolhaOrigem} perícia(s) da origem.
-                </div>
-              ) : null}
-              {periciaMeta && faltandoPericias > 0 && (
-                <p className="mt-2 text-[11px] text-ordem-gold font-mono tracking-widest">
-                  FALTAM {faltandoPericias} PERÍCIA(S) — VOCÊ PODE AVANÇAR, MAS FICARÁ PENDENTE
-                </p>
-              )}
-            </div>
-
-            {periciaMeta && periciaMeta.obrigatorias.length > 0 && (
-              <div className="bg-ordem-ooze/50 p-4 rounded border border-ordem-border">
-                <h4 className="text-xs font-bold text-ordem-text-muted uppercase tracking-widest mb-3">Perícias Obrigatórias (Classe/Origem)</h4>
-                <div className="flex flex-wrap gap-2">
-                  {periciaMeta.obrigatorias.map((obrigatoria) => (
-                    <span key={obrigatoria} className="px-3 py-1 bg-ordem-ooze text-ordem-white-muted text-xs rounded border border-ordem-border-light flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-ordem-text-muted rounded-full" />
-                      {obrigatoria}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {TODAS_PERICIAS.filter(p => !periciaMeta?.obrigatorias.includes(p)).map((pericia) => {
-                const isSelected = periciasSelecionadas.includes(pericia);
-                return (
-                  <button
-                    key={pericia}
-                    onClick={() => {
-                      setPericiasSelecionadas(prev =>
-                        prev.includes(pericia)
-                          ? prev.filter(p => p !== pericia)
-                          : [...prev, pericia]
-                      );
-                    }}
-                    className={`p-4 sm:p-3 text-sm sm:text-xs font-mono border rounded transition-all touch-target ${isSelected
-                      ? 'border-ordem-green bg-ordem-green/20 text-white'
-                      : 'border-ordem-border text-ordem-text-muted hover:border-ordem-border-light'
-                      }`}
-                  >
-                    {pericia}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <PericiasStep
+            value={periciasSelecionadas}
+            onChange={setPericiasSelecionadas}
+            periciaMeta={periciaMeta}
+          />
         )}
 
         {state.step === 7 && (
@@ -1235,307 +832,18 @@ export default function CharacterCreator({
         )}
 
         {state.step === 5 && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500 h-full flex flex-col">
-            <div className="text-center">
-              <h3 className="text-xl font-serif text-white mb-2">Rituais Iniciais</h3>
-              <p className="text-ordem-text-secondary text-sm">Ocultistas começam com 3 rituais de 1º Círculo.</p>
-              <div className={`mt-4 inline-block px-4 py-1 rounded-full text-xs font-mono border ${rituaisSelecionados.length > 3
-                ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
-                : 'border-purple-500 text-purple-400 bg-purple-900/10'
-                }`}>
-                SELECIONADOS: {rituaisSelecionados.length} / 3
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 overflow-y-auto custom-scrollbar pr-2 max-h-[60vh] sm:max-h-[400px] lg:grid-cols-3">
-              {rituaisDisponiveis.map((ritual) => {
-                const isSelected = rituaisSelecionados.some(r => r.nome === ritual.nome);
-                return (
-                  <button
-                    key={ritual.nome}
-                    onClick={() => {
-                      setRituaisSelecionados(prev =>
-                        isSelected
-                          ? prev.filter(r => r.nome !== ritual.nome)
-                          : [...prev, ritual]
-                      );
-                    }}
-                    className={`p-4 border text-left transition-all duration-200 rounded group relative overflow-hidden ${isSelected
-                      ? `${ELEMENTO_COLORS[ritual.elemento]} bg-ordem-black/60 shadow-[0_0_15px_rgba(128,0,128,0.2)]`
-                      : 'border-ordem-border bg-ordem-black/40 hover:border-ordem-border-light text-ordem-text-muted'
-                      }`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-serif font-bold">{ritual.nome}</span>
-                      <span className="text-[10px] uppercase opacity-70 border px-1 rounded border-current">{ritual.elemento}</span>
-                    </div>
-                    <p className="text-xs opacity-80 line-clamp-3">{ritual.descricao}</p>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <RituaisStep value={rituaisSelecionados} onChange={setRituaisSelecionados} limite={limiteRituais} />
         )}
 
         {state.step === 6 && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500 h-full flex flex-col">
-            <div className="text-center">
-              <h3 className="text-xl font-serif text-white mb-2">Equipamento Inicial</h3>
-              <p className="text-ordem-text-secondary text-sm">
-                {tipoSelecionado === 'Sobrevivente'
-                  ? 'Sobreviventes podem levar 1 item Categoria I e itens Categoria 0. Modificações adicionam +1 na categoria da arma.'
-                  : 'Recrutas podem levar 3 itens Categoria I e itens Categoria 0. Modificações adicionam +1 na categoria da arma.'}
-              </p>
-              <div className={`mt-4 inline-block px-4 py-1 rounded-full text-xs font-mono border ${contagemCatI > limiteCatI
-                ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
-                : 'border-blue-500 text-blue-400 bg-blue-900/10'
-                }`}>
-                CATEGORIA I: {contagemCatI} / {limiteCatI}
-              </div>
-            </div>
-
-            <div className="flex justify-center gap-4 border-b border-ordem-border pb-4">
-              <button
-                onClick={() => setActiveTab('items')}
-                className={`px-4 py-2 text-sm font-mono uppercase tracking-wider transition-all ${activeTab === 'items'
-                  ? 'text-white border-b-2 border-ordem-green'
-                  : 'text-ordem-text-muted hover:text-ordem-white-muted'
-                  }`}
-              >
-                Itens Gerais
-              </button>
-              <button
-                onClick={() => setActiveTab('weapons')}
-                className={`px-4 py-2 text-sm font-mono uppercase tracking-wider transition-all ${activeTab === 'weapons'
-                  ? 'text-white border-b-2 border-ordem-red'
-                  : 'text-ordem-text-muted hover:text-ordem-white-muted'
-                  }`}
-              >
-                Armas
-              </button>
-              <button
-                onClick={() => setActiveTab('mods')}
-                className={`px-4 py-2 text-sm font-mono uppercase tracking-wider transition-all ${activeTab === 'mods'
-                  ? 'text-white border-b-2 border-ordem-gold'
-                  : 'text-ordem-text-muted hover:text-ordem-white-muted'
-                  }`}
-              >
-                Modificações
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 overflow-y-auto custom-scrollbar pr-2 max-h-[60vh] sm:max-h-[400px]">
-              {activeTab === 'mods' ? (
-
-                (() => {
-                  const armasSelecionadas = equipamentosSelecionados.filter(eq => eq.tipo === 'Arma' || (eq.stats && eq.stats.dano));
-
-                  if (armasSelecionadas.length === 0) {
-                    return (
-                      <div className="col-span-2 text-center py-8 text-ordem-text-muted">
-                        <p className="text-sm">Nenhuma arma selecionada.</p>
-                        <p className="text-xs mt-2">Adicione armas na aba &quot;Armas&quot; para aplicar modificações.</p>
-                      </div>
-                    );
-                  }
-
-                  const resumoLimites = (
-                    <div key="resumo-limites" className="col-span-2 bg-ordem-black/40 border border-ordem-border rounded-lg p-3 mb-2">
-                      <div className="text-[10px] text-ordem-text-muted uppercase tracking-widest mb-2">Limites de Patente:</div>
-                      <div className="flex flex-wrap gap-3 text-xs font-mono">
-                        {[1, 2, 3, 4].map(cat => {
-                          const limite = limitesCategoria[cat as 0 | 1 | 2 | 3 | 4];
-                          const atual = contagemPorCategoria[cat as 0 | 1 | 2 | 3 | 4];
-                          const corTexto = limite === 0 ? 'text-ordem-text-muted' :
-                            atual >= limite ? 'text-ordem-red' :
-                              atual > 0 ? 'text-ordem-gold' : 'text-ordem-text-secondary';
-                          return (
-                            <div key={cat} className={corTexto}>
-                              Cat {cat}: {atual}/{limite === Infinity ? '∞' : limite}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-
-                  return [
-                    resumoLimites,
-                    ...armasSelecionadas.map((arma) => {
-                      const modsAplicadas = modificacoesArmas[arma.nome] || [];
-                      const categoriaAtual = arma.categoria + modsAplicadas.length;
-                      const podeModificarCategoria = categoriaAtual < 4;
-                      const podeModificarLimite = podeAdicionarModificacao(arma.nome, arma.categoria);
-
-                      const tipoArma = arma.stats?.alcance ? 'fogo' : 'cac';
-                      const modsDisponiveis = MODIFICACOES_ARMAS.filter(mod => {
-                        if (mod.tipo === 'universal') return true;
-                        if (mod.tipo === 'cac' && tipoArma === 'cac') return true;
-                        if (mod.tipo === 'fogo' && tipoArma === 'fogo') return true;
-                        return false;
-                      }).filter(mod => !modsAplicadas.some(m => m.nome === mod.nome));
-
-                      return (
-                        <div key={arma.nome} className="col-span-2 bg-ordem-ooze/30 border border-ordem-border rounded-lg p-4">
-                          <div className="flex justify-between items-start mb-3">
-                            <div>
-                              <div className="font-bold text-white">{arma.nome}</div>
-                              <div className="text-xs text-ordem-text-muted">
-                                Categoria: <span className={categoriaAtual > arma.categoria ? 'text-ordem-gold' : ''}>{categoriaAtual}</span>
-                                {categoriaAtual > arma.categoria && <span className="text-ordem-text-muted"> (original: {arma.categoria})</span>}
-                              </div>
-                            </div>
-                            {modsAplicadas.length > 0 && (
-                              <div className="px-2 py-1 rounded-full bg-ordem-gold/20 text-ordem-gold text-[10px] font-mono">
-                                {modsAplicadas.length} MOD{modsAplicadas.length > 1 ? 'S' : ''}
-                              </div>
-                            )}
-                          </div>
-
-                          { }
-                          {modsAplicadas.length > 0 && (
-                            <div className="mb-3 space-y-1">
-                              <div className="text-[10px] text-ordem-text-muted uppercase tracking-widest">Aplicadas:</div>
-                              <div className="flex flex-wrap gap-2">
-                                {modsAplicadas.map(mod => (
-                                  <button
-                                    key={mod.nome}
-                                    onClick={() => {
-                                      setModificacoesArmas(prev => ({
-                                        ...prev,
-                                        [arma.nome]: prev[arma.nome].filter(m => m.nome !== mod.nome)
-                                      }));
-                                    }}
-                                    className="px-2 py-1 text-xs font-mono border border-ordem-gold bg-ordem-gold/10 text-ordem-gold rounded flex items-center gap-1 hover:bg-ordem-red/10 hover:border-ordem-red hover:text-ordem-red transition-all"
-                                    title={mod.efeito}
-                                  >
-                                    {mod.nome}
-                                    <span className="text-[10px]">×</span>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          { }
-                          {podeModificarCategoria && podeModificarLimite && modsDisponiveis.length > 0 && (
-                            <div>
-                              <div className="text-[10px] text-ordem-text-muted uppercase tracking-widest mb-2">
-                                Adicionar modificação (+1 Cat → Cat {categoriaAtual + 1}):
-                              </div>
-                              <div className="flex flex-wrap gap-2">
-                                {modsDisponiveis.slice(0, 10).map(mod => (
-                                  <button
-                                    key={mod.nome}
-                                    onClick={() => {
-                                      setModificacoesArmas(prev => ({
-                                        ...prev,
-                                        [arma.nome]: [...(prev[arma.nome] || []), mod]
-                                      }));
-                                    }}
-                                    className="px-2 py-1 text-xs font-mono border border-ordem-border text-ordem-text-muted rounded hover:border-ordem-gold hover:text-ordem-gold transition-all"
-                                    title={mod.efeito}
-                                  >
-                                    {mod.nome}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {!podeModificarCategoria && (
-                            <div className="text-xs text-ordem-text-muted italic">
-                              Categoria máxima atingida (IV).
-                            </div>
-                          )}
-
-                          {podeModificarCategoria && !podeModificarLimite && (
-                            <div className="text-xs text-ordem-red italic">
-                              ⚠ Limite de itens Cat. {categoriaAtual + 1} atingido para sua patente.
-                              {limitesCategoria[categoriaAtual + 1 as 0 | 1 | 2 | 3 | 4] === 0 && ' (Não disponível)'}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })
-                  ];
-                })()
-              ) : activeTab === 'items' ? (
-                itensDisponiveis.map((item, idx) => {
-                  const isSelected = equipamentosSelecionados.some(i => i.nome === item.nome);
-                  return (
-                    <button
-                      key={`${item.nome}-${idx}`}
-                      onClick={() => {
-                        setEquipamentosSelecionados(prev =>
-                          isSelected
-                            ? prev.filter(i => i.nome !== item.nome)
-                            : [...prev, item]
-                        );
-                      }}
-                      className={`p-3 border text-left transition-all duration-200 rounded flex justify-between items-center ${isSelected
-                        ? 'border-blue-500 bg-blue-900/10 text-white'
-                        : 'border-ordem-border bg-ordem-black/40 hover:border-ordem-border-light text-ordem-text-muted'
-                        }`}
-                    >
-                      <div>
-                        <div className="font-bold text-sm">{item.nome}</div>
-                        <div className="text-xs opacity-70">{item.tipo}</div>
-                      </div>
-                      <div className="text-xs font-mono text-right">
-                        <div className={item.categoria > 0 ? 'text-ordem-gold' : 'text-ordem-text-muted'}>Cat {item.categoria}</div>
-                        <div>{item.espaco} esp</div>
-                      </div>
-                    </button>
-                  );
-                })
-              ) : (
-                armasDisponiveis.map((weapon, idx) => {
-                  const isSelected = equipamentosSelecionados.some(i => i.nome === weapon.nome);
-                  return (
-                    <button
-                      key={`${weapon.nome}-${idx}`}
-                      onClick={() => {
-                        setEquipamentosSelecionados(prev => {
-                          if (isSelected) {
-                            return prev.filter(i => i.nome !== weapon.nome);
-                          }
-                          const newItem: Item = {
-                            nome: weapon.nome,
-                            categoria: weapon.categoria,
-                            espaco: weapon.espaco,
-                            tipo: weapon.tipo === 'Munição' ? 'Geral' : 'Arma',
-                            descricao: `${weapon.descricao} ${weapon.proficiencia !== 'N/A' ? `[${weapon.proficiencia}]` : ''}`,
-                            stats: {
-                              dano: weapon.stats.Dano_Base !== '—' ? weapon.stats.Dano_Base : undefined,
-                              tipoDano: weapon.stats.Dano_Tipo !== '—' ? weapon.stats.Dano_Tipo : undefined,
-                              critico: weapon.stats.Critico !== '—' ? weapon.stats.Critico : undefined,
-                              alcance: weapon.stats.Alcance !== '—' ? weapon.stats.Alcance : undefined,
-                            },
-                            livro: weapon.livro as any
-                          };
-                          return [...prev, newItem];
-                        });
-                      }}
-                      className={`p-3 border text-left transition-all duration-200 rounded flex justify-between items-center ${isSelected
-                        ? 'border-ordem-red bg-ordem-red/10 text-white'
-                        : 'border-ordem-border bg-ordem-black/40 hover:border-ordem-border-light text-ordem-text-muted'
-                        }`}
-                    >
-                      <div>
-                        <div className="font-bold text-sm">{weapon.nome}</div>
-                        <div className="text-xs opacity-70">{weapon.tipo} ({weapon.proficiencia})</div>
-                      </div>
-                      <div className="text-xs font-mono text-right">
-                        <div className={weapon.categoria > 0 ? 'text-ordem-gold' : 'text-ordem-text-muted'}>Cat {weapon.categoria}</div>
-                        <div>{weapon.espaco} esp</div>
-                      </div>
-                    </button>
-                  );
-                })
-              )}
-            </div>
-          </div>
+          <EquipamentoStep
+            tipo={tipoSelecionado || 'Agente'}
+            patente={patenteSelecionada}
+            equipamentos={equipamentosSelecionados}
+            onEquipamentosChange={setEquipamentosSelecionados}
+            modificacoes={modificacoesArmas}
+            onModificacoesChange={setModificacoesArmas}
+          />
         )}
 
       </div>

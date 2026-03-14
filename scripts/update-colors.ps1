@@ -1,4 +1,3 @@
-# Script para substituir cores restantes do projeto - Passagem final
 $replacements = @{
     'zinc-900' = 'ordem-ooze'
     'zinc-950' = 'ordem-black-deep'
@@ -18,7 +17,6 @@ $replacements = @{
     'gray-300' = 'ordem-white-muted'
 }
 
-# Encontra todos os arquivos TSX no diretório src
 $files = Get-ChildItem -Path "src" -Recurse -Include "*.tsx" | Where-Object { $_.FullName -notlike "*node_modules*" }
 
 foreach ($file in $files) {

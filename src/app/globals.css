@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #4A4A4A #1A1A1A;
+}
+
 :root {
   --foreground-rgb: 245, 245, 245;
   --background-start-rgb: 26, 26, 26;

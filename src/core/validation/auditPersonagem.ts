@@ -75,7 +75,15 @@ export function auditPersonagem(personagem: Personagem): PersonagemIssue[] {
     });
   }
 
-  const derived = calculateDerivedStats(personagem.classe, personagem.atributos, personagem.nex, personagem.estagio);
+  const derived = calculateDerivedStats({
+    classe: personagem.classe,
+    atributos: personagem.atributos,
+    nex: personagem.nex,
+    estagio: personagem.estagio,
+    origemNome: personagem.origem,
+    trilhaNome: personagem.trilha,
+    qtdTranscender: personagem.qtdTranscender,
+  });
   const expectedPvMax = personagem.overrides?.pvMax ?? derived.pvMax;
   const expectedPeMax = personagem.overrides?.peMax ?? derived.peMax;
   const expectedSanMax = personagem.overrides?.sanMax ?? derived.sanMax;

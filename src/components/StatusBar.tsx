@@ -47,34 +47,34 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
 
   const colorConfig = {
     red: {
-      bar: 'bg-gradient-to-r from-red-700 to-red-500',
+      bar: 'bg-gradient-to-r from-ordem-red-dark to-ordem-red',
       glow: 'shadow-[0_0_15px_rgba(220,38,38,0.5)]',
-      accent: 'text-red-400',
-      border: 'border-red-900/50',
+      accent: 'text-ordem-red',
+      border: 'border-ordem-red-dark/50',
     },
     gold: {
-      bar: 'bg-gradient-to-r from-yellow-600 to-yellow-400',
-      glow: 'shadow-[0_0_15px_rgba(234,179,8,0.5)]',
-      accent: 'text-yellow-400',
-      border: 'border-yellow-900/50',
+      bar: 'bg-gradient-to-r from-yellow-900 to-ordem-gold',
+      glow: 'shadow-[0_0_15px_rgba(255,215,0,0.5)]',
+      accent: 'text-ordem-gold',
+      border: 'border-ordem-gold/50',
     },
     blue: {
-      bar: 'bg-gradient-to-r from-blue-700 to-blue-400',
+      bar: 'bg-gradient-to-r from-blue-900 to-ordem-blue',
       glow: 'shadow-[0_0_15px_rgba(59,130,246,0.5)]',
-      accent: 'text-blue-400',
-      border: 'border-blue-900/50',
+      accent: 'text-ordem-blue',
+      border: 'border-ordem-blue/50',
     },
     purple: {
-      bar: 'bg-gradient-to-r from-purple-700 to-purple-400',
+      bar: 'bg-gradient-to-r from-purple-900 to-ordem-purple',
       glow: 'shadow-[0_0_15px_rgba(168,85,247,0.5)]',
-      accent: 'text-purple-400',
-      border: 'border-purple-900/50',
+      accent: 'text-ordem-purple',
+      border: 'border-ordem-purple/50',
     },
     green: {
-      bar: 'bg-gradient-to-r from-green-700 to-green-400',
-      glow: 'shadow-[0_0_15px_rgba(34,197,94,0.5)]',
-      accent: 'text-green-400',
-      border: 'border-green-900/50',
+      bar: 'bg-gradient-to-r from-green-900 to-ordem-green',
+      glow: 'shadow-[0_0_15px_rgba(0,255,0,0.5)]',
+      accent: 'text-ordem-green',
+      border: 'border-ordem-green/50',
     },
   };
 
@@ -104,7 +104,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
         <span className="text-ordem-white font-bold text-sm sm:text-base tracking-wider uppercase">
           {label}
         </span>
-        <div className="flex items-center gap-1 font-mono text-lg sm:text-xl relative">
+        <div className="flex items-center gap-1 font-mono text-lg sm:text-xl relative min-w-0 overflow-visible">
           <motion.span
             className={cn(
               isLow && 'text-ordem-red',
@@ -120,12 +120,12 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
           <AnimatePresence>
             {showDelta !== null && (
               <motion.span
-                initial={{ opacity: 0, y: 0, x: 10 }}
-                animate={{ opacity: 1, y: -20, x: 10 }}
+                initial={{ opacity: 0, y: 0, x: 4 }}
+                animate={{ opacity: 1, y: -12, x: 4 }}
                 exit={{ opacity: 0 }}
                 className={cn(
-                  'absolute right-0 text-sm font-bold',
-                  showDelta > 0 ? 'text-green-400' : 'text-red-400'
+                  'absolute -top-1 right-0 text-xs sm:text-sm font-bold whitespace-nowrap',
+                  showDelta > 0 ? 'text-ordem-green' : 'text-ordem-red'
                 )}
               >
                 {showDelta > 0 ? '+' : ''}{showDelta}
@@ -211,7 +211,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleAdjust(amount)}
-                className="min-w-[44px] px-3 py-2 bg-ordem-ooze hover:bg-red-900/30 active:bg-red-900/50 border border-ordem-border-light text-sm text-ordem-white-muted rounded-lg transition-colors"
+                className="min-w-[44px] px-3 py-2 bg-ordem-ooze hover:bg-ordem-red/20 active:bg-ordem-red/30 border border-ordem-border-light text-sm text-ordem-white-muted rounded-lg transition-colors"
               >
                 {amount}
               </motion.button>
@@ -225,7 +225,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleAdjust(amount)}
-                className="min-w-[44px] px-3 py-2 bg-ordem-ooze hover:bg-green-900/30 active:bg-green-900/50 border border-ordem-border-light text-sm text-ordem-white-muted rounded-lg transition-colors"
+                className="min-w-[44px] px-3 py-2 bg-ordem-ooze hover:bg-ordem-green/20 active:bg-ordem-green/30 border border-ordem-border-light text-sm text-ordem-white-muted rounded-lg transition-colors"
               >
                 +{amount}
               </motion.button>

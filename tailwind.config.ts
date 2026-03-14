@@ -5,6 +5,7 @@ const config: Config = {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/data/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
@@ -28,7 +29,7 @@ const config: Config = {
           // Cores de texto para melhor contraste
           "text-primary": "#FFFFFF", // Texto principal
           "text-secondary": "#B0B0B0", // Texto secundário (mais claro que zinc-400)
-          "text-muted": "#888888", // Texto sutil
+          "text-muted": "#909090", // Texto sutil (WCAG AA)
           // Cores de borda
           "border": "#404040", // Borda padrão
           "border-light": "#505050", // Borda mais clara

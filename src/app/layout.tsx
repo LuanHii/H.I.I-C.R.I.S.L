@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthWrapper } from "@/components/AuthWrapper";
+import { ScanlineOverlay } from "@/components/ScanlineOverlay";
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
   viewportFit: 'cover',
   themeColor: '#1A1A1A',
 };
@@ -39,7 +40,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className="bg-ordem-black text-ordem-white min-h-screen relative selection:bg-ordem-green selection:text-ordem-black antialiased"
       >
-        <div className="scanline fixed inset-0 pointer-events-none z-50"></div>
+        <ScanlineOverlay />
         <div className="fixed inset-0 pointer-events-none z-40 bg-[radial-gradient(circle_at_center,_transparent_0%,_rgba(0,0,0,0.4)_100%)]"></div>
         <AuthWrapper showUserMenu>
           {children}

@@ -2,13 +2,14 @@
 
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Search, Sparkles, Lock, Check, Flame, Skull, Brain, Zap, BookOpen } from 'lucide-react';
+import { X, Search, Sparkles, Lock, Check, BookOpen } from 'lucide-react';
 import { Personagem, Poder, Elemento, Ritual } from '../core/types';
 import {
     getPoderesParanormaisElegiveis,
     contarPoderesElemento,
     PODERES
 } from '../data/powers';
+import { ELEMENTO_CONFIG } from '../data/elementColors';
 import { cn } from '../lib/utils';
 import { RitualChoiceModal } from './RitualChoiceModal';
 
@@ -18,14 +19,6 @@ interface ParanormalPowerModalProps {
     onClose?: () => void;
     title?: string;
 }
-
-const ELEMENTO_CONFIG: Record<Elemento, { icon: React.ElementType; color: string; bg: string }> = {
-    Sangue: { icon: Flame, color: 'text-red-400', bg: 'bg-red-500/20' },
-    Morte: { icon: Skull, color: 'text-purple-400', bg: 'bg-purple-500/20' },
-    Conhecimento: { icon: Brain, color: 'text-blue-400', bg: 'bg-blue-500/20' },
-    Energia: { icon: Zap, color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
-    Medo: { icon: Skull, color: 'text-gray-400', bg: 'bg-gray-500/20' },
-};
 
 export function ParanormalPowerModal({
     agent,

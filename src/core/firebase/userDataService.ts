@@ -10,6 +10,7 @@ import {
   Unsubscribe,
 } from 'firebase/firestore';
 import { Personagem, Ameaca, Item, Weapow } from '../types';
+import { removeUndefinedFields } from './firestoreUtils';
 
 export interface FichaRegistroCloud {
   id: string;
@@ -51,23 +52,6 @@ export interface UserDataCloud {
   monstros: MonsterRegistroCloud[];
   customItems: Item[];
   customWeapons: Weapow[];
-}
-
-function removeUndefinedFields<T extends object>(obj: T): T {
-  const cleaned = {} as T;
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      const value = obj[key];
-      if (value === undefined) {
-        continue;
-      } else if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-        cleaned[key] = removeUndefinedFields(value as object) as T[Extract<keyof T, string>];
-      } else {
-        cleaned[key] = value;
-      }
-    }
-  }
-  return cleaned;
 }
 
 function getUserDocRef(userId: string) {
@@ -247,7 +231,8 @@ export async function saveCustomItemsToCloud(
 ): Promise<void> {
   try {
     const data: CustomItemsCloud = { items, weapons };
-    await setDoc(getCustomItemsDocRef(userId), data);
+    const cleanedData = removeUndefinedFields(data);
+    await setDoc(getCustomItemsDocRef(userId), cleanedData);
   } catch (e) {
     console.error('Erro ao salvar itens customizados na nuvem:', e);
     throw e;
@@ -425,8 +410,9 @@ function getWatchedFichasCollectionRef(userId: string) {
 
 export async function addWatchedFicha(userId: string, ficha: WatchedFichaCloud): Promise<void> {
   try {
+    const cleanedData = removeUndefinedFields(ficha);
     const watchedRef = doc(getWatchedFichasCollectionRef(userId), ficha.agentId);
-    await setDoc(watchedRef, ficha);
+    await setDoc(watchedRef, cleanedData);
   } catch (e) {
     console.error('Erro ao adicionar ficha observada:', e);
     throw e;

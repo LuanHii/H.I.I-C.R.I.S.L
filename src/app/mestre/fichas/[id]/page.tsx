@@ -94,6 +94,13 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
 
       <main className="flex-1 bg-ordem-black-deep p-4">
         <div className="max-w-7xl mx-auto h-[calc(100vh-96px)] flex flex-col">
+          <nav className="flex items-center gap-2 mb-3 text-xs font-mono text-ordem-text-muted shrink-0" aria-label="Navegação">
+            <Link href="/mestre" className="hover:text-ordem-white transition-colors">Mestre</Link>
+            <span>/</span>
+            <Link href="/mestre/fichas" className="hover:text-ordem-white transition-colors">Fichas</Link>
+            <span>/</span>
+            <span className="text-ordem-white truncate max-w-[200px]">{personagemAtual.nome}</span>
+          </nav>
           <header className="flex items-center justify-between mb-4 shrink-0">
             <h1 className="text-xl font-bold text-white">
               Editando: <span className="text-ordem-red">{personagemAtual.nome}</span>

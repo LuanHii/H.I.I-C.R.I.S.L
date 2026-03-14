@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { AMEACAS } from '../../data/monsters';
 import { Ameaca } from '../../core/types';
 import { useCloudMonsters } from '../../core/storage';
+import { ELEMENTO_FILTER_STYLES } from '../../data/elementColors';
 import { MonsterEditor } from './MonsterEditor';
 import { Cloud, CloudOff } from 'lucide-react';
 
@@ -239,14 +240,8 @@ const MonsterCard: React.FC<MonsterCardProps> = ({ monster, onEdit, onDelete, on
   const [expanded, setExpanded] = useState(false);
 
   const getElementColor = (type: string) => {
-    switch (type) {
-      case 'Sangue': return 'text-red-600 border-red-900/50 bg-red-900/10';
-      case 'Morte': return 'text-ordem-text-secondary border-ordem-border-light bg-ordem-ooze/30';
-      case 'Conhecimento': return 'text-amber-500 border-amber-900/50 bg-amber-900/10';
-      case 'Energia': return 'text-purple-500 border-purple-900/50 bg-purple-900/10';
-      case 'Medo': return 'text-white border-white/20 bg-white/5';
-      default: return 'text-ordem-text-secondary border-ordem-border';
-    }
+    const elem = type as keyof typeof ELEMENTO_FILTER_STYLES;
+    return ELEMENTO_FILTER_STYLES[elem] ?? 'text-ordem-text-secondary border-ordem-border';
   };
 
   const styleClass = getElementColor(monster.tipo);

@@ -244,6 +244,7 @@ export interface NexEvento {
   | 'Pericia'
   | 'Afinidade'
   | 'Versatilidade'
+  | 'Ritual'
   | 'Patente';
   descricao: string;
   desbloqueado: boolean;
@@ -251,7 +252,7 @@ export interface NexEvento {
 
 export interface PendenciaNex {
   id: string;
-  tipo: 'poder' | 'atributo' | 'trilha' | 'trilhaHabilidade' | 'pericia' | 'afinidade' | 'versatilidade' | 'transcenderPoder';
+  tipo: 'poder' | 'atributo' | 'trilha' | 'trilhaHabilidade' | 'pericia' | 'afinidade' | 'versatilidade' | 'transcenderPoder' | 'ritual';
   descricao: string;
   nex: number;
   resolvida: boolean;
@@ -259,6 +260,9 @@ export interface PendenciaNex {
   quantidade?: number;
 
   opcoes?: string[];
+
+  /** Círculo máximo de ritual que o personagem pode escolher (apenas tipo 'ritual') */
+  circuloMaximo?: 1 | 2 | 3 | 4;
 
   valorEscolhido?: string | string[];
 }

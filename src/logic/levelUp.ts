@@ -9,31 +9,12 @@ import {
     Poder,
     PericiaName,
 } from '../core/types';
+import { RITUAIS } from '../data/rituals';
 import { TRILHAS } from '../data/tracks';
 import { PODERES, contarPoderesDisponiveis } from '../data/powers';
 import { calculateDerivedStats } from '../core/rules/derivedStats';
 import { getPatentePorNex, getPatenteConfig, calcularRecursosClasse } from './rulesEngine';
-
-const NEX_EVENTOS: { requisito: number; tipo: NexEvento['tipo']; descricao: string }[] = [
-    { requisito: 10, tipo: 'Trilha', descricao: 'Escolha de Trilha e 1ª habilidade' },
-    { requisito: 15, tipo: 'Poder', descricao: 'Desbloqueia um Poder de Classe' },
-    { requisito: 20, tipo: 'Atributo', descricao: '+1 em qualquer atributo' },
-    { requisito: 30, tipo: 'Poder', descricao: 'Desbloqueia um Poder de Classe' },
-    { requisito: 35, tipo: 'Pericia', descricao: 'Promove 2 + INT perícias em um grau' },
-    { requisito: 40, tipo: 'Trilha', descricao: '2ª habilidade da Trilha' },
-    { requisito: 45, tipo: 'Poder', descricao: 'Desbloqueia um Poder de Classe' },
-    { requisito: 50, tipo: 'Atributo', descricao: '+1 em qualquer atributo' },
-    { requisito: 50, tipo: 'Versatilidade', descricao: 'Ganha Versatilidade' },
-    { requisito: 50, tipo: 'Afinidade', descricao: 'Escolhe Afinidade elemental (Ocultista)' },
-    { requisito: 60, tipo: 'Poder', descricao: 'Desbloqueia um Poder de Classe' },
-    { requisito: 65, tipo: 'Trilha', descricao: '3ª habilidade da Trilha' },
-    { requisito: 70, tipo: 'Pericia', descricao: 'Promove novamente 2 + INT perícias' },
-    { requisito: 75, tipo: 'Poder', descricao: 'Desbloqueia um Poder de Classe' },
-    { requisito: 80, tipo: 'Atributo', descricao: '+1 em qualquer atributo' },
-    { requisito: 90, tipo: 'Poder', descricao: 'Desbloqueia um Poder de Classe' },
-    { requisito: 95, tipo: 'Atributo', descricao: '+1 em qualquer atributo' },
-    { requisito: 99, tipo: 'Trilha', descricao: '4ª habilidade da Trilha' },
-];
+import { NEX_EVENTOS } from '../core/rules/nexEventos';
 
 export interface LevelUpResult {
     personagem: Personagem;
@@ -149,7 +130,10 @@ export function detectingPendenciesAndAutoApply(
                 break;
 
             case 'Pericia':
-                const qtdPericias = 2 + personagem.atributos.INT;
+                // Especialista recebe 5+INT; Combatente e Ocultista recebem 2+INT
+                const qtdPericias = personagem.classe === 'Especialista'
+                    ? 5 + personagem.atributos.INT
+                    : 2 + personagem.atributos.INT;
                 const alvo = evento.requisito === 35 ? 'Veterano' : 'Expert';
                 pendencias.push({
                     id: gerarIdPendencia(),
@@ -183,6 +167,23 @@ export function detectingPendenciesAndAutoApply(
                         descricao: 'Versatilidade: Escolha um poder de sua classe ou de outra trilha',
                         nex: evento.requisito,
                         resolvida: false,
+                    });
+                }
+                break;
+
+            case 'Ritual':
+                // Apenas Ocultistas aprendem rituais via Escolhido pelo Outro Lado
+                if (personagem.classe === 'Ocultista') {
+                    // Determina o círculo máximo desbloqueado neste NEX
+                    const circuloPorNex: Record<number, 1 | 2 | 3 | 4> = { 5: 1, 25: 2, 55: 3, 85: 4 };
+                    const circuloMaximo = circuloPorNex[evento.requisito] ?? 1;
+                    pendencias.push({
+                        id: gerarIdPendencia(),
+                        tipo: 'ritual',
+                        descricao: `Escolha 1 ritual de até ${circuloMaximo}º círculo (NEX ${evento.requisito}%)`,
+                        nex: evento.requisito,
+                        resolvida: false,
+                        circuloMaximo,
                     });
                 }
                 break;
@@ -353,13 +354,59 @@ export function resolverPendencia(
             if (typeof valorEscolhido === 'string') {
                 const atributo = valorEscolhido as AtributoKey;
                 const novoValor = Math.min(5, personagemAtualizado.atributos[atributo] + 1);
+                let novasPendenciasPericias = personagemAtualizado.periciasTreinadasPendentes || 0;
+                if (atributo === 'INT') {
+                    novasPendenciasPericias += 1;
+                }
+
                 personagemAtualizado = {
                     ...personagemAtualizado,
                     atributos: {
                         ...personagemAtualizado.atributos,
                         [atributo]: novoValor,
                     },
+                    periciasTreinadasPendentes: novasPendenciasPericias > 0 ? novasPendenciasPericias : undefined,
                 };
+                
+                const statsAnteriores = calculateDerivedStats({
+                    classe: personagem.classe,
+                    atributos: personagem.atributos,
+                    nex: personagem.nex,
+                    estagio: personagem.estagio,
+                    qtdTranscender: personagem.qtdTranscender
+                });
+                const statsAtualizados = calculateDerivedStats({
+                    classe: personagemAtualizado.classe,
+                    atributos: personagemAtualizado.atributos,
+                    nex: personagemAtualizado.nex,
+                    estagio: personagemAtualizado.estagio,
+                    qtdTranscender: personagemAtualizado.qtdTranscender
+                });
+
+                if (atributo === 'VIG') {
+                    const diffPV = statsAtualizados.pvMax - statsAnteriores.pvMax;
+                    personagemAtualizado.pv = {
+                        ...personagemAtualizado.pv,
+                        max: personagemAtualizado.pv.max + diffPV,
+                        atual: personagemAtualizado.pv.atual + diffPV,
+                    };
+                }
+                if (atributo === 'PRE') {
+                    const diffPE = statsAtualizados.peMax - statsAnteriores.peMax;
+                    personagemAtualizado.pe = {
+                        ...personagemAtualizado.pe,
+                        max: personagemAtualizado.pe.max + diffPE,
+                        atual: personagemAtualizado.pe.atual + diffPE,
+                    };
+                    if (personagemAtualizado.pd) {
+                        const diffPD = statsAtualizados.pdMax - statsAnteriores.pdMax;
+                        personagemAtualizado.pd = {
+                            ...personagemAtualizado.pd,
+                            max: personagemAtualizado.pd.max + diffPD,
+                            atual: personagemAtualizado.pd.atual + diffPD,
+                        };
+                    }
+                }
             }
             break;
 
@@ -372,7 +419,6 @@ export function resolverPendencia(
             }
             break;
 
-        case 'trilha':
         case 'trilha':
             if (typeof valorEscolhido === 'string') {
                 personagemAtualizado = {
@@ -478,6 +524,18 @@ export function resolverPendencia(
                 personagemAtualizado.pericias = novasPericias;
             }
             break;
+
+        case 'ritual':
+            if (typeof valorEscolhido === 'string') {
+                const ritualEscolhido = RITUAIS.find(r => r.nome === valorEscolhido);
+                if (ritualEscolhido) {
+                    personagemAtualizado = {
+                        ...personagemAtualizado,
+                        rituais: [...(personagemAtualizado.rituais || []), ritualEscolhido],
+                    };
+                }
+            }
+            break;
     }
 
     return personagemAtualizado;
@@ -557,6 +615,12 @@ export function rebaixarNex(
                         novasPericias[pNome as PericiaName] = alvoAnterior;
                     });
                     atualizado.pericias = novasPericias;
+                }
+                break;
+            case 'ritual':
+                if (typeof ped.valorEscolhido === 'string') {
+                    const nomeRitual = ped.valorEscolhido;
+                    atualizado.rituais = (atualizado.rituais || []).filter(r => r.nome !== nomeRitual);
                 }
                 break;
         }

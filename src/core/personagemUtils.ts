@@ -24,6 +24,9 @@ export function normalizePersonagem(personagem: Personagem, autoPatente: boolean
     estagio: personagem.estagio,
     patente: patente || 'Recruta',
     usarPd: personagem.usarPd || personagem.pd !== undefined,
+    origemNome: personagem.origem,
+    trilhaNome: personagem.trilha,
+    qtdTranscender: personagem.qtdTranscender,
   });
 
   const eventosBase = listarEventosNex(personagem.nex);

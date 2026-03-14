@@ -55,14 +55,13 @@ export const ThreatManagerModal: React.FC<ThreatManagerModalProps> = ({ isOpen, 
           </div>
 
           <div className="flex gap-2">
-            {['Sangue', 'Morte', 'Conhecimento', 'Energia', 'Medo'].map(type => (
+            {(['Sangue', 'Morte', 'Conhecimento', 'Energia', 'Medo'] as const).map(type => (
               <button
                 key={type}
                 onClick={() => setSelectedType(selectedType === type ? null : type)}
-                className={`px-3 py-1 rounded border text-sm font-mono transition-all
-                  ${selectedType === type
-                    ? `bg-${type === 'Sangue' ? 'red' : type === 'Morte' ? 'zinc' : type === 'Conhecimento' ? 'yellow' : type === 'Energia' ? 'purple' : 'white'}-900/30 border-${type === 'Sangue' ? 'red' : type === 'Morte' ? 'zinc' : type === 'Conhecimento' ? 'yellow' : type === 'Energia' ? 'purple' : 'white'}-500 text-white`
-                    : 'border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted'}`}
+                className={selectedType === type
+                  ? `px-3 py-1 rounded border text-sm font-mono transition-all text-white ${type === 'Sangue' ? 'bg-red-900/30 border-red-500' : type === 'Morte' ? 'bg-gray-900/30 border-gray-500' : type === 'Conhecimento' ? 'bg-yellow-900/30 border-yellow-500' : type === 'Energia' ? 'bg-purple-900/30 border-purple-500' : 'bg-blue-900/30 border-blue-500'}`
+                  : 'px-3 py-1 rounded border border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted text-sm font-mono transition-all'}
               >
                 {type.toUpperCase()}
               </button>
@@ -88,13 +87,13 @@ export const ThreatManagerModal: React.FC<ThreatManagerModalProps> = ({ isOpen, 
               </div>
 
               <div className="text-xs text-ordem-text-muted font-mono mb-3 flex gap-2">
-                <span className={`
-                  ${threat.tipo === 'Sangue' ? 'text-red-500' : ''}
-                  ${threat.tipo === 'Morte' ? 'text-ordem-text-secondary' : ''}
-                  ${threat.tipo === 'Conhecimento' ? 'text-yellow-500' : ''}
-                  ${threat.tipo === 'Energia' ? 'text-purple-500' : ''}
-                  ${threat.tipo === 'Medo' ? 'text-white' : ''}
-                `}>{threat.tipo.toUpperCase()}</span>
+                <span className={
+                  threat.tipo === 'Sangue' ? 'text-red-500' :
+                  threat.tipo === 'Morte' ? 'text-ordem-text-secondary' :
+                  threat.tipo === 'Conhecimento' ? 'text-yellow-500' :
+                  threat.tipo === 'Energia' ? 'text-purple-500' :
+                  threat.tipo === 'Medo' ? 'text-blue-500' : ''
+                }>{threat.tipo.toUpperCase()}</span>
                 <span>•</span>
                 <span>{threat.tamanho}</span>
               </div>

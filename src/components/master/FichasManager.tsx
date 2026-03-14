@@ -453,9 +453,10 @@ export function FichasManager() {
       { }
       <section
         className={`
-          flex-1 lg:flex-none lg:border-r border-ordem-border
+          lg:border-r border-ordem-border
           p-4 lg:p-6 space-y-4 overflow-hidden flex flex-col
-          ${mobileDetailOpen || isSidebarCollapsed ? 'hidden' : 'flex'}
+          ${mobileDetailOpen ? 'hidden lg:flex' : 'flex'}
+          ${isSidebarCollapsed ? 'lg:hidden' : ''}
         `}
       >
         { }

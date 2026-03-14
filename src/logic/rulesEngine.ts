@@ -19,6 +19,7 @@ import {
 } from '../core/types';
 import { validateAttributes } from '../core/rules/attributes';
 import { calculateDerivedStats } from '../core/rules/derivedStats';
+import { NEX_EVENTOS } from '../core/rules/nexEventos';
 import { CLASSES } from '../data/classes';
 import { ORIGENS } from '../data/origins';
 
@@ -124,25 +125,7 @@ const PATENTE_CONFIGS: PatenteConfig[] = [
   },
 ];
 
-const NEX_EVENTOS_BASE: { requisito: number; tipo: NexEvento['tipo']; descricao: string }[] = [
-  { requisito: 10, tipo: 'Trilha', descricao: 'Escolha de Trilha e 1ª habilidade' },
-  { requisito: 15, tipo: 'Poder', descricao: 'Desbloqueia um Poder de Classe' },
-  { requisito: 20, tipo: 'Atributo', descricao: '+1 em qualquer atributo' },
-  { requisito: 30, tipo: 'Poder', descricao: 'Desbloqueia um Poder de Classe' },
-  { requisito: 35, tipo: 'Pericia', descricao: 'Promove 2 + INT perícias em um grau' },
-  { requisito: 40, tipo: 'Trilha', descricao: '2ª habilidade da Trilha' },
-  { requisito: 45, tipo: 'Poder', descricao: 'Desbloqueia um Poder de Classe' },
-  { requisito: 50, tipo: 'Atributo', descricao: '+1 em qualquer atributo' },
-  { requisito: 50, tipo: 'Versatilidade', descricao: 'Ganha Versatilidade' },
-  { requisito: 50, tipo: 'Afinidade', descricao: 'Escolhe Afinidade elemental (Ocultista)' },
-  { requisito: 60, tipo: 'Poder', descricao: 'Desbloqueia um Poder de Classe' },
-  { requisito: 65, tipo: 'Trilha', descricao: '3ª habilidade da Trilha' },
-  { requisito: 70, tipo: 'Pericia', descricao: 'Promove novamente 2 + INT perícias' },
-  { requisito: 75, tipo: 'Poder', descricao: 'Desbloqueia um Poder de Classe' },
-  { requisito: 80, tipo: 'Atributo', descricao: '+1 em qualquer atributo' },
-  { requisito: 90, tipo: 'Poder', descricao: 'Desbloqueia um Poder de Classe' },
-  { requisito: 99, tipo: 'Trilha', descricao: '4ª habilidade da Trilha' },
-];
+// NEX_EVENTOS importado de src/core/rules/nexEventos.ts — fonte canônica única.
 
 export const TODAS_PATENTES: Patente[] = PATENTE_CONFIGS.map((cfg) => cfg.nome);
 const ORDEM_PATENTE: Patente[] = TODAS_PATENTES;
@@ -395,7 +378,7 @@ export function gerarFicha(input: CriacaoInput): Personagem {
 }
 
 export function listarEventosNex(nex: number): NexEvento[] {
-  return NEX_EVENTOS_BASE.map((evento) => ({
+  return NEX_EVENTOS.map((evento) => ({
     requisito: evento.requisito,
     tipo: evento.tipo,
     descricao: evento.descricao,
@@ -702,12 +685,18 @@ export function calcularRecursosClasse(params: {
   patente: Patente;
   usarPd?: boolean;
   pvBonus?: number;
+  origemNome?: string;
+  trilhaNome?: string;
+  qtdTranscender?: number;
 }) {
   const derived = calculateDerivedStats({
     classe: params.classe,
     atributos: params.atributos,
     nex: params.nex,
     estagio: params.estagio,
+    origemNome: params.origemNome,
+    trilhaNome: params.trilhaNome,
+    qtdTranscender: params.qtdTranscender,
   });
 
   return {
@@ -759,6 +748,17 @@ function criarBonusOrigemVazio(): BonusPoderOrigem {
   };
 }
 
+/**
+ * Calcula bônus de stats/perícias concedidos pelo PODER DE ORIGEM de um personagem.
+ *
+ * SEPARAÇÃO DE RESPONSABILIDADES:
+ * Esta função é distinta de `calcularBonusOrigem()` em `derivedStats.ts`.
+ * - `derivedStats.ts::calcularBonusOrigem()` — calcula bônus numéricos de stats (PV, PE, SAN, Defesa)
+ *   para reuso genérico dentro do cálculo de stats derivados.
+ * - Esta função — calcula bônus COM EFEITOS DE TEXTO descritivos e inclui bônus de perícias
+ *   (periciaFixos, periciaDados) que não são stats derivados puros.
+ * Ao adicionar uma nova origem com bônus, atualize AMBAS as funções.
+ */
 function calcularBonusPoderOrigem(
   origem: Origem,
   nex: number,

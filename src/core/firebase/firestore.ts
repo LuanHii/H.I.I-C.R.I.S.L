@@ -1,26 +1,11 @@
 import { db, auth } from './config';
 import { doc, setDoc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { Personagem } from '../types';
+import { removeUndefinedFields } from './firestoreUtils';
+
 interface AgentDocument extends Personagem {
     ownerId?: string;
     updatedAt?: string;
-}
-
-function removeUndefinedFields<T extends object>(obj: T): T {
-    const cleaned = {} as T;
-    for (const key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
-            const value = obj[key];
-            if (value === undefined) {
-                continue;
-            } else if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-                cleaned[key] = removeUndefinedFields(value as object) as T[Extract<keyof T, string>];
-            } else {
-                cleaned[key] = value;
-            }
-        }
-    }
-    return cleaned;
 }
 
 export const saveAgentToCloud = async (agentId: string, agentData: Personagem, ownerId?: string) => {
@@ -48,7 +33,8 @@ export const updateAgentInCloud = async (agentId: string, updates: Partial<Perso
             ...updates,
             updatedAt: new Date().toISOString(),
         };
-        await updateDoc(agentRef, updatesWithTimestamp);
+        const cleaned = removeUndefinedFields(updatesWithTimestamp as Record<string, unknown>);
+        await updateDoc(agentRef, cleaned as Record<string, object | string | number | boolean | null>);
     } catch (e) {
         console.error("Erro ao atualizar agente: ", e);
     }
