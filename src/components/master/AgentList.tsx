@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Shield, Activity, Footprints } from 'lucide-react';
 import { useCloudFichas } from '../../core/storage';
 import { Personagem } from '../../core/types';
-import { calcularRecursosClasse } from '../../logic/rulesEngine';
+import { calcularRecursosClasse } from '../../logic/progression';
 import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPersonagem';
 
 export const AgentList: React.FC = () => {

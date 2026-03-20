@@ -15,15 +15,15 @@ import {
     BookOpen,
 } from 'lucide-react';
 import { Personagem, Poder, PendenciaNex, AtributoKey, Elemento, Ritual, PericiaName } from '../core/types';
-import { subirNex, MudancasNex, getPendenciasNaoResolvidas, resolverPendencia } from '../logic/levelUp';
-import { calculateDerivedStats } from '../core/rules/derivedStats';
 import { cn } from '../lib/utils';
 import { PowerChoiceModal } from './PowerChoiceModal';
 import { ParanormalPowerModal } from './ParanormalPowerModal';
-import { PODERES } from '../data/powers';
-import { TRILHAS } from '../data/tracks';
-import { RITUAIS } from '../data/rituals';
-import { ELEMENTO_COR } from '../data/elementColors';
+import { PODERES } from '../data/character/powers';
+import { TRILHAS } from '../data/character/tracks';
+import { RITUAIS } from '../data/magic/rituals';
+import { CLASSES } from '../data/character/classes';
+import { ELEMENTO_COR } from '../data/magic/elementColors';
+import { useLevelUpFlow } from '../hooks/useLevelUpFlow';
 
 interface LevelUpModalProps {
     agent: Personagem;
@@ -32,184 +32,32 @@ interface LevelUpModalProps {
     isResume?: boolean;
 }
 
-type ModalState = 'summary' | 'powerChoice' | 'paranormalChoice' | 'attributeChoice' | 'affinityChoice' | 'versatilityChoice' | 'skillUpgrade' | 'trackAbilityChoice' | 'ritualChoice' | 'trackChoice';
-
 export function LevelUpModal({ agent, onConfirm, onClose, isResume }: LevelUpModalProps) {
-    const [modalState, setModalState] = useState<ModalState>('summary');
-    const [personagemAtualizado, setPersonagemAtualizado] = useState<Personagem | null>(null);
-    const [mudancas, setMudancas] = useState<MudancasNex | null>(null);
-    const [pendenciaSelecionada, setPendenciaSelecionada] = useState<PendenciaNex | null>(null);
-    const [transcenderEscolhido, setTranscenderEscolhido] = useState(false);
+    const {
+        modalState, setModalState,
+        personagemAtualizado, mudancas,
+        pendenciaSelecionada,
+        pendenciasAbertas, temPendencias,
+        isReady,
+        transcenderEscolhido,
+        setPendenciaSelecionada,
+        handleConfirmLevelUp,
+        handleResolvePendencia,
+        handleTranscenderComplete,
+        handlePowerSelect,
+        handleAttributeSelect,
+        handleAffinitySelect,
+        handleVersatilitySelect,
+        handleSkillUpgradeConfirm,
+        handleTrackAbilityConfirm,
+        handleRitualSelect,
+        handleTrackChoiceSelect,
+    } = useLevelUpFlow(agent, isResume);
 
-    React.useEffect(() => {
-        if (!personagemAtualizado) {
-            if (isResume) {
-                setPersonagemAtualizado(agent);
-                setMudancas({
-                    pvGanho: 0,
-                    peGanho: 0,
-                    sanGanha: 0,
-                    limitePeRodada: calculateDerivedStats({
-                        classe: agent.classe,
-                        atributos: agent.atributos,
-                        nex: agent.nex,
-                        estagio: agent.estagio
-                    }).peRodada,
-                    nexAnterior: agent.nex,
-                    nexNovo: agent.nex,
-                    eventosDesbloqueados: []
-                });
-            } else {
-                const novoNex = agent.classe === 'Sobrevivente' ? (agent.estagio || 1) + 1 : Math.min(99, agent.nex + (agent.nex === 95 ? 4 : 5));
-                const resultado = subirNex(agent, novoNex, transcenderEscolhido);
-                setPersonagemAtualizado(resultado.personagem);
-                setMudancas(resultado.mudancas);
-            }
-        }
-    }, [agent, transcenderEscolhido, personagemAtualizado, isResume]);
-
-    if (!personagemAtualizado || !mudancas) {
+    if (!isReady || !personagemAtualizado || !mudancas) {
         return null;
     }
 
-    const pendenciasAbertas = getPendenciasNaoResolvidas(personagemAtualizado);
-    const temPendencias = pendenciasAbertas.length > 0;
-
-    const handleConfirmLevelUp = () => {
-        onConfirm(personagemAtualizado);
-    };
-
-    const handleResolvePendencia = (pendencia: PendenciaNex) => {
-        setPendenciaSelecionada(pendencia);
-
-        switch (pendencia.tipo) {
-            case 'poder':
-                setModalState('powerChoice');
-                break;
-            case 'transcenderPoder':
-                setModalState('paranormalChoice');
-                break;
-            case 'trilha':
-                setModalState('trackChoice');
-                break;
-            case 'atributo':
-                setModalState('attributeChoice');
-                break;
-            case 'afinidade':
-                setModalState('affinityChoice');
-                break;
-            case 'versatilidade':
-                setModalState('versatilityChoice');
-                break;
-            case 'pericia':
-                setModalState('skillUpgrade');
-                break;
-            case 'trilhaHabilidade':
-                setModalState('trackAbilityChoice');
-                break;
-            case 'ritual':
-                setModalState('ritualChoice');
-                break;
-            default:
-                break;
-        }
-    };
-
-    const handleTranscenderComplete = (poderParanormal: Poder, ritual?: Ritual) => {
-        if (!pendenciaSelecionada || !mudancas) return;
-        const novoNex = mudancas.nexNovo;
-        const baseTranscendido = subirNex(agent, novoNex, true).personagem;
-        const infoPendencia = ritual
-            ? `Transcender: ${poderParanormal.nome} (${ritual.nome})`
-            : `Transcender: ${poderParanormal.nome}`;
-        const qtdTranscender = (agent.qtdTranscender || 0) + 1;
-        let atualizado: Personagem = {
-            ...resolverPendencia(personagemAtualizado, pendenciaSelecionada.id, infoPendencia),
-            poderes: [...personagemAtualizado.poderes, poderParanormal],
-            rituais: ritual ? [...personagemAtualizado.rituais, ritual] : personagemAtualizado.rituais,
-            qtdTranscender,
-            san: baseTranscendido.san,
-        };
-        setTranscenderEscolhido(true);
-        setPersonagemAtualizado(atualizado);
-        setPendenciaSelecionada(null);
-        setModalState('summary');
-        setMudancas({
-            ...mudancas,
-            sanGanha: 0,
-        });
-    };
-
-    const handlePowerSelect = (poderNome: string) => {
-        if (!pendenciaSelecionada) return;
-        if (poderNome === 'Transcender') return;
-        const poder = PODERES.find(p => p.nome === poderNome);
-        if (!poder) return;
-        const atualizado = {
-            ...resolverPendencia(personagemAtualizado, pendenciaSelecionada.id, poderNome),
-            poderes: [...personagemAtualizado.poderes, poder],
-        };
-        setPersonagemAtualizado(atualizado);
-        setPendenciaSelecionada(null);
-        setModalState('summary');
-    };
-
-    const handleAttributeSelect = (atributo: AtributoKey) => {
-        if (!pendenciaSelecionada) return;
-
-        const atualizado = resolverPendencia(personagemAtualizado, pendenciaSelecionada.id, atributo);
-        setPersonagemAtualizado(atualizado);
-        setPendenciaSelecionada(null);
-        setModalState('summary');
-    };
-
-    const handleAffinitySelect = (elemento: Elemento) => {
-        if (!pendenciaSelecionada) return;
-        const atualizado = resolverPendencia(personagemAtualizado, pendenciaSelecionada.id, elemento);
-        setPersonagemAtualizado(atualizado);
-        setPendenciaSelecionada(null);
-        setModalState('summary');
-    };
-
-    const handleVersatilitySelect = (valor: string) => {
-        if (!pendenciaSelecionada) return;
-        const atualizado = resolverPendencia(personagemAtualizado, pendenciaSelecionada.id, valor);
-        setPersonagemAtualizado(atualizado);
-        setPendenciaSelecionada(null);
-        setModalState('summary');
-    };
-
-    const handleSkillUpgradeConfirm = (selectedSkills: string[]) => {
-        if (!pendenciaSelecionada) return;
-        const atualizado = resolverPendencia(personagemAtualizado, pendenciaSelecionada.id, selectedSkills);
-        setPersonagemAtualizado(atualizado);
-        setPendenciaSelecionada(null);
-        setModalState('summary');
-    };
-
-    const handleTrackAbilityConfirm = (valor: string) => {
-        if (!pendenciaSelecionada) return;
-        const atualizado = resolverPendencia(personagemAtualizado, pendenciaSelecionada.id, valor);
-        setPersonagemAtualizado(atualizado);
-        setPendenciaSelecionada(null);
-        setModalState('summary');
-    };
-
-    const handleRitualSelect = (ritualNome: string) => {
-        if (!pendenciaSelecionada) return;
-        const atualizado = resolverPendencia(personagemAtualizado, pendenciaSelecionada.id, ritualNome);
-        setPersonagemAtualizado(atualizado);
-        setPendenciaSelecionada(null);
-        setModalState('summary');
-    };
-
-    const handleTrackChoiceSelect = (trilhaNome: string) => {
-        if (!pendenciaSelecionada) return;
-        const atualizado = resolverPendencia(personagemAtualizado, pendenciaSelecionada.id, trilhaNome);
-        setPersonagemAtualizado(atualizado);
-        setPendenciaSelecionada(null);
-        setModalState('summary');
-    };
     if (modalState === 'powerChoice' && pendenciaSelecionada) {
         return (
             <PowerChoiceModal
@@ -480,7 +328,7 @@ export function LevelUpModal({ agent, onConfirm, onClose, isResume }: LevelUpMod
                         </div>
                     )}
 
-                    {/* Footer: aviso ou botão de confirmação */}
+                    {}
                     <div className={cn(
                         'pt-3 border-t border-ordem-border',
                         temPendencias ? 'opacity-60' : ''
@@ -491,7 +339,7 @@ export function LevelUpModal({ agent, onConfirm, onClose, isResume }: LevelUpMod
                             </p>
                         ) : (
                             <button
-                                onClick={handleConfirmLevelUp}
+                                onClick={() => { const p = handleConfirmLevelUp(); if (p) onConfirm(p); }}
                                 className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-700 hover:bg-green-600 active:bg-green-800 text-white font-bold rounded-lg transition-colors"
                             >
                                 <Check size={18} />
@@ -684,7 +532,6 @@ function RitualChoiceModal({
 
     const circuloMaximo = pendencia.circuloMaximo ?? 1;
 
-    // Rituais já conhecidos pelo personagem
     const rituaisConhecidos = useMemo(
         () => new Set((personagem.rituais || []).map(r => r.nome)),
         [personagem.rituais]
@@ -708,7 +555,7 @@ function RitualChoiceModal({
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
             <div className="bg-ordem-ooze border border-purple-700/50 rounded-xl w-full max-w-2xl max-h-[85vh] flex flex-col">
-                {/* Header */}
+                
                 <div className="p-5 border-b border-ordem-border bg-gradient-to-r from-purple-900/30 to-ordem-ooze flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <BookOpen size={22} className="text-purple-400 flex-shrink-0" />
@@ -724,7 +571,7 @@ function RitualChoiceModal({
                     </button>
                 </div>
 
-                {/* Filtros */}
+                
                 <div className="p-3 border-b border-ordem-border flex flex-col sm:flex-row gap-2">
                     <input
                         type="text"
@@ -762,7 +609,7 @@ function RitualChoiceModal({
                     </div>
                 </div>
 
-                {/* Lista de rituais */}
+                {}
                 <div className="flex-1 overflow-y-auto p-3 space-y-2">
                     {rituaisFiltrados.length === 0 ? (
                         <p className="text-center text-ordem-text-muted py-8">
@@ -804,7 +651,7 @@ function RitualChoiceModal({
                     )}
                 </div>
 
-                {/* Footer */}
+                {}
                 <div className="p-3 border-t border-ordem-border text-center">
                     <span className="text-xs text-ordem-text-muted">
                         {rituaisFiltrados.length} ritual{rituaisFiltrados.length !== 1 ? 'is' : ''} disponível{rituaisFiltrados.length !== 1 ? 'is' : ''}
@@ -832,7 +679,7 @@ function TrackChoiceModal({
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
             <div className="bg-ordem-ooze border border-ordem-border rounded-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
-                {/* Header */}
+                {}
                 <div className="p-5 border-b border-ordem-border">
                     <h3 className="text-lg font-bold text-ordem-text">Escolha uma Trilha de Classe</h3>
                     <p className="text-sm text-ordem-text-muted">
@@ -840,7 +687,7 @@ function TrackChoiceModal({
                     </p>
                 </div>
 
-                {/* Lista de trilhas */}
+                {}
                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
                     {trilhasDisponiveis.map(trilha => {
                         const hab10 = trilha.habilidades.find(h => h.nex === 10);
@@ -863,7 +710,7 @@ function TrackChoiceModal({
                     })}
                 </div>
 
-                {/* Footer */}
+                {}
                 <div className="p-3 border-t border-ordem-border">
                     <button onClick={onCancel} className="w-full px-4 py-2 border border-ordem-border rounded text-ordem-text-muted hover:text-ordem-text transition-colors">
                         Cancelar

@@ -1,4 +1,4 @@
-import { Ameaca } from '../core/types';
+import { Ameaca } from '../../core/types';
 
 export const AMEACAS: Ameaca[] = [
 

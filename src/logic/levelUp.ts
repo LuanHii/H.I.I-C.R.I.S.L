@@ -9,11 +9,12 @@ import {
     Poder,
     PericiaName,
 } from '../core/types';
-import { RITUAIS } from '../data/rituals';
-import { TRILHAS } from '../data/tracks';
-import { PODERES, contarPoderesDisponiveis } from '../data/powers';
+import { RITUAIS } from '../data/magic/rituals';
+import { TRILHAS } from '../data/character/tracks';
+import { PODERES, contarPoderesDisponiveis } from '../data/character/powers';
 import { calculateDerivedStats } from '../core/rules/derivedStats';
-import { getPatentePorNex, getPatenteConfig, calcularRecursosClasse } from './rulesEngine';
+import { getPatentePorNex, getPatenteConfig } from './rulesEngine';
+import { calcularRecursosClasse } from './progression';
 import { NEX_EVENTOS } from '../core/rules/nexEventos';
 
 export interface LevelUpResult {
@@ -130,7 +131,7 @@ export function detectingPendenciesAndAutoApply(
                 break;
 
             case 'Pericia':
-                // Especialista recebe 5+INT; Combatente e Ocultista recebem 2+INT
+                
                 const qtdPericias = personagem.classe === 'Especialista'
                     ? 5 + personagem.atributos.INT
                     : 2 + personagem.atributos.INT;
@@ -172,9 +173,9 @@ export function detectingPendenciesAndAutoApply(
                 break;
 
             case 'Ritual':
-                // Apenas Ocultistas aprendem rituais via Escolhido pelo Outro Lado
+                
                 if (personagem.classe === 'Ocultista') {
-                    // Determina o círculo máximo desbloqueado neste NEX
+                    
                     const circuloPorNex: Record<number, 1 | 2 | 3 | 4> = { 5: 1, 25: 2, 55: 3, 85: 4 };
                     const circuloMaximo = circuloPorNex[evento.requisito] ?? 1;
                     pendencias.push({
@@ -235,6 +236,10 @@ export function subirNex(
 ): LevelUpResult {
     const nexAnterior = personagem.nex;
 
+    const novoQtdTranscender = transcenderEscolhido
+        ? (personagem.qtdTranscender || 0) + 1
+        : (personagem.qtdTranscender || 0);
+
     const recursosAnteriores = calcularRecursosParaNex(
         personagem.classe,
         personagem.atributos,
@@ -252,16 +257,12 @@ export function subirNex(
         personagem.estagio,
         personagem.origem,
         personagem.trilha,
-        personagem.qtdTranscender
+        novoQtdTranscender
     );
 
     const pvGanho = recursosNovos.pv - recursosAnteriores.pv;
     const peGanho = recursosNovos.pe - recursosAnteriores.pe;
-    let sanGanha = recursosNovos.san - recursosAnteriores.san;
-
-    if (transcenderEscolhido) {
-        sanGanha = 0;
-    }
+    const sanGanha = recursosNovos.san - recursosAnteriores.san;
 
     const eventosDesbloqueados = calcularEventosDesbloqueados(nexAnterior, novoNex);
 
@@ -273,6 +274,7 @@ export function subirNex(
     const personagemAtualizado: Personagem = {
         ...personagem,
         nex: novoNex,
+        qtdTranscender: novoQtdTranscender,
         pv: {
             ...personagem.pv,
             atual: personagem.pv.atual + pvGanho,
@@ -367,7 +369,7 @@ export function resolverPendencia(
                     },
                     periciasTreinadasPendentes: novasPendenciasPericias > 0 ? novasPendenciasPericias : undefined,
                 };
-                
+
                 const statsAnteriores = calculateDerivedStats({
                     classe: personagem.classe,
                     atributos: personagem.atributos,

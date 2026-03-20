@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Star, Lock, Check, Zap, Sparkles } from 'lucide-react';
 import { Personagem, Poder, Ritual } from '../core/types';
-import { getPoderesClasse, getPoderesGerais, verificarRequisitos, PODERES } from '../data/powers';
+import { getPoderesClasse, getPoderesGerais, verificarRequisitos, PODERES } from '../data/character/powers';
 import { cn } from '../lib/utils';
 import { ParanormalPowerModal } from './ParanormalPowerModal';
 

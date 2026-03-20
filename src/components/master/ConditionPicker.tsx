@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, X, Search, Info } from 'lucide-react';
-import { REGRAS, type Regra } from '@/data/guiaRegras';
+import { REGRAS, type Regra } from '@/data/reference/guiaRegras';
 import { getConditionColor } from './CombatManagerTypes';
 import { cn } from '@/lib/utils';
 

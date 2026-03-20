@@ -8,8 +8,8 @@ import {
     getPoderesParanormaisElegiveis,
     contarPoderesElemento,
     PODERES
-} from '../data/powers';
-import { ELEMENTO_CONFIG } from '../data/elementColors';
+} from '../data/character/powers';
+import { ELEMENTO_CONFIG } from '../data/magic/elementColors';
 import { cn } from '../lib/utils';
 import { RitualChoiceModal } from './RitualChoiceModal';
 

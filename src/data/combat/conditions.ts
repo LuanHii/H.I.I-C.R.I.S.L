@@ -1,4 +1,4 @@
-import { Condicao } from '../core/types';
+import { Condicao } from '../../core/types';
 
 export type ConditionCategory = 'medo' | 'mental' | 'paralisia' | 'sentidos' | 'fadiga' | 'outros';
 

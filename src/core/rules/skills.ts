@@ -1,6 +1,6 @@
 import { ClasseName, PericiaName } from '../types';
-import { CLASSES } from '../../data/classes';
-import { ORIGENS } from '../../data/origins';
+import { CLASSES } from '../../data/character/classes';
+import { ORIGENS } from '../../data/character/origins';
 
 export function calculateSkillPoints(classe: ClasseName, intelecto: number): number {
   const stats = CLASSES[classe];

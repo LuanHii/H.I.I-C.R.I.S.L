@@ -1,4 +1,4 @@
-import { Item } from '../core/types';
+import { Item } from '../../core/types';
 
 export const ITENS: Item[] = [
 

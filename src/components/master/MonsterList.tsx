@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { AMEACAS } from '../../data/monsters';
+import { AMEACAS } from '../../data/combat/monsters';
 import { Ameaca } from '../../core/types';
 import { useCloudMonsters } from '../../core/storage';
-import { ELEMENTO_FILTER_STYLES } from '../../data/elementColors';
+import { ELEMENTO_FILTER_STYLES } from '../../data/magic/elementColors';
 import { MonsterEditor } from './MonsterEditor';
 import { Cloud, CloudOff } from 'lucide-react';
 

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { AMEACAS } from '../../data/monsters';
+import { AMEACAS } from '../../data/combat/monsters';
 import { Ameaca } from '../../core/types';
 
 interface ThreatManagerModalProps {

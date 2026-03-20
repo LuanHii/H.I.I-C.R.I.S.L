@@ -15,9 +15,9 @@ import {
 } from '../logic/creationWorkflow';
 import { useCloudFichas } from '../core/storage';
 import { calcularPericiasIniciais, TODAS_PERICIAS } from '../logic/characterUtils';
-import { ORIGENS } from '../data/origins';
-import { RITUAIS } from '../data/rituals';
-import { TRILHAS } from '../data/tracks';
+import { ORIGENS } from '../data/character/origins';
+import { RITUAIS } from '../data/magic/rituals';
+import { TRILHAS } from '../data/character/tracks';
 import { Atributos, ClasseName, Personagem, PericiaName, Ritual, Item, Elemento, Trilha, Poder, ModificacaoArma, Patente } from '../core/types';
 import { ClassePreferencias, getPatenteConfig } from '../logic/rulesEngine';
 import type { RecreateDraft } from '../logic/recreateFromPersonagem';

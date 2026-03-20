@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Item } from '../core/types';
-import { calcularStatsModificados, MODIFICACOES_ARMAS } from '../data/modifications';
+import { calcularStatsModificados, MODIFICACOES_ARMAS } from '../data/equipment/modifications';
 import { Swords, Target, Zap, ArrowRight, Shield, Crosshair, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

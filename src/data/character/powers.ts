@@ -1,4 +1,4 @@
-import { Poder } from '../core/types';
+import { Poder } from '../../core/types';
 
 export const PODERES: Poder[] = [
 
@@ -976,7 +976,7 @@ export const PODERES: Poder[] = [
 
 ];
 
-import { ClasseName, Personagem, Atributos, PericiaName, GrauTreinamento } from '../core/types';
+import { ClasseName, Personagem, Atributos, PericiaName, GrauTreinamento } from '../../core/types';
 
 const PODERES_POR_CLASSE: Record<ClasseName, string[]> = {
   Combatente: [
@@ -1102,7 +1102,7 @@ export function contarPoderesDisponiveis(nex: number): number {
   return marcos.filter(m => nex >= m).length;
 }
 
-import { Elemento } from '../core/types';
+import { Elemento } from '../../core/types';
 
 export function getPoderesParanormais(): Poder[] {
   return PODERES.filter(p => p.tipo === 'Paranormal');

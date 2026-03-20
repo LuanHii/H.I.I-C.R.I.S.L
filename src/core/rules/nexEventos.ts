@@ -1,13 +1,13 @@
 import type { NexEvento } from '../types';
 
-/**
- * Tabela canonical de eventos de NEX para personagens Agentes (5%-99%).
- *
- * FONTE DE VERDADE ÚNICA — importar daqui em vez de duplicar.
- * Usada por:
- *   - src/logic/rulesEngine.ts  (listagem/exibição de eventos na UI)
- *   - src/logic/levelUp.ts      (controle real do level-up)
- */
+
+
+
+
+
+
+
+
 export const NEX_EVENTOS: { requisito: number; tipo: NexEvento['tipo']; descricao: string }[] = [
   { requisito: 5,  tipo: 'Ritual',       descricao: 'Ocultista: aprende 1 ritual de 1º círculo (Escolhido pelo Outro Lado)' },
   { requisito: 10, tipo: 'Trilha',       descricao: 'Escolha de Trilha e 1ª habilidade' },

@@ -261,7 +261,7 @@ export interface PendenciaNex {
 
   opcoes?: string[];
 
-  /** Círculo máximo de ritual que o personagem pode escolher (apenas tipo 'ritual') */
+  
   circuloMaximo?: 1 | 2 | 3 | 4;
 
   valorEscolhido?: string | string[];

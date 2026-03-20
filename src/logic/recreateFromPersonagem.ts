@@ -1,5 +1,5 @@
-import { ORIGENS } from '../data/origins';
-import { RITUAIS } from '../data/rituals';
+import { ORIGENS } from '../data/character/origins';
+import { RITUAIS } from '../data/magic/rituals';
 import type { Atributos, ClasseName, PericiaName, Personagem, Ritual } from '../core/types';
 import type { ClassePreferencias } from './rulesEngine';
 import { calcularPericiasIniciais, TODAS_PERICIAS } from './characterUtils';

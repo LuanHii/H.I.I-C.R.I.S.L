@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "strip-code-comments": "node scripts/strip-code-comments.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

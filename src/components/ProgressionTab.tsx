@@ -1,7 +1,7 @@
 import React from 'react';
 import { Personagem } from '../core/types';
-import { ORIGENS } from '../data/origins';
-import { TRILHAS } from '../data/tracks';
+import { ORIGENS } from '../data/character/origins';
+import { TRILHAS } from '../data/character/tracks';
 
 interface ProgressionTabProps {
   character: Personagem;

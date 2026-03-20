@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { PODERES } from '../../data/powers';
-import { CLASS_ABILITIES } from '../../data/classAbilities';
+import { PODERES } from '../../data/character/powers';
+import { CLASS_ABILITIES } from '../../data/character/classAbilities';
 import { Poder, ClasseName } from '../../core/types';
 
 interface AbilitySelectorModalProps {

@@ -1,9 +1,9 @@
-/**
- * Utilitários compartilhados para operações com o Firebase Firestore.
- *
- * NOTA: O Firestore rejeita campos com valor `undefined`. Sempre use
- * `removeUndefinedFields()` antes de qualquer escrita (setDoc / updateDoc).
- */
+
+
+
+
+
+
 
 function cleanValue(value: unknown): unknown {
   if (value === undefined) return undefined;

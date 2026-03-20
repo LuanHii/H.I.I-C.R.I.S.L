@@ -1,8 +1,47 @@
-import { Personagem, AtributoKey, Poder, PericiaName } from '../core/types';
+import {
+  Personagem,
+  AtributoKey,
+  Poder,
+  PericiaName,
+  Atributos,
+  ClasseName,
+  Patente,
+} from '../core/types';
 import { calculateDerivedStats } from '../core/rules/derivedStats';
-import { TRILHAS } from '../data/tracks';
-import { PODERES, verificarRequisitos } from '../data/powers';
+import { TRILHAS } from '../data/character/tracks';
+import { PODERES, verificarRequisitos } from '../data/character/powers';
 import { calcularPericiasDetalhadas, calcularCarga } from './rulesEngine';
+
+export function calcularRecursosClasse(params: {
+  classe: ClasseName;
+  atributos: Atributos;
+  nex: number;
+  estagio?: number;
+  patente: Patente;
+  usarPd?: boolean;
+  pvBonus?: number;
+  origemNome?: string;
+  trilhaNome?: string;
+  qtdTranscender?: number;
+}) {
+  const derived = calculateDerivedStats({
+    classe: params.classe,
+    atributos: params.atributos,
+    nex: params.nex,
+    estagio: params.estagio,
+    origemNome: params.origemNome,
+    trilhaNome: params.trilhaNome,
+    qtdTranscender: params.qtdTranscender,
+  });
+
+  return {
+    pv: derived.pvMax + (params.pvBonus ?? 0),
+    pe: derived.peMax,
+    san: derived.sanMax,
+    pd: params.usarPd ? derived.pdMax : undefined,
+    limitePeRodada: derived.peRodada,
+  };
+}
 
 export function applyAttributePoint(character: Personagem, attribute: AtributoKey): Personagem {
   if (character.classe === 'Sobrevivente' && character.atributos[attribute] >= 3) {

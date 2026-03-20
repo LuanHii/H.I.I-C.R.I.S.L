@@ -5,7 +5,7 @@ import {
   gerarFicha,
 } from './characterUtils';
 import type { ClassePreferencias } from './rulesEngine';
-import { ORIGENS } from '../data/origins';
+import { ORIGENS } from '../data/character/origins';
 import { subirNex } from './levelUp';
 
 export interface CreationState {

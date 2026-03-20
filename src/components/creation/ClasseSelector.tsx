@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { CLASSES } from '@/data/classes';
+import { CLASSES } from '@/data/character/classes';
 import type { ClasseName, ClasseStats } from '@/core/types';
 import type { ClassePreferencias } from '@/logic/rulesEngine';
 

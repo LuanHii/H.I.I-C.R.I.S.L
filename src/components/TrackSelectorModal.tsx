@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Personagem, Trilha } from '../core/types';
-import { TRILHAS } from '../data/tracks';
+import { TRILHAS } from '../data/character/tracks';
 
 interface TrackSelectorModalProps {
   agent: Personagem;

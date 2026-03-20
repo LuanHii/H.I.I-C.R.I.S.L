@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { ITENS } from '../../data/items';
-import { WEAPONS } from '../../data/weapons';
+import { ITENS } from '../../data/equipment/items';
+import { WEAPONS } from '../../data/combat/weapons';
 import { useCloudItems } from '../../core/storage';
 import { Item } from '../../core/types';
 

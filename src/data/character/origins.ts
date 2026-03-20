@@ -1,4 +1,4 @@
-import { Origem } from '../core/types';
+import { Origem } from '../../core/types';
 
 export const ORIGENS: Origem[] = [
 

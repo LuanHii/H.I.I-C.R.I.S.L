@@ -20,8 +20,8 @@ import {
 import { validateAttributes } from '../core/rules/attributes';
 import { calculateDerivedStats } from '../core/rules/derivedStats';
 import { NEX_EVENTOS } from '../core/rules/nexEventos';
-import { CLASSES } from '../data/classes';
-import { ORIGENS } from '../data/origins';
+import { CLASSES } from '../data/character/classes';
+import { ORIGENS } from '../data/character/origins';
 
 export const TODAS_PERICIAS: PericiaName[] = [
   'Acrobacia',
@@ -125,7 +125,7 @@ const PATENTE_CONFIGS: PatenteConfig[] = [
   },
 ];
 
-// NEX_EVENTOS importado de src/core/rules/nexEventos.ts — fonte canônica única.
+
 
 export const TODAS_PATENTES: Patente[] = PATENTE_CONFIGS.map((cfg) => cfg.nome);
 const ORDEM_PATENTE: Patente[] = TODAS_PATENTES;
@@ -677,37 +677,6 @@ export function calcularPericiasDetalhadas(
   });
 }
 
-export function calcularRecursosClasse(params: {
-  classe: ClasseName;
-  atributos: Atributos;
-  nex: number;
-  estagio?: number;
-  patente: Patente;
-  usarPd?: boolean;
-  pvBonus?: number;
-  origemNome?: string;
-  trilhaNome?: string;
-  qtdTranscender?: number;
-}) {
-  const derived = calculateDerivedStats({
-    classe: params.classe,
-    atributos: params.atributos,
-    nex: params.nex,
-    estagio: params.estagio,
-    origemNome: params.origemNome,
-    trilhaNome: params.trilhaNome,
-    qtdTranscender: params.qtdTranscender,
-  });
-
-  return {
-    pv: derived.pvMax + (params.pvBonus ?? 0),
-    pe: derived.peMax,
-    san: derived.sanMax,
-    pd: params.usarPd ? derived.pdMax : undefined,
-    limitePeRodada: derived.peRodada,
-  };
-}
-
 export function calcularCarga(params: {
   atributos: Atributos;
   itens: Item[];
@@ -748,17 +717,17 @@ function criarBonusOrigemVazio(): BonusPoderOrigem {
   };
 }
 
-/**
- * Calcula bônus de stats/perícias concedidos pelo PODER DE ORIGEM de um personagem.
- *
- * SEPARAÇÃO DE RESPONSABILIDADES:
- * Esta função é distinta de `calcularBonusOrigem()` em `derivedStats.ts`.
- * - `derivedStats.ts::calcularBonusOrigem()` — calcula bônus numéricos de stats (PV, PE, SAN, Defesa)
- *   para reuso genérico dentro do cálculo de stats derivados.
- * - Esta função — calcula bônus COM EFEITOS DE TEXTO descritivos e inclui bônus de perícias
- *   (periciaFixos, periciaDados) que não são stats derivados puros.
- * Ao adicionar uma nova origem com bônus, atualize AMBAS as funções.
- */
+
+
+
+
+
+
+
+
+
+
+
 function calcularBonusPoderOrigem(
   origem: Origem,
   nex: number,

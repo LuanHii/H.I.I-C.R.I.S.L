@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Personagem, PericiaName, Elemento, Ritual, Item } from '../core/types';
-import { RITUAIS } from '../data/rituals';
+import { RITUAIS } from '../data/magic/rituals';
 
 interface PendingChoiceModalProps {
   agent: Personagem;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getCondicao, getCategoriaCor, getCategoriaIcon, type CondicaoCompleta } from '../data/conditions';
+import { getCondicao, getCategoriaCor, getCategoriaIcon, type CondicaoCompleta } from '../data/combat/conditions';
 
 interface ConditionBadgeProps {
     nome: string;

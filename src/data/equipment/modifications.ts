@@ -1,4 +1,4 @@
-import { ModificacaoArma, Item, ItemStats } from '../core/types';
+import { ModificacaoArma, Item, ItemStats } from '../../core/types';
 
 export const MODIFICACOES_ARMAS: ModificacaoArma[] = [
 

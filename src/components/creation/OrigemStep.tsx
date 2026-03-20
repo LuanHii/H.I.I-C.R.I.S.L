@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ORIGENS } from '@/data/origins';
+import { ORIGENS } from '@/data/character/origins';
 import { OrigemSelector } from './OrigemSelector';
 
 interface OrigemStepProps {

@@ -1,4 +1,4 @@
-import { ClasseName } from '../core/types';
+import { ClasseName } from '../../core/types';
 
 export interface ClassAbility {
   nome: string;

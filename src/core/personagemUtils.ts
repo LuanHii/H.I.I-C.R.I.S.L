@@ -1,12 +1,12 @@
 import { Personagem } from './types';
 import {
   calcularPericiasDetalhadas,
-  calcularRecursosClasse,
   getPatenteConfig,
   getPatentePorNex,
   listarEventosNex,
   calcularCarga,
 } from '../logic/rulesEngine';
+import { calcularRecursosClasse } from '../logic/progression';
 
 export const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 

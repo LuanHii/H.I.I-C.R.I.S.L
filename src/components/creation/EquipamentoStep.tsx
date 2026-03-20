@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { ITENS } from '@/data/items';
-import { WEAPONS } from '@/data/weapons';
-import { MODIFICACOES_ARMAS } from '@/data/modifications';
+import { ITENS } from '@/data/equipment/items';
+import { WEAPONS } from '@/data/combat/weapons';
+import { MODIFICACOES_ARMAS } from '@/data/equipment/modifications';
 import { getPatenteConfig } from '@/logic/rulesEngine';
 import type { Item, ModificacaoArma, Patente } from '@/core/types';
 

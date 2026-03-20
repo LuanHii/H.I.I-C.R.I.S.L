@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Personagem } from '../core/types';
-import { condicoes, getCategoriaCor, getCategoriaIcon, type CondicaoCompleta, type ConditionCategory } from '../data/conditions';
+import { condicoes, getCategoriaCor, getCategoriaIcon, type CondicaoCompleta, type ConditionCategory } from '../data/combat/conditions';
 import { ConditionBadge, ConditionsSummary } from './ConditionBadge';
 import { Button } from './ui/Button';
 import { Card, CardHeader, CardContent } from './ui/Card';

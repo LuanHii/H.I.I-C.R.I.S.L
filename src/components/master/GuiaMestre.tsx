@@ -10,7 +10,7 @@ import {
     regrasPorCategoria,
     type Regra,
     type RegraCategoria
-} from '@/data/guiaRegras';
+} from '@/data/reference/guiaRegras';
 import { cn } from '@/lib/utils';
 import { InvestigationManager } from './InvestigationManager';
 import { InterludeManager } from './InterludeManager';

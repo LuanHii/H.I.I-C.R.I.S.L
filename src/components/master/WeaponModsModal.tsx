@@ -12,7 +12,7 @@ import {
     parseDano,
     formatDano,
     formatCritico
-} from '../../data/modifications';
+} from '../../data/equipment/modifications';
 import { cn } from '@/lib/utils';
 
 interface WeaponModsModalProps {

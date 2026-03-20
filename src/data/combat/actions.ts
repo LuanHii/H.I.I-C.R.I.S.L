@@ -1,4 +1,4 @@
-import { PericiaName } from '../core/types';
+import { PericiaName } from '../../core/types';
 
 export type TipoAcao = 'Padrão' | 'Movimento' | 'Completa' | 'Livre' | 'Reação';
 

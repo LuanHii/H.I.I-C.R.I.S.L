@@ -2,12 +2,12 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ChevronDown, Swords, Zap, Crosshair, Sparkles, BookOpen, Flame, Shield, Wind, Clock, ArrowRight } from 'lucide-react';
 import { Personagem, Poder, Ritual } from '../core/types';
-import { UNIVERSAL_ACTIONS, INVESTIGATION_ACTIONS, CHASE_ACTIONS, STEALTH_ACTIONS, MANEUVER_ACTIONS, ACAO_BADGE, ActionDefinition, TipoAcao } from '../data/actions';
-import { ORIGENS } from '../data/origins';
-import { CLASS_ABILITIES } from '../data/classAbilities';
-import { TRILHAS } from '../data/tracks';
+import { UNIVERSAL_ACTIONS, INVESTIGATION_ACTIONS, CHASE_ACTIONS, STEALTH_ACTIONS, MANEUVER_ACTIONS, ACAO_BADGE, ActionDefinition, TipoAcao } from '../data/combat/actions';
+import { ORIGENS } from '../data/character/origins';
+import { CLASS_ABILITIES } from '../data/character/classAbilities';
+import { TRILHAS } from '../data/character/tracks';
 import { getPenalidadesPericia } from '../logic/combatUtils';
-import { calcularStatsModificados, MODIFICACOES_ARMAS } from '../data/modifications';
+import { calcularStatsModificados, MODIFICACOES_ARMAS } from '../data/equipment/modifications';
 
 interface ActionsTabProps {
   character: Personagem;

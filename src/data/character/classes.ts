@@ -1,4 +1,4 @@
-import { ClasseName, ClasseStats, PericiaName } from '../core/types';
+import { ClasseName, ClasseStats, PericiaName } from '../../core/types';
 
 export const CLASSES: Record<ClasseName, ClasseStats> = {
   'Combatente': {

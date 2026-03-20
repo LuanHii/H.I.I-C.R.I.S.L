@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { RITUAIS } from '@/data/rituals';
+import { RITUAIS } from '@/data/magic/rituals';
 import type { Elemento, Ritual } from '@/core/types';
 
 const ELEMENTO_COLORS: Record<Elemento, string> = {

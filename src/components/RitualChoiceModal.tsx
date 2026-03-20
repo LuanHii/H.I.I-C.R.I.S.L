@@ -4,8 +4,8 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, BookOpen, Check } from 'lucide-react';
 import { Personagem, Ritual, Elemento } from '../core/types';
-import { RITUAIS } from '../data/rituals';
-import { ELEMENTO_CONFIG } from '../data/elementColors';
+import { RITUAIS } from '../data/magic/rituals';
+import { ELEMENTO_CONFIG } from '../data/magic/elementColors';
 import { cn } from '../lib/utils';
 
 interface RitualChoiceModalProps {

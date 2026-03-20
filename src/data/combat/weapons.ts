@@ -1,4 +1,4 @@
-import { Weapow } from '../core/types';
+import { Weapow } from '../../core/types';
 
 export const WEAPONS: Weapow[] = [
 

@@ -1,5 +1,5 @@
 import { Personagem } from '../core/types';
-import { condicoes } from '../data/conditions';
+import { condicoes } from '../data/combat/conditions';
 
 export function calcularDefesaEfetiva(personagem: Personagem): number {
   let defesa = personagem.defesa;

@@ -1,4 +1,4 @@
-import { Trilha } from '../core/types';
+import { Trilha } from '../../core/types';
 
 export const TRILHAS: Trilha[] = [
 

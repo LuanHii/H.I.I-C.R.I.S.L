@@ -1,4 +1,4 @@
-import { Ritual } from '../core/types';
+import { Ritual } from '../../core/types';
 
 export const RITUAIS: Ritual[] = [
 

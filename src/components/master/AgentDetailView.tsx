@@ -399,7 +399,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     return (
         <div className={`flex flex-col h-full transition-all duration-300 relative ${isEditingMode ? 'ring-2 ring-dashed ring-red-500/50 bg-red-900/5 rounded-xl' : ''}`}>
 
-            {/* === FAB: Modo Edição === */}
+            
             {!readOnly && (
                 <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5">
                     <button
@@ -425,7 +425,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 </div>
             )}
 
-            {/* === Pending Choice Banner === */}
+            
             {hasPendingStuff && isPendingChoiceModalSuppressed && !disableInteractionModals && (
                 <button
                     onClick={() => {
@@ -444,7 +444,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 </button>
             )}
 
-            {/* === Modals (logic preserved identically) === */}
+            
             {!disableInteractionModals && !isPendingChoiceModalSuppressed && !(agent.periciasPromocaoPendentes && agent.periciasPromocaoPendentes.restante > 0) && agent.periciasTreinadasPendentes && agent.periciasTreinadasPendentes > 0 && !activePendencies && (
                 <SkillSelectorModal isOpen={true} currentSkills={agent.pericias} onSelect={handleSkillSelection} onDefer={() => setIsPendingChoiceModalSuppressed(true)} />
             )}
@@ -496,9 +496,9 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 />
             </div>
 
-            {/* ═══════════════════════════════════════════════════════ */}
-            {/* ═══  TAB BAR  ═══════════════════════════════════════ */}
-            {/* ═══════════════════════════════════════════════════════ */}
+            
+            
+            
             <div className="bg-ordem-ooze border-b border-ordem-border-light px-2 sm:px-4 overflow-x-auto touch-scroll">
                 <div className="flex gap-0.5 min-w-max">
                     {TABS.map(tab => (
@@ -518,9 +518,9 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 </div>
             </div>
 
-            {/* ═══════════════════════════════════════════════════════ */}
-            {/* ═══  TAB CONTENT  ═══════════════════════════════════ */}
-            {/* ═══════════════════════════════════════════════════════ */}
+            {}
+            {}
+            {}
             <div className="flex-1 overflow-y-auto bg-ordem-ooze/50 rounded-b-xl">
                 <div className="p-4 sm:p-5">
 
@@ -566,21 +566,21 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                         />
                     )}
 
-                    {/* === TAB: Ações === */}
+                    {}
                     {activeTab === 'actions' && (
                         <div className="animate-in fade-in-0 slide-in-from-bottom-2 duration-200">
                             <ActionsTab character={agent} useSanity={!agent.usarPd} />
                         </div>
                     )}
 
-                    {/* === TAB: Progressão === */}
+                    {}
                     {activeTab === 'progression' && (
                         <div className="animate-in fade-in-0 slide-in-from-bottom-2 duration-200 h-[500px]">
                             <ProgressionTab character={agent} />
                         </div>
                     )}
 
-                    {/* === TAB: Condições === */}
+                    {}
                     {activeTab === 'conditions' && (
                         <div className="animate-in fade-in-0 slide-in-from-bottom-2 duration-200">
                             <ConditionsManager personagem={agent} onUpdate={onUpdate} readOnly={readOnly} />
@@ -589,7 +589,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 </div>
             </div>
 
-            {/* === Modals (preserved) === */}
+            {}
             <ItemSelectorModal isOpen={isItemModalOpen} onClose={() => setIsItemModalOpen(false)} onSelect={handleAddItem} />
             <AbilitySelectorModal isOpen={isAbilityModalOpen} onClose={() => setIsAbilityModalOpen(false)} onSelect={handleAddAbility} />
             <PatenteSelectorModal isOpen={isPatenteModalOpen} currentPatente={agent.patente || 'Recruta'} onSelect={handlePatenteChange} onClose={() => setIsPatenteModalOpen(false)} />

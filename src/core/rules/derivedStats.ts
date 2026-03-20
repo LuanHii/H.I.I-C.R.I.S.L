@@ -1,6 +1,6 @@
 import { Atributos, ClasseName, Origem } from '../types';
-import { CLASSES } from '../../data/classes';
-import { ORIGENS } from '../../data/origins';
+import { CLASSES } from '../../data/character/classes';
+import { ORIGENS } from '../../data/character/origins';
 
 export interface DerivedStats {
   pvMax: number;
