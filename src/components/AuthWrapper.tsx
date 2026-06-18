@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode, useState, useCallback, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { AuthProvider, User } from '@/core/firebase/auth';
 import { migrateDataOnLogin, hasLocalData, getLocalData } from '@/core/storage/migrationService';
 import { UserMenu } from './UserMenu';
@@ -32,6 +33,8 @@ interface AuthWrapperProps {
 }
 
 export function AuthWrapper({ children, showUserMenu = false }: AuthWrapperProps) {
+  const pathname = usePathname();
+  const [isFoundryEmbed, setIsFoundryEmbed] = useState(false);
   const [migrationStatus, setMigrationStatus] = useState<MigrationStatus>({
     inProgress: false,
   });
@@ -46,6 +49,12 @@ export function AuthWrapper({ children, showUserMenu = false }: AuthWrapperProps
       setHasPendingLocalData(false);
     }
   }, [currentUserId, migrationStatus]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    setIsFoundryEmbed(pathname?.startsWith('/ficha/') === true && params.get('embed') === 'foundry');
+  }, [pathname]);
 
   const handleLogin = useCallback(async (user: User) => {
     setCurrentUserId(user.uid);
@@ -111,9 +120,11 @@ export function AuthWrapper({ children, showUserMenu = false }: AuthWrapperProps
     });
   }, [currentUserId]);
 
+  const shouldShowUserMenu = showUserMenu && !isFoundryEmbed;
+
   return (
     <AuthProvider onLogin={handleLogin}>
-      {showUserMenu && (
+      {shouldShowUserMenu && (
         <div className="fixed top-3 right-4 z-[60]">
           <UserMenu
             migrationStatus={migrationStatus}
