@@ -185,8 +185,24 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
   const url = new URL(request.url);
   const includeRaw = url.searchParams.get('includeRaw') === 'true' || url.searchParams.get('include') === 'full';
+  const knownRevision = url.searchParams.get('knownRevision');
   const payload = buildFoundryPayload(request, agentId, agent);
   const etag = `"${payload.revision.hash}"`;
+
+  if (!includeRaw && knownRevision === payload.revision.hash) {
+    return json({
+      schemaVersion: payload.schemaVersion,
+      agentId,
+      fetchedAt: new Date().toISOString(),
+      notModified: true,
+      revision: payload.revision,
+    }, {
+      headers: {
+        ETag: etag,
+        ...(payload.updatedAt ? { 'Last-Modified': new Date(payload.updatedAt).toUTCString() } : {}),
+      },
+    });
+  }
 
   if (!includeRaw && request.headers.get('if-none-match') === etag) {
     return notModified(payload.revision.hash);
