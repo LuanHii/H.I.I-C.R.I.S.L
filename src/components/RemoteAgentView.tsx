@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from 'react';
-import { Personagem, AtributoKey, PericiaName } from '../core/types';
+import { Personagem, PericiaName } from '../core/types';
 import { StatusBar } from './StatusBar';
 import { ActionsTab } from './ActionsTab';
 import { PERICIA_ATRIBUTO } from '../logic/rulesEngine';
@@ -12,6 +12,17 @@ import { ActiveConditionsDisplay, ConditionsSummary } from './ConditionBadge';
 import { WeaponStatsDisplay } from './WeaponStatsDisplay';
 
 type RemoteTab = 'status' | 'acoes' | 'pericias' | 'inventario';
+
+const TRAINED_GRADES = new Set(['Treinado', 'Veterano', 'Expert']);
+
+const isTrainedSkill = (grau?: string) => (grau ? TRAINED_GRADES.has(grau) : false);
+
+const skillGradeLabel = (grau?: string) => {
+  if (grau === 'Treinado') return 'T';
+  if (grau === 'Veterano') return 'V';
+  if (grau === 'Expert') return 'E';
+  return '-';
+};
 
 interface RemoteAgentViewProps {
   agent: Personagem;
@@ -31,6 +42,7 @@ export function RemoteAgentView({
   const [skillSearch, setSkillSearch] = useState('');
   const [situationalBonus, setSituationalBonus] = useState(0);
   const [trainedOnly, setTrainedOnly] = useState(false);
+  const [expandedSkill, setExpandedSkill] = useState<PericiaName | null>(null);
 
   const usarDeterminacao = agent.usarPd === true;
   const quickSkills: PericiaName[] = ['Iniciativa', 'Percepção', 'Reflexos', 'Fortitude', 'Vontade', 'Luta', 'Pontaria', 'Ocultismo'];
@@ -43,31 +55,30 @@ export function RemoteAgentView({
     return `Problemas detectados (${summary.errors} erro(s), ${summary.warns} aviso(s)):\\n${lines.join('\\n')}`;
   }, [issues, summary]);
 
-  const periciasPorAtributo = useMemo(() => {
-    const grupos: Record<AtributoKey, Array<[PericiaName, Personagem['periciasDetalhadas'][PericiaName]]>> = {
-      AGI: [],
-      FOR: [],
-      INT: [],
-      PRE: [],
-      VIG: [],
-    };
-    for (const [nome, det] of Object.entries(agent.periciasDetalhadas) as any) {
-      const pericia = nome as PericiaName;
-      const attr = PERICIA_ATRIBUTO[pericia];
-      grupos[attr].push([pericia, det]);
-    }
-    (Object.keys(grupos) as AtributoKey[]).forEach((k) => {
-      grupos[k].sort((a, b) => a[0].localeCompare(b[0]));
-    });
-    return grupos;
-  }, [agent.periciasDetalhadas]);
-
   const normalizedSkillSearch = useMemo(
     () => skillSearch.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(),
     [skillSearch],
   );
 
-  const isTrainedSkill = (grau?: string) => grau === 'Treinado' || grau === 'Veterano' || grau === 'Expert';
+  const compactSkills = useMemo(() => {
+    return (Object.entries(agent.periciasDetalhadas) as Array<[PericiaName, Personagem['periciasDetalhadas'][PericiaName]]>)
+      .map(([nome, det]) => ({
+        nome,
+        det,
+        attr: PERICIA_ATRIBUTO[nome],
+        trained: isTrainedSkill(det.grau),
+      }))
+      .filter(({ nome, trained }) => {
+        if (trainedOnly && !trained) return false;
+        if (!normalizedSkillSearch) return true;
+        return nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().includes(normalizedSkillSearch);
+      })
+      .sort((a, b) => {
+        if (a.trained !== b.trained) return a.trained ? -1 : 1;
+        if (b.det.bonusFixo !== a.det.bonusFixo) return b.det.bonusFixo - a.det.bonusFixo;
+        return a.nome.localeCompare(b.nome);
+      });
+  }, [agent.periciasDetalhadas, normalizedSkillSearch, trainedOnly]);
 
   const rollSkill = (pericia: PericiaName) => {
     const det = agent.periciasDetalhadas[pericia];
@@ -486,76 +497,103 @@ export function RemoteAgentView({
               </div>
             </div>
 
-            {(Object.keys(periciasPorAtributo) as AtributoKey[]).map((attr) => {
-              const skills = periciasPorAtributo[attr];
-              if (skills.length === 0) return null;
-              const visibleSkills = normalizedSkillSearch
-                ? skills.filter(([nome]) => nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().includes(normalizedSkillSearch))
-                : skills;
-              const filteredSkills = trainedOnly
-                ? visibleSkills.filter(([, det]) => isTrainedSkill(det.grau))
-                : visibleSkills;
-              if (filteredSkills.length === 0) return null;
-              return (
-                <div key={attr} className="bg-gradient-to-b from-ordem-black/80 to-black/40 border border-white/5 rounded-2xl overflow-hidden backdrop-blur-sm shadow-xl">
-                  <div className="flex items-center justify-between p-4 border-b border-white/5 bg-white/5">
-                    <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-6 bg-ordem-text-muted rounded-full mix-blend-screen"></span>
-                      <span className="text-sm font-serif tracking-[0.2em] text-white uppercase">{attr}</span>
-                    </div>
-                    <div className="flex items-center gap-2 font-mono text-xs">
-                      <span className="text-ordem-text-secondary">DADOS</span>
-                      <span className="text-white font-bold text-base px-2.5 py-0.5 bg-black/60 rounded border border-white/10 shadow-inner">{agent.atributos[attr]}</span>
-                    </div>
-                  </div>
-                  <div className="divide-y divide-white/5">
-                    {filteredSkills.map(([nome, det]) => {
-                      const trained = isTrainedSkill(det.grau);
-                      return (
+            <div className="rounded-2xl border border-white/10 bg-black/35 p-2 sm:p-3 shadow-xl backdrop-blur-sm">
+              <div className="mb-3 flex items-center justify-between gap-3 px-1">
+                <div>
+                  <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-ordem-text-muted">Matriz compacta</div>
+                  <div className="text-[11px] text-ordem-text-secondary">Toque no card para detalhes. Use o dado para rolar.</div>
+                </div>
+                <div className="shrink-0 rounded-full border border-white/10 bg-black/50 px-2.5 py-1 text-[10px] font-mono text-ordem-text-muted">
+                  {compactSkills.length} / {Object.keys(agent.periciasDetalhadas).length}
+                </div>
+              </div>
+
+              {compactSkills.length === 0 ? (
+                <div className="rounded-xl border border-white/10 bg-black/35 px-4 py-6 text-center text-xs font-mono uppercase tracking-widest text-ordem-text-muted">
+                  Nenhuma perícia encontrada.
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2 lg:grid-cols-4">
+                  {compactSkills.map(({ nome, det, attr, trained }) => {
+                    const expanded = expandedSkill === nome;
+                    return (
                       <div
                         key={nome}
-                        className={`flex items-center justify-between p-3 sm:p-4 transition-colors group ${
+                        className={`min-w-0 rounded-xl border transition-all ${
                           trained
-                            ? 'bg-green-500/[0.045] hover:bg-green-500/[0.085] shadow-[inset_3px_0_0_rgba(74,222,128,0.75)]'
-                            : 'hover:bg-white/5 opacity-70 hover:opacity-100'
-                        }`}
+                            ? 'border-green-400/30 bg-green-500/[0.07] shadow-[inset_0_0_0_1px_rgba(74,222,128,0.12),0_0_18px_rgba(74,222,128,0.08)]'
+                            : 'border-white/8 bg-white/[0.025] opacity-75'
+                        } ${expanded ? 'col-span-2 sm:col-span-1 lg:col-span-2 border-ordem-gold/45 bg-ordem-gold/[0.06] opacity-100' : ''}`}
                       >
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-sm sm:text-base font-bold truncate transition-colors ${
-                              trained
-                                ? 'text-green-100 drop-shadow-[0_0_8px_rgba(74,222,128,0.35)] group-hover:text-white'
-                                : 'text-zinc-300 group-hover:text-white'
-                            }`}>{nome}</span>
-                            <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-mono border ${det.grau === 'Treinado' ? 'border-green-900/50 text-green-400 bg-green-900/10' : det.grau === 'Veterano' ? 'border-blue-900/50 text-blue-400 bg-blue-900/10' : det.grau === 'Expert' ? 'border-purple-900/50 text-purple-400 bg-purple-900/10' : 'border-white/10 text-ordem-text-secondary bg-white/5'}`}>
-                              {det.grau || 'Destreinado'}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4 shrink-0">
-                          <div className="flex items-center gap-1 text-right">
-                            <span className={`text-lg sm:text-xl font-mono font-bold ${det.bonusFixo >= 10 ? 'text-ordem-gold drop-shadow-[0_0_8px_rgba(234,179,8,0.4)]' : 'text-zinc-300'}`}>
-                              {det.bonusFixo >= 0 ? '+' : ''}{det.bonusFixo}
-                            </span>
-                            {det.bonusO !== 0 && (
-                              <span className="text-[10px] font-mono text-ordem-text-secondary hidden sm:inline-block ml-1">({det.bonusO > 0 ? '+' : ''}{det.bonusO}O)</span>
-                            )}
-                          </div>
+                        <div className="grid grid-cols-[1fr_auto] gap-1.5 p-2">
                           <button
                             type="button"
-                            onClick={() => rollSkill(nome)}
-                            className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center bg-black/60 border border-white/10 group-hover:border-ordem-gold/50 group-hover:text-ordem-gold group-hover:shadow-[0_0_15px_rgba(234,179,8,0.15)] group-hover:bg-ordem-gold/5 text-ordem-text-muted transition-all active:scale-95 shrink-0"
-                            title="Rolar teste"
+                            onClick={() => setExpandedSkill(expanded ? null : nome)}
+                            className="min-w-0 text-left"
+                            aria-expanded={expanded}
                           >
-                            <Dices size={20} className="sm:w-6 sm:h-6" />
+                            <div className="flex min-w-0 items-center gap-1.5">
+                              <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${trained ? 'bg-green-300 shadow-[0_0_8px_rgba(134,239,172,0.9)]' : 'bg-white/20'}`} />
+                              <span className={`truncate text-[12px] font-bold leading-tight sm:text-[13px] ${trained ? 'text-green-100' : 'text-zinc-300'}`}>
+                                {nome}
+                              </span>
+                            </div>
+                            <div className="mt-1 flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-wider">
+                              <span className="rounded border border-white/10 bg-black/45 px-1 text-ordem-text-muted">{attr}</span>
+                              <span className={`rounded border px-1 ${
+                                trained
+                                  ? 'border-green-400/35 bg-green-400/10 text-green-300'
+                                  : 'border-white/10 bg-white/5 text-ordem-text-muted'
+                              }`}>
+                                {skillGradeLabel(det.grau)}
+                              </span>
+                              {det.bonusO !== 0 && (
+                                <span className="hidden rounded border border-ordem-gold/20 bg-ordem-gold/10 px-1 text-ordem-gold sm:inline">
+                                  {det.bonusO > 0 ? '+' : ''}{det.bonusO}O
+                                </span>
+                              )}
+                            </div>
                           </button>
+
+                          <div className="flex flex-col items-end justify-between gap-1">
+                            <span className={`font-mono text-lg font-black leading-none ${det.bonusFixo >= 10 ? 'text-ordem-gold' : trained ? 'text-white' : 'text-zinc-400'}`}>
+                              {det.bonusFixo >= 0 ? '+' : ''}{det.bonusFixo}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => rollSkill(nome)}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-black/55 text-ordem-text-muted transition-all hover:border-ordem-gold/50 hover:text-ordem-gold active:scale-95"
+                              title={`Rolar ${nome}`}
+                            >
+                              <Dices size={16} />
+                            </button>
+                          </div>
                         </div>
+
+                        {expanded && (
+                          <div className="border-t border-white/10 px-2 pb-2 pt-1.5">
+                            <div className="grid grid-cols-3 gap-1 text-center font-mono text-[10px]">
+                              <div className="rounded-lg bg-black/40 px-1.5 py-1">
+                                <div className="text-ordem-text-muted">DADOS</div>
+                                <div className="font-bold text-white">{agent.atributos[attr]}d20</div>
+                              </div>
+                              <div className="rounded-lg bg-black/40 px-1.5 py-1">
+                                <div className="text-ordem-text-muted">GRAU</div>
+                                <div className="truncate font-bold text-white">{det.grau || 'Destreinado'}</div>
+                              </div>
+                              <div className="rounded-lg bg-black/40 px-1.5 py-1">
+                                <div className="text-ordem-text-muted">TOTAL</div>
+                                <div className="font-bold text-white">{det.bonusFixo + situationalBonus >= 0 ? '+' : ''}{det.bonusFixo + situationalBonus}</div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )})}
-                  </div>
+                    );
+                  })}
                 </div>
-              )
-            })}
+              )}
+            </div>
           </div>
         )}
       </div>
