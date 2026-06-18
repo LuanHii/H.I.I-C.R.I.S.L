@@ -111,7 +111,7 @@ function PlayerAgentContent() {
             <div className="text-xs font-mono tracking-widest text-ordem-text-muted uppercase">Ficha Compartilhada</div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {isAuthenticated ? (
               <button
                 onClick={handleToggleWatch}
@@ -134,10 +134,15 @@ function PlayerAgentContent() {
                 </span>
               </button>
             ) : (
-              <div className="flex items-center gap-2 text-xs text-ordem-text-muted">
+              <button
+                type="button"
+                onClick={() => auth?.signInWithGoogle()}
+                disabled={auth?.loading}
+                className="flex items-center gap-2 px-3 py-2 text-xs font-mono tracking-wider rounded-lg border border-ordem-border-light text-ordem-white/80 hover:border-ordem-green hover:text-ordem-green disabled:opacity-50 transition-colors touch-target-sm"
+              >
                 <LogIn size={14} />
-                <span className="hidden sm:inline">Faça login para acompanhar</span>
-              </div>
+                <span>Entrar</span>
+              </button>
             )}
           </div>
         </div>

@@ -7,7 +7,7 @@ import { ActionsTab } from './ActionsTab';
 import { PERICIA_ATRIBUTO } from '../logic/rulesEngine';
 import { auditPersonagem, summarizeIssues } from '../core/validation/auditPersonagem';
 import { rollPericia, type DiceRollResult } from '../logic/diceRoller';
-import { Dices, Package } from 'lucide-react';
+import { Backpack, Dices, Footprints, Package, Search, Shield, Swords, X } from 'lucide-react';
 import { ActiveConditionsDisplay, ConditionsSummary } from './ConditionBadge';
 import { WeaponStatsDisplay } from './WeaponStatsDisplay';
 
@@ -28,8 +28,12 @@ export function RemoteAgentView({
 }: RemoteAgentViewProps) {
   const [tab, setTab] = useState<RemoteTab>('status');
   const [lastRoll, setLastRoll] = useState<{ pericia: PericiaName; result: DiceRollResult } | null>(null);
+  const [skillSearch, setSkillSearch] = useState('');
+  const [situationalBonus, setSituationalBonus] = useState(0);
+  const [trainedOnly, setTrainedOnly] = useState(false);
 
   const usarDeterminacao = agent.usarPd === true;
+  const quickSkills: PericiaName[] = ['Iniciativa', 'Percepção', 'Reflexos', 'Fortitude', 'Vontade', 'Luta', 'Pontaria', 'Ocultismo'];
 
   const issues = useMemo(() => auditPersonagem(agent), [agent]);
   const summary = useMemo(() => summarizeIssues(issues), [issues]);
@@ -58,6 +62,38 @@ export function RemoteAgentView({
     return grupos;
   }, [agent.periciasDetalhadas]);
 
+  const normalizedSkillSearch = useMemo(
+    () => skillSearch.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(),
+    [skillSearch],
+  );
+
+  const isTrainedSkill = (grau?: string) => grau === 'Treinado' || grau === 'Veterano' || grau === 'Expert';
+
+  const rollSkill = (pericia: PericiaName) => {
+    const det = agent.periciasDetalhadas[pericia];
+    if (!det) return;
+    setLastRoll({
+      pericia,
+      result: rollPericia({
+        ...det,
+        bonusFixo: det.bonusFixo + situationalBonus,
+      }),
+    });
+  };
+
+  const ResourcePill = ({ label, current, max, tone }: { label: string; current: number; max: number; tone: string }) => {
+    const percent = max > 0 ? Math.max(0, Math.min(100, (current / max) * 100)) : 0;
+    return (
+      <div className="relative min-w-0 overflow-hidden rounded-lg border border-white/10 bg-black/45 px-3 py-2">
+        <div className={`absolute inset-y-0 left-0 ${tone} opacity-20 transition-all`} style={{ width: `${percent}%` }} />
+        <div className="relative z-10 text-[10px] font-mono tracking-widest text-ordem-text-muted uppercase">{label}</div>
+        <div className="relative z-10 text-lg font-bold text-white leading-tight">
+          {current}<span className="text-xs text-ordem-text-muted">/{max}</span>
+        </div>
+      </div>
+    );
+  };
+
   const TabButton = ({ id, label }: { id: RemoteTab; label: string }) => (
     <button
       type="button"
@@ -72,8 +108,8 @@ export function RemoteAgentView({
   );
 
   return (
-    <div className="min-h-screen bg-ordem-black text-white">
-      <div className="max-w-5xl mx-auto px-4 py-4 sm:py-6 safe-x safe-top">
+    <div className="min-h-screen overflow-x-clip bg-ordem-black text-white bg-[radial-gradient(circle_at_top,rgba(139,0,0,0.18),transparent_34%),linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[size:auto,32px_32px,32px_32px]">
+      <div className="w-full max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-6 safe-x safe-top safe-bottom">
         { }
         <div className="flex flex-col gap-3 sm:gap-4 border-b border-ordem-border pb-4 sm:pb-5 mb-4 sm:mb-6">
           { }
@@ -86,6 +122,24 @@ export function RemoteAgentView({
               </span>
               <span className="text-[10px] sm:text-xs font-mono text-ordem-text-secondary">{agent.nex}% NEX</span>
               {agent.patente && <span className="text-[10px] sm:text-xs font-mono text-ordem-text-muted uppercase">{agent.patente}</span>}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <ResourcePill label="PV" current={agent.pv.atual} max={agent.pv.max} tone="bg-red-500" />
+            {usarDeterminacao ? (
+              <ResourcePill label="PD" current={agent.pd?.atual ?? 0} max={agent.pd?.max ?? 0} tone="bg-violet-500" />
+            ) : (
+              <>
+                <ResourcePill label="PE" current={agent.pe.atual} max={agent.pe.max} tone="bg-yellow-500" />
+                <ResourcePill label="SAN" current={agent.san.atual} max={agent.san.max} tone="bg-blue-500" />
+              </>
+            )}
+            <div className="min-w-0 rounded-lg border border-white/10 bg-black/45 px-3 py-2">
+              <div className="text-[10px] font-mono tracking-widest text-ordem-text-muted uppercase flex items-center gap-1">
+                <Shield size={11} /> DEF
+              </div>
+              <div className="text-lg font-bold text-white leading-tight">{agent.defesa}</div>
             </div>
           </div>
 
@@ -122,7 +176,7 @@ export function RemoteAgentView({
               </div>
             )}
 
-            <div className="flex items-center gap-2 ml-auto">
+            <div className="flex w-full items-center justify-end gap-2 rounded-full border border-white/5 bg-black/30 px-2 py-1 sm:ml-auto sm:w-auto sm:border-0 sm:bg-transparent sm:p-0">
               <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500 animate-pulse' : 'bg-ordem-text-muted'}`} />
               <span className={`text-[10px] sm:text-xs font-mono ${connected ? 'text-green-500' : 'text-ordem-text-secondary'}`}>
                 {connected ? 'CONECTADO' : 'OFFLINE'}
@@ -133,7 +187,7 @@ export function RemoteAgentView({
 
         {summary.total > 0 && (
           <div className="mb-6 bg-ordem-black/40 border border-ordem-border rounded-xl p-4">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <div className="text-xs font-mono tracking-[0.25em] text-ordem-text-muted uppercase mb-2">Avisos da ficha</div>
                 <ul className="text-xs text-ordem-white-muted space-y-1 list-disc pl-5">
@@ -152,18 +206,43 @@ export function RemoteAgentView({
                   </div>
                 )}
               </div>
-              <div className="text-[11px] text-ordem-text-muted font-mono whitespace-nowrap">Este modo é somente leitura.</div>
+              <div className="text-[11px] text-ordem-text-muted font-mono sm:whitespace-nowrap">Este modo é somente leitura.</div>
             </div>
           </div>
         )}
 
         { }
 
-        <div className="flex gap-2 sm:gap-3 mb-4 sm:mb-6 overflow-x-auto touch-scroll -mx-4 px-4 sm:mx-0 sm:px-0 pb-2 no-select sticky top-0 z-20 bg-ordem-black/80 backdrop-blur pt-2">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
+          <div className="min-w-0 border border-white/10 bg-black/35 rounded-xl p-3">
+            <div className="text-[10px] font-mono tracking-[0.14em] sm:tracking-widest text-ordem-text-muted uppercase flex items-center gap-2">
+              <Footprints size={13} /> Deslocamento
+            </div>
+            <div className="text-xl font-bold mt-1">{agent.deslocamento}m</div>
+          </div>
+          <div className="min-w-0 border border-white/10 bg-black/35 rounded-xl p-3">
+            <div className="text-[10px] font-mono tracking-[0.14em] sm:tracking-widest text-ordem-text-muted uppercase flex items-center gap-2">
+              <Backpack size={13} /> Carga
+            </div>
+            <div className="text-xl font-bold mt-1">{agent.carga.atual}<span className="text-sm text-ordem-text-muted">/{agent.carga.maxima}</span></div>
+          </div>
+          <div className="min-w-0 border border-white/10 bg-black/35 rounded-xl p-3">
+            <div className="text-[10px] font-mono tracking-[0.14em] sm:tracking-widest text-ordem-text-muted uppercase flex items-center gap-2">
+              <Swords size={13} /> Armas
+            </div>
+            <div className="text-xl font-bold mt-1">{agent.equipamentos.filter((it) => it.tipo === 'Arma' || it.stats?.dano || it.stats?.danoBase).length}</div>
+          </div>
+          <div className="min-w-0 border border-white/10 bg-black/35 rounded-xl p-3">
+            <div className="text-[10px] font-mono tracking-[0.14em] sm:tracking-widest text-ordem-text-muted uppercase">Condições</div>
+            <div className="text-xl font-bold mt-1">{agent.efeitosAtivos?.length ?? 0}</div>
+          </div>
+        </div>
+
+        <div className="flex max-w-full gap-2 sm:gap-3 mb-4 sm:mb-6 overflow-x-auto touch-scroll pb-2 no-select sticky top-0 z-20 bg-ordem-black/85 backdrop-blur pt-2">
           <TabButton id="status" label="STATUS" />
-          <TabButton id="acoes" label="AÇÕES" />
-          <TabButton id="pericias" label="PERÍCIAS" />
-          <TabButton id="inventario" label="INVENTÁRIO" />
+          <TabButton id="acoes" label="ACOES" />
+          <TabButton id="pericias" label="PERICIAS" />
+          <TabButton id="inventario" label="INVENTARIO" />
         </div>
 
         { }
@@ -236,14 +315,14 @@ export function RemoteAgentView({
         )}
 
         {tab === 'acoes' && (
-          <div className="bg-ordem-ooze/30 border border-ordem-border rounded-xl p-4">
+          <div className="bg-ordem-ooze/30 border border-ordem-border rounded-xl p-3 sm:p-4">
             <ActionsTab character={agent} useSanity={!usarDeterminacao} />
           </div>
         )}
 
         {tab === 'inventario' && (
-          <div className="bg-ordem-ooze/30 border border-ordem-border rounded-xl p-5">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-ordem-ooze/30 border border-ordem-border rounded-xl p-3 sm:p-5">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
               <div className="text-xs font-mono tracking-[0.25em] text-ordem-text-muted uppercase flex items-center gap-2">
                 <Package size={14} />
                 Equipamento
@@ -343,22 +422,80 @@ export function RemoteAgentView({
         {tab === 'pericias' && (
           <div className="space-y-6">
             {lastRoll && (
-              <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-black/95 text-white rounded-full border border-ordem-gold/50 shadow-[0_10px_40px_rgba(0,0,0,0.8)] px-6 py-3 flex items-center gap-4 animate-in slide-in-from-top-10 fade-in duration-300">
+              <div className="fixed top-16 left-3 right-3 z-50 bg-black/95 text-white rounded-2xl border border-ordem-gold/50 shadow-[0_10px_40px_rgba(0,0,0,0.8)] px-4 py-3 flex items-center gap-3 animate-in slide-in-from-top-10 fade-in duration-300 sm:left-1/2 sm:right-auto sm:top-20 sm:-translate-x-1/2 sm:rounded-full sm:px-6 sm:gap-4">
                 <div className="text-3xl font-bold bg-gradient-to-br from-yellow-300 to-yellow-600 bg-clip-text text-transparent drop-shadow-md">
                   {lastRoll.result.total}
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold uppercase tracking-widest leading-none mb-1 text-zinc-200">{lastRoll.pericia}</span>
-                  <span className="text-[10px] text-ordem-text-secondary font-mono leading-none">
+                <div className="flex min-w-0 flex-col">
+                  <span className="truncate text-sm font-bold uppercase tracking-widest leading-none mb-1 text-zinc-200">{lastRoll.pericia}</span>
+                  <span className="truncate text-[10px] text-ordem-text-secondary font-mono leading-none">
                     {lastRoll.result.diceCount}d20 • [{lastRoll.result.dice.join(', ')}] {lastRoll.result.bonusFixo >= 0 ? '+' : ''}{lastRoll.result.bonusFixo}
                   </span>
                 </div>
                 <button onClick={() => setLastRoll(null)} className="ml-2 w-6 h-6 flex items-center justify-center rounded-full bg-white/10 text-ordem-text-secondary hover:text-white hover:bg-red-500/50 transition-colors pb-0.5">×</button>
               </div>
             )}
+            <div className="bg-black/45 border border-white/10 rounded-2xl p-4 space-y-4 sticky top-14 z-20 backdrop-blur">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_120px] gap-3">
+                <label className="flex items-center gap-2 border border-white/10 bg-black/50 rounded-xl px-3">
+                  <Search size={16} className="text-ordem-text-muted" />
+                  <input
+                    value={skillSearch}
+                    onChange={(event) => setSkillSearch(event.target.value)}
+                    placeholder="Buscar pericia..."
+                    className="w-full bg-transparent py-3 text-sm outline-none placeholder:text-ordem-text-muted"
+                  />
+                  {skillSearch && (
+                    <button type="button" onClick={() => setSkillSearch('')} className="text-ordem-text-muted hover:text-white">
+                      <X size={16} />
+                    </button>
+                  )}
+                </label>
+                <label className="flex items-center gap-2 border border-white/10 bg-black/50 rounded-xl px-3">
+                  <span className="text-[10px] font-mono tracking-widest text-ordem-text-muted uppercase">Bonus</span>
+                  <input
+                    type="number"
+                    value={situationalBonus}
+                    onChange={(event) => setSituationalBonus(Number(event.target.value) || 0)}
+                    className="w-full bg-transparent py-3 text-sm font-mono text-right outline-none"
+                  />
+                </label>
+              </div>
+              <div className="flex gap-2 overflow-x-auto touch-scroll pb-1">
+                <button
+                  type="button"
+                  onClick={() => setTrainedOnly((value) => !value)}
+                  className={`shrink-0 px-3 py-2 rounded-lg border text-[10px] font-mono tracking-widest ${
+                    trainedOnly
+                      ? 'border-green-400/60 bg-green-500/15 text-green-300 shadow-[0_0_18px_rgba(74,222,128,0.18)]'
+                      : 'border-white/10 bg-white/5 text-ordem-text-secondary hover:border-green-400/40 hover:text-green-300'
+                  }`}
+                >
+                  SÓ TREINADAS
+                </button>
+                {quickSkills.filter((skill) => agent.periciasDetalhadas[skill]).map((skill) => (
+                  <button
+                    key={skill}
+                    type="button"
+                    onClick={() => rollSkill(skill)}
+                    className="shrink-0 px-3 py-2 rounded-lg border border-ordem-gold/30 bg-ordem-gold/10 text-ordem-gold text-[10px] font-mono tracking-widest hover:bg-ordem-gold/20"
+                  >
+                    {skill}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {(Object.keys(periciasPorAtributo) as AtributoKey[]).map((attr) => {
               const skills = periciasPorAtributo[attr];
               if (skills.length === 0) return null;
+              const visibleSkills = normalizedSkillSearch
+                ? skills.filter(([nome]) => nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().includes(normalizedSkillSearch))
+                : skills;
+              const filteredSkills = trainedOnly
+                ? visibleSkills.filter(([, det]) => isTrainedSkill(det.grau))
+                : visibleSkills;
+              if (filteredSkills.length === 0) return null;
               return (
                 <div key={attr} className="bg-gradient-to-b from-ordem-black/80 to-black/40 border border-white/5 rounded-2xl overflow-hidden backdrop-blur-sm shadow-xl">
                   <div className="flex items-center justify-between p-4 border-b border-white/5 bg-white/5">
@@ -372,11 +509,24 @@ export function RemoteAgentView({
                     </div>
                   </div>
                   <div className="divide-y divide-white/5">
-                    {skills.map(([nome, det]) => (
-                      <div key={nome} className="flex items-center justify-between p-3 sm:p-4 hover:bg-white/5 transition-colors group">
+                    {filteredSkills.map(([nome, det]) => {
+                      const trained = isTrainedSkill(det.grau);
+                      return (
+                      <div
+                        key={nome}
+                        className={`flex items-center justify-between p-3 sm:p-4 transition-colors group ${
+                          trained
+                            ? 'bg-green-500/[0.045] hover:bg-green-500/[0.085] shadow-[inset_3px_0_0_rgba(74,222,128,0.75)]'
+                            : 'hover:bg-white/5 opacity-70 hover:opacity-100'
+                        }`}
+                      >
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm sm:text-base font-bold text-zinc-200 truncate group-hover:text-white transition-colors">{nome}</span>
+                            <span className={`text-sm sm:text-base font-bold truncate transition-colors ${
+                              trained
+                                ? 'text-green-100 drop-shadow-[0_0_8px_rgba(74,222,128,0.35)] group-hover:text-white'
+                                : 'text-zinc-300 group-hover:text-white'
+                            }`}>{nome}</span>
                             <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-mono border ${det.grau === 'Treinado' ? 'border-green-900/50 text-green-400 bg-green-900/10' : det.grau === 'Veterano' ? 'border-blue-900/50 text-blue-400 bg-blue-900/10' : det.grau === 'Expert' ? 'border-purple-900/50 text-purple-400 bg-purple-900/10' : 'border-white/10 text-ordem-text-secondary bg-white/5'}`}>
                               {det.grau || 'Destreinado'}
                             </span>
@@ -393,7 +543,7 @@ export function RemoteAgentView({
                           </div>
                           <button
                             type="button"
-                            onClick={() => setLastRoll({ pericia: nome, result: rollPericia(det) })}
+                            onClick={() => rollSkill(nome)}
                             className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center bg-black/60 border border-white/10 group-hover:border-ordem-gold/50 group-hover:text-ordem-gold group-hover:shadow-[0_0_15px_rgba(234,179,8,0.15)] group-hover:bg-ordem-gold/5 text-ordem-text-muted transition-all active:scale-95 shrink-0"
                             title="Rolar teste"
                           >
@@ -401,7 +551,7 @@ export function RemoteAgentView({
                           </button>
                         </div>
                       </div>
-                    ))}
+                    )})}
                   </div>
                 </div>
               )

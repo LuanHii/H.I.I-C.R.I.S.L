@@ -120,7 +120,8 @@ export function AuthWrapper({ children, showUserMenu = false }: AuthWrapperProps
     });
   }, [currentUserId]);
 
-  const shouldShowUserMenu = showUserMenu && !isFoundryEmbed;
+  const isSharedFichaRoute = pathname?.startsWith('/ficha/') === true;
+  const shouldShowUserMenu = showUserMenu && !isFoundryEmbed && !isSharedFichaRoute;
 
   return (
     <AuthProvider onLogin={handleLogin}>
