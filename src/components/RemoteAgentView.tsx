@@ -10,6 +10,7 @@ import { rollPericia, type DiceRollResult } from '../logic/diceRoller';
 import { Backpack, Dices, Footprints, Package, Search, Shield, Swords, X } from 'lucide-react';
 import { ActiveConditionsDisplay, ConditionsSummary } from './ConditionBadge';
 import { WeaponStatsDisplay } from './WeaponStatsDisplay';
+import { CustomDiceRoller } from './CustomDiceRoller';
 
 type RemoteTab = 'status' | 'acoes' | 'pericias' | 'inventario';
 
@@ -496,6 +497,8 @@ export function RemoteAgentView({
                 ))}
               </div>
             </div>
+
+            <CustomDiceRoller />
 
             <div className="rounded-2xl border border-white/10 bg-black/35 p-2 sm:p-3 shadow-xl backdrop-blur-sm">
               <div className="mb-3 flex items-center justify-between gap-3 px-1">
