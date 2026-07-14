@@ -23,7 +23,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 1,
     tipo: 'Improvisada',
     proficiencia: 'Armas Simples',
-    descricao: 'Qualquer objeto usado para atacar (cadeira, garrafa, etc.). Sofre –2 em ataques.',
+    descricao: 'Qualquer objeto usado para atacar (cadeira, garrafa, etc.). Arma corpo a corpo de uma mão; sofre –1d20 no teste de ataque.',
     stats: {
       Dano_Base: '1d6',
       Dano_Tipo: 'Impacto',
@@ -38,7 +38,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 0,
     tipo: 'Improvisada',
     proficiencia: 'Armas Simples',
-    descricao: 'Golpe com a coronha de uma arma de fogo. Arma leve: 1d4, outras: 1d6.',
+    descricao: 'Golpe com a coronha de uma arma de fogo. Armas leves e de uma mão: 1d4; armas de duas mãos: 1d6.',
     stats: {
       Dano_Base: '1d4/1d6',
       Dano_Tipo: 'Impacto',
@@ -69,7 +69,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 2,
     tipo: 'Simples',
     proficiencia: 'Armas Simples',
-    descricao: 'Arma de duas mãos, longa e contundente.',
+    descricao: 'Arma de duas mãos, longa e contundente. Arma ágil. Pode ser usada com Combater com Duas Armas (e poderes similares), como se fosse uma arma de uma mão e uma arma leve.',
     stats: {
       Dano_Base: '1d6',
       Dano_Tipo: 'Impacto',
@@ -99,7 +99,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 1,
     tipo: 'Simples',
     proficiencia: 'Armas Simples',
-    descricao: 'Arma primitiva com ponta perfurante. Pode ser usada para investidas ou arremessada.',
+    descricao: 'Haste de madeira com ponta metálica afiada. Pode ser arremessada.',
     stats: {
       Dano_Base: '1d6',
       Dano_Tipo: 'Perfuração',
@@ -144,12 +144,12 @@ export const WEAPONS: Weapow[] = [
     espaco: 1,
     tipo: 'Simples',
     proficiencia: 'Armas Simples',
-    descricao: 'Adaga de combate. Arma leve, ágil. Pode ser arremessada.',
+    descricao: 'Faca de lâmina longa e pontiaguda, usada por cultistas em rituais. Arma leve, ágil.',
     stats: {
       Dano_Base: '1d4',
       Dano_Tipo: 'Perfuração',
       Critico: 'x3',
-      Alcance: 'Curto'
+      Alcance: 'Corpo a corpo'
     },
     livro: 'Ordem Paranormal RPG'
   },
@@ -175,7 +175,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 2,
     tipo: 'Simples',
     proficiencia: 'Armas Simples',
-    descricao: 'Arma de disparo de duas mãos. Dispara virotes.',
+    descricao: 'Arma de disparo de duas mãos. Recarregar exige uma ação de movimento a cada disparo.',
     stats: {
       Dano_Base: '1d8',
       Dano_Tipo: 'Perfuração',
@@ -191,7 +191,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 1,
     tipo: 'Simples',
     proficiencia: 'Armas Simples',
-    descricao: 'Arma de fogo de uma mão. Usa balas curtas.',
+    descricao: 'Arma de fogo leve. Usa balas curtas.',
     stats: {
       Dano_Base: '1d12',
       Dano_Tipo: 'Balístico',
@@ -206,7 +206,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 1,
     tipo: 'Simples',
     proficiencia: 'Armas Simples',
-    descricao: 'Arma de fogo de uma mão com tambor. Usa balas curtas.',
+    descricao: 'Arma de fogo leve com tambor. Usa balas curtas.',
     stats: {
       Dano_Base: '2d6',
       Dano_Tipo: 'Balístico',
@@ -268,12 +268,12 @@ export const WEAPONS: Weapow[] = [
     espaco: 1,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
-    descricao: 'Corrente de metal. Alcance de 3m. Fornece +2 em testes de desarmar e derrubar.',
+    descricao: 'Corrente grossa de metal. Fornece +2 em testes para desarmar e derrubar.',
     stats: {
       Dano_Base: '1d8',
       Dano_Tipo: 'Impacto',
       Critico: 'x2',
-      Alcance: 'Corpo a corpo (3m)'
+      Alcance: 'Corpo a corpo'
     },
     livro: 'Ordem Paranormal RPG'
   },
@@ -301,7 +301,7 @@ export const WEAPONS: Weapow[] = [
     descricao: 'Espada fina e leve para estocadas. Arma ágil.',
     stats: {
       Dano_Base: '1d6',
-      Dano_Tipo: 'Perfuração',
+      Dano_Tipo: 'Corte',
       Critico: '18',
       Alcance: 'Corpo a corpo'
     },
@@ -374,7 +374,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 2,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
-    descricao: 'Espada japonesa de duas mãos. Arma ágil.',
+    descricao: 'Espada japonesa de duas mãos. Arma ágil. Veterano em Luta pode usá-la como arma de uma mão.',
     stats: {
       Dano_Base: '1d10',
       Dano_Tipo: 'Corte',
@@ -419,11 +419,11 @@ export const WEAPONS: Weapow[] = [
     espaco: 2,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
-    descricao: 'Ferramenta de corte motorizada adaptada para combate.',
+    descricao: 'Ferramenta de corte motorizada. Sempre que rolar 6 em um dado de dano, role um dado adicional. Desajeitada: impõe -1d20 nos testes de ataque. Ligar gasta uma ação de movimento.',
     stats: {
       Dano_Base: '3d6',
       Dano_Tipo: 'Corte',
-      Critico: 'x4',
+      Critico: 'x2',
       Alcance: 'Corpo a corpo'
     },
     livro: 'Ordem Paranormal RPG'
@@ -435,7 +435,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 2,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
-    descricao: 'Arco moderno com polias. Dispara flechas.',
+    descricao: 'Arco moderno com polias. Dispara flechas. Ao contrário de outras armas de disparo, permite somar Força às rolagens de dano.',
     stats: {
       Dano_Base: '1d10',
       Dano_Tipo: 'Perfuração',
@@ -450,7 +450,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 2,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
-    descricao: 'Besta pesada de alta potência. Dispara virotes.',
+    descricao: 'Besta pesada de alta potência. Recarregar exige uma ação de movimento a cada disparo.',
     stats: {
       Dano_Base: '1d12',
       Dano_Tipo: 'Perfuração',
@@ -462,7 +462,7 @@ export const WEAPONS: Weapow[] = [
 
   {
     nome: 'Submetralhadora',
-    categoria: 2,
+    categoria: 1,
     espaco: 1,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
@@ -477,11 +477,11 @@ export const WEAPONS: Weapow[] = [
   },
   {
     nome: 'Espingarda',
-    categoria: 2,
+    categoria: 1,
     espaco: 2,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
-    descricao: 'Arma de fogo de duas mãos que dispara cartuchos. Tiro disperso.',
+    descricao: 'Arma de fogo de duas mãos com cano liso. Usa cartuchos. Causa apenas metade do dano em alcance médio ou maior.',
     stats: {
       Dano_Base: '4d6',
       Dano_Tipo: 'Balístico',
@@ -492,7 +492,7 @@ export const WEAPONS: Weapow[] = [
   },
   {
     nome: 'Fuzil de Assalto',
-    categoria: 3,
+    categoria: 2,
     espaco: 2,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
@@ -511,12 +511,12 @@ export const WEAPONS: Weapow[] = [
     espaco: 2,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
-    descricao: 'Arma de fogo de duas mãos com mira telescópica. Usa balas longas.',
+    descricao: 'Arma de fogo de duas mãos para disparos longos e precisos. Usa balas longas. Veterano em Pontaria que mirar com ela recebe +5 na margem de ameaça.',
     stats: {
       Dano_Base: '2d10',
       Dano_Tipo: 'Balístico',
       Critico: '19/x3',
-      Alcance: 'Extremo'
+      Alcance: 'Longo'
     },
     livro: 'Ordem Paranormal RPG'
   },
@@ -524,10 +524,10 @@ export const WEAPONS: Weapow[] = [
   {
     nome: 'Bazuca',
     categoria: 3,
-    espaco: 4,
+    espaco: 2,
     tipo: 'Pesada',
     proficiencia: 'Armas Pesadas',
-    descricao: 'Lançador de foguetes de duas mãos. Dispara foguetes. Dano em área de 3m.',
+    descricao: 'Lançador de foguetes de duas mãos. Causa o dano no alvo e em todos os seres num raio de 3m (exceto o alvo direto, Reflexos DT Agi reduz à metade). Pode disparar num ponto em alcance médio sem rolar ataque (sem acertar ninguém diretamente). Recarregar: ação de movimento por disparo.',
     stats: {
       Dano_Base: '10d8',
       Dano_Tipo: 'Impacto',
@@ -539,30 +539,30 @@ export const WEAPONS: Weapow[] = [
   {
     nome: 'Lança-chamas',
     categoria: 3,
-    espaco: 4,
+    espaco: 2,
     tipo: 'Pesada',
     proficiencia: 'Armas Pesadas',
-    descricao: 'Arma de duas mãos que dispara jatos de fogo. Usa combustível. Área em cone.',
+    descricao: 'Arma de duas mãos que esguicha líquido inflamável. Atinge todos os seres em uma linha de 1,5m de largura em alcance curto (um único teste de ataque contra a Defesa de todos). Seres atingidos ficam em chamas. Usa combustível.',
     stats: {
       Dano_Base: '6d6',
       Dano_Tipo: 'Fogo',
       Critico: 'x2',
-      Alcance: 'Curto (cone)'
+      Alcance: 'Curto (linha)'
     },
     livro: 'Ordem Paranormal RPG'
   },
   {
     nome: 'Metralhadora',
-    categoria: 3,
-    espaco: 4,
+    categoria: 2,
+    espaco: 2,
     tipo: 'Pesada',
     proficiencia: 'Armas Pesadas',
-    descricao: 'Arma de fogo pesada de duas mãos. Usa balas longas. Tiro automático.',
+    descricao: 'Arma de fogo pesada de duas mãos. Usa balas longas. Arma automática. Exige Força 4+ ou uma ação de movimento para apoiá-la; caso contrário, sofre -5 nos ataques.',
     stats: {
       Dano_Base: '2d12',
       Dano_Tipo: 'Balístico',
       Critico: '19/x3',
-      Alcance: 'Longo'
+      Alcance: 'Médio'
     },
     livro: 'Ordem Paranormal RPG'
   },
@@ -571,8 +571,8 @@ export const WEAPONS: Weapow[] = [
     nome: 'Gancho de Carne',
     categoria: 0,
     espaco: 1,
-    tipo: 'Improvisada',
-    proficiencia: 'Armas Simples',
+    tipo: 'Tática',
+    proficiencia: 'Armas Táticas',
     descricao: 'Gancho metálico de frigorífico. Pode ser amarrado a corda/corrente (alcance 4,5m, espaço 2).',
     stats: {
       Dano_Base: '1d4',
@@ -585,10 +585,10 @@ export const WEAPONS: Weapow[] = [
   {
     nome: 'Picareta',
     categoria: 0,
-    espaco: 2,
-    tipo: 'Improvisada',
-    proficiencia: 'Armas Simples',
-    descricao: 'Ferramenta de mineração. Arma de duas mãos.',
+    espaco: 1,
+    tipo: 'Tática',
+    proficiencia: 'Armas Táticas',
+    descricao: 'Ferramenta de mineração e demolição, empregada em combate na falta de armas apropriadas. Arma de uma mão.',
     stats: {
       Dano_Base: '1d6',
       Dano_Tipo: 'Perfuração',
@@ -602,8 +602,8 @@ export const WEAPONS: Weapow[] = [
     nome: 'Baioneta',
     categoria: 0,
     espaco: 1,
-    tipo: 'Simples',
-    proficiencia: 'Armas Simples',
+    tipo: 'Tática',
+    proficiencia: 'Armas Táticas',
     descricao: 'Lâmina para fixar em fuzil. Fixada: arma de duas mãos ágil, dano 1d6, -1d20 em ataques à distância.',
     stats: {
       Dano_Base: '1d4',
@@ -630,15 +630,15 @@ export const WEAPONS: Weapow[] = [
   },
   {
     nome: 'Pregador Pneumático',
-    categoria: 1,
+    categoria: 0,
     espaco: 1,
     tipo: 'Simples',
     proficiencia: 'Armas Simples',
-    descricao: 'Ferramenta que dispara pregos. Conta como arma de fogo. 300 pregos por missão.',
+    descricao: 'Ferramenta que dispara pregos sob pressão. Conta como arma de fogo para poderes. Armazena 300 pregos, suficiente para uma missão inteira.',
     stats: {
       Dano_Base: '1d4',
       Dano_Tipo: 'Perfuração',
-      Critico: 'x2',
+      Critico: 'x4',
       Alcance: 'Curto'
     },
     livro: 'Sobrevivendo ao Horror'
@@ -648,11 +648,11 @@ export const WEAPONS: Weapow[] = [
     categoria: 1,
     espaco: 1,
     tipo: 'Simples',
-    proficiencia: 'Armas Táticas',
+    proficiencia: 'Armas Simples',
     descricao: 'Arma de baixo calibre, fácil de esconder. Treinado em Crime: não ocupa espaço. Usa balas curtas.',
     stats: {
       Dano_Base: '2d4',
-      Dano_Tipo: 'Balístico',
+      Dano_Tipo: 'Perfuração',
       Critico: '19/x3',
       Alcance: 'Curto'
     },
@@ -665,12 +665,12 @@ export const WEAPONS: Weapow[] = [
     espaco: 1,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
-    descricao: 'Bastão com guarda lateral. Arma ágil. Esquiva com esta arma: +1 Defesa adicional.',
+    descricao: 'Bastão com guarda lateral. Arma ágil. Ao usar a ação especial esquiva com ele, o bônus na Defesa aumenta em +1.',
     stats: {
       Dano_Base: '1d6',
       Dano_Tipo: 'Impacto',
       Critico: 'x2',
-      Alcance: 'Corpo a corpo'
+      Alcance: 'Curto'
     },
     livro: 'Sobrevivendo ao Horror'
   },
@@ -691,7 +691,7 @@ export const WEAPONS: Weapow[] = [
   },
   {
     nome: 'Shuriken',
-    categoria: 0,
+    categoria: 1,
     espaco: 0.5,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
@@ -741,7 +741,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 1,
     tipo: 'Munição',
     proficiencia: 'N/A',
-    descricao: 'Munição para pistolas, revólveres e submetralhadoras. Dura uma missão inteira.',
+    descricao: 'Munição para pistolas, revólveres e submetralhadoras. Um pacote dura duas cenas.',
     stats: {
       Dano_Base: '—',
       Dano_Tipo: '—',
@@ -756,7 +756,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 1,
     tipo: 'Munição',
     proficiencia: 'N/A',
-    descricao: 'Munição para fuzis e metralhadoras. Dura uma missão inteira.',
+    descricao: 'Munição para fuzis e metralhadoras. Um pacote dura uma cena.',
     stats: {
       Dano_Base: '—',
       Dano_Tipo: '—',
@@ -771,7 +771,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 1,
     tipo: 'Munição',
     proficiencia: 'N/A',
-    descricao: 'Munição para espingardas. Dura uma missão inteira.',
+    descricao: 'Munição para espingardas. Um pacote dura uma cena.',
     stats: {
       Dano_Base: '—',
       Dano_Tipo: '—',
@@ -831,7 +831,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 1,
     tipo: 'Especial',
     proficiencia: 'Armas Simples',
-    descricao: 'Arma de choque elétrico. Causa dano não letal. Alvo fica atordoado 1 rodada (Fortitude evita).',
+    descricao: 'Dispositivo de eletrochoque. Ação padrão: ser adjacente sofre 1d6 de eletricidade e fica atordoado por 1 rodada (Fortitude DT Agi evita). Bateria dura dois usos.',
     stats: {
       Dano_Base: '1d6',
       Dano_Tipo: 'Eletricidade',
@@ -846,7 +846,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 0.5,
     tipo: 'Especial',
     proficiencia: 'Armas Simples',
-    descricao: 'Spray irritante. Alvo fica cego por 1d4 rodadas (Fortitude reduz para 1 rodada).',
+    descricao: 'Spray irritante. Ação padrão: ser adjacente fica cego por 1d4 rodadas (Fortitude DT Agi evita). Carga dura dois usos.',
     stats: {
       Dano_Base: '—',
       Dano_Tipo: 'Químico',

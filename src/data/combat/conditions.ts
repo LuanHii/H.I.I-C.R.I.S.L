@@ -23,16 +23,16 @@ export const condicoes: CondicaoCompleta[] = [
   },
   {
     nome: 'Agarrado',
-    descricao: 'O personagem fica desprevenido e imóvel, sofre -2 em testes de ataque e só pode atacar com armas leves.',
+    descricao: 'O personagem fica desprevenido e imóvel, sofre -1d20 em testes de ataque e só pode atacar com armas leves.',
     efeito: {
       deslocamento: 'zero',
       defesa: -5,
       pericias: {
-        penalidadeValor: -2
+        penalidadeDados: -1
       }
     },
     categoria: 'paralisia',
-    especial: 'Ataques à distância contra alvos envolvidos têm 50% de chance de acertar o alvo errado. Pode se soltar com ação padrão (teste de manobra).'
+    especial: 'Um ataque à distância contra um alvo envolvido na manobra agarrar tem 50% de chance de acertar o alvo errado. Pode se soltar com ação padrão (teste de manobra).'
   },
   {
     nome: 'Alquebrado',
@@ -41,7 +41,7 @@ export const condicoes: CondicaoCompleta[] = [
   },
   {
     nome: 'Apavorado',
-    descricao: 'Sofre -2d20 em testes de perícia e deve fugir da fonte do medo da maneira mais eficiente possível.',
+    descricao: 'Sofre -2d20 em testes de perícia e deve fugir da fonte do medo da maneira mais eficiente possível (mas pode parar de fazê-lo assim que a perder de vista ou se afastar mais do que alcance médio).',
     efeito: {
       pericias: {
         penalidadeDados: -2
@@ -86,14 +86,11 @@ export const condicoes: CondicaoCompleta[] = [
       }
     },
     categoria: 'sentidos',
-    especial: 'Todos os alvos têm camuflagem total contra ele.'
+    especial: 'Todos os alvos de seus ataques recebem camuflagem total. Você é considerado cego em uma área de escuridão total, a menos que algo lhe permita perceber no escuro.'
   },
   {
     nome: 'Confuso',
-    descricao: 'Comporta-se de modo aleatório. Role 1d6 no início de seus turnos: 1 = move-se aleatoriamente; 2-3 = não age; 4-5 = ataca o ser mais próximo; 6 = age normalmente.',
-    efeito: {
-      acoes: 'nenhuma'
-    },
+    descricao: 'Comporta-se de modo aleatório. Role 1d6 no início de seus turnos: 1 = movimenta-se em uma direção escolhida por uma rolagem de 1d8; 2-3 = não pode fazer ações e fica balbuciando de forma incoerente; 4-5 = usa a arma que estiver empunhando para atacar o ser mais próximo, ou a si mesmo se estiver sozinho (nesse caso, apenas role o dano); 6 = a condição termina e pode agir normalmente.',
     categoria: 'mental'
   },
   {
@@ -137,17 +134,14 @@ export const condicoes: CondicaoCompleta[] = [
   {
     nome: 'Enlouquecendo',
     descricao: 'Com Sanidade 0. Se iniciar três turnos enlouquecendo na mesma cena (não necessariamente consecutivos), você fica insano — seu personagem se torna um NPC.',
-    efeito: {
-      acoes: 'nenhuma'
-    },
-    remocao: 'Teste de Diplomacia (DT 20 +5 por vez que já tiver sido acalmado na cena) ou qualquer efeito que cure pelo menos 1 ponto de Sanidade.'
+    remocao: 'Teste de Diplomacia (DT 20 +5 por vez que já tiver sido acalmado na cena, deixando-o com Sanidade 1) ou qualquer efeito que cure pelo menos 1 ponto de Sanidade.'
   },
   {
     nome: 'Enredado',
     descricao: 'O personagem fica lento, vulnerável e sofre -1d20 em testes de ataque.',
     efeito: {
       deslocamento: 'metade',
-      defesa: -5,
+      defesa: -2,
       pericias: {
         penalidadeDados: -1
       }
@@ -175,7 +169,7 @@ export const condicoes: CondicaoCompleta[] = [
     descricao: 'O personagem fica debilitado, lento e vulnerável.',
     efeito: {
       deslocamento: 'metade',
-      defesa: -5,
+      defesa: -2,
       pericias: {
         atributos: ['AGI', 'FOR', 'VIG'],
         penalidadeDados: -2
@@ -194,13 +188,13 @@ export const condicoes: CondicaoCompleta[] = [
       }
     },
     categoria: 'mental',
-    remocao: 'Qualquer ação hostil contra o personagem anula esta condição.'
+    remocao: 'Qualquer ação hostil contra o personagem anula esta condição. Balançar um ser fascinado para tirá-lo desse estado gasta uma ação padrão.'
   },
   {
     nome: 'Fatigado',
     descricao: 'O personagem fica fraco e vulnerável.',
     efeito: {
-      defesa: -5,
+      defesa: -2,
       pericias: {
         atributos: ['AGI', 'FOR', 'VIG'],
         penalidadeDados: -1
@@ -258,7 +252,7 @@ export const condicoes: CondicaoCompleta[] = [
   },
   {
     nome: 'Lento',
-    descricao: 'Todas as formas de deslocamento são reduzidas à metade e o personagem não pode correr ou fazer investidas.',
+    descricao: 'Todas as formas de deslocamento são reduzidas à metade (arredonde para baixo para o primeiro incremento de 1,5m) e o personagem não pode correr ou fazer investidas.',
     efeito: {
       deslocamento: 'metade'
     },
@@ -266,7 +260,7 @@ export const condicoes: CondicaoCompleta[] = [
   },
   {
     nome: 'Machucado',
-    descricao: 'O personagem tem menos da metade de seus pontos de vida totais.',
+    descricao: 'O personagem tem metade ou menos de seus pontos de vida totais.',
     especial: 'Esta é uma condição de status, não causa penalidades diretas mas pode ativar efeitos de outras habilidades.'
   },
   {
@@ -276,7 +270,8 @@ export const condicoes: CondicaoCompleta[] = [
       defesa: -10,
       acoes: 'nenhuma'
     },
-    remocao: 'Teste de Medicina (DT 20) ou efeitos específicos que curem/estabilizem.'
+    remocao: 'Teste de Medicina (DT 20, +5 por vez que já tiver sido estabilizado na cena) ou efeitos específicos.',
+    especial: 'Ao ser reduzido a 0 PV, o personagem fica inconsciente e morrendo. Curar pelo menos 1 PV encerra a condição inconsciente, mas não a morrendo.'
   },
   {
     nome: 'Ofuscado',

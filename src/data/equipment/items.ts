@@ -55,8 +55,7 @@ export const ITENS: Item[] = [
     categoria: 2,
     espaco: 1,
     tipo: 'Amaldiçoado (Sangue)',
-    descricao: 'Coluna vertebral sustentada por Lodo de Morte e revestida com cabos de Energia. Conectar exige ação completa (atordoado 1 rodada). Vestimenta +2 Fortitude. Ilumina indicando saúde (verde=melhor), pulsa lilás se sob efeito paranormal. +5 em Medicina para auxiliar o usuário.',
-    stats: { resistencia: 2 },
+    descricao: 'Coluna vertebral sustentada por Lodo de Morte e revestida com cabos de Energia. Conectar exige ação completa (atordoado 1 rodada). Conta como vestimenta que fornece +2 em Fortitude. Ilumina indicando saúde (verde=melhor), pulsa lilás se sob efeito paranormal. +5 em Medicina para auxiliar o usuário.',
     livro: 'Sobrevivendo ao Horror'
   },
 
@@ -81,7 +80,7 @@ export const ITENS: Item[] = [
     categoria: 2,
     espaco: 0.5,
     tipo: 'Amaldiçoado (Morte)',
-    descricao: 'Câmera instantânea amaldiçoada. Ao tirar foto de criatura de Morte, ela sofre 4d6 Energia. Ao tirar foto de pessoa, revela quanto tempo de vida lhe resta (teste de Vontade DT 25 ou sofre 2d6 mental ao ver a foto).',
+    descricao: 'Fotografia que retrata os últimos momentos de uma pessoa antes de sua morte. Empunhando-a ao fazer um teste para procurar pistas, pode gastar 1 PE: se a perícia for relacionada às circunstâncias da morte retratada, a imagem aponta uma direção útil, concedendo +1d20 no teste. O mestre decide quais perícias se relacionam.',
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -89,7 +88,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 1,
     tipo: 'Amaldiçoado (Morte)',
-    descricao: 'Munição especial para armas de fogo de balas curtas. Causa +1d6 Morte e a condição lento por 1 rodada (Fortitude DT 15 evita). Pacote para 1 cena.',
+    descricao: 'Munição forjada com Lodo, poderosa contra criaturas de Sangue. Versão para armas de balas curtas. Usar um projétil de Lodo troca todo o dano da arma para Morte. Entretanto, ao fim da cena, a arma se degrada, sendo consumida pelo tempo até ser completamente desfeita.',
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -97,7 +96,7 @@ export const ITENS: Item[] = [
     categoria: 2,
     espaco: 1,
     tipo: 'Amaldiçoado (Morte)',
-    descricao: 'Munição especial para armas de fogo de balas longas. Causa +2d6 Morte e a condição lento por 1 rodada (Fortitude DT 20 evita). Pacote para 1 cena.',
+    descricao: 'Munição forjada com Lodo, poderosa contra criaturas de Sangue. Versão para armas de balas longas. Usar um projétil de Lodo troca todo o dano da arma para Morte. Entretanto, ao fim da cena, a arma se degrada, sendo consumida pelo tempo até ser completamente desfeita.',
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -105,7 +104,7 @@ export const ITENS: Item[] = [
     categoria: 2,
     espaco: 1,
     tipo: 'Amaldiçoado (Morte)',
-    descricao: 'Rádio antigo que emite chiado perturbador e constante. Causa 1d6 Morte em criaturas com invisibilidade, incorporeidade ou camuflagem a cada rodada.',
+    descricao: 'Rádio gravador de bolso com chiado perturbador e constante. Ligado, emite chiados estáticos se houver qualquer criatura paranormal em alcance extremo; o chiado fica mais alto conforme a proximidade, permitindo estimar direção e alcance aproximados. Criaturas paranormais tendem a ser atraídas pelo chiado. Pilhas duram 12 horas antes de virarem Lodo preto.',
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -118,16 +117,8 @@ export const ITENS: Item[] = [
   },
 
   {
-    nome: 'Enciclopédia Infinita',
-    categoria: 3,
-    espaco: 1,
-    tipo: 'Amaldiçoado (Conhecimento)',
-    descricao: 'Livro que contém todo o conhecimento humano, mas que muda constantemente. Ação de interlúdio: faz teste de Investigação DT 25. Se passar, recebe resposta para uma pergunta sobre o caso. Se falhar, sofre 1d6 mental.',
-    livro: 'Sobrevivendo ao Horror'
-  },
-  {
     nome: 'Enxame Fantasmagórico',
-    categoria: 2,
+    categoria: 3,
     espaco: 1,
     tipo: 'Amaldiçoado (Conhecimento)',
     descricao: 'Manto de traças e mariposas esbranquiçadas. Enquanto vestido, deixa o usuário invisível. Contudo, sofre 1 ponto de dano mental no início de cada turno (ignora resistência).',
@@ -154,7 +145,7 @@ export const ITENS: Item[] = [
     categoria: 3,
     espaco: 1,
     tipo: 'Amaldiçoado (Conhecimento)',
-    descricao: 'Câmera antiga que captura almas. Ao fotografar criatura, ela deve fazer Vontade DT 25 ou fica paralisada por 1 rodada. Se a criatura for destruída enquanto a foto existe, sua essência fica presa na foto.',
+    descricao: 'Uma das câmeras de aura paranormal mais antigas (Polaroid Model 95). Possui a modificação lente de revelação embutida, mas a DT para resistir ao efeito aumenta em +10. Se falhar, a criatura também sofre 6d6 de dano de frio conforme partes de sua forma são inexistidas (apenas criaturas com invisibilidade, incorporeidade ou camuflagem sofrem esse dano).',
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -187,7 +178,7 @@ export const ITENS: Item[] = [
     categoria: 2,
     espaco: 1,
     tipo: 'Amaldiçoado (Energia)',
-    descricao: 'Dispositivo que se conecta ao sistema nervoso. Uma vez conectado (ação completa), permite controlar dispositivos eletrônicos com a mente. +5 em Tecnologia para controlar máquinas, mas sofre 1d4 mental se o dispositivo for destruído.',
+    descricao: 'Correias de couro e fivelas metálicas da era vitoriana, fixadas à cabeça, que convertem correntes em estímulos cerebrais. Enquanto usar o arreio, sempre que sofrer 5 ou mais pontos de dano de eletricidade ou Energia, você recupera 1 PE. Máximo de PE recuperados por dia igual ao dobro do seu Vigor.',
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -195,7 +186,7 @@ export const ITENS: Item[] = [
     categoria: 3,
     espaco: 1,
     tipo: 'Amaldiçoado (Energia)',
-    descricao: 'Dispositivo cilíndrico com energia pulsante. Ação completa + 3 PE: cria uma cópia ilusória de você em alcance curto que dura até o fim da cena. A cópia pode agir independentemente mas não causa dano real.',
+    descricao: 'Dois círculos de cobre concêntricos do século XVII. Ação padrão + 3 PE: divide você em duas possibilidades de futuro — recebe um turno adicional na última contagem de iniciativa da rodada; sorteie qual versão se dissipa no fim dela. A cada uso, teste de Ocultismo (DT 15 +5 por uso adicional no dia); se falhar, perde metade dos atributos (recupera 1 ponto de cada por interlúdio).',
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -203,7 +194,7 @@ export const ITENS: Item[] = [
     categoria: 2,
     espaco: 1,
     tipo: 'Amaldiçoado (Energia)',
-    descricao: 'Placa metálica polida. Usado para se separar em nível energético. Ação completa: divide-se, perdendo metade dos atributos mas criando uma projeção energética. Recupera no próximo interlúdio.',
+    descricao: 'Placa metálica polida ritualisticamente até se tornar reflexiva. Ação de movimento: observa um ponto ou ser fora de seu ângulo de visão em alcance médio, recebendo +1d20 em Percepção e chance de enxergar mesmo alvos sob cobertura total. Ao sofrer dano de Energia, pode sacrificar o espelho para evitar o dano e refleti-lo de volta à origem.',
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -211,7 +202,7 @@ export const ITENS: Item[] = [
     categoria: 4,
     espaco: 2,
     tipo: 'Amaldiçoado (Energia)',
-    descricao: 'Arma de fogo alienígena que dispara feixes de energia pura. Causa 4d10 Energia (crítico 19/x3, alcance Longo). Não usa munição convencional mas consome 2 PE por disparo. Causa 1d4 mental ao atirador por disparo.',
+    descricao: 'Arma alienígena deixada pelos Alheios. É um fuzil de precisão com mira telescópica e mira laser que causa dano de Energia e não precisa de munição.',
     livro: 'Sobrevivendo ao Horror'
   },
 
@@ -219,8 +210,8 @@ export const ITENS: Item[] = [
     nome: 'A Primeira Adaga',
     categoria: 3,
     espaco: 1,
-    tipo: 'Amaldiçoado',
-    descricao: 'Adaga primordial forjada do primeiro Medo. Causa 2d6 + Medo adicional igual ao dano mental que o alvo sofreu na cena. Se matar uma criatura com Enigma de Medo, resolve automaticamente o enigma.',
+    tipo: 'Amaldiçoado (Medo)',
+    descricao: 'A primeira adaga já usada em um ritual: lâmina de pedra polida e cabo de madeira. Empregada como componente ritualístico, concede ao ritual os efeitos dos catalisadores ampliador, perturbador, potencializador e prolongador, e o tempo de conjuração se torna 1 rodada. Em troca, o conjurador perde metade de seus PV totais (conta como dano para fins de dano massivo). É possível usar uma vítima de sacrifício para pagar esse preço.',
     livro: 'Sobrevivendo ao Horror'
   },
 
@@ -325,7 +316,7 @@ export const ITENS: Item[] = [
     categoria: 2,
     espaco: 5,
     tipo: 'Geral (Acessório)',
-    descricao: 'Roupa completa para o vácuo espacial com 8h de oxigênio e água. Protege contra raios cósmicos e micrometeoritos. Fornece resistência a dano 5.',
+    descricao: 'Roupa completa para o vácuo espacial com 8h de oxigênio e água. Protege contra raios cósmicos e micrometeoritos. Fornece +10 em testes de resistência contra efeitos ambientais e resistência a químico 20. Ocupa o espaço de uma vestimenta; vestir ou despir demora duas rodadas.',
     livro: 'Sobrevivendo ao Horror'
   },
 
@@ -469,7 +460,7 @@ export const ITENS: Item[] = [
   },
   {
     nome: 'Coldre Saque Rápido',
-    categoria: 0,
+    categoria: 1,
     espaco: 1,
     tipo: 'Geral (Operacional)',
     descricao: 'Coldre projetado para movimento mínimo. 1x/rodada: saca ou guarda arma de fogo leve como ação livre.',
@@ -513,7 +504,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 0.5,
     tipo: 'Paranormal',
-    descricao: 'Catalisador de elemento específico. Ao conjurar ritual, gasta o catalisador para aumentar o alcance do ritual em um passo.',
+    descricao: 'Catalisador de elemento específico. Ao conjurar ritual, gasta o catalisador para aumentar o alcance do ritual em um passo ou dobrar a área de efeito.',
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -529,7 +520,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 0.5,
     tipo: 'Paranormal',
-    descricao: 'Catalisador de elemento específico. Ao conjurar ritual, gasta o catalisador para aumentar o dano do ritual em +2d6.',
+    descricao: 'Catalisador de elemento específico. Ao conjurar ritual, gasta o catalisador para aumentar o dano do ritual em um dado do mesmo tipo.',
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -537,7 +528,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 0.5,
     tipo: 'Paranormal',
-    descricao: 'Catalisador de elemento específico. Ao conjurar ritual, gasta o catalisador para dobrar a duração do ritual.',
+    descricao: 'Catalisador de elemento específico. Ao conjurar ritual, gasta o catalisador para dobrar a duração do ritual. Não funciona em rituais instantâneos ou sustentados.',
     livro: 'Sobrevivendo ao Horror'
   },
 
@@ -575,7 +566,7 @@ export const ITENS: Item[] = [
   },
   {
     nome: 'Granada de Atordoamento',
-    categoria: 1,
+    categoria: 0,
     espaco: 1,
     tipo: 'Explosivo',
     descricao: 'Estouro e luz. Seres na área atordoados 1 rodada (Fortitude DT Agi reduz para ofuscado e surdo).',
@@ -600,9 +591,9 @@ export const ITENS: Item[] = [
   {
     nome: 'Mina Antipessoal',
     categoria: 1,
-    espaco: 2,
+    espaco: 1,
     tipo: 'Explosivo',
-    descricao: 'Ativada por controle remoto. Dispara bolas de aço em cone de 6m: 12d6 perfuração (Reflexos DT Int reduz à metade).',
+    descricao: 'Ativada por controle remoto (ação padrão, em alcance longo). Dispara bolas de aço em cone de 6m: 12d6 perfuração (Reflexos DT Int reduz à metade). Instalar: ação completa + Tática DT 15 (se falhar, gasta a mina sem funcionar). Encontrar a mina: Percepção contra o resultado da instalação.',
     livro: 'Regras Básicas'
   },
   {
@@ -610,7 +601,7 @@ export const ITENS: Item[] = [
     categoria: 0,
     espaco: 1,
     tipo: 'Explosivo',
-    descricao: 'Libera fumaça densa em raio 6m. Criaturas na área têm camuflagem total. A fumaça dura 2 rodadas ou até ser dispersada por vento forte.',
+    descricao: 'Libera fumaça espessa e escura em raio 6m. Seres na área ficam cegos e sob camuflagem total. A fumaça dura 2 rodadas.',
     livro: 'Regras Básicas'
   },
 
@@ -619,7 +610,7 @@ export const ITENS: Item[] = [
     categoria: 0,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Algemas de metal. Prender uma criatura imobilizada é uma ação padrão. Escapar: Acrobacia DT 30 ou Força DT 25 para quebrar.',
+    descricao: 'Par de algemas de aço. Para prender alguém que não esteja indefeso: empunhe as algemas, agarre a pessoa e vença um novo teste de agarrar. Pode prender os dois pulsos (–5 em testes que exijam as mãos, impede conjuração) ou um pulso a um objeto imóvel adjacente. Escapar: Acrobacia DT 30 (ou as chaves).',
     livro: 'Regras Básicas'
   },
   {
@@ -627,7 +618,7 @@ export const ITENS: Item[] = [
     categoria: 0,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Gancho de metal com corda. Permite escalar superfícies sem apoio. Fornece +5 em Atletismo para escalar.',
+    descricao: 'Gancho de aço amarrado à ponta de uma corda para se fixar em muros e janelas. Prender o arpéu exige teste de Pontaria (DT 15). Subir com a ajuda da corda fornece +5 em Atletismo.',
     livro: 'Regras Básicas'
   },
   {
@@ -635,7 +626,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Correia com suportes para armas e equipamentos. Você pode sacar ou guardar uma arma como ação livre.',
+    descricao: 'Cinto com bolsos e alças. Uma vez por rodada, você pode sacar ou guardar um item de seu inventário como ação livre.',
     livro: 'Regras Básicas'
   },
   {
@@ -659,7 +650,7 @@ export const ITENS: Item[] = [
     categoria: 0,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Corda de 15m. Útil para escalar, amarrar ou criar armadilhas. Fornece +2 em testes relacionados.',
+    descricao: 'Rolo com 10 metros de corda resistente. Ajuda a descer buracos ou prédios (+5 em Atletismo nessas situações), amarrar pessoas inconscientes etc.',
     livro: 'Regras Básicas'
   },
   {
@@ -667,7 +658,7 @@ export const ITENS: Item[] = [
     categoria: 0,
     espaco: 2,
     tipo: 'Geral (Operacional)',
-    descricao: 'Kit com barraca, saco de dormir, cantil e suprimentos básicos. Fornece +5 em Sobrevivência.',
+    descricao: 'Mochila com saco de dormir, panelas, GPS e outros itens úteis. Fornece +5 em Sobrevivência para acampar e orientar-se, mesmo sem treinamento na perícia.',
     livro: 'Regras Básicas'
   },
   {
@@ -675,7 +666,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Lanterna potente e resistente. Ilumina cone de 9m. Pode ser acoplada a armas. Fornece +2 em testes contra condição ofuscado.',
+    descricao: 'Ilumina um cone de 9m. Ação de movimento: mira a luz nos olhos de um ser em alcance curto — ele fica ofuscado por 1 rodada, mas imune à lanterna pelo resto da cena.',
     livro: 'Regras Básicas'
   },
   {
@@ -683,7 +674,7 @@ export const ITENS: Item[] = [
     categoria: 0,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Protege contra gases e partículas nocivas. Imune a efeitos de gás enquanto vestida.',
+    descricao: 'Máscara com filtro que cobre o rosto inteiro. Fornece +10 em testes de Fortitude contra efeitos que dependam de respiração.',
     livro: 'Regras Básicas'
   },
   {
@@ -699,7 +690,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Permite ver fontes de calor através de paredes finas e fumaça. Criaturas de sangue quente não têm camuflagem contra você.',
+    descricao: 'Estes óculos eliminam a penalidade em testes causada por camuflagem.',
     livro: 'Regras Básicas'
   },
   {
@@ -707,7 +698,7 @@ export const ITENS: Item[] = [
     categoria: 0,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Barra de metal para alavanca. Fornece +5 em Força para arrombar portas e objetos. Pode ser usada como clava em combate.',
+    descricao: 'Barra de ferro para alavanca. Fornece +5 em testes de Força para arrombar portas. Pode ser usada em combate como um bastão.',
     livro: 'Regras Básicas'
   },
   {
@@ -715,7 +706,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Arma de ar comprimido com dardos tranquilizantes. Alcance curto, causa sono (Fortitude DT Agi evita). Não funciona contra criaturas não-vivas.',
+    descricao: 'Arma leve que dispara dardos com sonífero em alcance curto (ataque à distância). Se acertar, o alvo fica inconsciente até o fim da cena (Fortitude DT Agi reduz para desprevenido e lento por 1 rodada). Vem com 2 dardos; caixa adicional com 2 dardos é item de categoria 0 (1 espaço).',
     livro: 'Regras Básicas'
   },
   {
@@ -723,7 +714,7 @@ export const ITENS: Item[] = [
     categoria: 0,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Dispara um sinalizador luminoso visível a quilômetros. Também pode ser usada como arma improvisada (2d6 fogo, alcance curto).',
+    descricao: 'Dispara um sinalizador luminoso para chamar outras pessoas à sua localização. Pode ser usada como arma de disparo leve (alcance curto, 2d6 fogo). Vem com 2 cargas.',
     livro: 'Regras Básicas'
   },
   {
@@ -731,7 +722,7 @@ export const ITENS: Item[] = [
     categoria: 0,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Proteção metálica para os punhos. Seus ataques desarmados causam +2 de dano de impacto.',
+    descricao: 'Peça de metal usada entre os dedos. Fornece +1 em rolagens de dano desarmado e torna o dano letal. Pode receber modificações e maldições de armas corpo a corpo, aplicando os efeitos aos seus ataques desarmados.',
     livro: 'Regras Básicas'
   },
   {
@@ -739,7 +730,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Spray irritante. Ação padrão: alvo adjacente fica cego por 1d4 rodadas (Fortitude DT Agi reduz para 1 rodada).',
+    descricao: 'Spray irritante que causa dor e lacrimação. Ação padrão: um ser adjacente fica cego por 1d4 rodadas (Fortitude DT Agi evita). A carga dura dois usos.',
     livro: 'Regras Básicas'
   },
   {
@@ -747,7 +738,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Arma de choque elétrico. Ação padrão: alvo adjacente fica atordoado 1 rodada (Fortitude DT Agi evita). Não funciona contra criaturas imunes a eletricidade.',
+    descricao: 'Dispositivo de eletrochoque. Ação padrão: um ser adjacente sofre 1d6 de eletricidade e fica atordoado por 1 rodada (Fortitude DT Agi evita). A bateria dura dois usos.',
     livro: 'Regras Básicas'
   },
   {
@@ -755,7 +746,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 2,
     tipo: 'Geral (Operacional)',
-    descricao: 'Roupa de proteção contra materiais perigosos. Fornece imunidade a venenos e doenças transmitidas pelo ar e contato. –2 em testes físicos.',
+    descricao: 'Roupa impermeável que cobre o corpo inteiro, contra materiais tóxicos. Fornece +5 em testes de resistência contra efeitos ambientais e resistência a químico 10.',
     livro: 'Regras Básicas'
   },
 
@@ -764,7 +755,7 @@ export const ITENS: Item[] = [
     categoria: 2,
     espaco: 1,
     tipo: 'Paranormal',
-    descricao: 'Amarras para imobilizar criaturas vulneráveis a Sangue. Laçar (ação padrão, 2 PE): paralisa criatura (Vontade DT Agi repete no próximo turno).',
+    descricao: 'Amarras para imobilizar criaturas vulneráveis a Sangue. Laçar (ação padrão, 1 PE): criatura em alcance curto fica paralisada até o início do próximo turno dela (Vontade DT Agi evita; repete o teste a cada turno); manter custa 1 PE/rodada. Armadilha (ação completa, 2 PE, gasta o item): área de 3x3m — quem atravessar fica imóvel até o fim da cena (Reflexos DT Int evita); mesmo passando, a área é terreno difícil.',
     livro: 'Regras Básicas'
   },
   {
@@ -772,7 +763,7 @@ export const ITENS: Item[] = [
     categoria: 2,
     espaco: 1,
     tipo: 'Paranormal',
-    descricao: 'Amarras para imobilizar criaturas vulneráveis a Morte. Laçar (ação padrão, 2 PE): paralisa criatura (Vontade DT Agi repete no próximo turno).',
+    descricao: 'Amarras para imobilizar criaturas vulneráveis a Morte. Laçar (ação padrão, 1 PE): criatura em alcance curto fica paralisada até o início do próximo turno dela (Vontade DT Agi evita; repete o teste a cada turno); manter custa 1 PE/rodada. Armadilha (ação completa, 2 PE, gasta o item): área de 3x3m — quem atravessar fica imóvel até o fim da cena (Reflexos DT Int evita); mesmo passando, a área é terreno difícil.',
     livro: 'Regras Básicas'
   },
   {
@@ -780,7 +771,7 @@ export const ITENS: Item[] = [
     categoria: 2,
     espaco: 1,
     tipo: 'Paranormal',
-    descricao: 'Amarras para imobilizar criaturas vulneráveis a Conhecimento. Laçar (ação padrão, 2 PE): paralisa criatura (Vontade DT Agi repete no próximo turno).',
+    descricao: 'Amarras para imobilizar criaturas vulneráveis a Conhecimento. Laçar (ação padrão, 1 PE): criatura em alcance curto fica paralisada até o início do próximo turno dela (Vontade DT Agi evita; repete o teste a cada turno); manter custa 1 PE/rodada. Armadilha (ação completa, 2 PE, gasta o item): área de 3x3m — quem atravessar fica imóvel até o fim da cena (Reflexos DT Int evita); mesmo passando, a área é terreno difícil.',
     livro: 'Regras Básicas'
   },
   {
@@ -788,7 +779,7 @@ export const ITENS: Item[] = [
     categoria: 2,
     espaco: 1,
     tipo: 'Paranormal',
-    descricao: 'Amarras para imobilizar criaturas vulneráveis a Energia. Laçar (ação padrão, 2 PE): paralisa criatura (Vontade DT Agi repete no próximo turno).',
+    descricao: 'Amarras para imobilizar criaturas vulneráveis a Energia. Laçar (ação padrão, 1 PE): criatura em alcance curto fica paralisada até o início do próximo turno dela (Vontade DT Agi evita; repete o teste a cada turno); manter custa 1 PE/rodada. Armadilha (ação completa, 2 PE, gasta o item): área de 3x3m — quem atravessar fica imóvel até o fim da cena (Reflexos DT Int evita); mesmo passando, a área é terreno difícil.',
     livro: 'Regras Básicas'
   },
   {
@@ -828,20 +819,52 @@ export const ITENS: Item[] = [
   },
   {
     nome: 'Escudo',
-    categoria: 0,
+    categoria: 1,
     espaco: 2,
     tipo: 'Proteção',
-    descricao: 'Escudo moderno ou medieval. Fornece +2 na Defesa e precisa ser empunhado em uma mão.',
+    descricao: 'Escudo moderno ou medieval. Fornece +2 na Defesa e precisa ser empunhado em uma mão. O bônus acumula com o de uma proteção. Para proficiência, conta como proteção pesada.',
     stats: { defesa: 2 },
     livro: 'Regras Básicas'
   },
+
   {
-    nome: 'Capacete Tático',
-    categoria: 1,
+    nome: 'Scanner de Manifestação Paranormal',
+    categoria: 2,
     espaco: 1,
-    tipo: 'Proteção',
-    descricao: 'Capacete balístico. Fornece +1 na Defesa e RD 2 contra dano na cabeça.',
-    stats: { defesa: 1 },
+    tipo: 'Paranormal',
+    descricao: 'Dispositivo de um elemento específico. Ativar é ação padrão; consome 1 PE por rodada. O usuário sabe a direção de todas as manifestações paranormais ativas (rituais, criaturas, itens amaldiçoados etc.) do elemento escolhido em alcance longo. Criaturas com o elemento como complemento também são detectadas.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Emissor de Pulsos Paranormais',
+    categoria: 2,
+    espaco: 1,
+    tipo: 'Paranormal',
+    descricao: 'Pequena caixa coberta de sigilos que serve de "isca". Ativar: ação completa + 1 PE. Emite um pulso de um elemento definido pelo ativador, que atrai criaturas do mesmo elemento e afasta criaturas do elemento oposto (Vontade DT Pre evita).',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Escuta de Ruídos Paranormais',
+    categoria: 2,
+    espaco: 1,
+    tipo: 'Paranormal',
+    descricao: 'Microfone espião que capta ruídos paranormais. Ativar: ação completa + 2 PE; grava ruídos por até 24 horas. Ouvir a escuta fornece +5 em testes de Ocultismo para identificar criatura.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Medidor de Estabilidade da Membrana',
+    categoria: 2,
+    espaco: 1,
+    tipo: 'Paranormal',
+    descricao: 'Dispositivo com diversos medidores (temperatura, campo magnético, dilatação temporal…). Um agente treinado em Ocultismo pode avaliar o estado da Membrana em uma área, indicando a chance de uma entidade se manifestar. Leituras inexplicáveis ou com grandes variações sugerem uma entidade; não fornece respostas definitivas.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Cão Adestrado',
+    categoria: 1,
+    espaco: 0,
+    tipo: 'Geral (Operacional)',
+    descricao: 'Cão grande e corajoso, treinado para investigação e combate. Requer treinamento em Adestramento; funciona como um aliado: fornece +2 em Investigação e Percepção. Ladrar e Morder: gaste 1 PE para o cão assumir postura defensiva, recebendo +2 na Defesa por 1 rodada.',
     livro: 'Sobrevivendo ao Horror'
   }
 ];

@@ -151,7 +151,7 @@ export interface Item {
   espaco: number;
   tipo: 'Arma' | 'Proteção' | 'Acessório' | 'Geral' | 'Amaldiçoado' |
   'Modificação Paranormal (Acessório)' |
-  'Amaldiçoado (Sangue)' | 'Amaldiçoado (Sangue/Energia)' | 'Amaldiçoado (Morte)' | 'Amaldiçoado (Conhecimento)' | 'Amaldiçoado (Energia)' |
+  'Amaldiçoado (Sangue)' | 'Amaldiçoado (Sangue/Energia)' | 'Amaldiçoado (Morte)' | 'Amaldiçoado (Conhecimento)' | 'Amaldiçoado (Energia)' | 'Amaldiçoado (Medo)' |
   'Geral (Acessório)' | 'Geral (Utensílio)' | 'Geral (Medicamento)' | 'Geral (Operacional)' |
   'Explosivo' | 'Paranormal';
   descricao: string;
