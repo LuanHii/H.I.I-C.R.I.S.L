@@ -49,14 +49,21 @@ export function assinarFichaOp2(
   agenteId: string,
   aoMudar: (ficha: DocumentoAgenteOp2 | null) => void,
 ): () => void {
-  return onSnapshot(doc(db, COLECAO, agenteId), (referencia) => {
-    if (!referencia.exists()) {
+  return onSnapshot(
+    doc(db, COLECAO, agenteId),
+    (referencia) => {
+      if (!referencia.exists()) {
+        aoMudar(null);
+        return;
+      }
+      const dados = referencia.data();
+      aoMudar(ehDocumentoOp2(dados) ? dados : null);
+    },
+    (erro) => {
+      console.error('Falha ao assinar a ficha de Ordem 2:', erro);
       aoMudar(null);
-      return;
-    }
-    const dados = referencia.data();
-    aoMudar(ehDocumentoOp2(dados) ? dados : null);
-  });
+    },
+  );
 }
 
 export function urlDaFicha(agenteId: string, origem: string): string {
