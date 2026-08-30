@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { useOp2FichasStore } from '../estado/useOp2FichasStore';
 import { pdAtual, pvAtual } from '../regras/ficha';
 import type { FichaOp2 } from '../regras/tipos';
+import { CompartilharFicha } from './CompartilharFicha';
 import { FichaOp2View } from './FichaOp2View';
 import { PainelInvestigacao } from './PainelInvestigacao';
 import { SeletorDePresets } from './SeletorDePresets';
@@ -110,6 +111,8 @@ const PainelFichas: React.FC = () => {
               registrarResultadoDeTeste(selecionada.id, { contaComoFalhaParaImpeto });
             }}
           />
+
+          <CompartilharFicha ficha={selecionada} />
 
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" onClick={() => encerrarCena(selecionada.id)}>

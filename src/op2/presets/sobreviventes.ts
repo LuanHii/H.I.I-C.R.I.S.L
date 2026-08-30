@@ -14,7 +14,6 @@ export const PRESETS_SOBREVIVENTES: readonly PresetSobrevivente[] = [
     id: 'alan',
     resumo: 'Executor cientista. Percepção afiada e muita determinação para gastar.',
     entrada: {
-      id: 'alan',
       nome: 'Alan',
       nivel: 2,
       perfil: 'EXECUTOR',
@@ -38,7 +37,6 @@ export const PRESETS_SOBREVIVENTES: readonly PresetSobrevivente[] = [
     id: 'victor',
     resumo: 'Vigilante professor. Age primeiro e melhora a rolagem de quem ajuda.',
     entrada: {
-      id: 'victor',
       nome: 'Victor',
       nivel: 2,
       perfil: 'VIGILANTE',
@@ -62,7 +60,6 @@ export const PRESETS_SOBREVIVENTES: readonly PresetSobrevivente[] = [
     id: 'eloisa',
     resumo: 'Analista artista. Observa antes de agir e converte leitura em dados bônus.',
     entrada: {
-      id: 'eloisa',
       nome: 'Eloísa',
       nivel: 2,
       perfil: 'ANALISTA',
@@ -86,7 +83,6 @@ export const PRESETS_SOBREVIVENTES: readonly PresetSobrevivente[] = [
     id: 'edgar',
     resumo: 'Executor operário. O corpo mais resistente da mesa, e o mais teimoso.',
     entrada: {
-      id: 'edgar',
       nome: 'Edgar',
       nivel: 2,
       perfil: 'EXECUTOR',
@@ -110,7 +106,6 @@ export const PRESETS_SOBREVIVENTES: readonly PresetSobrevivente[] = [
     id: 'kenia',
     resumo: 'Analista de escritório. A mente mais rápida da mesa.',
     entrada: {
-      id: 'kenia',
       nome: 'Kênia',
       nivel: 2,
       perfil: 'ANALISTA',

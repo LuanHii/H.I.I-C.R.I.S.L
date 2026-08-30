@@ -201,20 +201,20 @@ describe('Examinar rola e cobra 1 PD quando nao traz novidade (p.22)', () => {
 
 describe('informacoes exclusivas e travadas', () => {
   it('informacao exclusiva de um personagem nao sai para outro (p.36)', () => {
+    const victor = fichaDoPreset('victor');
+    const alan = fichaDoPreset('alan');
     const cena = criarCena({
       id: 'cena',
       titulo: 'cena',
       pontos: [
         ponto({
           id: 'pertences',
-          informacoes: [info({ id: 'soVictor', dt: 4, exclusivoPara: ['victor'] })],
+          informacoes: [info({ id: 'soVictor', dt: 4, exclusivoPara: [victor.id] })],
         }),
       ],
     });
-    expect(investigar(cena, 'pertences', fichaDoPreset('alan'), pericia('Percepção')).reveladas).toEqual([]);
-    expect(
-      investigar(cena, 'pertences', fichaDoPreset('victor'), pericia('Percepção')).reveladas,
-    ).toHaveLength(1);
+    expect(investigar(cena, 'pertences', alan, pericia('Percepção')).reveladas).toEqual([]);
+    expect(investigar(cena, 'pertences', victor, pericia('Percepção')).reveladas).toHaveLength(1);
   });
 
   it('informacao com requisito so aparece depois da condicao cumprida (o cadeado do livro)', () => {

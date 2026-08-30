@@ -127,6 +127,7 @@ export {
   aptidoesDestreinadas,
   avaliacaoDe,
   criarFichaOp2,
+  gerarIdDeFicha,
   dadoDaPericia,
   dadoDoAtributo,
   estadoDeRisco,
@@ -260,3 +261,22 @@ export {
 
 export { novoIdDeCena, useOp2CenasStore } from './estado/useOp2CenasStore';
 export { PainelInvestigacao } from './ui/PainelInvestigacao';
+
+export type { DocumentoAgenteOp2 } from './nuvem/agentes';
+
+export {
+  assinarFichaOp2,
+  buscarFichaOp2,
+  despublicarFichaOp2,
+  ehDocumentoOp2,
+  publicarFichaOp2,
+  urlDaFicha,
+  urlDoOverlay,
+} from './nuvem/agentes';
+
+export type { EstadoDaAssinatura, FichaOp2RemotaProps } from './ui/FichaOp2Remota';
+export { FichaOp2Remota, useFichaOp2Remota } from './ui/FichaOp2Remota';
+export { FichaOp2Publica } from './ui/FichaOp2Publica';
+export { OverlayOp2 } from './ui/OverlayOp2';
+
+export { CompartilharFicha } from './ui/CompartilharFicha';

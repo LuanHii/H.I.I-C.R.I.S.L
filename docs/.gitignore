@@ -1,2 +1,7 @@
 *
 !.gitignore
+!AGENT_RULES.md
+!ANALISE_GERAL.md
+!FOUNDRY_VTT_VIABILIDADE.md
+!PLANO_*.md
+!implementation_plan.md

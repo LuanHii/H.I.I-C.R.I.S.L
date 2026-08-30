@@ -21,6 +21,14 @@ import {
 
 export const DADO_DESTREINADO: DiceStep = 'd4';
 
+export function gerarIdDeFicha(): string {
+  const escopo = globalThis as { crypto?: { randomUUID?: () => string } };
+  const gerado = escopo.crypto?.randomUUID?.();
+  if (gerado) return gerado;
+  const aleatorio = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+  return `${Date.now().toString(36)}-${aleatorio}`;
+}
+
 export function recursoInicialDePerfil(perfil: Perfil): RecursoDePerfil {
   if (perfil === 'EXECUTOR') return { tipo: 'EXECUTOR', impetoPreenchido: 0 };
   if (perfil === 'ANALISTA') return { tipo: 'ANALISTA', avaliacaoDisponivel: 0 };
@@ -51,7 +59,7 @@ export function aptidoesDestreinadas(): Record<CampoAptidao, DiceStep> {
 }
 
 export interface EntradaDeCriacao {
-  id: string;
+  id?: string;
   nome: string;
   nivel: number;
   perfil: Perfil;
@@ -70,7 +78,7 @@ export function criarFichaOp2(entrada: EntradaDeCriacao): FichaOp2 {
     versaoDocumento: 1,
     sistema: 'op2',
     revisaoRegras: 'playtest-alpha',
-    id: entrada.id,
+    id: entrada.id ?? gerarIdDeFicha(),
     nome: entrada.nome,
     nivel: entrada.nivel,
     ocupacao: entrada.ocupacao,

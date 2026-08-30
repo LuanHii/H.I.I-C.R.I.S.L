@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   DADO_DESTREINADO,
+  criarFichaOp2,
   avaliacaoDe,
   dadoDaPericia,
   estadoDeRisco,
@@ -259,5 +260,34 @@ describe('composicoes de mesa da missao (p.29)', () => {
         expect.arrayContaining(['alan', 'victor', 'eloisa']),
       );
     }
+  });
+});
+
+describe('identidade da ficha — o id vira URL publica ao compartilhar', () => {
+  it('importar o mesmo preset duas vezes gera fichas com ids DIFERENTES', () => {
+    const primeira = fichaDoPreset('alan');
+    const segunda = fichaDoPreset('alan');
+    expect(primeira.id).not.toBe(segunda.id);
+  });
+
+  it('o id nao e o nome do personagem: /ficha/alan seria adivinhavel e colidiria entre mesas', () => {
+    for (const preset of PRESETS_SOBREVIVENTES) {
+      const ficha = fichaDoPreset(preset.id);
+      expect(ficha.id).not.toBe(preset.id);
+      expect(ficha.id.toLowerCase()).not.toBe(ficha.nome.toLowerCase());
+    }
+  });
+
+  it('o id e longo o suficiente para nao ser adivinhado por tentativa', () => {
+    expect(fichaDoPreset('alan').id.length).toBeGreaterThanOrEqual(16);
+  });
+
+  it('uma composicao inteira sai com ids unicos entre si', () => {
+    const ids = fichasDaComposicao(5).map((ficha) => ficha.id);
+    expect(new Set(ids).size).toBe(5);
+  });
+
+  it('um id explicito ainda e respeitado, para importar ficha salva', () => {
+    expect(criarFichaOp2({ ...PRESETS_SOBREVIVENTES[0].entrada, id: 'fixo' }).id).toBe('fixo');
   });
 });
