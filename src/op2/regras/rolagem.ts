@@ -82,12 +82,9 @@ function somaDePassos(passos: readonly PassoAplicado[], alvo: AlvoDePasso): numb
 }
 
 function temParCritico(valores: readonly number[]): boolean {
-  const contagem = new Map<number, number>();
-  for (const valor of valores) {
-    contagem.set(valor, (contagem.get(valor) ?? 0) + 1);
-  }
-  for (const [valor, vezes] of contagem) {
-    if (vezes >= 2 && valor >= VALOR_MINIMO_CRITICO) return true;
+  const ordenados = [...valores].sort((a, b) => a - b);
+  for (let i = 1; i < ordenados.length; i += 1) {
+    if (ordenados[i] === ordenados[i - 1] && ordenados[i] >= VALOR_MINIMO_CRITICO) return true;
   }
   return false;
 }
