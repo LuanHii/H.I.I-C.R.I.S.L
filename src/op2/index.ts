@@ -151,3 +151,36 @@ export {
   fichasDaComposicao,
   presetPorId,
 } from './presets/sobreviventes';
+
+export { useFichaOp2Ativa, useOp2FichasStore } from './estado/useOp2FichasStore';
+
+export {
+  adicionarPassoDeCena,
+  alternarCondicao,
+  aplicarResultadoDeTeste,
+  ativarHabilidade,
+  curar,
+  custoDaHabilidade,
+  definirPd,
+  definirPv,
+  descansar,
+  encerrarCena,
+  encherImpeto,
+  ganharDadosDeAvaliacao,
+  gastarDadosDeAvaliacao,
+  gastarImpeto,
+  gastarPd,
+  pagarCusto,
+  recuperarPd,
+  registrarTesteDeFerimento,
+  registrarTesteDeTrauma,
+  sofrerDano,
+} from './regras/sessao';
+
+export { FichaOp2View } from './ui/FichaOp2View';
+export { GradePericias } from './ui/GradePericias';
+export { PainelOp2 } from './ui/PainelOp2';
+export { PainelRecursos } from './ui/PainelRecursos';
+export { ResultadoTesteView } from './ui/ResultadoTeste';
+export { SeletorDePresets } from './ui/SeletorDePresets';
+export { TesteRapido } from './ui/TesteRapido';
