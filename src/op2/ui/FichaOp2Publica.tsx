@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Activity, Brain, HeartPulse, Sparkles, Zap } from 'lucide-react';
+import { Brain, HeartPulse, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   avaliacaoDe,
@@ -27,7 +27,6 @@ import {
   MAXIMO_AVALIACAO,
   MAXIMO_IMPETO,
   ROTULO_ATRIBUTO,
-  type AtributoOp2,
   type FichaOp2,
   type RefPericia,
 } from '../regras/tipos';
@@ -46,12 +45,6 @@ import {
 } from './Pecas';
 
 type Aba = 'status' | 'pericias' | 'habilidades';
-
-const ICONE_DO_ATRIBUTO: Record<AtributoOp2, React.ReactNode> = {
-  FISICO: <Activity size={12} />,
-  MENTE: <Brain size={12} />,
-  EMOCAO: <Sparkles size={12} />,
-};
 
 interface LinhaDePericiaProps {
   ficha: FichaOp2;
@@ -256,8 +249,7 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
                     key={atributo}
                     className="flex items-center gap-3 rounded-lg border border-white/10 bg-black/40 px-3 py-3"
                   >
-                    <span className="text-ordem-text-muted">{ICONE_DO_ATRIBUTO[atributo]}</span>
-                    <span className="flex-1 font-mono text-xs uppercase tracking-[0.2em] text-ordem-white-muted">
+                    <span className="flex-1 font-mono text-sm uppercase tracking-[0.2em] text-ordem-white-muted">
                       {ROTULO_ATRIBUTO[atributo]}
                     </span>
                     <span className="font-mono text-2xl font-bold text-white">

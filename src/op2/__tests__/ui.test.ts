@@ -38,6 +38,20 @@ describe('a UI cobre todas as variantes do dominio', () => {
     expect(redefinem).toEqual([]);
   });
 
+  it('os atributos aparecem pelo NOME COMPLETO, nunca so por icone', () => {
+    for (const arquivo of ['FichaOp2Publica.tsx', 'FichaOp2View.tsx', 'OverlayOp2.tsx']) {
+      const conteudo = fonte(arquivo);
+      expect(conteudo).toContain('ROTULO_ATRIBUTO[atributo]');
+      expect(conteudo).not.toMatch(/ICONE_DO_ATRIBUTO/);
+    }
+  });
+
+  it('nenhum atributo depende de title para ser identificado: tooltip nao e rotulo', () => {
+    for (const arquivo of ['FichaOp2Publica.tsx', 'FichaOp2View.tsx', 'OverlayOp2.tsx']) {
+      expect(fonte(arquivo)).not.toContain('title={ROTULO_ATRIBUTO[atributo]}');
+    }
+  });
+
   it('cada atributo tem rotulo legivel, para a UI nunca mostrar EMOCAO sem acento', () => {
     for (const atributo of ATRIBUTOS_OP2) {
       expect(ROTULO_ATRIBUTO[atributo]).toBeTruthy();

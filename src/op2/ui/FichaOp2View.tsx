@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Activity, Brain, Dices, Sparkles } from 'lucide-react';
+import { Dices } from 'lucide-react';
 import { Modal, ModalContent } from '@/components/ui/Modal';
 import { cn } from '@/lib/utils';
 import {
@@ -28,7 +28,6 @@ import {
   MAXIMO_AVALIACAO,
   MAXIMO_IMPETO,
   ROTULO_ATRIBUTO,
-  type AtributoOp2,
   type FichaOp2,
   type RefPericia,
 } from '../regras/tipos';
@@ -43,12 +42,6 @@ import {
   RotuloDeSecao,
 } from './Pecas';
 import { TesteRapido } from './TesteRapido';
-
-const ICONE_DO_ATRIBUTO: Record<AtributoOp2, React.ReactNode> = {
-  FISICO: <Activity size={12} />,
-  MENTE: <Brain size={12} />,
-  EMOCAO: <Sparkles size={12} />,
-};
 
 interface AjustadorProps {
   rotulo: string;
@@ -212,15 +205,18 @@ export const FichaOp2View: React.FC<FichaOp2ViewProps> = ({
             <div className="font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted">
               Atributos
             </div>
-            <div className="mt-1 flex gap-2">
+            <div className="mt-1.5 flex gap-1.5">
               {(['FISICO', 'MENTE', 'EMOCAO'] as const).map((atributo) => (
                 <span
                   key={atributo}
-                  title={ROTULO_ATRIBUTO[atributo]}
-                  className="flex flex-1 items-center justify-center gap-1 rounded border border-white/10 bg-black/40 py-1 font-mono text-xs font-bold text-white"
+                  className="flex flex-1 flex-col items-center rounded border border-white/10 bg-black/40 px-1 py-1"
                 >
-                  <span className="text-ordem-text-muted">{ICONE_DO_ATRIBUTO[atributo]}</span>
-                  {ficha.atributos[atributo]}
+                  <span className="font-mono text-[9px] uppercase tracking-wide text-ordem-text-muted">
+                    {ROTULO_ATRIBUTO[atributo]}
+                  </span>
+                  <span className="font-mono text-sm font-bold text-white">
+                    {ficha.atributos[atributo]}
+                  </span>
                 </span>
               ))}
             </div>
