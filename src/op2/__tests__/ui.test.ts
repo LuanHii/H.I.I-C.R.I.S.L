@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -11,6 +11,8 @@ const RAIZ_UI = path.resolve(fileURLToPath(new URL('../ui/', import.meta.url)));
 function fonte(arquivo: string): string {
   return readFileSync(path.join(RAIZ_UI, arquivo), 'utf8');
 }
+
+const TODOS_OS_COMPONENTES = readdirSync(RAIZ_UI).filter((arquivo) => arquivo.endsWith('.tsx'));
 
 describe('a UI cobre todas as variantes do dominio', () => {
   it('cada passo da escala tem cor propria na grade de pericias', () => {
@@ -90,26 +92,21 @@ describe('a UI nao carrega regra propria', () => {
   });
 
   it('nenhum componente usa hex solto: a paleta ordem-* e a fonte de cor', () => {
-    for (const arquivo of [
-      'FichaOp2View.tsx',
-      'GradePericias.tsx',
-      'PainelRecursos.tsx',
-      'ResultadoTeste.tsx',
-      'TesteRapido.tsx',
-    ]) {
+    for (const arquivo of TODOS_OS_COMPONENTES) {
       expect(fonte(arquivo)).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
     }
   });
 
   it('todo componente com estado declara "use client"', () => {
-    for (const arquivo of [
-      'FichaOp2View.tsx',
-      'GradePericias.tsx',
-      'PainelRecursos.tsx',
-      'ResultadoTeste.tsx',
-      'TesteRapido.tsx',
-    ]) {
+    for (const arquivo of TODOS_OS_COMPONENTES) {
       expect(fonte(arquivo).startsWith("'use client';")).toBe(true);
+    }
+  });
+
+  it('nenhum componente usa <button> cru onde o design system tem Button', () => {
+    const comBotaoDeAcaoPrimaria = ['SeletorDePresets.tsx', 'PainelOp2.tsx'];
+    for (const arquivo of comBotaoDeAcaoPrimaria) {
+      expect(fonte(arquivo)).toContain("from '@/components/ui/Button'");
     }
   });
 
@@ -129,5 +126,30 @@ describe('a UI nao carrega regra propria', () => {
       grade.includes(`"${nome}"`) || grade.includes(`'${nome}'`),
     );
     expect(nomesEscritosAMao).toEqual([]);
+  });
+});
+
+describe('painel de investigacao', () => {
+  it('a lista de pericias do formulario vem do catalogo, nao escrita a mao', () => {
+    const painel = fonte('PainelInvestigacao.tsx');
+    expect(painel).toContain('PERICIAS_SIMPLES');
+    expect(painel).toContain('CAMPOS_APTIDAO');
+  });
+
+  it('a previa de Investigar usa facesDe, deixando explicito que nao ha rolagem', () => {
+    const painel = fonte('PainelInvestigacao.tsx');
+    expect(painel).toContain('facesDe');
+    expect(painel).toContain('investigar');
+    expect(painel).not.toContain('rolarTeste');
+  });
+
+  it('a descricao contextual fica atras de um <details>, para nao vazar na tela do jogador', () => {
+    const painel = fonte('PainelInvestigacao.tsx');
+    expect(painel).toContain('descricaoContextual');
+    expect(painel).toContain('só o mestre');
+  });
+
+  it('o painel avisa do custo de 1 PD do Examinar', () => {
+    expect(fonte('PainelInvestigacao.tsx')).toContain('1 PD');
   });
 });

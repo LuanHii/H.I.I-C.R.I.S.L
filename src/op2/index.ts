@@ -184,3 +184,79 @@ export { PainelRecursos } from './ui/PainelRecursos';
 export { ResultadoTesteView } from './ui/ResultadoTeste';
 export { SeletorDePresets } from './ui/SeletorDePresets';
 export { TesteRapido } from './ui/TesteRapido';
+
+export type {
+  AcaoUnicaPorCena,
+  CenaInvestigacao,
+  InformacaoPI,
+  PontoDeInteresse,
+  ProgressoDaCena,
+  ResultadoExaminar,
+  ResultadoInvestigar,
+} from './regras/investigacao';
+
+export {
+  CUSTO_PD_EXAMINAR_SEM_NOVIDADE,
+  DT_DAS_ACOES_UNICAS,
+  acessivelPara,
+  avancarRodada,
+  criarCena,
+  cumprirCondicao,
+  examinar,
+  informacoesDaPericia,
+  investigar,
+  jaRevelada,
+  jaUsou,
+  podeUsar,
+  pontoAcessivel,
+  pontoPorId,
+  progresso,
+  registrarUso,
+  requisitosCumpridos,
+  revelarInformacao,
+  revelarVarias,
+} from './regras/investigacao';
+
+export type {
+  DesafioDeAcesso,
+  EstadoAlcancar,
+  EstadoArrombar,
+  EstadoDestrancar,
+  EstadoHackSocial,
+  EstadoSustentar,
+  FaixaDeEquacao,
+  RetornoPosicao,
+  TentativaDeSenha,
+} from './regras/desafios';
+
+export {
+  ACOES_PARA_ALCANCAR_ARRISCADO,
+  ACOES_PARA_ALCANCAR_SEGURO,
+  DANO_DE_ESMAGAMENTO,
+  PONTOS_POR_CHANCE_EXTRA,
+  PV_PARA_COMECAR_A_SUSTENTAR,
+  PV_POR_TENTATIVA_DE_ARROMBAR,
+  SEGUNDOS_PARA_RESPONDER_HACK_TECNICO,
+  TENTATIVAS_POR_RODADA,
+  acoesNecessariasParaAlcancar,
+  chancesExtras,
+  compararComSenha,
+  criarDesafioAlcancar,
+  criarDesafioArrombar,
+  criarDesafioDestrancar,
+  criarDesafioHackSocial,
+  criarDesafioSustentar,
+  dadoCansadoDeSustentar,
+  descreverDesafio,
+  equacaoParaResultado,
+  responderPergunta,
+  sortearSenha,
+  sustentarMaisUmaRodada,
+  tentarAlcancar,
+  tentarArrombar,
+  tentarSenha,
+  tentativasPorRodada,
+} from './regras/desafios';
+
+export { novoIdDeCena, useOp2CenasStore } from './estado/useOp2CenasStore';
+export { PainelInvestigacao } from './ui/PainelInvestigacao';

@@ -7,6 +7,7 @@ import { useOp2FichasStore } from '../estado/useOp2FichasStore';
 import { pdAtual, pvAtual } from '../regras/ficha';
 import type { FichaOp2 } from '../regras/tipos';
 import { FichaOp2View } from './FichaOp2View';
+import { PainelInvestigacao } from './PainelInvestigacao';
 import { SeletorDePresets } from './SeletorDePresets';
 
 const CORES_DO_PERFIL: Record<FichaOp2['perfil']['tipo'], string> = {
@@ -15,7 +16,14 @@ const CORES_DO_PERFIL: Record<FichaOp2['perfil']['tipo'], string> = {
   VIGILANTE: 'text-ordem-green',
 };
 
-export const PainelOp2: React.FC = () => {
+type Aba = 'fichas' | 'investigacao';
+
+const ABAS: { id: Aba; rotulo: string }[] = [
+  { id: 'fichas', rotulo: 'Fichas' },
+  { id: 'investigacao', rotulo: 'Investigação' },
+];
+
+const PainelFichas: React.FC = () => {
   const fichas = useOp2FichasStore((estado) => estado.fichas);
   const fichaAtiva = useOp2FichasStore((estado) => estado.fichaAtiva);
   const setFichaAtiva = useOp2FichasStore((estado) => estado.setFichaAtiva);
@@ -41,17 +49,11 @@ export const PainelOp2: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <header className="flex flex-wrap items-center gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-ordem-white">Ordem Paranormal 2</h1>
-          <p className="text-xs uppercase tracking-wide text-ordem-text-muted">
-            Playtest Alpha · sistema isolado, não afeta as fichas do Ordem 1
-          </p>
-        </div>
-        <Button className="ml-auto" onClick={() => setMostrandoPresets((atual) => !atual)}>
+      <div className="flex justify-end">
+        <Button onClick={() => setMostrandoPresets((atual) => !atual)}>
           {mostrandoPresets ? 'Fechar' : 'Importar sobreviventes'}
         </Button>
-      </header>
+      </div>
 
       {mostrandoPresets ? <SeletorDePresets onImportar={importar} /> : null}
 
@@ -119,6 +121,42 @@ export const PainelOp2: React.FC = () => {
           </div>
         </>
       ) : null}
+    </div>
+  );
+};
+
+export const PainelOp2: React.FC = () => {
+  const [aba, setAba] = useState<Aba>('fichas');
+
+  return (
+    <div className="space-y-4">
+      <header>
+        <h1 className="text-2xl font-bold text-ordem-white">Ordem Paranormal 2</h1>
+        <p className="text-xs uppercase tracking-wide text-ordem-text-muted">
+          Playtest Alpha · sistema isolado, não afeta as fichas do Ordem 1
+        </p>
+      </header>
+
+      <nav className="flex gap-2 border-b border-ordem-border" aria-label="Seções de Ordem 2">
+        {ABAS.map((candidata) => (
+          <button
+            key={candidata.id}
+            type="button"
+            onClick={() => setAba(candidata.id)}
+            aria-current={aba === candidata.id ? 'page' : undefined}
+            className={cn(
+              'px-4 py-2 text-sm font-bold uppercase tracking-wide transition-colors',
+              aba === candidata.id
+                ? 'border-b-2 border-ordem-green text-ordem-white'
+                : 'text-ordem-text-muted hover:text-ordem-text-secondary',
+            )}
+          >
+            {candidata.rotulo}
+          </button>
+        ))}
+      </nav>
+
+      {aba === 'fichas' ? <PainelFichas /> : <PainelInvestigacao />}
     </div>
   );
 };
