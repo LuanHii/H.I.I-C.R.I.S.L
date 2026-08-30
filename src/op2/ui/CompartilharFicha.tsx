@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { useAuthOptional } from '@/core/firebase/auth';
 import { cn } from '@/lib/utils';
@@ -11,7 +11,13 @@ import {
   urlDaFicha,
   urlDoOverlay,
 } from '../nuvem/agentes';
+import {
+  ATRASO_DE_SINCRONIZACAO_MS,
+  assinaturaDaFicha,
+  precisaSincronizar,
+} from '../nuvem/sincronizacao';
 import type { FichaOp2 } from '../regras/tipos';
+import { Distintivo, RotuloDeSecao } from './Pecas';
 
 type Situacao = 'verificando' | 'fora-do-ar' | 'publicada' | 'publicando' | 'erro';
 
@@ -40,21 +46,21 @@ const LinhaDeLink: React.FC<LinhaDeLinkProps> = ({ rotulo, url, ajuda }) => {
   }, [copiado]);
 
   return (
-    <div className="rounded border border-ordem-border bg-ordem-bg p-2">
+    <div className="rounded-lg border border-white/10 bg-black/40 p-2">
       <div className="flex items-baseline gap-2">
-        <span className="text-[0.65rem] font-bold uppercase tracking-wide text-ordem-text-secondary">
+        <span className="font-mono text-[10px] uppercase tracking-widest text-ordem-text-secondary">
           {rotulo}
         </span>
-        <span className="text-[0.6rem] text-ordem-text-muted">{ajuda}</span>
+        <span className="font-mono text-[10px] text-ordem-text-muted">{ajuda}</span>
         <button
           type="button"
           onClick={copiar}
-          className="ml-auto rounded border border-ordem-border px-2 py-0.5 text-[0.65rem] text-ordem-text-muted hover:border-ordem-green hover:text-ordem-green"
+          className="ml-auto rounded border border-white/10 px-2 py-0.5 font-mono text-[10px] text-ordem-text-muted transition-colors hover:border-ordem-gold/50 hover:text-ordem-gold"
         >
           {copiado ? 'copiado' : 'copiar'}
         </button>
       </div>
-      <code className="mt-1 block truncate font-mono text-[0.65rem] text-ordem-cyan">{url}</code>
+      <code className="mt-1 block truncate font-mono text-[10px] text-ordem-cyan">{url}</code>
     </div>
   );
 };
@@ -69,6 +75,11 @@ export const CompartilharFicha: React.FC<CompartilharFichaProps> = ({ ficha, cla
   const [situacao, setSituacao] = useState<Situacao>('verificando');
   const [mensagemDeErro, setMensagemDeErro] = useState<string | null>(null);
   const [origem, setOrigem] = useState('');
+  const [sincronizando, setSincronizando] = useState(false);
+  const [sincronizadoEm, setSincronizadoEm] = useState<string | null>(null);
+
+  const assinaturaEnviada = useRef<string | null>(null);
+  const assinaturaAtual = assinaturaDaFicha(ficha);
 
   useEffect(() => {
     if (typeof window !== 'undefined') setOrigem(window.location.origin);
@@ -77,11 +88,18 @@ export const CompartilharFicha: React.FC<CompartilharFichaProps> = ({ ficha, cla
   useEffect(() => {
     let cancelado = false;
     setSituacao('verificando');
+    assinaturaEnviada.current = null;
 
     buscarFichaOp2(ficha.id)
       .then((documento) => {
         if (cancelado) return;
-        setSituacao(documento ? 'publicada' : 'fora-do-ar');
+        if (documento) {
+          assinaturaEnviada.current = assinaturaDaFicha(ficha);
+          setSituacao('publicada');
+          setSincronizadoEm(documento.updatedAt ?? null);
+        } else {
+          setSituacao('fora-do-ar');
+        }
       })
       .catch(() => {
         if (!cancelado) setSituacao('fora-do-ar');
@@ -90,13 +108,43 @@ export const CompartilharFicha: React.FC<CompartilharFichaProps> = ({ ficha, cla
     return () => {
       cancelado = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ficha.id]);
+
+  const enviar = useCallback(async () => {
+    await publicarFichaOp2(ficha.id, ficha);
+    assinaturaEnviada.current = assinaturaDaFicha(ficha);
+    setSincronizadoEm(new Date().toISOString());
+  }, [ficha]);
+
+  const publicada = situacao === 'publicada';
+
+  useEffect(() => {
+    if (!precisaSincronizar(publicada, assinaturaEnviada.current, assinaturaAtual)) return;
+
+    setSincronizando(true);
+    const relogio = setTimeout(() => {
+      enviar()
+        .then(() => setMensagemDeErro(null))
+        .catch((erro) =>
+          setMensagemDeErro(
+            erro instanceof Error ? erro.message : 'Falha ao sincronizar a ficha.',
+          ),
+        )
+        .finally(() => setSincronizando(false));
+    }, ATRASO_DE_SINCRONIZACAO_MS);
+
+    return () => {
+      clearTimeout(relogio);
+      setSincronizando(false);
+    };
+  }, [publicada, assinaturaAtual, enviar]);
 
   const publicar = async () => {
     setSituacao('publicando');
     setMensagemDeErro(null);
     try {
-      await publicarFichaOp2(ficha.id, ficha);
+      await enviar();
       setSituacao('publicada');
     } catch (erro) {
       setSituacao('erro');
@@ -109,6 +157,8 @@ export const CompartilharFicha: React.FC<CompartilharFichaProps> = ({ ficha, cla
     setMensagemDeErro(null);
     try {
       await despublicarFichaOp2(ficha.id);
+      assinaturaEnviada.current = null;
+      setSincronizadoEm(null);
       setSituacao('fora-do-ar');
     } catch (erro) {
       setSituacao('erro');
@@ -118,54 +168,85 @@ export const CompartilharFicha: React.FC<CompartilharFichaProps> = ({ ficha, cla
 
   if (!auth?.isAuthenticated) {
     return (
-      <div className={cn('rounded-lg border border-ordem-border bg-ordem-black p-4', className)}>
-        <h3 className="text-sm font-bold uppercase tracking-wide text-ordem-white">Compartilhar</h3>
-        <p className="mt-1 text-xs text-ordem-text-muted">
+      <div
+        className={cn(
+          'rounded-xl border border-ordem-border bg-ordem-ooze/30 p-4 sm:p-5',
+          className,
+        )}
+      >
+        <RotuloDeSecao>Compartilhar</RotuloDeSecao>
+        <p className="mt-2 text-xs text-ordem-text-muted">
           Entre com sua conta para publicar a ficha e enviar o link ao jogador.
         </p>
-        <Button className="mt-2" onClick={() => auth?.signInWithGoogle()} disabled={auth?.loading}>
+        <Button className="mt-3" onClick={() => auth?.signInWithGoogle()} disabled={auth?.loading}>
           Entrar
         </Button>
       </div>
     );
   }
 
-  const publicada = situacao === 'publicada';
   const ocupado = situacao === 'publicando' || situacao === 'verificando';
 
   return (
-    <div className={cn('space-y-3 rounded-lg border border-ordem-border bg-ordem-black p-4', className)}>
+    <div
+      className={cn(
+        'space-y-3 rounded-xl border border-ordem-border bg-ordem-ooze/30 p-4 sm:p-5',
+        className,
+      )}
+    >
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="text-sm font-bold uppercase tracking-wide text-ordem-white">Compartilhar</h3>
-        <span
-          className={cn(
-            'rounded px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider',
-            publicada ? 'bg-ordem-green text-ordem-black' : 'bg-ordem-ooze text-ordem-text-muted',
-          )}
-        >
-          {situacao === 'verificando' ? 'verificando' : publicada ? 'no ar' : 'fora do ar'}
-        </span>
+        <RotuloDeSecao>Compartilhar</RotuloDeSecao>
+
+        {situacao === 'verificando' ? (
+          <Distintivo>verificando</Distintivo>
+        ) : publicada ? (
+          <Distintivo className="border-ordem-green/40 bg-ordem-green/10 uppercase text-ordem-green">
+            no ar
+          </Distintivo>
+        ) : (
+          <Distintivo className="border-white/10 bg-black/40 uppercase text-ordem-text-muted">
+            fora do ar
+          </Distintivo>
+        )}
+
+        {publicada ? (
+          <span
+            className={cn(
+              'flex items-center gap-1.5 font-mono text-[10px]',
+              sincronizando ? 'text-ordem-gold' : 'text-ordem-text-muted',
+            )}
+          >
+            <span
+              className={cn(
+                'h-1.5 w-1.5 rounded-full',
+                sincronizando ? 'animate-pulse bg-ordem-gold' : 'bg-green-500',
+              )}
+            />
+            {sincronizando ? 'sincronizando…' : 'sincronizado'}
+          </span>
+        ) : null}
 
         <div className="ml-auto flex gap-2">
-          <Button size="sm" onClick={publicar} disabled={ocupado}>
-            {publicada ? 'Atualizar' : 'Publicar'}
-          </Button>
-          {publicada ? (
+          {!publicada ? (
+            <Button size="sm" onClick={publicar} disabled={ocupado}>
+              Publicar
+            </Button>
+          ) : (
             <Button size="sm" variant="danger" onClick={despublicar} disabled={ocupado}>
               Tirar do ar
             </Button>
-          ) : null}
+          )}
         </div>
       </div>
 
       <p className="text-xs text-ordem-text-muted">
-        Publicar envia esta ficha para a nuvem. O jogador abre o link e vê PV, PD, ímpeto e
-        condições atualizando em tempo real. Publicar de novo depois de mudar algo é o que
-        sincroniza.
+        {publicada
+          ? 'Alterações de PV, PD, ímpeto e condições vão para o jogador sozinhas, em tempo real.'
+          : 'Publicar envia a ficha para a nuvem e devolve o link do jogador. A partir daí, tudo que você mudar aqui aparece lá sozinho.'}
       </p>
 
       {mensagemDeErro ? (
-        <p className="rounded border border-ordem-red bg-ordem-red-dark/30 px-3 py-2 text-xs text-ordem-red-light">
+        <p className="rounded-lg border border-ordem-red/50 bg-ordem-red/10 px-3 py-2 text-xs text-ordem-red-light">
           {mensagemDeErro}
         </p>
       ) : null}
@@ -187,6 +268,11 @@ export const CompartilharFicha: React.FC<CompartilharFichaProps> = ({ ficha, cla
             url={urlDoOverlay(ficha.id, origem, 'full')}
             ajuda="inclui as perícias treinadas"
           />
+          {sincronizadoEm ? (
+            <p className="font-mono text-[10px] text-ordem-text-muted">
+              Último envio: {new Date(sincronizadoEm).toLocaleTimeString('pt-BR')}
+            </p>
+          ) : null}
         </div>
       ) : null}
     </div>

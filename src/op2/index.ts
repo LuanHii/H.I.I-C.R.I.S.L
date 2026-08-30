@@ -279,3 +279,9 @@ export { FichaOp2Publica } from './ui/FichaOp2Publica';
 export { OverlayOp2 } from './ui/OverlayOp2';
 
 export { CompartilharFicha } from './ui/CompartilharFicha';
+
+export {
+  ATRASO_DE_SINCRONIZACAO_MS,
+  assinaturaDaFicha,
+  precisaSincronizar,
+} from './nuvem/sincronizacao';
