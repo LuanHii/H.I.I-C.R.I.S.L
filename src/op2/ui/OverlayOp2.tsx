@@ -4,18 +4,13 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { avaliacaoDe, dadoDaPericia, estadoDeRisco, impetoDe, pdAtual, pvAtual } from '../regras/ficha';
 import { PERICIAS_SIMPLES, pericia } from '../regras/pericias';
+import { CORES_DO_PERFIL } from './Pecas';
 import {
   MAXIMO_AVALIACAO,
   MAXIMO_IMPETO,
   ROTULO_ATRIBUTO,
   type FichaOp2,
 } from '../regras/tipos';
-
-const CORES_DO_PERFIL: Record<FichaOp2['perfil']['tipo'], string> = {
-  EXECUTOR: 'text-ordem-red bg-ordem-red/10',
-  ANALISTA: 'text-ordem-blue bg-ordem-blue/10',
-  VIGILANTE: 'text-ordem-green bg-ordem-green/10',
-};
 
 interface BarraProps {
   rotulo: string;

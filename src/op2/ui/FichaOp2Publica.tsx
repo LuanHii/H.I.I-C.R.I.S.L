@@ -1,9 +1,18 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Activity, Brain, HeartPulse, Sparkles, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { dadoDaPericia, dadoDoAtributo, estadoDeRisco, pdAtual, pvAtual } from '../regras/ficha';
-import { habilidadePorId } from '../regras/habilidades';
+import {
+  avaliacaoDe,
+  dadoDaPericia,
+  dadoDoAtributo,
+  estadoDeRisco,
+  impetoDe,
+  pdAtual,
+  pvAtual,
+} from '../regras/ficha';
+import { habilidadePorId, temEfeitoEmRuntime } from '../regras/habilidades';
 import {
   CAMPOS_APTIDAO,
   DESCRICAO_DA_PERICIA,
@@ -13,91 +22,38 @@ import {
   aptidao,
   atributoBaseDe,
   pericia,
-  rotuloDe,
 } from '../regras/pericias';
 import {
   MAXIMO_AVALIACAO,
   MAXIMO_IMPETO,
   ROTULO_ATRIBUTO,
-  type DiceStep,
+  type AtributoOp2,
   type FichaOp2,
   type RefPericia,
 } from '../regras/tipos';
+import {
+  BotaoDeAba,
+  CARTAO,
+  CONTEUDO,
+  CORES_DO_PERFIL,
+  Distintivo,
+  DistintivoDeDado,
+  FUNDO_DA_PAGINA,
+  LADRILHO,
+  PilulaDeEspacos,
+  PilulaDeRecurso,
+  RotuloDeSecao,
+} from './Pecas';
 
-const CORES_DO_PERFIL: Record<FichaOp2['perfil']['tipo'], string> = {
-  EXECUTOR: 'bg-ordem-red text-ordem-white',
-  ANALISTA: 'bg-ordem-blue text-ordem-white',
-  VIGILANTE: 'bg-ordem-green text-ordem-black',
+type Aba = 'status' | 'pericias' | 'habilidades';
+
+const ICONE_DO_ATRIBUTO: Record<AtributoOp2, React.ReactNode> = {
+  FISICO: <Activity size={12} />,
+  MENTE: <Brain size={12} />,
+  EMOCAO: <Sparkles size={12} />,
 };
 
-const CORES_DO_DADO: Record<DiceStep, string> = {
-  d4: 'border-ordem-border text-ordem-text-muted',
-  d6: 'border-ordem-green-muted text-ordem-green-muted',
-  d8: 'border-ordem-cyan text-ordem-cyan',
-  d10: 'border-ordem-gold text-ordem-gold',
-  d12: 'border-ordem-purple text-ordem-purple',
-  d20: 'border-ordem-red text-ordem-red-light',
-};
-
-interface BarraProps {
-  rotulo: string;
-  atual: number;
-  maximo: number;
-  cor: string;
-}
-
-const Barra: React.FC<BarraProps> = ({ rotulo, atual, maximo, cor }) => (
-  <div>
-    <div className="flex items-baseline justify-between">
-      <span className="text-xs font-bold uppercase tracking-wide text-ordem-text-secondary">
-        {rotulo}
-      </span>
-      <span className="font-mono text-sm text-ordem-white">
-        {atual}
-        <span className="text-ordem-text-muted"> / {maximo}</span>
-      </span>
-    </div>
-    <div className="mt-1 h-2.5 w-full overflow-hidden rounded-full bg-ordem-bg">
-      <div
-        className={cn('h-full rounded-full transition-all duration-500', cor)}
-        style={{ width: `${maximo > 0 ? Math.max(0, Math.min(1, atual / maximo)) * 100 : 0}%` }}
-      />
-    </div>
-  </div>
-);
-
-interface EspacosProps {
-  rotulo: string;
-  preenchidos: number;
-  total: number;
-  cor: string;
-}
-
-const Espacos: React.FC<EspacosProps> = ({ rotulo, preenchidos, total, cor }) => (
-  <div>
-    <div className="flex items-baseline justify-between">
-      <span className="text-xs font-bold uppercase tracking-wide text-ordem-text-secondary">
-        {rotulo}
-      </span>
-      <span className="font-mono text-sm text-ordem-white">
-        {preenchidos} / {total}
-      </span>
-    </div>
-    <div className="mt-1 flex gap-1">
-      {Array.from({ length: total }, (_, indice) => (
-        <span
-          key={indice}
-          className={cn(
-            'h-4 flex-1 rounded-sm border',
-            indice < preenchidos ? cor : 'border-ordem-border bg-ordem-bg',
-          )}
-        />
-      ))}
-    </div>
-  </div>
-);
-
-interface LinhaProps {
+interface LinhaDePericiaProps {
   ficha: FichaOp2;
   ref_: RefPericia;
   rotulo: string;
@@ -105,7 +61,13 @@ interface LinhaProps {
   recuada?: boolean;
 }
 
-const Linha: React.FC<LinhaProps> = ({ ficha, ref_, rotulo, descricao, recuada }) => {
+const LinhaDePericia: React.FC<LinhaDePericiaProps> = ({
+  ficha,
+  ref_,
+  rotulo,
+  descricao,
+  recuada,
+}) => {
   const dado = dadoDaPericia(ficha, ref_);
   const atributo = atributoBaseDe(ref_);
   const grau = dado === 'd20' ? 'Sobre-humano' : GRAUS_DE_TREINAMENTO[dado];
@@ -115,21 +77,16 @@ const Linha: React.FC<LinhaProps> = ({ ficha, ref_, rotulo, descricao, recuada }
     <div
       title={`${descricao} · ${grau}`}
       className={cn(
-        'flex items-center gap-3 rounded px-2 py-1.5',
-        recuada && 'pl-6',
-        destreinada && 'opacity-50',
+        'flex items-center gap-3 rounded-lg border px-3 py-2 transition-colors',
+        destreinada
+          ? 'border-white/5 bg-black/20 opacity-50'
+          : 'border-white/10 bg-black/40',
+        recuada && 'ml-4',
       )}
     >
-      <span
-        className={cn(
-          'w-12 shrink-0 rounded border bg-ordem-bg py-0.5 text-center font-mono text-xs font-bold',
-          CORES_DO_DADO[dado],
-        )}
-      >
-        {dado}
-      </span>
-      <span className="flex-1 truncate text-sm text-ordem-text-secondary">{rotulo}</span>
-      <span className="shrink-0 font-mono text-[0.65rem] text-ordem-text-muted">
+      <DistintivoDeDado dado={dado} />
+      <span className="flex-1 truncate text-sm text-ordem-white-muted">{rotulo}</span>
+      <span className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted">
         {ROTULO_ATRIBUTO[atributo]} {dadoDoAtributo(ficha, atributo)}
       </span>
     </div>
@@ -139,15 +96,23 @@ const Linha: React.FC<LinhaProps> = ({ ficha, ref_, rotulo, descricao, recuada }
 export interface FichaOp2PublicaProps {
   ficha: FichaOp2;
   atualizadoEm?: string;
+  conectado?: boolean;
+  aoAbrirOverlay?: (modo: 'mini' | 'full') => void;
   className?: string;
 }
 
 export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
   ficha,
   atualizadoEm,
+  conectado = true,
+  aoAbrirOverlay,
   className,
 }) => {
+  const [aba, setAba] = useState<Aba>('status');
+
   const risco = estadoDeRisco(ficha);
+  const pv = pvAtual(ficha);
+  const pd = pdAtual(ficha);
 
   const habilidades = ficha.habilidades
     .map(habilidadePorId)
@@ -157,172 +122,305 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
         lista.findIndex((outra) => outra.nome === habilidade.nome) === indice,
     );
 
-  return (
-    <div className={cn('mx-auto max-w-3xl space-y-4 p-4', className)}>
-      <header className="rounded-lg border border-ordem-border bg-ordem-black p-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-3xl font-bold text-ordem-white">{ficha.nome}</h1>
-          <span
-            className={cn(
-              'rounded px-2 py-0.5 text-xs font-bold uppercase tracking-wider',
-              CORES_DO_PERFIL[ficha.perfil.tipo],
-            )}
-          >
-            {ficha.perfil.tipo}
-          </span>
-          <span className="text-sm text-ordem-text-secondary">{ficha.ocupacao}</span>
-          <span className="ml-auto font-mono text-sm text-ordem-text-muted">
-            Nível {ficha.nivel}
-          </span>
-        </div>
+  const treinadas = PERICIAS_SIMPLES.filter(
+    (nome) => dadoDaPericia(ficha, pericia(nome)) !== 'd4',
+  ).length;
 
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          {(['FISICO', 'MENTE', 'EMOCAO'] as const).map((atributo) => (
-            <div
-              key={atributo}
-              className="rounded border border-ordem-border bg-ordem-bg px-3 py-3 text-center"
-            >
-              <div className="text-[0.65rem] uppercase tracking-wide text-ordem-text-muted">
-                {ROTULO_ATRIBUTO[atributo]}
+  return (
+    <div className={cn(FUNDO_DA_PAGINA, className)}>
+      <div className={CONTEUDO}>
+        <header className="mb-4 flex flex-col gap-3 border-b border-ordem-border pb-4 sm:mb-6 sm:gap-4 sm:pb-5">
+          <div className="min-w-0">
+            <RotuloDeSecao>Ordem Paranormal 2 · Playtest</RotuloDeSecao>
+            <h1 className="mt-1 truncate font-serif text-2xl text-white sm:mt-2 sm:text-3xl md:text-4xl">
+              {ficha.nome}
+            </h1>
+            <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-3">
+              <Distintivo className={cn('uppercase', CORES_DO_PERFIL[ficha.perfil.tipo])}>
+                {ficha.perfil.tipo}
+              </Distintivo>
+              <span className="font-mono text-[10px] text-ordem-text-secondary sm:text-xs">
+                {ficha.ocupacao}
+              </span>
+              <span className="font-mono text-[10px] uppercase text-ordem-text-muted sm:text-xs">
+                Nível {ficha.nivel}
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <PilulaDeRecurso
+              rotulo="PV"
+              atual={pv}
+              maximo={ficha.pvMax}
+              tom="bg-red-500"
+              alerta={risco.precisaFerimento}
+            />
+            <PilulaDeRecurso
+              rotulo="PD"
+              atual={pd}
+              maximo={ficha.pdMax}
+              tom="bg-violet-500"
+              alerta={risco.precisaTrauma}
+            />
+
+            {ficha.perfil.tipo === 'EXECUTOR' ? (
+              <PilulaDeEspacos
+                rotulo="Ímpeto"
+                preenchidos={impetoDe(ficha)}
+                total={MAXIMO_IMPETO}
+                tom="border-ordem-gold bg-ordem-gold"
+                ajuda="Enche a cada teste falhado. 1 espaço dá +1 passo; 3 espaços aumentam um atributo até o fim da cena."
+              />
+            ) : null}
+
+            {ficha.perfil.tipo === 'ANALISTA' ? (
+              <PilulaDeEspacos
+                rotulo="Avaliação"
+                preenchidos={avaliacaoDe(ficha)}
+                total={MAXIMO_AVALIACAO}
+                tom="border-ordem-cyan bg-ordem-cyan"
+                ajuda="Ganhos com a ação Avaliação (2 PD). Valem só em testes relativos ao alvo observado."
+              />
+            ) : null}
+
+            <div className={LADRILHO}>
+              <div className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted">
+                <Zap size={11} /> Treinadas
               </div>
-              <div className="font-mono text-2xl font-bold text-ordem-white">
-                {ficha.atributos[atributo]}
+              <div className="text-lg font-bold leading-tight text-white">
+                {treinadas}
+                <span className="text-xs text-ordem-text-muted">/{PERICIAS_SIMPLES.length}</span>
               </div>
             </div>
-          ))}
-        </div>
-      </header>
+          </div>
 
-      <section className="space-y-4 rounded-lg border border-ordem-border bg-ordem-black p-4">
-        <Barra rotulo="Pontos de Vida" atual={pvAtual(ficha)} maximo={ficha.pvMax} cor="bg-ordem-red" />
-        <Barra
-          rotulo="Pontos de Determinação"
-          atual={pdAtual(ficha)}
-          maximo={ficha.pdMax}
-          cor="bg-ordem-blue"
-        />
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            {aoAbrirOverlay ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => aoAbrirOverlay('mini')}
+                  className="touch-target-sm rounded-lg border border-ordem-border-light px-3 py-2.5 font-mono text-[10px] tracking-[0.15em] text-ordem-white-muted transition hover:border-ordem-text-muted hover:text-white active:bg-ordem-ooze/50 sm:tracking-[0.25em]"
+                >
+                  OVERLAY MINI
+                </button>
+                <button
+                  type="button"
+                  onClick={() => aoAbrirOverlay('full')}
+                  className="touch-target-sm rounded-lg border border-ordem-border-light px-3 py-2.5 font-mono text-[10px] tracking-[0.15em] text-ordem-white-muted transition hover:border-ordem-text-muted hover:text-white active:bg-ordem-ooze/50 sm:tracking-[0.25em]"
+                >
+                  OVERLAY FULL
+                </button>
+              </>
+            ) : null}
 
-        {ficha.perfil.tipo === 'EXECUTOR' ? (
-          <Espacos
-            rotulo="Ímpeto"
-            preenchidos={ficha.perfil.impetoPreenchido}
-            total={MAXIMO_IMPETO}
-            cor="border-ordem-gold bg-ordem-gold"
-          />
-        ) : null}
-
-        {ficha.perfil.tipo === 'ANALISTA' ? (
-          <Espacos
-            rotulo="Dados de Avaliação"
-            preenchidos={ficha.perfil.avaliacaoDisponivel}
-            total={MAXIMO_AVALIACAO}
-            cor="border-ordem-cyan bg-ordem-cyan"
-          />
-        ) : null}
-
-        {risco.precisaFerimento ? (
-          <p className="rounded border border-ordem-red bg-ordem-red-dark/30 px-3 py-2 text-xs text-ordem-red-light">
-            0 PV — teste de Ferimento (Físico + Vigor) contra DT {risco.dtFerimento}.
-          </p>
-        ) : null}
-
-        {risco.precisaTrauma ? (
-          <p className="rounded border border-ordem-purple bg-ordem-purple/20 px-3 py-2 text-xs text-ordem-purple">
-            0 PD — teste de Trauma (Emoção + Disciplina) contra DT {risco.dtTrauma}.
-          </p>
-        ) : null}
-
-        {ficha.sessao.condicoes.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
-            {ficha.sessao.condicoes.map((condicao) => (
+            <div className="flex w-full items-center justify-end gap-2 rounded-full border border-white/5 bg-black/30 px-2 py-1 sm:ml-auto sm:w-auto sm:border-0 sm:bg-transparent sm:p-0">
+              <div
+                className={cn(
+                  'h-2 w-2 rounded-full',
+                  conectado ? 'animate-pulse bg-green-500' : 'bg-ordem-text-muted',
+                )}
+              />
               <span
-                key={condicao}
-                className="rounded border border-ordem-red/50 bg-ordem-red-dark/20 px-2 py-0.5 text-xs text-ordem-red-light"
+                className={cn(
+                  'font-mono text-[10px] sm:text-xs',
+                  conectado ? 'text-green-500' : 'text-ordem-text-secondary',
+                )}
               >
-                {condicao}
+                {conectado ? 'CONECTADO' : 'OFFLINE'}
               </span>
-            ))}
+            </div>
           </div>
-        ) : null}
+        </header>
 
-        {ficha.sessao.passosDeCena.length > 0 ? (
-          <div className="rounded border border-ordem-gold/50 bg-ordem-ooze px-3 py-2">
-            <span className="text-xs uppercase tracking-wide text-ordem-text-muted">
-              Ativo até o fim da cena
-            </span>
-            <ul className="mt-1 space-y-0.5">
-              {ficha.sessao.passosDeCena.map((passo, indice) => (
-                <li key={indice} className="text-xs text-ordem-text-secondary">
-                  {passo.delta > 0 ? '+' : ''}
-                  {passo.delta} passo em {ROTULO_ATRIBUTO[passo.alvo]} — {passo.motivo}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-      </section>
-
-      <section className="rounded-lg border border-ordem-border bg-ordem-black p-3">
-        <div className="mb-2 flex items-baseline justify-between px-2">
-          <h2 className="text-sm font-bold uppercase tracking-wide text-ordem-white">Perícias</h2>
-          <span className="text-[0.65rem] text-ordem-text-muted">
-            atributo + perícia, soma contra a DT
-          </span>
+        <div className="mb-4 flex gap-2 overflow-x-auto pb-1 sm:mb-6">
+          <BotaoDeAba ativo={aba === 'status'} onClick={() => setAba('status')}>
+            STATUS
+          </BotaoDeAba>
+          <BotaoDeAba ativo={aba === 'pericias'} onClick={() => setAba('pericias')}>
+            PERICIAS
+          </BotaoDeAba>
+          <BotaoDeAba ativo={aba === 'habilidades'} onClick={() => setAba('habilidades')}>
+            HABILIDADES
+          </BotaoDeAba>
         </div>
 
-        <div className="space-y-0.5">
-          <div className="flex items-center gap-3 px-2 py-1.5">
-            <span className="w-12 shrink-0 text-center text-[0.65rem] uppercase tracking-wide text-ordem-text-muted">
-              por campo
-            </span>
-            <span className="flex-1 text-sm font-bold text-ordem-text-secondary">Aptidão</span>
-            <span className="shrink-0 font-mono text-[0.65rem] text-ordem-text-muted">
-              {ROTULO_ATRIBUTO.MENTE} {dadoDoAtributo(ficha, 'MENTE')}
-            </span>
-          </div>
-          {CAMPOS_APTIDAO.map((campo) => (
-            <Linha
-              key={campo}
-              ficha={ficha}
-              ref_={aptidao(campo)}
-              rotulo={campo}
-              descricao={DESCRICAO_DO_CAMPO_APTIDAO[campo]}
-              recuada
-            />
-          ))}
-          {PERICIAS_SIMPLES.map((nome) => (
-            <Linha
-              key={nome}
-              ficha={ficha}
-              ref_={pericia(nome)}
-              rotulo={nome}
-              descricao={DESCRICAO_DA_PERICIA[nome]}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section className="rounded-lg border border-ordem-border bg-ordem-black p-4">
-        <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-ordem-white">
-          Habilidades
-        </h2>
-        <ul className="space-y-2">
-          {habilidades.map((habilidade) => (
-            <li key={habilidade.id} className="rounded border border-ordem-border bg-ordem-bg p-3">
-              <span className="text-sm font-bold text-ordem-white">{habilidade.nome}</span>
-              <p className="mt-1 text-xs leading-relaxed text-ordem-text-secondary">
-                {habilidade.descricao}
+        {aba === 'status' ? (
+          <div className="grid grid-cols-1 gap-4 duration-500 animate-in fade-in slide-in-from-bottom-4 lg:grid-cols-2">
+            <section className={CARTAO}>
+              <RotuloDeSecao className="mb-4">Atributos</RotuloDeSecao>
+              <div className="space-y-2">
+                {(['FISICO', 'MENTE', 'EMOCAO'] as const).map((atributo) => (
+                  <div
+                    key={atributo}
+                    className="flex items-center gap-3 rounded-lg border border-white/10 bg-black/40 px-3 py-3"
+                  >
+                    <span className="text-ordem-text-muted">{ICONE_DO_ATRIBUTO[atributo]}</span>
+                    <span className="flex-1 font-mono text-xs uppercase tracking-[0.2em] text-ordem-white-muted">
+                      {ROTULO_ATRIBUTO[atributo]}
+                    </span>
+                    <span className="font-mono text-2xl font-bold text-white">
+                      {ficha.atributos[atributo]}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-3 font-mono text-[10px] leading-relaxed text-ordem-text-muted">
+                Todo teste rola o dado do atributo + o dado da perícia e soma contra a DT
+                (7 por padrão).
               </p>
-            </li>
-          ))}
-        </ul>
-      </section>
+            </section>
 
-      {atualizadoEm ? (
-        <p className="text-center text-[0.65rem] text-ordem-text-muted">
-          Atualizado em {new Date(atualizadoEm).toLocaleString('pt-BR')}
-        </p>
-      ) : null}
+            <section className={CARTAO}>
+              <RotuloDeSecao className="mb-4">Situação</RotuloDeSecao>
+
+              <div className="space-y-2">
+                {risco.precisaFerimento ? (
+                  <div className="flex items-start gap-2 rounded-lg border border-ordem-red/50 bg-ordem-red/10 px-3 py-2">
+                    <HeartPulse size={14} className="mt-0.5 shrink-0 text-ordem-red-light" />
+                    <p className="text-xs text-ordem-red-light">
+                      <strong>0 PV.</strong> Teste de Ferimento (Físico + Vigor) contra DT{' '}
+                      {risco.dtFerimento}. Falhar é morrer.
+                    </p>
+                  </div>
+                ) : null}
+
+                {risco.precisaTrauma ? (
+                  <div className="flex items-start gap-2 rounded-lg border border-ordem-purple/50 bg-ordem-purple/10 px-3 py-2">
+                    <Brain size={14} className="mt-0.5 shrink-0 text-ordem-purple" />
+                    <p className="text-xs text-ordem-purple">
+                      <strong>0 PD.</strong> Teste de Trauma (Emoção + Disciplina) contra DT{' '}
+                      {risco.dtTrauma}. Falhar é colapso mental.
+                    </p>
+                  </div>
+                ) : null}
+
+                {ficha.sessao.condicoes.length > 0 ? (
+                  <div className="rounded-lg border border-white/10 bg-black/40 px-3 py-2">
+                    <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-red-400">
+                      Condições ativas
+                    </div>
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {ficha.sessao.condicoes.map((condicao) => (
+                        <Distintivo
+                          key={condicao}
+                          className="border-ordem-red/40 bg-ordem-red/10 text-ordem-red-light"
+                        >
+                          {condicao}
+                        </Distintivo>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {ficha.sessao.passosDeCena.length > 0 ? (
+                  <div className="rounded-lg border border-ordem-gold/40 bg-ordem-gold/5 px-3 py-2">
+                    <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-ordem-gold">
+                      Ativo até o fim da cena
+                    </div>
+                    <ul className="mt-1.5 space-y-1">
+                      {ficha.sessao.passosDeCena.map((passo, indice) => (
+                        <li key={indice} className="text-xs text-ordem-white-muted">
+                          {passo.delta > 0 ? '+' : ''}
+                          {passo.delta} passo em {ROTULO_ATRIBUTO[passo.alvo]}
+                          <span className="text-ordem-text-muted"> — {passo.motivo}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+
+                {!risco.precisaFerimento &&
+                !risco.precisaTrauma &&
+                ficha.sessao.condicoes.length === 0 &&
+                ficha.sessao.passosDeCena.length === 0 ? (
+                  <p className="rounded-lg border border-white/5 bg-black/20 px-3 py-6 text-center font-mono text-xs text-ordem-text-muted">
+                    Nada afetando o personagem agora.
+                  </p>
+                ) : null}
+              </div>
+            </section>
+          </div>
+        ) : null}
+
+        {aba === 'pericias' ? (
+          <section
+            className={cn(CARTAO, 'duration-500 animate-in fade-in slide-in-from-bottom-4')}
+          >
+            <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <RotuloDeSecao>Perícias</RotuloDeSecao>
+              <span className="font-mono text-[10px] text-ordem-text-muted">
+                d4 destreinado · d6 treinado · d8 especialista · d10 mestre · d12 grão-mestre
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 gap-1.5 lg:grid-cols-2">
+              <div className="lg:col-span-2">
+                <div className="flex items-center gap-3 px-3 py-1">
+                  <span className="w-12 shrink-0 text-center font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted">
+                    campo
+                  </span>
+                  <span className="flex-1 font-mono text-xs uppercase tracking-[0.2em] text-ordem-white-muted">
+                    Aptidão
+                  </span>
+                  <span className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted">
+                    {ROTULO_ATRIBUTO.MENTE} {dadoDoAtributo(ficha, 'MENTE')}
+                  </span>
+                </div>
+              </div>
+              {CAMPOS_APTIDAO.map((campo) => (
+                <LinhaDePericia
+                  key={campo}
+                  ficha={ficha}
+                  ref_={aptidao(campo)}
+                  rotulo={campo}
+                  descricao={DESCRICAO_DO_CAMPO_APTIDAO[campo]}
+                  recuada
+                />
+              ))}
+
+              <div className="mt-2 lg:col-span-2" />
+
+              {PERICIAS_SIMPLES.map((nome) => (
+                <LinhaDePericia
+                  key={nome}
+                  ficha={ficha}
+                  ref_={pericia(nome)}
+                  rotulo={nome}
+                  descricao={DESCRICAO_DA_PERICIA[nome]}
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {aba === 'habilidades' ? (
+          <section className="grid grid-cols-1 gap-3 duration-500 animate-in fade-in slide-in-from-bottom-4 lg:grid-cols-2">
+            {habilidades.map((habilidade) => (
+              <div key={habilidade.id} className={CARTAO}>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-serif text-lg text-white">{habilidade.nome}</span>
+                  {!temEfeitoEmRuntime(habilidade) ? (
+                    <Distintivo className="border-white/10 bg-black/40 uppercase text-ordem-text-muted">
+                      já na ficha
+                    </Distintivo>
+                  ) : null}
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-ordem-white-muted">
+                  {habilidade.descricao}
+                </p>
+              </div>
+            ))}
+          </section>
+        ) : null}
+
+        {atualizadoEm ? (
+          <p className="mt-6 text-center font-mono text-[10px] text-ordem-text-muted">
+            Atualizado em {new Date(atualizadoEm).toLocaleString('pt-BR')}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 };

@@ -6,16 +6,11 @@ import { cn } from '@/lib/utils';
 import { useOp2FichasStore } from '../estado/useOp2FichasStore';
 import { pdAtual, pvAtual } from '../regras/ficha';
 import type { FichaOp2 } from '../regras/tipos';
+import { CORES_DO_PERFIL } from './Pecas';
 import { CompartilharFicha } from './CompartilharFicha';
 import { FichaOp2View } from './FichaOp2View';
 import { PainelInvestigacao } from './PainelInvestigacao';
 import { SeletorDePresets } from './SeletorDePresets';
-
-const CORES_DO_PERFIL: Record<FichaOp2['perfil']['tipo'], string> = {
-  EXECUTOR: 'text-ordem-red',
-  ANALISTA: 'text-ordem-blue',
-  VIGILANTE: 'text-ordem-green',
-};
 
 type Aba = 'fichas' | 'investigacao';
 

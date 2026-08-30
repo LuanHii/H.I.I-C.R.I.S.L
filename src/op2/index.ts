@@ -179,9 +179,8 @@ export {
 } from './regras/sessao';
 
 export { FichaOp2View } from './ui/FichaOp2View';
-export { GradePericias } from './ui/GradePericias';
+export * from './ui/Pecas';
 export { PainelOp2 } from './ui/PainelOp2';
-export { PainelRecursos } from './ui/PainelRecursos';
 export { ResultadoTesteView } from './ui/ResultadoTeste';
 export { SeletorDePresets } from './ui/SeletorDePresets';
 export { TesteRapido } from './ui/TesteRapido';

@@ -15,18 +15,27 @@ function fonte(arquivo: string): string {
 const TODOS_OS_COMPONENTES = readdirSync(RAIZ_UI).filter((arquivo) => arquivo.endsWith('.tsx'));
 
 describe('a UI cobre todas as variantes do dominio', () => {
-  it('cada passo da escala tem cor propria na grade de pericias', () => {
-    const grade = fonte('GradePericias.tsx');
+  it('cada passo da escala tem cor propria no vocabulario visual compartilhado', () => {
+    const pecas = fonte('Pecas.tsx');
     for (const passo of [...ESCALA_PASSOS, 'd20']) {
-      expect(grade).toContain(`${passo}:`);
+      expect(pecas).toContain(`${passo}:`);
     }
   });
 
-  it('cada perfil tem cor propria no cabecalho da ficha', () => {
-    const ficha = fonte('FichaOp2View.tsx');
+  it('cada perfil tem cor propria no vocabulario visual compartilhado', () => {
+    const pecas = fonte('Pecas.tsx');
     for (const perfil of ['EXECUTOR', 'ANALISTA', 'VIGILANTE']) {
-      expect(ficha).toContain(`${perfil}:`);
+      expect(pecas).toContain(`${perfil}:`);
     }
+  });
+
+  it('os mapas de cor moram SO em Pecas.tsx: uma segunda copia acaba divergindo', () => {
+    const redefinem = TODOS_OS_COMPONENTES.filter(
+      (arquivo) =>
+        arquivo !== 'Pecas.tsx' &&
+        /const CORES_DO_(DADO|PERFIL)\s*[:=]/.test(fonte(arquivo)),
+    );
+    expect(redefinem).toEqual([]);
   });
 
   it('cada atributo tem rotulo legivel, para a UI nunca mostrar EMOCAO sem acento', () => {
@@ -52,19 +61,20 @@ describe('a UI cobre todas as variantes do dominio', () => {
     }
   });
 
-  it('o painel de recursos mostra impeto e avaliacao, cada um so para o seu perfil', () => {
-    const painel = fonte('PainelRecursos.tsx');
-    expect(painel).toContain("ficha.perfil.tipo === 'EXECUTOR'");
-    expect(painel).toContain("ficha.perfil.tipo === 'ANALISTA'");
-    expect(painel).toContain('Ímpeto');
-    expect(painel).toContain('Dados de Avaliação');
+  it('cada ficha mostra impeto e avaliacao so para o perfil que os tem', () => {
+    for (const arquivo of ['FichaOp2Publica.tsx', 'FichaOp2View.tsx', 'OverlayOp2.tsx']) {
+      const conteudo = fonte(arquivo);
+      expect(conteudo).toContain("ficha.perfil.tipo === 'EXECUTOR'");
+      expect(conteudo).toContain("ficha.perfil.tipo === 'ANALISTA'");
+      expect(conteudo).toContain('Ímpeto');
+    }
   });
 
-  it('o painel avisa dos dois testes de risco, com a pericia certa em cada um', () => {
-    const painel = fonte('PainelRecursos.tsx');
-    expect(painel).toContain('Físico + Vigor');
-    expect(painel).toContain('Emoção + Disciplina');
-    expect(painel).toContain('0 PD');
+  it('a ficha do jogador avisa dos dois testes de risco, com a pericia certa em cada um', () => {
+    const publica = fonte('FichaOp2Publica.tsx');
+    expect(publica).toContain('Físico + Vigor');
+    expect(publica).toContain('Emoção + Disciplina');
+    expect(publica).toContain('0 PD');
   });
 
   it('o resultado exibe RA, RB e os dados fora da soma: as tres consequencias das regras A1 e A2', () => {
@@ -85,7 +95,7 @@ describe('a UI cobre todas as variantes do dominio', () => {
 
 describe('a UI nao carrega regra propria', () => {
   it('nenhum componente reimplementa a DT padrao como literal', () => {
-    for (const arquivo of ['TesteRapido.tsx', 'ResultadoTeste.tsx', 'PainelRecursos.tsx']) {
+    for (const arquivo of ['TesteRapido.tsx', 'ResultadoTeste.tsx', 'FichaOp2Publica.tsx']) {
       const conteudo = fonte(arquivo);
       expect(conteudo).not.toMatch(/dt\s*=\s*7\b/);
     }
@@ -118,14 +128,16 @@ describe('a UI nao carrega regra propria', () => {
     }
   });
 
-  it('a grade de pericias vem do catalogo, nao de uma lista escrita na UI', () => {
-    const grade = fonte('GradePericias.tsx');
-    expect(grade).toContain('PERICIAS_SIMPLES');
-    expect(grade).toContain('CAMPOS_APTIDAO');
-    const nomesEscritosAMao = [...PERICIAS_SIMPLES, ...CAMPOS_APTIDAO].filter((nome) =>
-      grade.includes(`"${nome}"`) || grade.includes(`'${nome}'`),
-    );
-    expect(nomesEscritosAMao).toEqual([]);
+  it('as duas fichas listam pericias a partir do catalogo, nao de uma lista escrita na UI', () => {
+    for (const arquivo of ['FichaOp2Publica.tsx', 'FichaOp2View.tsx']) {
+      const conteudo = fonte(arquivo);
+      expect(conteudo).toContain('PERICIAS_SIMPLES');
+      expect(conteudo).toContain('CAMPOS_APTIDAO');
+      const nomesEscritosAMao = [...PERICIAS_SIMPLES, ...CAMPOS_APTIDAO].filter(
+        (nome) => conteudo.includes(`"${nome}"`) || conteudo.includes(`'${nome}'`),
+      );
+      expect(nomesEscritosAMao).toEqual([]);
+    }
   });
 });
 
