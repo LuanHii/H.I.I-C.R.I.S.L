@@ -160,12 +160,11 @@ export async function migrateDataOnLogin(
 
   const localData = getLocalData();
 
-  const fichasCloud: FichaRegistroCloud[] = localData.fichas.map(f => ({
-    id: f.id,
-    personagem: f.personagem,
-    atualizadoEm: f.atualizadoEm,
-    campanha: f.campanha,
-  }));
+  /*
+   * Spread, não literal de campos: um literal descartaria o documento v2 ao
+   * subir as fichas locais para a nuvem no primeiro login.
+   */
+  const fichasCloud: FichaRegistroCloud[] = localData.fichas.map(f => ({ ...f }));
 
   const campanhasCloud: CampanhaCloud[] = localData.campanhas.map(c => ({
     id: c.id,

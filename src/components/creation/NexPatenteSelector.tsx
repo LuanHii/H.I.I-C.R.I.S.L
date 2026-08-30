@@ -1,16 +1,22 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { listarPatentes } from '@/logic/rulesEngine';
-import type { Patente } from '@/core/types';
+import { getPatenteConfig, listarPatentes } from '@/logic/rulesEngine';
+import type { LimiteItens } from '@/core/types';
 
-const LIMITE_ITENS_POR_PATENTE: Record<Patente, string> = {
-  'Recruta': 'Cat I: 3',
-  'Operador': 'Cat I: 5 | II: 1',
-  'Agente Especial': 'Cat I: ∞ | II: 2 | III: 1',
-  'Oficial de Operações': 'Cat I-II: ∞ | III: 2',
-  'Agente de Elite': 'Cat I-II: ∞ | III: 3 | IV: 1',
-};
+/**
+ * Texto do limite de itens derivado da Tabela 3.1, nunca escrito à mão.
+ * Havia aqui um mapa fixo que divergia da tabela do motor — e ambos divergiam
+ * do livro. Uma fonte só evita a terceira versão.
+ */
+function descreverLimite(limite: LimiteItens): string {
+  const partes = (['I', 'II', 'III', 'IV'] as const)
+    .filter((cat) => limite[cat] > 0)
+    .map((cat) => `${cat}: ${limite[cat]}`);
+  return partes.length > 0 ? `Cat ${partes.join(' | ')}` : 'Sem itens da Ordem';
+}
+import type { Patente } from '@/core/types';
+import { NEX_ESCADA } from '@/core/rules/progressao';
 
 const UI_PROPS: Record<string, { cor: string; icone: string }> = {
   'Recruta': { cor: 'text-ordem-text-secondary', icone: '○' },
@@ -33,19 +39,19 @@ export function NexPatenteSelector({
   onNexChange,
   patente,
   onPatenteChange,
-  nexOptions = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 99],
+  nexOptions = [...NEX_ESCADA],
 }: NexPatenteSelectorProps) {
   const patentes = useMemo(() => {
     const configs = listarPatentes();
     return configs.map(cfg => ({
       nome: cfg.nome,
-      nexMinimo: cfg.nexMin,
+      ppMinimo: cfg.ppMin,
       cor: UI_PROPS[cfg.nome]?.cor || 'text-white',
       icone: UI_PROPS[cfg.nome]?.icone || '•'
     }));
   }, []);
 
-  const limiteItensText = LIMITE_ITENS_POR_PATENTE[patente];
+  const limiteItensText = descreverLimite(getPatenteConfig(patente).limiteItens);
   const borderPatente = patentes.find(p => p.nome === patente)?.cor.replace('text-', 'border-') || 'border-ordem-border';
 
   return (

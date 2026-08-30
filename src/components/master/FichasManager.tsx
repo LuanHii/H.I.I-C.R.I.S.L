@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useCloudFichas, useCloudCampanhas, useWatchedFichas, type FichaRegistro } from '../../core/storage';
+import type { Personagem } from '../../core/types';
 import { AgentDetailView } from './AgentDetailView';
 import { normalizePersonagem } from '../../core/personagemUtils';
 import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPersonagem';
@@ -11,6 +12,10 @@ import { ImportExportModal } from './ImportExportModal';
 import { downloadJSON, exportarFichaIndividual, exportarFichasPorCampanha } from '../../core/storage/exportImportUtils';
 import { CampanhaSection, NovaCampanhaForm } from './CampanhaSection';
 import { recalcularRecursosPersonagem } from '../../logic/progression';
+import { observar } from '../../core/ficha/sombra';
+import { MigracaoWizard } from './MigracaoWizard';
+import { PendenciasPanel } from './PendenciasPanel';
+import { NivelPanel } from './NivelPanel';
 import { Cloud, CloudOff, ChevronLeft, Menu, Plus, Download, Eye, PanelLeftClose, PanelLeft, RefreshCw } from 'lucide-react';
 import { WeaponModsButton } from './WeaponModsModal';
 import { WatchedFichasSection } from './WatchedFichasSection';
@@ -18,7 +23,7 @@ import { WatchedFichasSection } from './WatchedFichasSection';
 type FichasViewMode = 'minhas' | 'observadas';
 
 export function FichasManager() {
-  const { fichas, remover, duplicar, salvar, moverParaCampanha, marcarComoSincronizada, sincronizarFicha, isCloudMode, loading: fichasLoading } = useCloudFichas();
+  const { fichas, fichasBrutas, remover, duplicar, salvar, moverParaCampanha, marcarComoSincronizada, sincronizarFicha, migrar, reverterMigracao, responderEscolha, desfazerEscolha, definirNivelDaFicha, isCloudMode, loading: fichasLoading } = useCloudFichas();
   const { campanhas, criarCampanha, renomearCampanha, removerCampanha, loading: campanhasLoading } = useCloudCampanhas();
   const { watchedFichas, isAuthenticated: isLoggedIn } = useWatchedFichas();
   const [selecionada, setSelecionada] = useState<string | null>(null);
@@ -36,6 +41,9 @@ export function FichasManager() {
 
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
+  /** Fichas abertas no wizard de migração. Vazio = wizard fechado. */
+  const [migrando, setMigrando] = useState<{ id: string; personagem: Personagem }[]>([]);
+  const [pendenciasAbertas, setPendenciasAbertas] = useState(false);
 
   const registroAtual = fichas.find((ficha) => ficha.id === selecionada);
   const fichaAtual = registroAtual?.personagem;
@@ -228,6 +236,19 @@ export function FichasManager() {
     }
   };
 
+  /*
+   * SHADOW MODE onde ele de fato observa.
+   *
+   * As duas primeiras tentativas engancharam em `normalizePersonagem` e
+   * `recalcularRecursosPersonagem` — que rodam em SAVE e em RECÁLCULO, não ao
+   * abrir uma ficha. Navegando normalmente, o motor novo nunca era exercitado e
+   * o console ficava mudo. Aqui roda uma vez por ficha aberta, que é justamente
+   * o corpus que interessa: as fichas reais que o mestre olha.
+   */
+  useEffect(() => {
+    if (registroAtual?.personagem) observar(registroAtual.personagem);
+  }, [registroAtual?.id, registroAtual?.personagem]);
+
   const handleSelectFicha = (id: string) => {
     setSelecionada(id);
     setMobileDetailOpen(true);
@@ -235,6 +256,21 @@ export function FichasManager() {
 
   const handleCloseDetail = () => {
     setMobileDetailOpen(false);
+  };
+
+  /**
+   * Abre o comparador com um lote. Sempre a partir do v0 CRU.
+   *
+   * Numa ficha já lida do motor novo, `registro.personagem` é a view renderizada
+   * — converter a partir dela seria converter a saída do próprio conversor.
+   */
+  const handleConverterCampanha = (doLote: FichaRegistro[]) => {
+    setMigrando(
+      doLote.map((registro) => {
+        const bruto = fichasBrutas.find((f) => f.id === registro.id);
+        return { id: registro.id, personagem: bruto?.personagem ?? registro.personagem };
+      }),
+    );
   };
 
   const renderFichaCard = (registro: FichaRegistro) => {
@@ -405,6 +441,35 @@ export function FichasManager() {
             title="Recalcular PV, PE, SAN, Defesa"
           >
             ♻ RECALC
+          </button>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              /*
+               * O v0 CRU, não `registro.personagem`: numa ficha já lida do motor
+               * novo, `personagem` é a view renderizada — reconverter a partir
+               * dela seria converter a saída do conversor.
+               */
+              const bruto = fichasBrutas.find((f) => f.id === registro.id);
+              setMigrando([{ id: registro.id, personagem: bruto?.personagem ?? registro.personagem }]);
+            }}
+            className={`text-xs px-3 py-2.5 border rounded-lg touch-target-sm flex items-center justify-center ${
+              registro.fonte === 'v2'
+                ? 'border-ordem-green text-ordem-green hover:bg-ordem-green/10'
+                : registro.ficha
+                  ? 'border-ordem-gold text-ordem-gold hover:bg-ordem-gold/10'
+                  : 'border-ordem-purple text-ordem-purple hover:bg-ordem-purple/10'
+            }`}
+            title={registro.motivoDaFonte ?? 'Comparar com o motor novo e converter (a ficha atual não é alterada)'}
+          >
+            {/*
+              * Três estados, não dois: convertida E sendo lida do motor novo
+              * (verde), convertida mas CAÍDA para o motor antigo (âmbar), e não
+              * convertida (roxo). O âmbar é o que importa — sem ele, uma ficha que
+              * silenciosamente voltou ao v0 pareceria idêntica a uma que não voltou.
+              */}
+            {registro.fonte === 'v2' ? '✓ v2' : registro.ficha ? '⚠ v0' : 'MIGRAR'}
           </button>
           <Link
             href={`/agente/recriar/${registro.id}`}
@@ -684,6 +749,7 @@ export function FichasManager() {
                   onRenomear={renomearCampanha}
                   onRemoverCampanha={handleRemoverCampanha}
                   onExportarCampanha={handleExportarCampanha}
+                  onConverterCampanha={handleConverterCampanha}
                   forceExpanded={expandAll}
                   autoExpand={busca.trim().length > 0}
                 />
@@ -699,6 +765,7 @@ export function FichasManager() {
                 campanhasDisponiveis={campanhas}
                 renderFichaCard={renderFichaCard}
                 onExportarCampanha={handleExportarCampanha}
+                  onConverterCampanha={handleConverterCampanha}
                 forceExpanded={expandAll}
                 autoExpand={busca.trim().length > 0}
               />
@@ -799,6 +866,80 @@ export function FichasManager() {
             { }
             <div className="flex-1 overflow-y-auto touch-scroll p-4 lg:p-6 safe-bottom">
               <div className="rounded-xl border border-ordem-border overflow-hidden">
+                {/*
+                  * Faixa de procedência: de qual motor esta ficha está sendo lida.
+                  *
+                  * Fica acima da ficha, sempre visível, porque durante a transição
+                  * essa é a informação mais importante da tela — o mestre precisa
+                  * saber se o que está vendo veio do motor que ele já conhece ou do
+                  * novo, sem ter que deduzir por um número parecer estranho.
+                  */}
+                {registroAtual?.ficha && (
+                  <div
+                    className={`mb-3 rounded border px-3 py-2 text-xs flex items-start justify-between gap-3 ${
+                      registroAtual.fonte === 'v2'
+                        ? 'border-ordem-green/60 text-ordem-green'
+                        : 'border-ordem-gold/60 text-ordem-gold'
+                    }`}
+                  >
+                    <span>
+                      <strong>{registroAtual.fonte === 'v2' ? 'Motor novo' : 'Motor antigo'}</strong>
+                      {' — '}
+                      {registroAtual.motivoDaFonte}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const ok = window.confirm(
+                          'Reverter a conversão desta ficha?\n\n' +
+                          'A ficha volta exatamente como estava antes de converter. ' +
+                          'O documento novo é apagado; nada mais é alterado.',
+                        );
+                        if (ok) reverterMigracao(registroAtual.id);
+                      }}
+                      className="touch-target shrink-0 underline hover:text-ordem-text-primary"
+                    >
+                      Reverter
+                    </button>
+                  </div>
+                )}
+                {/*
+                  * Pendências só aparecem quando a ficha É LIDA do motor novo.
+                  *
+                  * Numa ficha lida do v0 o painel mostraria obrigações que o motor
+                  * antigo não sabe resolver — o mestre responderia e nada
+                  * aconteceria na ficha que ele está vendo. Melhor não oferecer.
+                  */}
+                {registroAtual?.fonte === 'v2' && registroAtual.ficha && (
+                  <div className="mb-3">
+                    <button
+                      type="button"
+                      onClick={() => setPendenciasAbertas((v) => !v)}
+                      className="touch-target w-full text-left text-xs uppercase tracking-widest px-3 py-2 rounded border border-ordem-gold/60 text-ordem-gold hover:bg-ordem-gold/10"
+                    >
+                      {pendenciasAbertas ? '▾' : '▸'} Progressão e escolhas pendentes
+                    </button>
+                    {pendenciasAbertas && (
+                      <div className="mt-2 space-y-4">
+                        {/*
+                          * Progressão vem ANTES das pendências, e não é acidente de
+                          * layout: avançar de marco é o que CRIA pendência. Na ordem
+                          * inversa o mestre resolveria o que já estava aberto, subiria,
+                          * e teria de voltar à mesma tela.
+                          */}
+                        <NivelPanel
+                          ficha={registroAtual.ficha}
+                          onDefinirNivel={(nivel) => definirNivelDaFicha(registroAtual.id, nivel)}
+                        />
+                        <PendenciasPanel
+                          ficha={registroAtual.ficha}
+                          onResponder={(escolhaId, valor) => responderEscolha(registroAtual.id, escolhaId, valor)}
+                          onDesfazer={(escolhaId) => desfazerEscolha(registroAtual.id, escolhaId)}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
                 <AgentDetailView agent={fichaAtual} onUpdate={handleUpdate} readOnly={false} />
               </div>
             </div>
@@ -820,6 +961,18 @@ export function FichasManager() {
         onImportComplete={() => {
           window.location.reload();
         }}
+      />
+
+      {/*
+        * DUAL-WRITE: `migrar` grava o documento v2 e NÃO toca no `personagem`.
+        * A ficha continua sendo lida do v0 — o motor novo só acumula conversões
+        * verificadas. Desfazer é apagar o campo, sem perda.
+        */}
+      <MigracaoWizard
+        isOpen={migrando.length > 0}
+        fichas={migrando}
+        onClose={() => setMigrando([])}
+        onConverter={(id, ficha, opcoes) => migrar(id, ficha, opcoes)}
       />
     </div>
   );

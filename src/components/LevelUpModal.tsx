@@ -24,6 +24,7 @@ import { RITUAIS } from '../data/magic/rituals';
 import { CLASSES } from '../data/character/classes';
 import { ELEMENTO_COR } from '../data/magic/elementColors';
 import { useLevelUpFlow } from '../hooks/useLevelUpFlow';
+import { grauAlvoPromocao, grauRequeridoPromocao } from '../core/rules/progressao';
 
 interface LevelUpModalProps {
     agent: Personagem;
@@ -359,8 +360,8 @@ export default LevelUpModal;
 function SkillUpgradeModal({ personagem, pendencia, onConfirm, onCancel }: { personagem: Personagem, pendencia: PendenciaNex, onConfirm: (s: string[]) => void, onCancel: () => void }) {
     const [selected, setSelected] = useState<string[]>([]);
     const maxSelect = pendencia.quantidade || 0;
-    const alvo = pendencia.nex === 35 ? 'Veterano' : 'Expert';
-    const requisitoAtual = pendencia.nex === 35 ? 'Treinado' : 'Veterano';
+    const alvo = grauAlvoPromocao(pendencia.nex);
+    const requisitoAtual = grauRequeridoPromocao(pendencia.nex);
 
     const eligibleSkills = Object.keys(personagem.pericias).filter(p => {
         const grau = personagem.pericias[p as PericiaName];

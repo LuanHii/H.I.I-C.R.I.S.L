@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Personagem } from '../types';
 import { saveAgentToCloud } from '../firebase/firestore';
+import type { FichaPersistida } from '../ficha/tipos';
+import type { FonteDaFicha } from '../ficha/leitura';
 
 export interface FichaRegistro {
   id: string;
@@ -8,6 +10,27 @@ export interface FichaRegistro {
   atualizadoEm: string;
   campanha?: string;
   sincronizadaNaNuvem?: boolean;
+  /**
+   * Documento v2 (dual-write). Leitura ainda é `personagem`.
+   *
+   * Precisa existir aqui também: `FichasManager` importa `FichaRegistro` DESTE
+   * arquivo mas recebe os objetos de `useCloudFichas`. Os dois tipos são
+   * estruturalmente idênticos, e é só por isso que compila — declarar o campo
+   * num lado só faria o outro perdê-lo silenciosamente no tipo.
+   */
+  ficha?: FichaPersistida;
+  fichaMigradaDe?: string;
+  fichaConfirmada?: boolean;
+  personagemOriginal?: Personagem;
+  /**
+   * De qual motor esta ficha está sendo LIDA. Preenchido pela resolução em
+   * `useCloudFichas`, NUNCA persistido — é decisão recalculada a cada render,
+   * não estado. Gravá-la congelaria uma escolha que precisa poder mudar quando
+   * o catálogo muda.
+   */
+  fonte?: FonteDaFicha;
+  /** Por que essa fonte, em português. Para o mestre, não para o log. */
+  motivoDaFonte?: string;
 }
 
 export interface Campanha {
@@ -48,6 +71,10 @@ function normalizarRegistro(entrada: unknown): FichaRegistro | null {
       atualizadoEm: registroPossivel.atualizadoEm ?? new Date().toISOString(),
       campanha: registroPossivel.campanha,
       sincronizadaNaNuvem: registroPossivel.sincronizadaNaNuvem,
+      ficha: registroPossivel.ficha,
+      fichaMigradaDe: registroPossivel.fichaMigradaDe,
+      fichaConfirmada: registroPossivel.fichaConfirmada,
+      personagemOriginal: registroPossivel.personagemOriginal,
     };
   }
 

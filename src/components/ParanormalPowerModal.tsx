@@ -256,10 +256,19 @@ export function ParanormalPowerModal({
                                                     Requisitos: {poder.requisitos}
                                                 </p>
                                             )}
-                                            {!poder.elegivel && poder.motivo && (
-                                                <p className="text-xs text-red-400 mt-1">
-                                                    ⚠ {poder.motivo}
-                                                </p>
+                                            {!poder.elegivel && (poder.motivos?.length ?? 0) > 0 && (
+                                                <ul className="text-[10px] text-red-400 mt-1 space-y-0.5">
+                                                    {poder.motivos!.map((m) => (
+                                                        <li key={m}>⚠ {m}</li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                            {poder.elegivel && (poder.indeterminados?.length ?? 0) > 0 && (
+                                                <ul className="text-[10px] text-ordem-gold mt-1 space-y-0.5">
+                                                    {poder.indeterminados!.map((m) => (
+                                                        <li key={m}>? {m}</li>
+                                                    ))}
+                                                </ul>
                                             )}
                                         </div>
                                         {poder.elemento && (

@@ -52,7 +52,11 @@ export const ORIGENS: Origem[] = [
     pericias: ['Atualidades', 'Diplomacia'],
     poder: {
       nome: 'Conexões',
-      descricao: 'Você recebe +2 em Diplomacia. Além disso, se puder contatar um NPC capaz de lhe auxiliar, pode gastar 10 minutos e 2 PE para substituir um teste de perícia relacionado ao conhecimento desse NPC (feito até o fim da cena) por um teste de Diplomacia.'
+      descricao: 'Você recebe +2 em Diplomacia. Além disso, se puder contatar um NPC capaz de lhe auxiliar, pode gastar 10 minutos e 2 PE para substituir um teste de perícia relacionado ao conhecimento desse NPC (feito até o fim da cena) por um teste de Diplomacia.',
+      efeitos: [
+        { tipo: 'periciaBonus', pericia: 'Diplomacia', valor: 2 },
+        { tipo: 'narrativo', nota: 'Por 10 min e 2 PE, substitui um teste pelo conhecimento de um NPC contatado.' },
+      ],
     },
     livro: 'Sobrevivendo ao Horror'
   },
@@ -70,7 +74,12 @@ export const ORIGENS: Origem[] = [
     pericias: ['Atletismo', 'Fortitude'],
     poder: {
       nome: 'Mutação',
-      descricao: 'Você recebe resistência a dano 2 e +2 em uma perícia à sua escolha que seja originalmente baseada em Força, Agilidade ou Vigor. Entretanto, sofre -1d20 em Diplomacia.'
+      descricao: 'Você recebe resistência a dano 2 e +2 em uma perícia à sua escolha que seja originalmente baseada em Força, Agilidade ou Vigor. Entretanto, sofre -1d20 em Diplomacia.',
+      efeitos: [
+        { tipo: 'resistenciaDano', contra: 'geral', valor: 2 },
+        { tipo: 'periciaDado', pericia: 'Diplomacia', dados: -1 },
+        { tipo: 'narrativo', nota: '+2 em uma perícia à escolha baseada em Força, Agilidade ou Vigor — depende de escolha do jogador.' },
+      ],
     },
     livro: 'Sobrevivendo ao Horror'
   },
@@ -133,7 +142,11 @@ export const ORIGENS: Origem[] = [
     pericias: ['Atletismo', 'Fortitude'],
     poder: {
       nome: 'Fôlego de Nadador',
-      descricao: 'Você recebe +5 PV. Pode prender a respiração por um número de rodadas igual ao dobro do seu Vigor. Quando passa em teste de Atletismo para natação, avança seu deslocamento normal (em vez da metade).'
+      descricao: 'Você recebe +5 PV. Pode prender a respiração por um número de rodadas igual ao dobro do seu Vigor. Quando passa em teste de Atletismo para natação, avança seu deslocamento normal (em vez da metade).',
+      efeitos: [
+        { tipo: 'pv', valor: 5 },
+        { tipo: 'narrativo', nota: 'Prende a respiração por rodadas = 2x Vigor; nada em deslocamento pleno ao passar em Atletismo.' },
+      ],
     },
     livro: 'Sobrevivendo ao Horror'
   },
@@ -162,7 +175,11 @@ export const ORIGENS: Origem[] = [
     periciasExtras: 1,
     poder: {
       nome: 'Luta ou Fuga',
-      descricao: 'Você recebe +2 em Vontade. Quando surge uma referência a sua premonição, recebe +2 PE temporários que duram até o fim da cena.'
+      descricao: 'Você recebe +2 em Vontade. Quando surge uma referência a sua premonição, recebe +2 PE temporários que duram até o fim da cena.',
+      efeitos: [
+        { tipo: 'periciaBonus', pericia: 'Vontade', valor: 2 },
+        { tipo: 'narrativo', nota: '+2 PE temporários quando surge referência à premonição.' },
+      ],
     },
     livro: 'Sobrevivendo ao Horror'
   },
@@ -246,7 +263,8 @@ export const ORIGENS: Origem[] = [
     pericias: ['Fortitude', 'Sobrevivência'],
     poder: {
       nome: 'Calejado',
-      descricao: 'Você recebe +1 PV para cada 5% de NEX.'
+      descricao: 'Você recebe +1 PV para cada 5% de NEX.',
+      efeitos: [{ tipo: 'pv', valor: 1, porNex: 5 }],
     },
     livro: 'Regras Básicas'
   },
@@ -282,7 +300,8 @@ export const ORIGENS: Origem[] = [
     pericias: ['Luta', 'Reflexos'],
     poder: {
       nome: 'Mão Pesada',
-      descricao: 'Você recebe +2 em rolagens de dano com ataques corpo a corpo.'
+      descricao: 'Você recebe +2 em rolagens de dano com ataques corpo a corpo.',
+      efeitos: [{ tipo: 'danoCorpoACorpo', valor: 2 }],
     },
     livro: 'Regras Básicas'
   },
@@ -309,7 +328,8 @@ export const ORIGENS: Origem[] = [
     pericias: ['Pontaria', 'Tática'],
     poder: {
       nome: 'Para Bellum',
-      descricao: 'Você recebe +2 em rolagens de dano com armas de fogo.'
+      descricao: 'Você recebe +2 em rolagens de dano com armas de fogo.',
+      efeitos: [{ tipo: 'danoArmaFogo', valor: 2 }],
     },
     livro: 'Regras Básicas'
   },
@@ -327,7 +347,8 @@ export const ORIGENS: Origem[] = [
     pericias: ['Percepção', 'Pontaria'],
     poder: {
       nome: 'Patrulha',
-      descricao: 'Você recebe +2 em Defesa.'
+      descricao: 'Você recebe +2 em Defesa.',
+      efeitos: [{ tipo: 'defesa', valor: 2 }],
     },
     livro: 'Regras Básicas'
   },
@@ -345,7 +366,8 @@ export const ORIGENS: Origem[] = [
     pericias: ['Religião', 'Vontade'],
     poder: {
       nome: 'Acalentar',
-      descricao: 'Você recebe +5 em testes de Religião para acalmar. Além disso, quando acalma uma pessoa, ela recebe um número de pontos de Sanidade igual a 1d6 + sua Presença.'
+      descricao: 'Você recebe +5 em testes de Religião para acalmar. Além disso, quando acalma uma pessoa, ela recebe um número de pontos de Sanidade igual a 1d6 + sua Presença.',
+      efeitos: [{ tipo: 'narrativo', nota: '+5 em Religião apenas para acalmar; quem é acalmado recupera 1d6 + Presença de Sanidade.' }],
     },
     livro: 'Regras Básicas'
   },
@@ -363,7 +385,8 @@ export const ORIGENS: Origem[] = [
     pericias: ['Investigação', 'Ocultismo'],
     poder: {
       nome: 'Eu Já Sabia',
-      descricao: 'Você recebe resistência a dano mental igual ao seu Intelecto.'
+      descricao: 'Você recebe resistência a dano mental igual ao seu Intelecto.',
+      efeitos: [{ tipo: 'resistenciaDano', contra: 'mental', porAtributo: 'INT' }],
     },
     livro: 'Regras Básicas'
   },
@@ -399,7 +422,12 @@ export const ORIGENS: Origem[] = [
     pericias: ['Atualidades', 'Investigação'],
     poder: {
       nome: 'Dedicação',
-      descricao: 'Você recebe +1 PE, e mais 1 PE adicional a cada NEX ímpar. Seu limite de PE por turno aumenta em 1.'
+      descricao: 'Você recebe +1 PE, e mais 1 PE adicional a cada NEX ímpar. Seu limite de PE por turno aumenta em 1.',
+      efeitos: [
+        { tipo: 'pe', valor: 1 },
+        { tipo: 'pe', valor: 1, nosNex: [5, 15, 25, 35, 45, 55, 65, 75, 85, 95, 99] },
+        { tipo: 'narrativo', nota: 'Limite de PE por turno aumenta em 1 — não afeta a DT dos efeitos.' },
+      ],
     },
     livro: 'Regras Básicas'
   },
@@ -408,7 +436,8 @@ export const ORIGENS: Origem[] = [
     pericias: ['Reflexos', 'Vontade'],
     poder: {
       nome: 'Cicatrizes Psicológicas',
-      descricao: 'Você recebe +1 de Sanidade para cada 5% de NEX.'
+      descricao: 'Você recebe +1 de Sanidade para cada 5% de NEX.',
+      efeitos: [{ tipo: 'san', valor: 1, porNex: 5 }],
     },
     livro: 'Regras Básicas'
   }

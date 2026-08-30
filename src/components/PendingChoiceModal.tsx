@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Personagem, PericiaName, Elemento, Ritual, Item } from '../core/types';
 import { RITUAIS } from '../data/magic/rituals';
+import { TODAS_PERICIAS } from '@/core/rules/pericias';
 
 interface PendingChoiceModalProps {
   agent: Personagem;
@@ -79,14 +80,7 @@ export const PendingChoiceModal: React.FC<PendingChoiceModalProps> = ({ agent, p
 
   const renderOptions = () => {
       if (escolha.tipo === 'pericia') {
-          const allSkills = [
-            'Acrobacia', 'Adestramento', 'Artes', 'Atletismo', 'Atualidades',
-            'Ciências', 'Crime', 'Diplomacia', 'Enganação', 'Fortitude',
-            'Furtividade', 'Iniciativa', 'Intimidação', 'Intuição', 'Investigação',
-            'Luta', 'Medicina', 'Ocultismo', 'Percepção', 'Pilotagem',
-            'Pontaria', 'Profissão', 'Reflexos', 'Religião', 'Sobrevivência',
-            'Tática', 'Tecnologia', 'Vontade'
-          ];
+          const allSkills = TODAS_PERICIAS;
 
           if (escolha.quantidade === 1) {
               return (

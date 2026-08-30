@@ -14,6 +14,12 @@ interface CampanhaSectionProps {
     onRenomear?: (id: string, nome: string) => void;
     onRemoverCampanha?: (id: string) => void;
     onExportarCampanha?: (fichas: FichaRegistro[], campanhaNome: string, campanhaId?: string) => void;
+    /**
+     * Abre o comparador de conversão com as fichas da campanha que ainda não
+     * foram convertidas. Nada é convertido por clicar aqui — o wizard continua
+     * pedindo confirmação ficha a ficha.
+     */
+    onConverterCampanha?: (fichas: FichaRegistro[], campanhaNome: string) => void;
     forceExpanded?: boolean;
     autoExpand?: boolean;
 }
@@ -29,6 +35,7 @@ export function CampanhaSection({
     onRenomear,
     onRemoverCampanha,
     onExportarCampanha,
+    onConverterCampanha,
     forceExpanded,
     autoExpand,
 }: CampanhaSectionProps) {
@@ -52,6 +59,13 @@ export function CampanhaSection({
     const nome = campanha?.nome || 'Fichas Soltas';
     const id = campanha?.id;
     const hasSelected = Boolean(selecionada && fichas.some((f) => f.id === selecionada));
+
+    /*
+     * Já convertidas ficam de fora do lote: reabrir o comparador para elas
+     * transformaria "converter a campanha" numa tela que o mestre tem de
+     * despachar N vezes clicando em "Manter v0".
+     */
+    const naoConvertidas = fichas.filter((f) => !f.ficha);
 
     const handleSalvarNome = () => {
         if (id && onRenomear && novoNome.trim()) {
@@ -132,6 +146,35 @@ export function CampanhaSection({
                     >
                         📤
                     </button>
+                )}
+
+                {/*
+                  * Contador de pendentes no CABEÇALHO, não dentro da seção.
+                  *
+                  * As seções nascem colapsadas, então um aviso interno ficaria
+                  * invisível justamente para quem ainda não converteu nada — que é
+                  * quem precisa vê-lo.
+                  */}
+                {onConverterCampanha && naoConvertidas.length > 0 && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onConverterCampanha(naoConvertidas, nome);
+                        }}
+                        className="text-[10px] px-2 py-0.5 rounded border border-ordem-purple text-ordem-purple hover:bg-ordem-purple/10 transition"
+                        title={`Comparar e converter ${naoConvertidas.length} ficha(s) desta campanha`}
+                    >
+                        converter {naoConvertidas.length}
+                    </button>
+                )}
+
+                {onConverterCampanha && naoConvertidas.length === 0 && fichas.length > 0 && (
+                    <span
+                        className="text-[10px] px-2 py-0.5 rounded border border-ordem-green text-ordem-green"
+                        title="Todas as fichas desta campanha usam o motor novo"
+                    >
+                        ✓ v2
+                    </span>
                 )}
 
                 {id && onRemoverCampanha && (

@@ -10,6 +10,7 @@ import {
   Unsubscribe,
 } from 'firebase/firestore';
 import { Personagem, Ameaca, Item, Weapow } from '../types';
+import type { FichaPersistida } from '../ficha/tipos';
 import { removeUndefinedFields } from './firestoreUtils';
 
 export interface FichaRegistroCloud {
@@ -17,6 +18,24 @@ export interface FichaRegistroCloud {
   personagem: Personagem;
   atualizadoEm: string;
   campanha?: string;
+  /**
+   * Documento v2. DUAL-WRITE: gravado ao migrar, mas a LEITURA continua vindo de
+   * `personagem`. Ausente = ficha não migrada; apagar o campo é rollback
+   * completo, sem perda de nada.
+   *
+   * CUIDADO — `saveFichaToCloud` é `setDoc` SEM merge, e `removeUndefinedFields`
+   * tira `undefined` do payload. Somando os dois: gravar um registro sem este
+   * campo APAGA o documento v2 que estava lá. Não é hipótese — os quatro
+   * caminhos de escrita montavam literais de 4 campos, então mover uma ficha de
+   * campanha teria destruído a conversão. Ver `paraNuvem` em `useCloudFichas.ts`.
+   */
+  ficha?: FichaPersistida;
+  /** `atualizadoEm` do v0 no momento da conversão — detecta v2 obsoleto. */
+  fichaMigradaDe?: string;
+  /** O mestre confirmou a conversão mesmo com round trip vermelho? */
+  fichaConfirmada?: boolean;
+  /** O v0 no instante da conversão, nunca reescrito. Torna o rollback exato. */
+  personagemOriginal?: Personagem;
 }
 
 export interface CampanhaCloud {
@@ -301,12 +320,8 @@ export async function migrateLocalDataToCloud(
 
     const newFichas = data.fichas.filter(f => !existingFichaIds.has(f.id));
     for (const ficha of newFichas) {
-      await saveFichaToCloud(userId, {
-        id: ficha.id,
-        personagem: ficha.personagem,
-        atualizadoEm: ficha.atualizadoEm,
-        campanha: ficha.campanha,
-      });
+      // Spread, não literal de campos: um literal descartaria o documento v2.
+      await saveFichaToCloud(userId, { ...ficha });
       result.fichas++;
     }
 

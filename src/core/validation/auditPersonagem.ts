@@ -1,6 +1,8 @@
 import { Personagem } from '../types';
 import { calculateDerivedStats } from '../rules/derivedStats';
 import { calcularCarga } from '../../logic/rulesEngine';
+import { NEX_ESCADA, ehNexValido, limitePeRodada } from '../rules/progressao';
+import { temDesvioDeNexRegistrado } from '../rules/marcas';
 
 export type PersonagemIssueSeverity = 'erro' | 'aviso';
 
@@ -10,17 +12,8 @@ export interface PersonagemIssue {
   message: string;
 }
 
-function allowedNexValues(): Set<number> {
-  const s = new Set<number>();
-  for (let n = 5; n <= 95; n += 5) s.add(n);
-  s.add(99);
-  return s;
-}
-
 function expectedPeRodada(personagem: Personagem): number {
-  if (personagem.classe === 'Sobrevivente') return 1;
-  const nivel = Math.min(20, Math.max(1, Math.ceil(Math.max(personagem.nex, 0) / 5)));
-  return nivel;
+  return limitePeRodada(personagem.classe, personagem.nex);
 }
 
 export function auditPersonagem(personagem: Personagem): PersonagemIssue[] {
@@ -56,12 +49,11 @@ export function auditPersonagem(personagem: Personagem): PersonagemIssue[] {
       });
     }
   } else {
-    const allowed = allowedNexValues();
-    if (!allowed.has(personagem.nex)) {
+    if (!ehNexValido(personagem.nex) && !temDesvioDeNexRegistrado(personagem.marcas)) {
       issues.push({
         severity: 'aviso',
         code: 'invalid_nex_step',
-        message: `NEX fora dos degraus padrão (esperado: 5,10,...,95,99). Atual: ${personagem.nex}%.`,
+        message: `NEX fora dos degraus padrão (esperado: ${NEX_ESCADA.join(', ')}). Atual: ${personagem.nex}%.`,
       });
     }
   }
@@ -83,6 +75,7 @@ export function auditPersonagem(personagem: Personagem): PersonagemIssue[] {
     origemNome: personagem.origem,
     trilhaNome: personagem.trilha,
     qtdTranscender: personagem.qtdTranscender,
+    marcas: personagem.marcas,
   });
   const expectedPvMax = personagem.overrides?.pvMax ?? derived.pvMax;
   const expectedPeMax = personagem.overrides?.peMax ?? derived.peMax;

@@ -16,6 +16,8 @@ import { RitualChoiceModal } from '../RitualChoiceModal';
 import { LevelUpModal } from '../LevelUpModal';
 import { calculateDerivedStats } from '../../core/rules/derivedStats';
 import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPersonagem';
+import { grauRequeridoParaAlvo } from '../../core/rules/progressao';
+import { definirPerdaManual, somarPerdasDeRecurso } from '../../core/rules/marcas';
 import { Edit2 } from 'lucide-react';
 import type { DiceRollResult } from '../../logic/diceRoller';
 import { ConditionsManager } from '../ConditionsManager';
@@ -132,6 +134,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 origemNome: updated.origem,
                 trilhaNome: updated.trilha,
                 qtdTranscender: updated.qtdTranscender,
+                marcas: updated.marcas,
             });
 
             const targetPvMax = updated.overrides?.pvMax ?? derived.pvMax;
@@ -181,6 +184,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
             origemNome: agent.origem,
             trilhaNome: agent.trilha,
             qtdTranscender: agent.qtdTranscender,
+            marcas: agent.marcas,
         });
 
         const updated = { ...agent, usarPd: newMode };
@@ -225,22 +229,39 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
 
     const updateMaxStat = (stat: 'pv' | 'pe' | 'san' | 'pd', newMax: number) => {
         const updated = { ...agent };
-        if (stat === 'pv') updated.pv.max = newMax;
-        if (stat === 'pe') updated.pe.max = newMax;
-        if (stat === 'san') updated.san.max = newMax;
+        if (stat === 'pv') updated.pv = { ...updated.pv, max: newMax };
+        if (stat === 'pe') updated.pe = { ...updated.pe, max: newMax };
+        if (stat === 'san') updated.san = { ...updated.san, max: newMax };
         if (stat === 'pd') {
             if (!updated.pd) updated.pd = { atual: newMax, max: newMax };
-            else updated.pd.max = newMax;
+            else updated.pd = { ...updated.pd, max: newMax };
         }
 
-        updated.overrides = {
-            ...(updated.overrides ?? {}),
-            pvMax: stat === 'pv' ? newMax : updated.overrides?.pvMax,
-            peMax: stat === 'pe' ? newMax : updated.overrides?.peMax,
-            sanMax: stat === 'san' ? newMax : updated.overrides?.sanMax,
-            pdMax: stat === 'pd' ? newMax : updated.overrides?.pdMax,
-            periciaFixos: updated.overrides?.periciaFixos,
-        };
+        const tipoDeMarca = stat === 'pv' ? 'pvMaxPerdido' : stat === 'pe' ? 'peMaxPerdido' : stat === 'san' ? 'sanMaxPerdida' : undefined;
+
+        if (tipoDeMarca) {
+            const perdaAnterior = somarPerdasDeRecurso(updated.marcas);
+            const perdaAtual = stat === 'pv' ? perdaAnterior.pvMaxPerdido : stat === 'pe' ? perdaAnterior.peMaxPerdido : perdaAnterior.sanMaxPerdida;
+            const maximoSemPerda = (stat === 'pv' ? derivedPreview.pvMax : stat === 'pe' ? derivedPreview.peMax : derivedPreview.sanMax) + perdaAtual;
+            const perdaNova = maximoSemPerda - newMax;
+
+            updated.marcas = definirPerdaManual(updated.marcas, tipoDeMarca, perdaNova, new Date().toISOString());
+            updated.overrides = {
+                ...(updated.overrides ?? {}),
+                pvMax: stat === 'pv' ? undefined : updated.overrides?.pvMax,
+                peMax: stat === 'pe' ? undefined : updated.overrides?.peMax,
+                sanMax: stat === 'san' ? undefined : updated.overrides?.sanMax,
+                pdMax: updated.overrides?.pdMax,
+                defesa: updated.overrides?.defesa,
+                periciaFixos: updated.overrides?.periciaFixos,
+            };
+        } else {
+            updated.overrides = {
+                ...(updated.overrides ?? {}),
+                pdMax: newMax,
+                periciaFixos: updated.overrides?.periciaFixos,
+            };
+        }
 
         if (stat === 'pv') updated.pv.atual = Math.min(updated.pv.atual, updated.pv.max);
         if (stat === 'pe') updated.pe.atual = Math.min(updated.pe.atual, updated.pe.max);
@@ -310,7 +331,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
         const pending = agent.periciasPromocaoPendentes;
         if (!pending) return;
 
-        const requiredFrom = pending.alvo === 'Veterano' ? 'Treinado' : 'Veterano';
+        const requiredFrom = grauRequeridoParaAlvo(pending.alvo);
         if (agent.pericias[skill] !== requiredFrom) return;
 
         const updated = { ...agent };
@@ -353,6 +374,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
         origemNome: agent.origem,
         trilhaNome: agent.trilha,
         qtdTranscender: agent.qtdTranscender,
+        marcas: agent.marcas,
     });
     const expectedPvMax = agent.overrides?.pvMax ?? derivedPreview.pvMax;
     const expectedPeMax = agent.overrides?.peMax ?? derivedPreview.peMax;
@@ -449,7 +471,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 <SkillSelectorModal isOpen={true} currentSkills={agent.pericias} onSelect={handleSkillSelection} onDefer={() => setIsPendingChoiceModalSuppressed(true)} />
             )}
             {!disableInteractionModals && !isPendingChoiceModalSuppressed && agent.periciasPromocaoPendentes && agent.periciasPromocaoPendentes.restante > 0 && (
-                <SkillSelectorModal isOpen={true} currentSkills={agent.pericias} onSelect={handleSkillPromotionSelection} onDefer={() => setIsPendingChoiceModalSuppressed(true)} eligibleFrom={agent.periciasPromocaoPendentes.alvo === 'Veterano' ? 'Treinado' : 'Veterano'} title={`Grau de Treinamento (${agent.periciasPromocaoPendentes.alvo})`} description={`Pela regra de Grau de Treinamento (NEX ${agent.periciasPromocaoPendentes.alvo === 'Veterano' ? '35%' : '70%'}), escolha perícias elegíveis para promover. Restante: ${agent.periciasPromocaoPendentes.restante}.`} confirmLabel="Promover" />
+                <SkillSelectorModal isOpen={true} currentSkills={agent.pericias} onSelect={handleSkillPromotionSelection} onDefer={() => setIsPendingChoiceModalSuppressed(true)} eligibleFrom={grauRequeridoParaAlvo(agent.periciasPromocaoPendentes.alvo)} title={`Grau de Treinamento (${agent.periciasPromocaoPendentes.alvo})`} description={`Pela regra de Grau de Treinamento (NEX ${agent.periciasPromocaoPendentes.alvo === 'Veterano' ? '35%' : '70%'}), escolha perícias elegíveis para promover. Restante: ${agent.periciasPromocaoPendentes.restante}.`} confirmLabel="Promover" />
             )}
             {!disableInteractionModals && !isPendingChoiceModalSuppressed && agent.escolhaTrilhaPendente && (
                 <TrackSelectorModal agent={agent} onConfirm={handleTrackSelection} onDefer={() => setIsPendingChoiceModalSuppressed(true)} />

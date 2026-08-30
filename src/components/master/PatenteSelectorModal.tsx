@@ -63,7 +63,7 @@ export function PatenteSelectorModal({
                                             )}
                                         </div>
                                         <div className="text-xs text-ordem-text-muted mt-1">
-                                            Crédito: {config.credito} • PP mín: {config.nexMin}
+                                            Crédito: {config.credito} • PP mín: {config.ppMin}
                                         </div>
                                     </div>
                                 </div>

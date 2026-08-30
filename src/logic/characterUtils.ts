@@ -7,7 +7,6 @@ import {
   type ClassePreferencias,
   calcularPericiasDisponiveis,
   gerarFicha,
-  getPatentePorNex,
   listarEventosNex,
 } from './rulesEngine';
 
@@ -49,7 +48,9 @@ export function criarPersonagemBase(
     periciasLivres: [],
     nex: nexInicial,
     estagio: estagioInicial,
-    patente: patente ?? getPatentePorNex(nexInicial),
+    // O livro é explícito: "Você começa na patente mais baixa, recruta".
+    // Patente não deriva do NEX.
+    patente: patente ?? 'Recruta',
   };
 
   return gerarFicha(input);

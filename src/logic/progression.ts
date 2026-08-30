@@ -6,8 +6,11 @@ import {
   Atributos,
   ClasseName,
   Patente,
+  Marca,
 } from '../core/types';
 import { calculateDerivedStats } from '../core/rules/derivedStats';
+import { observar } from '../core/ficha/sombra';
+import { limiarMachucado } from '../core/rules/progressao';
 import { TRILHAS } from '../data/character/tracks';
 import { PODERES, verificarRequisitos } from '../data/character/powers';
 import { calcularPericiasDetalhadas, calcularCarga } from './rulesEngine';
@@ -23,6 +26,9 @@ export function calcularRecursosClasse(params: {
   origemNome?: string;
   trilhaNome?: string;
   qtdTranscender?: number;
+  marcas?: readonly Marca[];
+  poderes?: readonly { nome: string }[];
+  periciasTreinadas?: readonly PericiaName[];
 }) {
   const derived = calculateDerivedStats({
     classe: params.classe,
@@ -32,14 +38,27 @@ export function calcularRecursosClasse(params: {
     origemNome: params.origemNome,
     trilhaNome: params.trilhaNome,
     qtdTranscender: params.qtdTranscender,
+    marcas: params.marcas,
+    poderes: params.poderes,
+    periciasTreinadas: params.periciasTreinadas,
   });
 
   return {
+    // Bônus de perícia de origem, trilha e poderes, todos pelo mesmo interpretador.
+    periciaBonus: derived.periciaBonus,
+    periciaDados: derived.periciaDados,
     pv: derived.pvMax + (params.pvBonus ?? 0),
     pe: derived.peMax,
     san: derived.sanMax,
     pd: params.usarPd ? derived.pdMax : undefined,
     limitePeRodada: derived.peRodada,
+    /*
+     * Defesa e deslocamento saem daqui também porque o motor novo precisa
+     * devolvê-los ao renderizar a ficha. Recalculá-los num segundo lugar seria
+     * criar a sexta cópia da mesma fórmula — o problema que este plano combate.
+     */
+    defesa: derived.defesa,
+    deslocamento: derived.deslocamento,
   };
 }
 
@@ -102,6 +121,7 @@ function recalculateStats(char: Personagem) {
     origemNome: char.origem,
     trilhaNome: char.trilha,
     qtdTranscender: char.qtdTranscender,
+    marcas: char.marcas,
   });
 
   const targetPvMax = char.overrides?.pvMax ?? derived.pvMax;
@@ -114,7 +134,7 @@ function recalculateStats(char: Personagem) {
 
   char.pv.max = targetPvMax;
   char.pv.atual = Math.min(char.pv.max, Math.max(0, char.pv.atual + diffPV));
-  char.pv.machucado = Math.floor(char.pv.max / 2);
+  char.pv.machucado = limiarMachucado(char.pv.max);
 
   char.pe.max = targetPeMax;
   char.pe.atual = Math.min(char.pe.max, Math.max(0, char.pe.atual + diffPE));
@@ -150,13 +170,8 @@ function recalculateStats(char: Personagem) {
     maxima: cargaInfo.maxima
   };
 
-  const extrasFixos: Partial<Record<PericiaName, number>> = {};
-  if (derived.furtividadeBonus) extrasFixos.Furtividade = (extrasFixos.Furtividade || 0) + derived.furtividadeBonus;
-  if (derived.percepcaoBonus) extrasFixos.Percepção = (extrasFixos.Percepção || 0) + derived.percepcaoBonus;
-  if (derived.iniciativaBonus) extrasFixos.Iniciativa = (extrasFixos.Iniciativa || 0) + derived.iniciativaBonus;
-  if (derived.enganacaoBonus) extrasFixos.Enganação = (extrasFixos.Enganação || 0) + derived.enganacaoBonus;
-  if (derived.diplomaciaBonus) extrasFixos.Diplomacia = (extrasFixos.Diplomacia || 0) + derived.diplomaciaBonus;
-  if (derived.fortitudeBonus) extrasFixos.Fortitude = (extrasFixos.Fortitude || 0) + derived.fortitudeBonus;
+  // Mapa geral: cobre qualquer perícia, não só as cinco com campo nomeado.
+  const extrasFixos: Partial<Record<PericiaName, number>> = { ...derived.periciaBonus };
 
   const overridesFixos = char.overrides?.periciaFixos || {};
 
@@ -180,6 +195,16 @@ function recalculateStats(char: Personagem) {
 export function recalcularRecursosPersonagem(personagem: Personagem): Personagem {
   const char = { ...personagem };
   recalculateStats(char);
+  /*
+   * Segundo ponto do shadow mode.
+   *
+   * `normalizePersonagem` roda só em três caminhos de save. ESTE é o recálculo
+   * que roda ao abrir e editar ficha, com 7 call sites — e são dois caminhos
+   * independentes que não se conhecem, o que já é parte do problema que a
+   * remodelagem resolve. Enganchar só no primeiro deixava o shadow mode mudo
+   * na navegação normal.
+   */
+  observar(char);
   return char;
 }
 
@@ -226,7 +251,7 @@ export function choosePower(character: Personagem, poderNome: string): Personage
     throw new Error(`Poder "${poderNome}" não encontrado.`);
   }
 
-  if (newChar.poderes.some(p => p.nome === poderNome)) {
+  if (!poder.repetivel && newChar.poderes.some(p => p.nome === poderNome)) {
     throw new Error(`Você já possui o poder "${poderNome}".`);
   }
 

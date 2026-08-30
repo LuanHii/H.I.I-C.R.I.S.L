@@ -9,7 +9,7 @@ import {
   browserLocalPersistence,
   setPersistence,
 } from 'firebase/auth';
-import { auth, googleProvider } from './config';
+import { auth, firebaseConfigurado, googleProvider } from './config';
 
 export interface AuthContextType {
   user: User | null;
@@ -46,6 +46,16 @@ export function AuthProvider({ children, onLogin }: AuthProviderProps) {
   const [hasTriggeredLogin, setHasTriggeredLogin] = useState(false);
 
   useEffect(() => {
+    /*
+     * Modo local: sem credenciais, não há a quem perguntar quem está logado.
+     * Antes isto lançava e derrubava o app inteiro — a nuvem é opcional aqui, as
+     * fichas vivem em localStorage, então "não autenticado" é um estado válido.
+     */
+    if (!firebaseConfigurado()) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
 
     setPersistence(auth, browserLocalPersistence).catch(console.error);
 
@@ -68,6 +78,10 @@ export function AuthProvider({ children, onLogin }: AuthProviderProps) {
 
   const signInWithGoogle = useCallback(async () => {
     setError(null);
+    if (!firebaseConfigurado()) {
+      setError('Sincronização com a nuvem não está configurada neste ambiente.');
+      return;
+    }
     setLoading(true);
     try {
       await signInWithPopup(auth, googleProvider);
@@ -83,6 +97,7 @@ export function AuthProvider({ children, onLogin }: AuthProviderProps) {
 
   const signOut = useCallback(async () => {
     setError(null);
+    if (!firebaseConfigurado()) { setUser(null); return; }
     try {
       await firebaseSignOut(auth);
     } catch (err) {

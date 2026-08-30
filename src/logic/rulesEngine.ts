@@ -15,44 +15,21 @@ import {
   Poder,
   Ritual,
   Item,
+  Marca,
   BonusContexto,
 } from '../core/types';
 import { validateAttributes } from '../core/rules/attributes';
-import { calculateDerivedStats } from '../core/rules/derivedStats';
+import { calculateDerivedStats, calcularBonusPoderes } from '../core/rules/derivedStats';
 import { NEX_EVENTOS } from '../core/rules/nexEventos';
+import { limiarMachucado, periciasIniciaisPorClasse } from '../core/rules/progressao';
+import { TODAS_PERICIAS } from '../core/rules/pericias';
 import { CLASSES } from '../data/character/classes';
 import { ORIGENS } from '../data/character/origins';
+import { PODERES } from '../data/character/powers';
+import { TRILHAS } from '../data/character/tracks';
+import { aplicarVarios, type Efeito } from '../core/rules/efeitos';
 
-export const TODAS_PERICIAS: PericiaName[] = [
-  'Acrobacia',
-  'Adestramento',
-  'Artes',
-  'Atletismo',
-  'Atualidades',
-  'Ciências',
-  'Crime',
-  'Diplomacia',
-  'Enganação',
-  'Fortitude',
-  'Furtividade',
-  'Iniciativa',
-  'Intimidação',
-  'Intuição',
-  'Investigação',
-  'Luta',
-  'Medicina',
-  'Ocultismo',
-  'Percepção',
-  'Pilotagem',
-  'Pontaria',
-  'Profissão',
-  'Reflexos',
-  'Religião',
-  'Sobrevivência',
-  'Tática',
-  'Tecnologia',
-  'Vontade',
-];
+export { TODAS_PERICIAS };
 
 export const PERICIA_ATRIBUTO: Record<PericiaName, AtributoKey> = {
   Acrobacia: 'AGI',
@@ -92,36 +69,51 @@ const GRAU_BONUS: Record<GrauTreinamento, number> = {
   Expert: 15,
 };
 
+/**
+ * Tabela 3.1: Patentes (Livro de Regras, Cap. 3).
+ *
+ *   PP    Patente                Crédito      I  II  III  IV
+ *   0     Recruta                Baixo        2   —   —   —
+ *   20    Operador               Médio        3   1   —   —
+ *   50    Agente especial        Médio        3   2   1   —
+ *   100   Oficial de operações   Alto         3   3   2   1
+ *   200   Agente de elite        Ilimitado    3   3   3   2
+ *
+ * O limite de categoria I é 3 em toda patente acima de recruta — nunca
+ * ilimitado. A tabela anterior dava I:5 para agente especial e I:99 para
+ * oficial e elite, além de II:5 para elite, o que liberava equipamento que a
+ * Ordem não fornece.
+ */
 const PATENTE_CONFIGS: PatenteConfig[] = [
   {
     nome: 'Recruta',
     credito: 'Baixo',
     limiteItens: { I: 2, II: 0, III: 0, IV: 0 },
-    nexMin: 0,
+    ppMin: 0,
   },
   {
     nome: 'Operador',
     credito: 'Médio',
     limiteItens: { I: 3, II: 1, III: 0, IV: 0 },
-    nexMin: 20,
+    ppMin: 20,
   },
   {
     nome: 'Agente Especial',
     credito: 'Médio',
-    limiteItens: { I: 5, II: 2, III: 1, IV: 0 },
-    nexMin: 35,
+    limiteItens: { I: 3, II: 2, III: 1, IV: 0 },
+    ppMin: 50,
   },
   {
     nome: 'Oficial de Operações',
     credito: 'Alto',
-    limiteItens: { I: 99, II: 3, III: 2, IV: 1 },
-    nexMin: 50,
+    limiteItens: { I: 3, II: 3, III: 2, IV: 1 },
+    ppMin: 100,
   },
   {
     nome: 'Agente de Elite',
     credito: 'Ilimitado',
-    limiteItens: { I: 99, II: 5, III: 3, IV: 2 },
-    nexMin: 70,
+    limiteItens: { I: 3, II: 3, III: 3, IV: 2 },
+    ppMin: 200,
   },
 ];
 
@@ -173,6 +165,7 @@ export interface CriacaoInput {
   sobreviventeBeneficioOrigem?: 'pericias' | 'poder' | 'ambos';
   trilhaConfig?: TrilhaConfigOptions;
   bonus?: BonusContexto;
+  marcas?: Marca[];
   rituais?: Ritual[];
   equipamentos?: Item[];
 }
@@ -195,11 +188,27 @@ export function listarPatentes(): PatenteConfig[] {
   return PATENTE_CONFIGS;
 }
 
-export function getPatentePorNex(nex: number): Patente {
+/**
+ * Patente a partir dos Pontos de Prestígio (Tabela 3.1).
+ *
+ * Serve tanto para promoção quanto para rebaixamento: o livro manda devolver
+ * itens aos quais o agente perdeu acesso se o PP cair abaixo do mínimo da
+ * patente atual. Como promoção e rebaixamento só valem a partir da MISSÃO
+ * SEGUINTE, quem chama decide quando gravar isso em `Personagem.patente`.
+ */
+export function getPatentePorPP(pp: number): Patente {
   const config = [...PATENTE_CONFIGS]
-    .sort((a, b) => b.nexMin - a.nexMin)
-    .find((cfg) => nex >= cfg.nexMin);
+    .sort((a, b) => b.ppMin - a.ppMin)
+    .find((cfg) => pp >= cfg.ppMin);
   return config?.nome ?? 'Recruta';
+}
+
+/** PP que faltam para a próxima patente, ou null se já está no topo. */
+export function ppParaProximaPatente(pp: number): { proxima: Patente; faltam: number } | null {
+  const acima = [...PATENTE_CONFIGS]
+    .sort((a, b) => a.ppMin - b.ppMin)
+    .find((cfg) => cfg.ppMin > pp);
+  return acima ? { proxima: acima.nome, faltam: acima.ppMin - pp } : null;
 }
 
 export function getPatenteConfig(patente: Patente): PatenteConfig {
@@ -225,15 +234,15 @@ export function calcularPericiasDisponiveis(
 
       obrigatorias.add(preferenciasClasse?.ofensiva ?? 'Luta');
       obrigatorias.add(preferenciasClasse?.defensiva ?? 'Fortitude');
-      return { qtdEscolhaLivre: Math.max(1, 1 + intelecto), qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
+      return { qtdEscolhaLivre: periciasIniciaisPorClasse(classe, intelecto), qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
     case 'Especialista':
-      return { qtdEscolhaLivre: Math.max(1, 7 + intelecto), qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
+      return { qtdEscolhaLivre: periciasIniciaisPorClasse(classe, intelecto), qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
     case 'Ocultista':
       obrigatorias.add('Ocultismo');
       obrigatorias.add('Vontade');
-      return { qtdEscolhaLivre: Math.max(1, 3 + intelecto), qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
+      return { qtdEscolhaLivre: periciasIniciaisPorClasse(classe, intelecto), qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
     case 'Sobrevivente':
-      return { qtdEscolhaLivre: Math.max(1, 1 + intelecto), qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
+      return { qtdEscolhaLivre: periciasIniciaisPorClasse(classe, intelecto), qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
     default:
       return { qtdEscolhaLivre: 1, qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
   }
@@ -252,7 +261,7 @@ export function gerarFicha(input: CriacaoInput): Personagem {
     throw new Error(validacao.message ?? 'Distribuição de atributos inválida');
   }
 
-  const patente = input.patente ?? getPatentePorNex(nexBase);
+  const patente = input.patente ?? 'Recruta';
   const origem = input.origem ?? ORIGENS[0];
 
   const periciasBase = construirPericias({
@@ -292,6 +301,7 @@ export function gerarFicha(input: CriacaoInput): Personagem {
     trilhaNome: input.trilha,
     sobreviventeBeneficioOrigem: input.sobreviventeBeneficioOrigem,
     qtdTranscender: 0,
+    marcas: input.marcas,
   });
 
   const afinidadeFinal =
@@ -309,13 +319,7 @@ export function gerarFicha(input: CriacaoInput): Personagem {
     bonusCarga: input.bonus?.carga
   });
 
-  const extrasFixosDerived: Partial<Record<PericiaName, number>> = {};
-  if (derived.furtividadeBonus) extrasFixosDerived.Furtividade = derived.furtividadeBonus;
-  if (derived.percepcaoBonus) extrasFixosDerived.Percepção = derived.percepcaoBonus;
-  if (derived.iniciativaBonus) extrasFixosDerived.Iniciativa = derived.iniciativaBonus;
-  if (derived.enganacaoBonus) extrasFixosDerived.Enganação = derived.enganacaoBonus;
-  if (derived.diplomaciaBonus) extrasFixosDerived.Diplomacia = derived.diplomaciaBonus;
-  if (derived.fortitudeBonus) extrasFixosDerived.Fortitude = derived.fortitudeBonus;
+  const extrasFixosDerived: Partial<Record<PericiaName, number>> = { ...derived.periciaBonus };
 
   const periciasDetalhadas = gerarDetalhesPericia({
     atributos,
@@ -351,7 +355,7 @@ export function gerarFicha(input: CriacaoInput): Personagem {
       atual: derived.pvMax,
       max: derived.pvMax,
       temp: 0,
-      machucado: Math.floor(derived.pvMax / 2),
+      machucado: limiarMachucado(derived.pvMax),
     },
     pe: {
       atual: derived.peMax,
@@ -473,20 +477,7 @@ function construirPericias(params: {
   return { graus, extrasFixos, extrasDados, logs, pendentesLivres: slotsLivres };
 }
 
-function calcularSlotsLivres(classe: ClasseName, intelecto: number): number {
-  switch (classe) {
-    case 'Combatente':
-      return Math.max(1, 1 + intelecto);
-    case 'Especialista':
-      return Math.max(1, 7 + intelecto);
-    case 'Ocultista':
-      return Math.max(1, 3 + intelecto);
-    case 'Sobrevivente':
-      return Math.max(1, 1 + intelecto);
-    default:
-      return 1;
-  }
-}
+const calcularSlotsLivres = periciasIniciaisPorClasse;
 
 function aplicarTrilhaEfeitos(params: {
   trilhaNome?: string;
@@ -677,6 +668,24 @@ export function calcularPericiasDetalhadas(
   });
 }
 
+/**
+ * Efeitos de um nome, procurando nos DOIS catálogos.
+ *
+ * O motor guarda poderes em `PODERES` e habilidades de trilha em `TRILHAS`, mas
+ * a ficha mistura os dois numa lista só de `Poder`. Quem recebe apenas a lista
+ * — como `calcularCarga` — não tem como saber de qual catálogo cada nome veio.
+ */
+function efeitosPorNome(nome: string): Efeito[] | undefined {
+  const doCatalogo = PODERES.find((p) => p.nome === nome || (p.apelidos ?? []).includes(nome));
+  if (doCatalogo?.efeitos) return doCatalogo.efeitos as Efeito[];
+
+  for (const trilha of TRILHAS) {
+    const hab = trilha.habilidades.find((h) => h.nome === nome);
+    if (hab?.efeitos) return hab.efeitos as Efeito[];
+  }
+  return undefined;
+}
+
 export function calcularCarga(params: {
   atributos: Atributos;
   itens: Item[];
@@ -689,8 +698,34 @@ export function calcularCarga(params: {
   const temMochilaMilitar = params.itens.some(i => i.nome === 'Mochila Militar');
   if (temMochilaMilitar) cargaMaxima += 2;
 
-  const temMascate = params.poderes.some(p => p.nome === 'Mascate');
-  if (temMascate) cargaMaxima += 5;
+  /*
+   * O bônus de carga vem do INTERPRETADOR DE EFEITOS, não de nome de poder.
+   *
+   * Aqui havia `if (nome === 'Mascate') cargaMaxima += 5` — uma exceção
+   * hard-coded para um poder só. `Mochileiro` diz a mesma coisa no livro
+   * ("seu limite de carga aumenta em 5 espaços") e não recebia nada, porque
+   * ninguém escreveu o `if` dele. Não escala: cada poder novo com efeito de
+   * carga exigiria mais um `if`, e quem escrevesse o poder não teria como saber.
+   *
+   * `cargaAtributo` também estava morto — acumulava em `BonusAcumulado` e nada
+   * lia de volta.
+   *
+   * A busca varre PODERES **e** habilidades de trilha, e isso não é detalhe:
+   * `Mascate` é habilidade da trilha Muambeiro, não entrada de `PODERES`. Ao
+   * remover o `if`, uma busca só em `PODERES` teria quebrado o Mascate em
+   * silêncio — e foi o teste dele que pegou.
+   *
+   * Não há risco de contagem dupla com `calcularBonusTrilha`: aquele caminho
+   * alimenta PV/PE/perícia, e nenhum deles lê carga.
+   */
+  const efeitosDeCarga = aplicarVarios(
+    (params.poderes ?? []).map((p) => efeitosPorNome(p.nome)),
+    { nex: 0, atributos: params.atributos },
+  );
+  cargaMaxima += efeitosDeCarga.cargaEspacos;
+  for (const atributo of efeitosDeCarga.cargaAtributos) {
+    cargaMaxima += (params.atributos[atributo] ?? 0) * 5;
+  }
 
   if (params.bonusCarga) cargaMaxima += params.bonusCarga;
 

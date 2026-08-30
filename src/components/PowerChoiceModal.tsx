@@ -7,6 +7,8 @@ import { Personagem, Poder, Ritual } from '../core/types';
 import { getPoderesClasse, getPoderesGerais, verificarRequisitos, PODERES } from '../data/character/powers';
 import { cn } from '../lib/utils';
 import { ParanormalPowerModal } from './ParanormalPowerModal';
+import { correspondeAoNome, filtrarPorCatalogo, selo } from '../core/rules/catalogo';
+import { useCatalogoStore } from '../stores/useCatalogoStore';
 
 interface PowerChoiceModalProps {
     agent: Personagem;
@@ -28,30 +30,34 @@ export function PowerChoiceModal({
     const [showParanormalModal, setShowParanormalModal] = useState(false);
 
     const pendentes = agent.poderesClassePendentes || 0;
+    const homebrewHabilitado = useCatalogoStore((estado) => estado.homebrewHabilitado);
+    const toggleHomebrew = useCatalogoStore((estado) => estado.toggleHomebrew);
+    const livrosHabilitados = useCatalogoStore((estado) => estado.livrosHabilitados);
+    const opcoesCatalogo = useMemo(
+        () => ({ homebrewHabilitado, livrosHabilitados }),
+        [homebrewHabilitado, livrosHabilitados],
+    );
+
     const { poderesClasse, poderesGerais, todosPoderes } = useMemo(() => {
-        const classe = getPoderesClasse(agent.classe);
-        const gerais = getPoderesGerais();
+        const classe = filtrarPorCatalogo(getPoderesClasse(agent.classe), opcoesCatalogo);
+        const gerais = filtrarPorCatalogo(getPoderesGerais(), opcoesCatalogo);
         const todos = [...classe, ...gerais].filter((p, idx, arr) =>
             arr.findIndex(x => x.nome === p.nome) === idx
         );
 
         return { poderesClasse: classe, poderesGerais: gerais, todosPoderes: todos };
-    }, [agent.classe]);
+    }, [agent.classe, opcoesCatalogo]);
     const poderesFiltrados = useMemo(() => {
         let lista = filtro === 'classe' ? poderesClasse :
             filtro === 'gerais' ? poderesGerais :
                 todosPoderes;
         const nomesPossuidos = new Set(agent.poderes.map(p => p.nome));
-        lista = lista.filter(p => {
-            if (p.nome === 'Transcender') return true;
-            if (p.nome === 'Treinamento em Perícia') return true;
-            if (p.nome === 'Aumento de Atributo') return true;
-            return !nomesPossuidos.has(p.nome);
-        });
+        // Repetição vem do dado (`repetivel`), não de uma lista de nomes aqui.
+        lista = lista.filter(p => p.repetivel === true || !nomesPossuidos.has(p.nome));
         if (busca.trim()) {
             const termo = busca.toLowerCase();
             lista = lista.filter(p =>
-                p.nome.toLowerCase().includes(termo) ||
+                correspondeAoNome(p, termo) ||
                 p.descricao.toLowerCase().includes(termo) ||
                 p.requisitos?.toLowerCase().includes(termo)
             );
@@ -163,6 +169,16 @@ export function PowerChoiceModal({
                             ))}
                         </div>
                     </div>
+
+                    <label className="flex items-center gap-2 mt-2 text-xs text-ordem-text-muted cursor-pointer touch-target">
+                        <input
+                            type="checkbox"
+                            checked={homebrewHabilitado}
+                            onChange={toggleHomebrew}
+                            className="accent-ordem-gold"
+                        />
+                        Incluir poderes não oficiais
+                    </label>
                 </div>
 
                 {}
@@ -197,6 +213,11 @@ export function PowerChoiceModal({
                                                     <Sparkles size={16} className="text-purple-400" />
                                                 )}
                                                 <h3 className="font-semibold text-ordem-text">{poder.nome}</h3>
+                                                {selo(poder) && (
+                                                    <span className="text-[10px] px-1.5 py-0.5 rounded border border-ordem-border text-ordem-text-muted">
+                                                        {selo(poder)}
+                                                    </span>
+                                                )}
                                                 {!poder.elegivel && (
                                                     <Lock size={14} className="text-ordem-text-muted" />
                                                 )}
@@ -218,10 +239,19 @@ export function PowerChoiceModal({
                                                     Requisitos: {poder.requisitos}
                                                 </p>
                                             )}
-                                            {!poder.elegivel && poder.motivo && (
-                                                <p className="text-xs text-red-400 mt-1">
-                                                    ⚠ {poder.motivo}
-                                                </p>
+                                            {!poder.elegivel && (poder.motivos?.length ?? 0) > 0 && (
+                                                <ul className="text-[10px] text-red-400 mt-1 space-y-0.5">
+                                                    {poder.motivos!.map((m) => (
+                                                        <li key={m}>⚠ {m}</li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                            {poder.elegivel && (poder.indeterminados?.length ?? 0) > 0 && (
+                                                <ul className="text-[10px] text-ordem-gold mt-1 space-y-0.5">
+                                                    {poder.indeterminados!.map((m) => (
+                                                        <li key={m}>? {m}</li>
+                                                    ))}
+                                                </ul>
                                             )}
                                         </div>
                                         <span className={cn(

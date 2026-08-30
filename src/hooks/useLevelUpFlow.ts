@@ -28,7 +28,8 @@ export function useLevelUpFlow(agent: Personagem, isResume?: boolean) {
                         classe: agent.classe,
                         atributos: agent.atributos,
                         nex: agent.nex,
-                        estagio: agent.estagio
+                        estagio: agent.estagio,
+                        marcas: agent.marcas
                     }).peRodada,
                     nexAnterior: agent.nex,
                     nexNovo: agent.nex,

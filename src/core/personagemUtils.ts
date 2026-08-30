@@ -1,22 +1,24 @@
-import { Personagem } from './types';
+import { PericiaName, Personagem } from './types';
 import {
   calcularPericiasDetalhadas,
   getPatenteConfig,
-  getPatentePorNex,
+  getPatentePorPP,
   listarEventosNex,
   calcularCarga,
 } from '../logic/rulesEngine';
 import { calcularRecursosClasse } from '../logic/progression';
+import { estaPerturbado, limiarMachucado, limitePeRodada } from './rules/progressao';
+import { migrarNomesDePoder } from './rules/catalogo';
+import { observar } from './ficha/sombra';
 
 export const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 export function normalizePersonagem(personagem: Personagem, autoPatente: boolean): Personagem {
-  const patente = (autoPatente ? getPatentePorNex(personagem.nex) : personagem.patente) || 'Recruta';
-  const periciasRecalc = calcularPericiasDetalhadas(
-    personagem.atributos,
-    personagem.pericias,
-    personagem.overrides?.periciaFixos ? { fixos: personagem.overrides.periciaFixos } : undefined,
-  );
+  // Fichas anteriores ao commit de Patente/PP não têm `pp`: a patente gravada
+  // era derivada do NEX. Semear o PP com o mínimo da patente atual preserva a
+  // patente que o mestre já via — sem esse backfill toda ficha viraria Recruta.
+  const pp = personagem.pp ?? getPatenteConfig(personagem.patente ?? 'Recruta').ppMin;
+  const patente = (autoPatente ? getPatentePorPP(pp) : personagem.patente) || 'Recruta';
   const recursos = calcularRecursosClasse({
     classe: personagem.classe,
     atributos: personagem.atributos,
@@ -27,7 +29,40 @@ export function normalizePersonagem(personagem: Personagem, autoPatente: boolean
     origemNome: personagem.origem,
     trilhaNome: personagem.trilha,
     qtdTranscender: personagem.qtdTranscender,
+    marcas: personagem.marcas,
+    poderes: personagem.poderes,
+    periciasTreinadas: (Object.entries(personagem.pericias) as [PericiaName, string][])
+      .filter(([, grau]) => grau !== 'Destreinado')
+      .map(([nome]) => nome),
   });
+
+  /*
+   * As perícias saem do MESMO cálculo que os recursos.
+   *
+   * Antes, `periciasDetalhadas` era reconstruída aqui lendo só
+   * `overrides.periciaFixos`, então todo bônus de origem, trilha ou poder era
+   * apagado no primeiro save — o split-brain. Agora vem de `calcularRecursosClasse`,
+   * que passa pelo interpretador de efeitos.
+   */
+  const somarPorPericia = (
+    base: Partial<Record<PericiaName, number>> | undefined,
+    extra: Partial<Record<PericiaName, number>>,
+  ): Partial<Record<PericiaName, number>> => {
+    const saida: Partial<Record<PericiaName, number>> = { ...(base ?? {}) };
+    for (const [pericia, valor] of Object.entries(extra) as [PericiaName, number][]) {
+      saida[pericia] = (saida[pericia] ?? 0) + valor;
+    }
+    return saida;
+  };
+
+  const periciasRecalc = calcularPericiasDetalhadas(
+    personagem.atributos,
+    personagem.pericias,
+    {
+      fixos: somarPorPericia(personagem.overrides?.periciaFixos, recursos.periciaBonus),
+      dados: recursos.periciaDados,
+    },
+  );
 
   const eventosBase = listarEventosNex(personagem.nex);
   const eventosNex = eventosBase.map((evento) => {
@@ -53,29 +88,30 @@ export function normalizePersonagem(personagem: Personagem, autoPatente: boolean
     poderes: personagem.poderes ?? [],
   });
 
-  return {
+  const normalizado = {
     ...personagem,
     patente,
+    poderes: migrarNomesDePoder(personagem.poderes ?? []),
     periciasDetalhadas: periciasRecalc,
     eventosNex,
     pv: {
       ...personagem.pv,
       max: pvMax,
       atual: clamp(personagem.pv.atual, 0, pvMax),
-      machucado: Math.floor(pvMax / 2),
+      machucado: limiarMachucado(pvMax),
     },
     pe: {
       ...personagem.pe,
       max: peMax,
       atual: clamp(personagem.pe.atual, 0, peMax),
 
-      rodada: personagem.classe === 'Sobrevivente' ? 1 : Math.min(20, Math.max(1, Math.ceil(personagem.nex / 5))),
+      rodada: limitePeRodada(personagem.classe, personagem.nex),
     },
     san: {
       ...personagem.san,
       max: sanMax,
       atual: clamp(personagem.san.atual, 0, sanMax),
-      perturbado: clamp(personagem.san.atual, 0, sanMax) <= sanMax / 2,
+      perturbado: estaPerturbado(clamp(personagem.san.atual, 0, sanMax), sanMax),
     },
     pd: (personagem.usarPd || personagem.pd)
         ? (personagem.pd
@@ -87,4 +123,18 @@ export function normalizePersonagem(personagem: Personagem, autoPatente: boolean
     limiteItens,
     carga: cargaCalculada,
   } satisfies Personagem;
+
+  /*
+   * SHADOW MODE — desligado por padrão.
+   *
+   * Ligado com NEXT_PUBLIC_FICHA_SOMBRA=1, roda o motor novo sobre esta mesma
+   * ficha, compara, descarta o resultado e loga divergências. O motor antigo
+   * segue autoritativo: `observar` não devolve nada e não pode lançar.
+   *
+   * Está aqui, e não nos componentes, porque `normalizePersonagem` é o funil por
+   * onde TODA ficha passa a cada save. Um call site cobre o app inteiro.
+   */
+  observar(normalizado);
+
+  return normalizado;
 }

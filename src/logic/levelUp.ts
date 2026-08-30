@@ -8,14 +8,24 @@ import {
     Elemento,
     Poder,
     PericiaName,
+    Marca,
 } from '../core/types';
 import { RITUAIS } from '../data/magic/rituals';
 import { TRILHAS } from '../data/character/tracks';
-import { PODERES, contarPoderesDisponiveis } from '../data/character/powers';
+import { PODERES } from '../data/character/powers';
 import { calculateDerivedStats } from '../core/rules/derivedStats';
-import { getPatentePorNex, getPatenteConfig } from './rulesEngine';
-import { calcularRecursosClasse } from './progression';
+import { getPatenteConfig } from './rulesEngine';
 import { NEX_EVENTOS } from '../core/rules/nexEventos';
+import { TODAS_PERICIAS } from '../core/rules/pericias';
+import {
+    circuloMaximoPorNex,
+    grauAlvoPromocao,
+    grauRequeridoPromocao,
+    limiarMachucado,
+    nexParaNivel,
+} from '../core/rules/progressao';
+
+export { nexParaNivel };
 
 export interface LevelUpResult {
     personagem: Personagem;
@@ -37,10 +47,6 @@ function gerarIdPendencia(): string {
     return `pend_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
 
-export function nexParaNivel(nex: number): number {
-    return Math.min(20, Math.max(1, Math.ceil(nex / 5)));
-}
-
 export function calcularRecursosParaNex(
     classe: ClasseName,
     atributos: Atributos,
@@ -48,7 +54,8 @@ export function calcularRecursosParaNex(
     estagio?: number,
     origem?: string,
     trilha?: string,
-    qtdTranscender?: number
+    qtdTranscender?: number,
+    marcas?: readonly Marca[]
 ): { pv: number; pe: number; san: number; limitePeRodada: number } {
     const derived = calculateDerivedStats({
         classe,
@@ -57,7 +64,8 @@ export function calcularRecursosParaNex(
         estagio,
         origemNome: origem,
         trilhaNome: trilha,
-        qtdTranscender
+        qtdTranscender,
+        marcas
     });
 
     return {
@@ -135,7 +143,7 @@ export function detectingPendenciesAndAutoApply(
                 const qtdPericias = personagem.classe === 'Especialista'
                     ? 5 + personagem.atributos.INT
                     : 2 + personagem.atributos.INT;
-                const alvo = evento.requisito === 35 ? 'Veterano' : 'Expert';
+                const alvo = grauAlvoPromocao(evento.requisito);
                 pendencias.push({
                     id: gerarIdPendencia(),
                     tipo: 'pericia',
@@ -176,8 +184,7 @@ export function detectingPendenciesAndAutoApply(
                 
                 if (personagem.classe === 'Ocultista') {
                     
-                    const circuloPorNex: Record<number, 1 | 2 | 3 | 4> = { 5: 1, 25: 2, 55: 3, 85: 4 };
-                    const circuloMaximo = circuloPorNex[evento.requisito] ?? 1;
+                    const circuloMaximo = circuloMaximoPorNex(evento.requisito);
                     pendencias.push({
                         id: gerarIdPendencia(),
                         tipo: 'ritual',
@@ -247,7 +254,8 @@ export function subirNex(
         personagem.estagio,
         personagem.origem,
         personagem.trilha,
-        personagem.qtdTranscender
+        personagem.qtdTranscender,
+        personagem.marcas
     );
 
     const recursosNovos = calcularRecursosParaNex(
@@ -257,7 +265,8 @@ export function subirNex(
         personagem.estagio,
         personagem.origem,
         personagem.trilha,
-        novoQtdTranscender
+        novoQtdTranscender,
+        personagem.marcas
     );
 
     const pvGanho = recursosNovos.pv - recursosAnteriores.pv;
@@ -268,8 +277,9 @@ export function subirNex(
 
     const { pendencias: pendenciasNovas, autoPoderes } = detectingPendenciesAndAutoApply(personagem, eventosDesbloqueados);
 
-    const novaPatenteNome = getPatentePorNex(novoNex);
-    const novaPatenteConfig = getPatenteConfig(novaPatenteNome);
+    // Subir de NEX NÃO promove: patente é posição na Ordem, medida em PP.
+    const patenteAtual = personagem.patente ?? 'Recruta';
+    const novaPatenteConfig = getPatenteConfig(patenteAtual);
 
     const personagemAtualizado: Personagem = {
         ...personagem,
@@ -279,7 +289,7 @@ export function subirNex(
             ...personagem.pv,
             atual: personagem.pv.atual + pvGanho,
             max: personagem.pv.max + pvGanho,
-            machucado: Math.floor((personagem.pv.max + pvGanho) / 2),
+            machucado: limiarMachucado(personagem.pv.max + pvGanho),
         },
         pe: {
             ...personagem.pe,
@@ -304,7 +314,7 @@ export function subirNex(
             ...(personagem.pendenciasNex || []),
             ...pendenciasNovas,
         ],
-        patente: novaPatenteNome,
+        patente: patenteAtual,
         limiteItens: novaPatenteConfig.limiteItens,
     };
 
@@ -375,14 +385,16 @@ export function resolverPendencia(
                     atributos: personagem.atributos,
                     nex: personagem.nex,
                     estagio: personagem.estagio,
-                    qtdTranscender: personagem.qtdTranscender
+                    qtdTranscender: personagem.qtdTranscender,
+                    marcas: personagem.marcas
                 });
                 const statsAtualizados = calculateDerivedStats({
                     classe: personagemAtualizado.classe,
                     atributos: personagemAtualizado.atributos,
                     nex: personagemAtualizado.nex,
                     estagio: personagemAtualizado.estagio,
-                    qtdTranscender: personagemAtualizado.qtdTranscender
+                    qtdTranscender: personagemAtualizado.qtdTranscender,
+                    marcas: personagemAtualizado.marcas
                 });
 
                 if (atributo === 'VIG') {
@@ -506,8 +518,36 @@ export function resolverPendencia(
                         }
                     ];
 
-                    if (hData.escolha?.tipo === 'pericia') {
+                    /*
+                     * Aplica a perícia escolhida. Este ramo era um `if` VAZIO:
+                     * a escolha ficava só no texto da descrição e nenhuma
+                     * perícia subia.
+                     *
+                     * Vale para `tipo: 'pericia'` e para o `tipo: 'custom'` com
+                     * lista de perícias (é assim que a Carteirada do Agente
+                     * Secreto é modelada). Segue o padrão do livro: treina, ou
+                     * dá +2 se já treinada.
+                     */
+                    const escolhaEhPericia =
+                        hData.escolha?.tipo === 'pericia' ||
+                        (hData.escolha?.tipo === 'custom' &&
+                            TODAS_PERICIAS.includes(valorEscolhido as PericiaName));
 
+                    if (escolhaEhPericia && TODAS_PERICIAS.includes(valorEscolhido as PericiaName)) {
+                        const pericia = valorEscolhido as PericiaName;
+                        if ((personagemAtualizado.pericias[pericia] ?? 'Destreinado') === 'Destreinado') {
+                            personagemAtualizado.pericias = {
+                                ...personagemAtualizado.pericias,
+                                [pericia]: 'Treinado',
+                            };
+                        } else {
+                            const fixos = { ...(personagemAtualizado.overrides?.periciaFixos ?? {}) };
+                            fixos[pericia] = (fixos[pericia] ?? 0) + 2;
+                            personagemAtualizado.overrides = {
+                                ...personagemAtualizado.overrides,
+                                periciaFixos: fixos,
+                            };
+                        }
                     }
                 }
             }
@@ -516,7 +556,7 @@ export function resolverPendencia(
         case 'pericia':
             if (Array.isArray(valorEscolhido)) {
 
-                const alvo = pendencia.nex === 35 ? 'Veterano' : 'Expert';
+                const alvo = grauAlvoPromocao(pendencia.nex);
 
                 const novasPericias = { ...personagemAtualizado.pericias };
                 valorEscolhido.forEach(pNome => {
@@ -574,7 +614,17 @@ export function rebaixarNex(
         .filter(p => p.nex > novoNex)
         .sort((a, b) => b.nex - a.nex);
 
-    const poderesARemover = new Set<string>();
+    /*
+     * Multiconjunto, não Set.
+     *
+     * Um poder repetível (Transcender, Aprender Ritual, Foco em Perícia…) pode
+     * aparecer N vezes na ficha. Com um Set e um `filter`, rebaixar um único NEX
+     * apagava TODAS as cópias de uma vez. Aqui conta-se quantas remover.
+     */
+    const poderesARemover = new Map<string, number>();
+    const marcarParaRemover = (nome: string) => {
+        poderesARemover.set(nome, (poderesARemover.get(nome) ?? 0) + 1);
+    };
 
     for (const ped of pendenciasParaReverter) {
         if (!ped.resolvida) continue;
@@ -597,7 +647,7 @@ export function rebaixarNex(
             case 'versatilidade':
             case 'transcenderPoder':
                 if (typeof ped.valorEscolhido === 'string') {
-                    poderesARemover.add(ped.valorEscolhido);
+                    marcarParaRemover(ped.valorEscolhido);
                 }
                 if (ped.tipo === 'transcenderPoder') {
                     atualizado.qtdTranscender = Math.max(0, (atualizado.qtdTranscender || 0) - 1);
@@ -606,12 +656,12 @@ export function rebaixarNex(
             case 'trilhaHabilidade':
                 const descMatch = ped.descricao.match(/Habilidade de Trilha: (.*?) \(/);
                 if (descMatch && descMatch[1]) {
-                    poderesARemover.add(descMatch[1].trim());
+                    marcarParaRemover(descMatch[1].trim());
                 }
                 break;
             case 'pericia':
                 if (Array.isArray(ped.valorEscolhido)) {
-                    const alvoAnterior = ped.nex === 35 ? 'Treinado' : 'Veterano';
+                    const alvoAnterior = grauRequeridoPromocao(ped.nex);
                     const novasPericias = { ...atualizado.pericias };
                     ped.valorEscolhido.forEach(pNome => {
                         novasPericias[pNome as PericiaName] = alvoAnterior;
@@ -638,14 +688,26 @@ export function rebaixarNex(
             autoPoderesParaRemover.forEach(evento => {
                 const hab = tData.habilidades.find(h => h.nex === evento.requisito);
                 if (hab && !hab.escolha) {
-                    poderesARemover.add(hab.nome);
+                    marcarParaRemover(hab.nome);
                 }
             });
         }
     }
 
     if (poderesARemover.size > 0) {
-        atualizado.poderes = atualizado.poderes.filter(p => !poderesARemover.has(p.nome));
+        // Remove da última cópia para a primeira, respeitando a contagem.
+        const restante = new Map(poderesARemover);
+        const mantidos: typeof atualizado.poderes = [];
+        for (let i = atualizado.poderes.length - 1; i >= 0; i -= 1) {
+            const poder = atualizado.poderes[i];
+            const aRemover = restante.get(poder.nome) ?? 0;
+            if (aRemover > 0) {
+                restante.set(poder.nome, aRemover - 1);
+                continue;
+            }
+            mantidos.unshift(poder);
+        }
+        atualizado.poderes = mantidos;
     }
 
     atualizado.pendenciasNex = (atualizado.pendenciasNex || []).filter(p => p.nex <= novoNex);
@@ -657,9 +719,8 @@ export function rebaixarNex(
 
     atualizado.nex = novoNex;
 
-    const novaPatenteNome = getPatentePorNex(novoNex);
-    atualizado.patente = novaPatenteNome;
-    atualizado.limiteItens = getPatenteConfig(novaPatenteNome).limiteItens;
+    // Patente e limite de itens não se alteram por NEX — só por PP.
+    atualizado.limiteItens = getPatenteConfig(atualizado.patente ?? 'Recruta').limiteItens;
 
     const recursosNovos = calcularRecursosParaNex(
         atualizado.classe,
@@ -668,14 +729,15 @@ export function rebaixarNex(
         atualizado.estagio,
         atualizado.origem,
         atualizado.trilha,
-        atualizado.qtdTranscender
+        atualizado.qtdTranscender,
+        atualizado.marcas
     );
 
     atualizado.pv = {
         ...atualizado.pv,
         max: recursosNovos.pv,
         atual: Math.min(atualizado.pv.atual, recursosNovos.pv),
-        machucado: Math.floor(recursosNovos.pv / 2),
+        machucado: limiarMachucado(recursosNovos.pv),
     };
 
     atualizado.pe = {

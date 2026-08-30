@@ -27,7 +27,7 @@ interface ModalContentProps {
     children: React.ReactNode;
     className?: string;
     showCloseButton?: boolean;
-    size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+    size?: 'sm' | 'md' | 'lg' | 'xl' | 'full' | 'wide';
 }
 
 const sizeStyles = {
@@ -36,6 +36,8 @@ const sizeStyles = {
     lg: 'max-w-lg',
     xl: 'max-w-xl',
     full: 'max-w-[95vw] sm:max-w-4xl',
+    /** Painéis lado a lado. Ocupa a largura da tela sem clamp por breakpoint. */
+    wide: 'max-w-[96vw]',
 };
 
 export const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
@@ -52,6 +54,25 @@ export const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
                     />
                 </DialogPrimitive.Overlay>
 
+                {/*
+                  * Centralizador SEM transform.
+                  *
+                  * A versão anterior centrava com `fixed left-1/2 top-1/2
+                  * -translate-x-1/2 -translate-y-1/2`. No Tailwind 3 essas classes
+                  * compilam para a propriedade `transform` — e o framer-motion, ao
+                  * animar `scale`/`y` (ver `modalVariants`), escreve
+                  * `transform: translateY(0px) scale(1)` INLINE, que vence a classe
+                  * e apaga o `-50%, -50%`. Resultado: o canto superior esquerdo do
+                  * painel para no centro da tela, e o modal aparece no quadrante
+                  * inferior direito, cortado.
+                  *
+                  * Centrar por flexbox não usa `transform`, então não há o que
+                  * sobrescrever. `pointer-events-none` aqui e `auto` no painel
+                  * mantêm o clique-fora-para-fechar do Radix funcionando: sem isso,
+                  * este container cobriria a tela e todo clique contaria como
+                  * "dentro" do Content.
+                  */}
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
                 <DialogPrimitive.Content asChild>
                     <motion.div
                         ref={ref}
@@ -60,9 +81,9 @@ export const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
                         animate="animate"
                         exit="exit"
                         className={cn(
-                            'fixed left-1/2 top-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2',
+                            'pointer-events-auto relative w-full',
                             'bg-ordem-ooze border border-ordem-border rounded-xl shadow-2xl shadow-black/50',
-                            'max-h-[90vh] overflow-hidden flex flex-col',
+                            'max-h-full overflow-hidden flex flex-col',
                             'focus:outline-none',
                             sizeStyles[size],
                             className
@@ -81,6 +102,7 @@ export const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
                         )}
                     </motion.div>
                 </DialogPrimitive.Content>
+                </div>
             </DialogPrimitive.Portal>
         );
     }

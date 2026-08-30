@@ -20,7 +20,12 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 40,
         nome: 'O Sorriso',
-        descricao: 'Recebe +2 em Diplomacia e Enganação. Quando falha em um teste dessas perícias, pode gastar 2 PE para repetir (apenas 1x por teste). Uma vez por cena, pode fazer Diplomacia para acalmar a si mesmo.'
+        descricao: 'Recebe +2 em Diplomacia e Enganação. Quando falha em um teste dessas perícias, pode gastar 2 PE para repetir (apenas 1x por teste). Uma vez por cena, pode fazer Diplomacia para acalmar a si mesmo.',
+        efeitos: [
+          { tipo: 'periciaBonus', pericia: 'Diplomacia', valor: 2 },
+          { tipo: 'periciaBonus', pericia: 'Enganação', valor: 2 },
+          { tipo: 'narrativo', nota: 'Repete teste falho de Diplomacia ou Enganação por 2 PE, aceitando o novo resultado.' },
+        ],
       },
       {
         nex: 65,
@@ -43,7 +48,11 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 10,
         nome: 'Rastrear o Paranormal',
-        descricao: 'Recebe treinamento em Sobrevivência (ou +2, se já for treinado). Pode usar Sobrevivência no lugar de Ocultismo para identificar criaturas e no lugar de Investigação e Percepção para rastros e pistas paranormais.'
+        descricao: 'Recebe treinamento em Sobrevivência (ou +2, se já for treinado). Pode usar Sobrevivência no lugar de Ocultismo para identificar criaturas e no lugar de Investigação e Percepção para rastros e pistas paranormais.',
+        efeitos: [
+          { tipo: 'treinamento', pericia: 'Sobrevivência' },
+          { tipo: 'narrativo', nota: 'Usa Sobrevivência no lugar de Ocultismo, Investigação e Percepção para rastros e criaturas paranormais.' },
+        ],
       },
       {
         nex: 40,
@@ -53,7 +62,8 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 65,
         nome: 'Atacar das Sombras',
-        descricao: 'Não sofre -1d20 em Furtividade por se mover ao deslocamento normal. Penalidade por atacar com arma silenciosa reduzida para -1d20. Visibilidade inicial em cenas de furtividade é 1 ponto abaixo (pode ser negativa).'
+        descricao: 'Não sofre -1d20 em Furtividade por se mover ao deslocamento normal. Penalidade por atacar com arma silenciosa reduzida para -1d20. Visibilidade inicial em cenas de furtividade é 1 ponto abaixo (pode ser negativa).',
+        efeitos: [{ tipo: 'narrativo', nota: 'Remove penalidades de Furtividade ao mover-se e ao atacar com arma silenciosa; visibilidade inicial 1 ponto abaixo.' }],
       },
       {
         nex: 99,
@@ -72,6 +82,10 @@ export const TRILHAS: Trilha[] = [
         nex: 10,
         nome: 'Ser Amaldiçoado',
         descricao: 'Treinado em Ocultismo (ou +2). Escolha elemento. Uma vez por dia, execute etapa ritualística. Recebe RD 5 ao elemento e bônus por elemento (Sangue: RD balístico, faro, +Vig dano contra-ataque, -1d20 Ciências/Intuição; Morte: RD perfuração, imune fadiga, +For PV, -1d20 Diplomacia/Enganação; Conhecimento: RD balístico, visão no escuro, +Int Defesa, -1d20 Atletismo/Acrobacia; Energia: RD corte/eletr./fogo, +Agi bloqueio, -1d20 Investigação/Percepção).',
+        efeitos: [
+          { tipo: 'treinamento', pericia: 'Ocultismo' },
+          { tipo: 'narrativo', nota: 'O elemento escolhido concede RD 5 e uma penalidade de –1d20 em duas perícias. O +Força em PV é exclusivo do elemento Morte — depende de escolha do jogador.' },
+        ],
         escolha: {
           tipo: 'elemento',
           quantidade: 1
@@ -161,6 +175,17 @@ export const TRILHAS: Trilha[] = [
         nex: 10,
         nome: 'Mascate',
         descricao: 'Recebe treinamento em Profissão (armeiro, engenheiro ou químico, à escolha) e +5 na capacidade de carga. Ao fabricar item improvisado, DT é reduzida em –10.',
+        efeitos: [
+          /*
+           * "+5 na capacidade de carga" — permanente.
+           *
+           * Isto vivia como `if (nome === 'Mascate') cargaMaxima += 5` dentro de
+           * `calcularCarga`. Ao trocar o `if` pelo interpretador, o bônus PRECISA
+           * estar declarado aqui — e foi o teste do Mascate que pegou a perda.
+           */
+          { tipo: 'cargaEspacos', valor: 5 },
+          { tipo: 'narrativo', nota: 'Treinamento em Profissão à escolha (ver `escolha`). Ao fabricar item improvisado, a DT cai em –10.' },
+        ],
         escolha: {
           tipo: 'custom',
           quantidade: 1,
@@ -283,7 +308,11 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 2,
         nome: 'Durão',
-        descricao: 'Você recebe +4 PV. Quando subir para o 3º estágio, recebe +2 PV.'
+        descricao: 'Você recebe +4 PV. Quando subir para o 3º estágio, recebe +2 PV.',
+        efeitos: [
+          { tipo: 'pv', valor: 4 },
+          { tipo: 'pv', valor: 2, nosNex: [3] },
+        ],
       },
       {
         nex: 4,
@@ -438,7 +467,11 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 10,
         nome: 'Iniciativa Aprimorada',
-        descricao: 'Recebe +5 em Iniciativa e uma ação de movimento adicional na primeira rodada.'
+        descricao: 'Recebe +5 em Iniciativa e uma ação de movimento adicional na primeira rodada.',
+        efeitos: [
+          { tipo: 'periciaBonus', pericia: 'Iniciativa', valor: 5 },
+          { tipo: 'narrativo', nota: 'Ação de movimento adicional na primeira rodada.' },
+        ],
       },
       {
         nex: 40,
@@ -466,7 +499,11 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 10,
         nome: 'Casca Grossa',
-        descricao: 'Recebe +1 PV para cada 5% de NEX. Quando faz um bloqueio, soma seu Vigor na resistência a dano recebida.'
+        descricao: 'Recebe +1 PV para cada 5% de NEX. Quando faz um bloqueio, soma seu Vigor na resistência a dano recebida.',
+        efeitos: [
+          { tipo: 'pv', valor: 1, porNex: 5 },
+          { tipo: 'narrativo', nota: 'Ao bloquear, soma o Vigor na resistência a dano recebida.' },
+        ],
       },
       {
         nex: 40,
@@ -481,7 +518,8 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 99,
         nome: 'Inquebrável',
-        descricao: 'Enquanto estiver machucado, recebe +5 na Defesa e resistência a dano 5. Enquanto estiver morrendo, não fica indefeso e pode realizar ações.'
+        descricao: 'Enquanto estiver machucado, recebe +5 na Defesa e resistência a dano 5. Enquanto estiver morrendo, não fica indefeso e pode realizar ações.',
+        efeitos: [{ tipo: 'narrativo', nota: '+5 Defesa e RD 5 apenas enquanto machucado; não fica indefeso ao morrer.' }],
       }
     ],
     livro: 'Regras Básicas'
@@ -523,12 +561,18 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 10,
         nome: 'Ataque Furtivo',
-        descricao: 'Sabe atingir os pontos vitais de um inimigo distraído. Uma vez por rodada, ao atingir alvo desprevenido com ataque corpo a corpo ou em alcance curto, ou alvo que esteja flanqueando, gasta 1 PE para causar +1d6 de dano. Em NEX 40% o dano aumenta para +2d6, em NEX 65% para +3d6 e em NEX 99% para +4d6.'
+        descricao: 'Sabe atingir os pontos vitais de um inimigo distraído. Uma vez por rodada, ao atingir alvo desprevenido com ataque corpo a corpo ou em alcance curto, ou alvo que esteja flanqueando, gasta 1 PE para causar +1d6 de dano. Em NEX 40% o dano aumenta para +2d6, em NEX 65% para +3d6 e em NEX 99% para +4d6.',
+        efeitos: [{ tipo: 'narrativo', nota: 'Ataque Furtivo: 1 PE por +1d6 de dano, escalando a +4d6 em NEX 99%.' }],
       },
       {
         nex: 40,
         nome: 'Gatuno',
-        descricao: 'Recebe +5 em Atletismo e Crime e pode percorrer seu deslocamento normal quando se esconder sem penalidade.'
+        descricao: 'Recebe +5 em Atletismo e Crime e pode percorrer seu deslocamento normal quando se esconder sem penalidade.',
+        efeitos: [
+          { tipo: 'periciaBonus', pericia: 'Atletismo', valor: 5 },
+          { tipo: 'periciaBonus', pericia: 'Crime', valor: 5 },
+          { tipo: 'narrativo', nota: 'Percorre o deslocamento normal ao esconder-se, sem penalidade.' },
+        ],
       },
       {
         nex: 65,
@@ -594,7 +638,8 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 99,
         nome: 'Reanimação',
-        descricao: 'Uma vez por cena, gasta Ação Completa e 10 PE para trazer de volta à vida um personagem que tenha morrido na mesma cena (exceto morte por dano massivo).'
+        descricao: 'Uma vez por cena, gasta Ação Completa e 10 PE para trazer de volta à vida um personagem que tenha morrido na mesma cena (exceto morte por dano massivo).',
+        efeitos: [{ tipo: 'narrativo', nota: 'Ressuscita um personagem morto na mesma cena por 10 PE e ação completa.' }],
       }
     ],
     livro: 'Regras Básicas'
@@ -607,7 +652,8 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 10,
         nome: 'Inventário Otimizado',
-        descricao: 'Soma seu Intelecto à sua Força para calcular sua capacidade de carga. Por exemplo, se você tem Força 1 e Intelecto 3, seu inventário tem 20 espaços.'
+        descricao: 'Soma seu Intelecto à sua Força para calcular sua capacidade de carga. Por exemplo, se você tem Força 1 e Intelecto 3, seu inventário tem 20 espaços.',
+        efeitos: [{ tipo: 'cargaAtributo', atributo: 'INT' }],
       },
       {
         nex: 40,
@@ -720,7 +766,8 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 10,
         nome: 'Mente Sã',
-        descricao: 'Recebe resistência paranormal +5 (+5 em testes de resistência contra efeitos paranormais).'
+        descricao: 'Recebe resistência paranormal +5 (+5 em testes de resistência contra efeitos paranormais).',
+        efeitos: [{ tipo: 'resistenciaDano', contra: 'paranormal', valor: 5 }],
       },
       {
         nex: 40,
@@ -730,7 +777,11 @@ export const TRILHAS: Trilha[] = [
       {
         nex: 65,
         nome: 'Inabalável',
-        descricao: 'Recebe resistência a dano mental e paranormal 10. Quando é alvo de efeito paranormal que permite Vontade para reduzir dano à metade, não sofre dano se passar.'
+        descricao: 'Recebe resistência a dano mental e paranormal 10. Quando é alvo de efeito paranormal que permite Vontade para reduzir dano à metade, não sofre dano se passar.',
+        efeitos: [
+          { tipo: 'resistenciaDano', contra: 'mental', valor: 10 },
+          { tipo: 'resistenciaDano', contra: 'paranormal', valor: 10 },
+        ],
       },
       {
         nex: 99,
