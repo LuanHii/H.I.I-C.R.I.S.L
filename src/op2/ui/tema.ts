@@ -1,66 +1,55 @@
 import type { FichaOp2 } from '../regras/tipos';
+import type { IdSobrevivente } from '../presets/sobreviventes';
 
 export type Perfil = FichaOp2['perfil']['tipo'];
 
 /**
- * Cada perfil tem uma identidade cromatica propria, porque o perfil e a
- * primeira coisa que define como o personagem joga. Antes as tres fichas
- * saiam identicas e so o texto do distintivo mudava.
+ * O HEX de cada perfil vive em globals.css, sob `[data-perfil='...']`. Aqui
+ * ficam apenas as classes que LEEM essas variaveis.
  *
- * O acento colore APENAS a moldura — nome, aba, regua de secao, aura da
- * pagina. Os recursos guardam cor semantica fixa (vida vermelha, determinacao
- * violeta) em toda ficha, porque um jogador que aprende "a barra vermelha e
- * minha vida" nao pode reaprender ao trocar de personagem.
+ * A separacao nao e cosmetica: mantem o guard de "sem hex solto em
+ * componente" com significado, e permite trocar a paleta inteira de uma ficha
+ * mudando um unico atributo no elemento raiz.
  */
 export interface TemaDePerfil {
   rotulo: string;
   lema: string;
   texto: string;
   borda: string;
-  fundo: string;
-  barra: string;
+  fundoSutil: string;
+  preenchimento: string;
   brilho: string;
   aura: string;
   regua: string;
-  distintivo: string;
+  badge: string;
 }
+
+const CLASSES_DO_TEMA: Omit<TemaDePerfil, 'rotulo' | 'lema'> = {
+  texto: 'text-[var(--op2-primary)]',
+  borda: 'border-[var(--op2-border)]',
+  fundoSutil: 'bg-[var(--op2-primary)]/10',
+  preenchimento: 'bg-[var(--op2-primary)]',
+  brilho: 'shadow-[0_0_18px_-2px_var(--op2-glow)]',
+  aura: 'bg-[radial-gradient(ellipse_80%_45%_at_50%_-10%,var(--op2-glow),transparent_70%)]',
+  regua: 'bg-gradient-to-r from-[var(--op2-primary)] to-transparent',
+  badge: 'bg-[var(--op2-badge)] text-white',
+};
 
 export const TEMAS: Record<Perfil, TemaDePerfil> = {
   EXECUTOR: {
+    ...CLASSES_DO_TEMA,
     rotulo: 'Executor',
-    lema: 'Age primeiro, pensa depois. Insiste até conseguir.',
-    texto: 'text-ordem-red-light',
-    borda: 'border-ordem-red/40',
-    fundo: 'bg-ordem-red/[0.12]',
-    barra: 'bg-ordem-red',
-    brilho: 'shadow-[0_0_16px_-2px_rgba(220,38,38,0.85)]',
-    aura: 'bg-[radial-gradient(ellipse_85%_50%_at_50%_-12%,rgba(220,38,38,0.22),transparent_72%)]',
-    regua: 'from-ordem-red/45',
-    distintivo: 'text-ordem-red-light border-ordem-red/45 bg-ordem-red/[0.14]',
-  },
-  ANALISTA: {
-    rotulo: 'Analista',
-    lema: 'Observa, entende e se prepara. Depois age com precisão.',
-    texto: 'text-ordem-cyan',
-    borda: 'border-ordem-cyan/40',
-    fundo: 'bg-ordem-cyan/[0.12]',
-    barra: 'bg-ordem-cyan',
-    brilho: 'shadow-[0_0_16px_-2px_rgba(34,211,238,0.75)]',
-    aura: 'bg-[radial-gradient(ellipse_85%_50%_at_50%_-12%,rgba(34,211,238,0.16),transparent_72%)]',
-    regua: 'from-ordem-cyan/45',
-    distintivo: 'text-ordem-cyan border-ordem-cyan/45 bg-ordem-cyan/[0.12]',
+    lema: 'Age primeiro e pensa depois. Se não der certo, tenta de novo até conseguir.',
   },
   VIGILANTE: {
+    ...CLASSES_DO_TEMA,
     rotulo: 'Vigilante',
-    lema: 'Sempre atento, pronto para a brecha. Age antes de todos.',
-    texto: 'text-ordem-green-muted',
-    borda: 'border-ordem-green/40',
-    fundo: 'bg-ordem-green/[0.10]',
-    barra: 'bg-ordem-green-muted',
-    brilho: 'shadow-[0_0_16px_-2px_rgba(102,255,102,0.6)]',
-    aura: 'bg-[radial-gradient(ellipse_85%_50%_at_50%_-12%,rgba(102,255,102,0.13),transparent_72%)]',
-    regua: 'from-ordem-green/45',
-    distintivo: 'text-ordem-green-muted border-ordem-green/45 bg-ordem-green/[0.12]',
+    lema: 'Sempre atento aos arredores, aproveitando a brecha perfeita para agir primeiro.',
+  },
+  ANALISTA: {
+    ...CLASSES_DO_TEMA,
+    rotulo: 'Analista',
+    lema: 'Observa, entende e se prepara, para só então agir — com a maior precisão possível.',
   },
 };
 
@@ -71,40 +60,77 @@ export function temaDe(ficha: FichaOp2): TemaDePerfil {
 export type TomDeRecurso = 'vida' | 'determinacao' | 'impeto' | 'avaliacao';
 
 export interface TomVisual {
-  barra: string;
+  cheio: string;
   brilho: string;
   texto: string;
-  trilho: string;
+  vazio: string;
 }
 
 /**
- * Cor SOLIDA, nao gradiente. O gradiente anterior usava `to-ordem-red-light`,
- * que o Tailwind nao gera nesta config — a parada final virava transparente e
- * a barra de vida aparecia lavada, encostada na de determinacao.
+ * Recurso guarda cor semantica FIXA em toda ficha, independente do perfil.
+ * Quem aprendeu "a barra vermelha e minha vida" nao pode reaprender ao trocar
+ * de personagem — e a barra e o primeiro lugar onde o olho cai numa cena.
  */
 export const TONS: Record<TomDeRecurso, TomVisual> = {
   vida: {
-    barra: 'bg-ordem-red',
-    brilho: 'shadow-[0_0_18px_-3px_rgba(220,38,38,0.9)]',
+    cheio: 'bg-ordem-red',
+    brilho: 'shadow-[0_0_10px_-2px_rgba(229,57,53,0.9)]',
     texto: 'text-ordem-red-light',
-    trilho: 'bg-ordem-red-dark/25',
+    vazio: 'bg-ordem-red-dark/20',
   },
   determinacao: {
-    barra: 'bg-ordem-purple',
-    brilho: 'shadow-[0_0_18px_-3px_rgba(168,85,247,0.85)]',
+    cheio: 'bg-ordem-purple',
+    brilho: 'shadow-[0_0_10px_-2px_rgba(168,85,247,0.9)]',
     texto: 'text-ordem-purple',
-    trilho: 'bg-ordem-purple/15',
+    vazio: 'bg-ordem-purple/15',
   },
   impeto: {
-    barra: 'bg-ordem-gold',
-    brilho: 'shadow-[0_0_18px_-3px_rgba(255,215,0,0.8)]',
-    texto: 'text-ordem-gold',
-    trilho: 'bg-ordem-gold/12',
+    cheio: 'bg-ordem-red',
+    brilho: 'shadow-[0_0_12px_-2px_rgba(229,57,53,0.95)]',
+    texto: 'text-ordem-red-light',
+    vazio: 'bg-ordem-red-dark/20',
   },
   avaliacao: {
-    barra: 'bg-ordem-cyan',
-    brilho: 'shadow-[0_0_18px_-3px_rgba(34,211,238,0.8)]',
+    cheio: 'bg-ordem-cyan',
+    brilho: 'shadow-[0_0_12px_-2px_rgba(2,136,209,0.9)]',
     texto: 'text-ordem-cyan',
-    trilho: 'bg-ordem-cyan/12',
+    vazio: 'bg-ordem-cyan/15',
   },
 };
+
+const RETRATOS: Record<string, IdSobrevivente> = {
+  alan: 'alan',
+  victor: 'victor',
+  eloísa: 'eloisa',
+  eloisa: 'eloisa',
+  edgar: 'edgar',
+  kênia: 'kenia',
+  kenia: 'kenia',
+};
+
+function chaveDoNome(nome: string): string {
+  return nome.trim().toLowerCase();
+}
+
+/**
+ * Os retratos sao dos cinco sobreviventes do playtest, casados pelo NOME.
+ * Ficha com outro nome simplesmente nao tem imagem — a UI cai para as
+ * iniciais em vez de mostrar um retrato de outra pessoa.
+ */
+export function tokenDoPersonagem(nome: string): string | null {
+  const chave = RETRATOS[chaveDoNome(nome)];
+  return chave ? `/op2/tokens/${chave}.webp` : null;
+}
+
+export function retratoDoPersonagem(nome: string): string | null {
+  const chave = RETRATOS[chaveDoNome(nome)];
+  return chave ? `/op2/retratos/${chave}.webp` : null;
+}
+
+export function iniciaisDe(nome: string): string {
+  return nome
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((parte) => parte.charAt(0).toUpperCase())
+    .join('');
+}

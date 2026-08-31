@@ -22,19 +22,31 @@ describe('a UI cobre todas as variantes do dominio', () => {
     }
   });
 
-  it('cada passo da escala tem um icone desenhado, e nenhum repete a forma de outro', () => {
+  it('cada passo da escala tem um icone proprio, e nenhum repete o de outro', () => {
     const dados = fonte('Dados.tsx');
-    const formas = dados.slice(dados.indexOf('const FORMAS'), dados.indexOf('export interface'));
+    const mapa = dados.slice(dados.indexOf('ICONES_DE_DADO'), dados.indexOf('NIVEIS_DO_DADO'));
 
-    for (const passo of [...ESCALA_PASSOS, 'd20']) {
-      expect(formas, `${passo} sem forma SVG`).toContain(`${passo}: {`);
-    }
+    const atribuidos = [...ESCALA_PASSOS, 'd20'].map((passo) => {
+      const casamento = mapa.match(new RegExp(passo + ': (Gi[A-Za-z0-9]+)'));
+      expect(casamento, `${passo} sem icone atribuido`).not.toBeNull();
+      return casamento![1];
+    });
 
-    const contornos = (formas.match(/corpo: '([^']+)'/g) ?? []).map((linha) =>
-      linha.replace("corpo: '", '').replace(/'$/, ''),
+    expect(new Set(atribuidos).size, 'dois dados usando o mesmo icone').toBe(atribuidos.length);
+  });
+
+  it('toda pericia tem icone proprio, sem cair num generico', () => {
+    const icones = fonte('IconesDePericia.tsx');
+    const mapa = icones.slice(
+      icones.indexOf('ICONES_DE_PERICIA'),
+      icones.indexOf('ICONE_DE_APTIDAO'),
     );
-    expect(contornos).toHaveLength(ESCALA_PASSOS.length + 1);
-    expect(new Set(contornos).size, 'dois dados com o mesmo desenho').toBe(contornos.length);
+    const atribuidos = PERICIAS_SIMPLES.map((nome) => {
+      const casamento = mapa.match(new RegExp(nome + ': (Gi[A-Za-z0-9]+)'));
+      expect(casamento, `${nome} sem icone`).not.toBeNull();
+      return casamento![1];
+    });
+    expect(new Set(atribuidos).size, 'duas pericias com o mesmo icone').toBe(atribuidos.length);
   });
 
   it('cada perfil tem tema proprio, com cor e lema distintos', () => {

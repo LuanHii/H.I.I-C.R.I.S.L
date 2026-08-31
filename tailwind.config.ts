@@ -37,6 +37,9 @@ const config: Config = {
       },
       fontFamily: {
         mono: ['"Courier New"', 'Courier', 'monospace'], // Fallback para fonte digital
+        display: ['var(--fonte-display)', 'Georgia', 'serif'],
+        carimbo: ['var(--fonte-carimbo)', '"Courier New"', 'monospace'],
+        dados: ['var(--fonte-dados)', 'system-ui', 'sans-serif'],
       },
       animation: {
         'pulse-red': 'pulse-red 2s infinite',

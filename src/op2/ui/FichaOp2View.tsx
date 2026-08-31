@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Dices } from 'lucide-react';
+import { GiEyeTarget, GiFlame } from 'react-icons/gi';
 import { Modal, ModalContent } from '@/components/ui/Modal';
 import { cn } from '@/lib/utils';
 import {
@@ -32,10 +33,11 @@ import {
   type RefPericia,
 } from '../regras/tipos';
 import {
-  BarraDeRecurso,
+  BlocosDeRecurso,
   Distintivo,
   DistintivoDeDado,
-  Medidor,
+  EspacosDePerfil,
+  Fita,
   PAINEL,
   RotuloDeSecao,
 } from './Pecas';
@@ -145,7 +147,7 @@ export const FichaOp2View: React.FC<FichaOp2ViewProps> = ({
         <div className="min-w-0">
           <h2 className="truncate font-serif text-2xl text-white sm:text-3xl">{ficha.nome}</h2>
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            <Distintivo className={cn('uppercase', temaDe(ficha).distintivo)}>
+            <Distintivo className={cn('uppercase', temaDe(ficha).badge)}>
               {ficha.perfil.tipo}
             </Distintivo>
             <span className="font-mono text-[10px] text-ordem-text-secondary sm:text-xs">
@@ -159,7 +161,7 @@ export const FichaOp2View: React.FC<FichaOp2ViewProps> = ({
 
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <div>
-            <BarraDeRecurso
+            <BlocosDeRecurso
               rotulo="PV"
               atual={pvAtual(ficha)}
               maximo={ficha.pvMax}
@@ -170,7 +172,7 @@ export const FichaOp2View: React.FC<FichaOp2ViewProps> = ({
           </div>
 
           <div>
-            <BarraDeRecurso
+            <BlocosDeRecurso
               rotulo="PD"
               atual={pdAtual(ficha)}
               maximo={ficha.pdMax}
@@ -181,21 +183,23 @@ export const FichaOp2View: React.FC<FichaOp2ViewProps> = ({
           </div>
 
           {ficha.perfil.tipo === 'EXECUTOR' ? (
-            <Medidor
+            <EspacosDePerfil
               rotulo="Ímpeto"
               preenchidos={impetoDe(ficha)}
               total={MAXIMO_IMPETO}
               tom="impeto"
+              icone={<GiFlame size={13} />}
               ajuda="Enche a cada teste falhado. 1 espaço dá +1 passo; 3 espaços aumentam um atributo até o fim da cena."
             />
           ) : null}
 
           {ficha.perfil.tipo === 'ANALISTA' ? (
-            <Medidor
+            <EspacosDePerfil
               rotulo="Avaliação"
               preenchidos={avaliacaoDe(ficha)}
               total={MAXIMO_AVALIACAO}
               tom="avaliacao"
+              icone={<GiEyeTarget size={13} />}
               ajuda="Ganhos com a ação Avaliação (2 PD). Valem só em testes relativos ao alvo observado."
             />
           ) : null}

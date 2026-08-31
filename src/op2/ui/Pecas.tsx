@@ -1,35 +1,84 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import type { DiceStep } from '../regras/tipos';
 import { IconeDeDado, NIVEIS_DO_DADO } from './Dados';
-import { TONS, type TemaDePerfil, type TomDeRecurso } from './tema';
+import {
+  TONS,
+  iniciaisDe,
+  retratoDoPersonagem,
+  tokenDoPersonagem,
+  type TemaDePerfil,
+  type TomDeRecurso,
+} from './tema';
 
-export const BASE_DA_PAGINA = 'relative min-h-screen w-full overflow-x-clip bg-ordem-black text-white';
+export const BASE_DA_PAGINA =
+  'relative min-h-screen w-full overflow-x-clip bg-[var(--op2-fundo)] text-white';
 
-export const TRAMA =
-  'pointer-events-none fixed inset-0 z-0 bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.016)_0px,rgba(255,255,255,0.016)_1px,transparent_1px,transparent_3px)]';
+export const GRAO = 'op2-grao pointer-events-none fixed inset-0 z-0';
 
 export const VINHETA =
-  'pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(0,0,0,0.75)_100%)]';
+  'pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.85)_100%)]';
 
 export const CONTEUDO =
   'relative z-10 mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 sm:py-10 safe-x safe-top safe-bottom';
 
-export const PAINEL = [
-  'relative overflow-hidden rounded-2xl',
-  'border border-white/[0.08] bg-white/[0.025]',
-  'shadow-[0_1px_0_0_rgba(255,255,255,0.07)_inset,0_24px_50px_-30px_rgba(0,0,0,1)]',
-].join(' ');
-
 export const SOMBRA_DE_LEITURA =
-  '[text-shadow:0_1px_2px_rgba(0,0,0,0.95),0_2px_12px_rgba(0,0,0,0.7)]';
+  '[text-shadow:0_1px_2px_rgba(0,0,0,0.95),0_2px_12px_rgba(0,0,0,0.75)]';
 
-export const SOMBRA_DE_ELEMENTO = 'drop-shadow-[0_2px_6px_rgba(0,0,0,0.85)]';
+export const SOMBRA_DE_ELEMENTO = 'drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]';
 
 export const CORES_DO_DADO: Record<DiceStep, string> = NIVEIS_DO_DADO;
+
+/** Painel com moldura de cantos recortados na cor do perfil. */
+export const Painel: React.FC<{
+  children: React.ReactNode;
+  cantos?: boolean;
+  className?: string;
+}> = ({ children, cantos = true, className }) => (
+  <div
+    className={cn(
+      'relative border border-white/10 bg-[var(--op2-superficie)]',
+      'shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_24px_50px_-30px_rgba(0,0,0,1)]',
+      className,
+    )}
+  >
+    {cantos ? (
+      <>
+        <span className="op2-canto op2-canto-se" />
+        <span className="op2-canto op2-canto-sd" />
+        <span className="op2-canto op2-canto-ie" />
+        <span className="op2-canto op2-canto-id" />
+      </>
+    ) : null}
+    {children}
+  </div>
+);
+
+export const PAINEL =
+  'relative border border-white/10 bg-[var(--op2-superficie)] shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_24px_50px_-30px_rgba(0,0,0,1)]';
+
+/** Badge com aparencia de fita/carimbo, levemente torta. */
+export const Fita: React.FC<{
+  children: React.ReactNode;
+  variante?: 'perfil' | 'neutra' | 'alerta';
+  className?: string;
+}> = ({ children, variante = 'neutra', className }) => (
+  <span
+    className={cn(
+      'inline-flex -rotate-1 items-center px-2.5 py-1 font-carimbo text-[11px] uppercase tracking-[0.16em] shadow-[0_2px_8px_rgba(0,0,0,0.6)]',
+      variante === 'perfil' && 'bg-[var(--op2-badge)] text-white',
+      variante === 'neutra' && 'bg-white/[0.07] text-white/70',
+      variante === 'alerta' && 'bg-ordem-red text-white',
+      className,
+    )}
+  >
+    {children}
+  </span>
+);
 
 export const RotuloDeSecao: React.FC<{
   children: React.ReactNode;
@@ -40,108 +89,128 @@ export const RotuloDeSecao: React.FC<{
   <div className={cn('flex items-center gap-3', className)}>
     <span
       className={cn(
-        'shrink-0 font-mono text-[10px] font-bold uppercase tracking-[0.32em]',
+        'shrink-0 font-carimbo text-[11px] uppercase tracking-[0.3em]',
         tema ? tema.texto : 'text-white/45',
       )}
     >
       {children}
     </span>
     <span
-      className={cn(
-        'h-px flex-1 bg-gradient-to-r to-transparent',
-        tema ? tema.regua : 'from-white/[0.14]',
-      )}
+      className={cn('h-px flex-1 opacity-40', tema ? tema.regua : 'bg-white/15')}
     />
     {acessorio ? <span className="shrink-0">{acessorio}</span> : null}
   </div>
 );
 
-export interface BarraDeRecursoProps {
+/**
+ * Contador em BLOCOS, como nos cartoes do playtest, em vez de barra continua.
+ *
+ * Uma barra continua diz "mais ou menos pela metade". Blocos dizem "sete de
+ * dez", que e a leitura que a mesa precisa: quantos pontos ainda dao para
+ * gastar. Quebra em duas linhas quando passa de 10 para nao virar fatia fina.
+ */
+export interface BlocosDeRecursoProps {
   rotulo: string;
   atual: number;
   maximo: number;
   tom: TomDeRecurso;
   alerta?: boolean;
-  compacta?: boolean;
+  compacto?: boolean;
   className?: string;
 }
 
-export const BarraDeRecurso: React.FC<BarraDeRecursoProps> = ({
+export const BlocosDeRecurso: React.FC<BlocosDeRecursoProps> = ({
   rotulo,
   atual,
   maximo,
   tom,
   alerta,
-  compacta,
+  compacto,
   className,
 }) => {
   const paleta = TONS[tom];
-  const proporcao = maximo > 0 ? Math.max(0, Math.min(1, atual / maximo)) : 0;
+  const porLinha = maximo > 10 ? Math.ceil(maximo / 2) : maximo;
+  const linhas: number[][] = [];
+  for (let inicio = 0; inicio < maximo; inicio += porLinha) {
+    linhas.push(Array.from({ length: Math.min(porLinha, maximo - inicio) }, (_, i) => inicio + i));
+  }
 
   return (
     <div className={cn('min-w-0', className)}>
       <div className="flex items-end justify-between gap-3">
         <span
           className={cn(
-            'truncate font-mono text-[10px] font-bold uppercase tracking-[0.26em]',
+            'truncate font-carimbo text-[11px] uppercase tracking-[0.22em]',
             alerta ? paleta.texto : 'text-white/45',
           )}
         >
           {rotulo}
         </span>
-        <span className="shrink-0 font-mono leading-none tabular-nums">
+        <span className="shrink-0 font-dados leading-none tabular-nums">
           <motion.span
             key={atual}
-            initial={{ opacity: 0.25, y: -5 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
+            initial={{ opacity: 0.3, scale: 1.18 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.28, ease: 'easeOut' }}
             className={cn(
               'inline-block font-bold',
-              compacta ? 'text-xl' : 'text-3xl',
+              compacto ? 'text-xl' : 'text-3xl',
               alerta ? paleta.texto : 'text-white',
             )}
           >
             {atual}
           </motion.span>
-          <span className={cn('text-white/30', compacta ? 'text-xs' : 'text-base')}>
+          <span className={cn('text-white/30', compacto ? 'text-xs' : 'text-base')}>
             /{maximo}
           </span>
         </span>
       </div>
 
-      <div
-        className={cn(
-          'mt-2 overflow-hidden rounded-full ring-1 ring-inset ring-white/[0.08]',
-          paleta.trilho,
-          compacta ? 'h-2' : 'h-3',
-        )}
-      >
-        <motion.div
-          className={cn('h-full rounded-full', paleta.barra, proporcao > 0 && paleta.brilho)}
-          initial={false}
-          animate={{ width: `${proporcao * 100}%` }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        />
+      <div className="mt-2 space-y-1">
+        {linhas.map((linha, indiceDaLinha) => (
+          <div key={indiceDaLinha} className="flex gap-1">
+            {linha.map((indice) => {
+              const cheio = indice < atual;
+              return (
+                <motion.span
+                  key={indice}
+                  initial={false}
+                  animate={cheio ? { opacity: 1 } : { opacity: 1 }}
+                  className={cn(
+                    'flex-1 rounded-[2px] transition-colors duration-300',
+                    compacto ? 'h-2' : 'h-2.5',
+                    cheio
+                      ? cn(paleta.cheio, paleta.brilho)
+                      : cn(paleta.vazio, 'ring-1 ring-inset ring-white/10'),
+                  )}
+                />
+              );
+            })}
+          </div>
+        ))}
       </div>
     </div>
   );
 };
 
-export interface MedidorProps {
+/** Ímpeto e Avaliação: poucos espaços, blocos grandes e chanfrados. */
+export interface EspacosDePerfilProps {
   rotulo: string;
   preenchidos: number;
   total: number;
   tom: TomDeRecurso;
+  icone?: React.ReactNode;
   ajuda?: string;
   compacto?: boolean;
   className?: string;
 }
 
-export const Medidor: React.FC<MedidorProps> = ({
+export const EspacosDePerfil: React.FC<EspacosDePerfilProps> = ({
   rotulo,
   preenchidos,
   total,
   tom,
+  icone,
   ajuda,
   compacto,
   className,
@@ -151,10 +220,11 @@ export const Medidor: React.FC<MedidorProps> = ({
   return (
     <div className={cn('min-w-0', className)} title={ajuda}>
       <div className="flex items-end justify-between gap-3">
-        <span className="truncate font-mono text-[10px] font-bold uppercase tracking-[0.26em] text-white/45">
+        <span className="flex items-center gap-1.5 truncate font-carimbo text-[11px] uppercase tracking-[0.22em] text-white/45">
+          {icone ? <span className={paleta.texto}>{icone}</span> : null}
           {rotulo}
         </span>
-        <span className="shrink-0 font-mono leading-none tabular-nums">
+        <span className="shrink-0 font-dados leading-none tabular-nums">
           <span className={cn('font-bold', compacto ? 'text-xl' : 'text-3xl', paleta.texto)}>
             {preenchidos}
           </span>
@@ -162,15 +232,18 @@ export const Medidor: React.FC<MedidorProps> = ({
         </span>
       </div>
 
-      <div className={cn('mt-2 flex gap-2', compacto ? 'h-2' : 'h-3')}>
+      <div className={cn('mt-2 flex gap-1.5', compacto ? 'h-3' : 'h-4')}>
         {Array.from({ length: total }, (_, indice) => (
-          <span
+          <motion.span
             key={indice}
+            initial={false}
+            animate={{ scale: indice < preenchidos ? 1 : 0.94 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
             className={cn(
-              'flex-1 rounded-full ring-1 ring-inset transition-all duration-300',
+              'op2-chanfro flex-1 transition-colors duration-300',
               indice < preenchidos
-                ? cn(paleta.barra, paleta.brilho, 'ring-white/25')
-                : cn(paleta.trilho, 'ring-white/[0.08]'),
+                ? cn(paleta.cheio, paleta.brilho)
+                : cn(paleta.vazio, 'ring-1 ring-inset ring-white/10'),
             )}
           />
         ))}
@@ -185,7 +258,7 @@ export const DistintivoDeDado: React.FC<{ dado: DiceStep; className?: string }> 
 }) => (
   <span className={cn('inline-flex shrink-0 items-center gap-2', NIVEIS_DO_DADO[dado], className)}>
     <IconeDeDado dado={dado} tamanho={24} />
-    <span className="w-6 font-mono text-xs font-bold tabular-nums">{dado}</span>
+    <span className="w-6 font-dados text-sm font-bold tabular-nums">{dado.replace('d', '')}</span>
   </span>
 );
 
@@ -195,13 +268,56 @@ export const Distintivo: React.FC<{ children: React.ReactNode; className?: strin
 }) => (
   <span
     className={cn(
-      'inline-flex items-center rounded-md border px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em]',
-      className ?? 'border-white/[0.12] bg-white/[0.04] text-white/60',
+      'inline-flex items-center border px-2 py-1 font-carimbo text-[11px] uppercase tracking-[0.14em]',
+      className ?? 'border-white/12 bg-white/[0.04] text-white/60',
     )}
   >
     {children}
   </span>
 );
+
+export interface RetratoProps {
+  nome: string;
+  variante?: 'token' | 'retrato';
+  tamanho?: number;
+  className?: string;
+}
+
+export const Retrato: React.FC<RetratoProps> = ({
+  nome,
+  variante = 'token',
+  tamanho = 88,
+  className,
+}) => {
+  const fonte = variante === 'token' ? tokenDoPersonagem(nome) : retratoDoPersonagem(nome);
+
+  if (!fonte) {
+    return (
+      <span
+        style={{ width: tamanho, height: tamanho }}
+        className={cn(
+          'inline-flex shrink-0 items-center justify-center rounded-full border-2 border-[var(--op2-primary)]/50 bg-[var(--op2-superficie-alta)] font-display text-white/70',
+          className,
+        )}
+      >
+        {iniciaisDe(nome)}
+      </span>
+    );
+  }
+
+  return (
+    <span
+      style={{ width: tamanho, height: tamanho }}
+      className={cn(
+        'relative inline-block shrink-0 overflow-hidden rounded-full border-2 border-[var(--op2-primary)]/60',
+        'shadow-[0_0_20px_-4px_var(--op2-glow)]',
+        className,
+      )}
+    >
+      <Image src={fonte} alt={nome} fill sizes={`${tamanho}px`} className="object-cover" />
+    </span>
+  );
+};
 
 export interface BotaoDeAbaProps {
   ativo: boolean;
@@ -216,14 +332,14 @@ export const BotaoDeAba: React.FC<BotaoDeAbaProps> = ({ ativo, onClick, tema, ch
     onClick={onClick}
     aria-pressed={ativo}
     className={cn(
-      'relative min-h-[2.75rem] whitespace-nowrap rounded-lg px-4 font-mono text-[11px] font-bold uppercase tracking-[0.2em] transition-colors duration-200',
-      ativo ? tema.texto : 'text-white/35 hover:text-white/70',
+      'relative min-h-[2.75rem] whitespace-nowrap px-4 font-carimbo text-[12px] uppercase tracking-[0.2em] transition-colors duration-200',
+      ativo ? 'text-white' : 'text-white/35 hover:text-white/70',
     )}
   >
     {ativo ? (
       <motion.span
         layoutId="aba-ativa-op2"
-        className={cn('absolute inset-0 rounded-lg border', tema.borda, tema.fundo)}
+        className={cn('op2-chanfro absolute inset-0 border', tema.borda, tema.fundoSutil)}
         transition={{ type: 'spring', stiffness: 400, damping: 34 }}
       />
     ) : null}

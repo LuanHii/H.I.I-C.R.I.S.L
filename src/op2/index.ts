@@ -181,7 +181,8 @@ export {
 export { FichaOp2View } from './ui/FichaOp2View';
 export * from './ui/Pecas';
 export * from './ui/tema';
-export { IconeDeDado, SeloDeDado } from './ui/Dados';
+export { ICONES_DE_DADO, IconeDeDado, NIVEIS_DO_DADO, SeloDeDado } from './ui/Dados';
+export { ICONES_DE_PERICIA, IconeDePericia, iconeDe } from './ui/IconesDePericia';
 export { PainelOp2 } from './ui/PainelOp2';
 export { ResultadoTesteView } from './ui/ResultadoTeste';
 export { SeletorDePresets } from './ui/SeletorDePresets';
@@ -279,6 +280,7 @@ export type { EstadoDaAssinatura, FichaOp2RemotaProps } from './ui/FichaOp2Remot
 export { FichaOp2Remota, useFichaOp2Remota } from './ui/FichaOp2Remota';
 export { FichaOp2Publica } from './ui/FichaOp2Publica';
 export { OverlayOp2 } from './ui/OverlayOp2';
+export { OverlayRemoto } from './ui/OverlayRemoto';
 export type { FundoDoOverlay } from './ui/OverlayOp2';
 
 export { CompartilharFicha } from './ui/CompartilharFicha';
