@@ -180,6 +180,8 @@ export {
 
 export { FichaOp2View } from './ui/FichaOp2View';
 export * from './ui/Pecas';
+export * from './ui/tema';
+export { IconeDeDado, SeloDeDado } from './ui/Dados';
 export { PainelOp2 } from './ui/PainelOp2';
 export { ResultadoTesteView } from './ui/ResultadoTeste';
 export { SeletorDePresets } from './ui/SeletorDePresets';

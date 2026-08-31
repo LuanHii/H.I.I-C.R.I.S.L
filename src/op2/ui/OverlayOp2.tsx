@@ -20,11 +20,11 @@ import {
 } from '../regras/tipos';
 import {
   BarraDeRecurso,
-  CORES_DO_PERFIL,
   Medidor,
   SOMBRA_DE_ELEMENTO,
   SOMBRA_DE_LEITURA,
 } from './Pecas';
+import { temaDe } from './tema';
 
 export type FundoDoOverlay = 'transparente' | 'verde';
 
@@ -85,7 +85,7 @@ export const OverlayOp2: React.FC<OverlayOp2Props> = ({
           <span
             className={cn(
               'shrink-0 rounded border px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest backdrop-blur-sm',
-              CORES_DO_PERFIL[ficha.perfil.tipo],
+              temaDe(ficha).distintivo,
               SOMBRA_DE_ELEMENTO,
             )}
           >

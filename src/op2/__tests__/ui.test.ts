@@ -15,25 +15,42 @@ function fonte(arquivo: string): string {
 const TODOS_OS_COMPONENTES = readdirSync(RAIZ_UI).filter((arquivo) => arquivo.endsWith('.tsx'));
 
 describe('a UI cobre todas as variantes do dominio', () => {
-  it('cada passo da escala tem cor propria no vocabulario visual compartilhado', () => {
-    const pecas = fonte('Pecas.tsx');
+  it('cada passo da escala tem forma e cor proprias em Dados.tsx', () => {
+    const dados = fonte('Dados.tsx');
     for (const passo of [...ESCALA_PASSOS, 'd20']) {
-      expect(pecas).toContain(`${passo}:`);
+      expect(dados).toContain(`${passo}:`);
     }
   });
 
-  it('cada perfil tem cor propria no vocabulario visual compartilhado', () => {
-    const pecas = fonte('Pecas.tsx');
+  it('cada passo da escala tem um icone desenhado, e nenhum repete a forma de outro', () => {
+    const dados = fonte('Dados.tsx');
+    const formas = dados.slice(dados.indexOf('const FORMAS'), dados.indexOf('export interface'));
+
+    for (const passo of [...ESCALA_PASSOS, 'd20']) {
+      expect(formas, `${passo} sem forma SVG`).toContain(`${passo}: {`);
+    }
+
+    const contornos = (formas.match(/corpo: '([^']+)'/g) ?? []).map((linha) =>
+      linha.replace("corpo: '", '').replace(/'$/, ''),
+    );
+    expect(contornos).toHaveLength(ESCALA_PASSOS.length + 1);
+    expect(new Set(contornos).size, 'dois dados com o mesmo desenho').toBe(contornos.length);
+  });
+
+  it('cada perfil tem tema proprio, com cor e lema distintos', () => {
+    const tema = readFileSync(path.join(RAIZ_UI, 'tema.ts'), 'utf8');
     for (const perfil of ['EXECUTOR', 'ANALISTA', 'VIGILANTE']) {
-      expect(pecas).toContain(`${perfil}:`);
+      expect(tema).toContain(`${perfil}: {`);
     }
+    const acentos = (tema.match(/texto: '([^']+)'/g) ?? []).slice(0, 3);
+    expect(new Set(acentos).size, 'perfis compartilhando a mesma cor').toBe(3);
   });
 
-  it('os mapas de cor moram SO em Pecas.tsx: uma segunda copia acaba divergindo', () => {
+  it('cada mapa de cor tem UM dono: copia em componente acaba divergindo', () => {
     const redefinem = TODOS_OS_COMPONENTES.filter(
       (arquivo) =>
-        arquivo !== 'Pecas.tsx' &&
-        /const CORES_DO_(DADO|PERFIL)\s*[:=]/.test(fonte(arquivo)),
+        !['Pecas.tsx', 'Dados.tsx'].includes(arquivo) &&
+        /const (CORES_DO_(DADO|PERFIL)|NIVEIS_DO_DADO|TEMAS|TONS)\s*[:=]/.test(fonte(arquivo)),
     );
     expect(redefinem).toEqual([]);
   });

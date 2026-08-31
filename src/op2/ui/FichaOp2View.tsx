@@ -33,13 +33,13 @@ import {
 } from '../regras/tipos';
 import {
   BarraDeRecurso,
-  CORES_DO_PERFIL,
   Distintivo,
   DistintivoDeDado,
   Medidor,
   PAINEL,
   RotuloDeSecao,
 } from './Pecas';
+import { temaDe } from './tema';
 import { TesteRapido } from './TesteRapido';
 
 interface AjustadorProps {
@@ -145,7 +145,7 @@ export const FichaOp2View: React.FC<FichaOp2ViewProps> = ({
         <div className="min-w-0">
           <h2 className="truncate font-serif text-2xl text-white sm:text-3xl">{ficha.nome}</h2>
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            <Distintivo className={cn('uppercase', CORES_DO_PERFIL[ficha.perfil.tipo])}>
+            <Distintivo className={cn('uppercase', temaDe(ficha).distintivo)}>
               {ficha.perfil.tipo}
             </Distintivo>
             <span className="font-mono text-[10px] text-ordem-text-secondary sm:text-xs">

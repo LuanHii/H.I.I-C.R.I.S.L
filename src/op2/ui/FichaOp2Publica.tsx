@@ -32,20 +32,23 @@ import {
   type FichaOp2,
   type RefPericia,
 } from '../regras/tipos';
+import { IconeDeDado } from './Dados';
 import {
-  ATMOSFERA,
   Aparecer,
+  BASE_DA_PAGINA,
   BarraDeRecurso,
   BotaoDeAba,
   CONTEUDO,
-  CORES_DO_PERFIL,
   Distintivo,
   DistintivoDeDado,
   Medidor,
   PAINEL,
   RotuloDeSecao,
+  TRAMA,
+  VINHETA,
 } from './Pecas';
 import { ReferenciaDeRegras } from './ReferenciaDeRegras';
+import { temaDe, type TemaDePerfil } from './tema';
 
 type Aba = 'acoes' | 'pericias';
 
@@ -65,27 +68,31 @@ const LinhaDePericia: React.FC<LinhaDePericiaProps> = ({ ficha, ref_, rotulo, de
     <div
       title={descricao}
       className={cn(
-        'flex min-h-[2.75rem] items-center gap-3 rounded-xl border px-3 py-2 transition-colors',
-        destreinada
-          ? 'border-transparent bg-white/[0.015]'
-          : 'border-white/[0.08] bg-white/[0.04]',
+        'flex min-h-[3rem] items-center gap-3 rounded-xl border px-3 py-2',
+        destreinada ? 'border-transparent bg-white/[0.012]' : 'border-white/[0.09] bg-white/[0.045]',
       )}
     >
       <DistintivoDeDado dado={dado} />
-      <span className={cn('flex-1 truncate text-sm', destreinada ? 'text-white/35' : 'text-white/85')}>
+      <span
+        className={cn(
+          'flex-1 truncate text-[0.95rem]',
+          destreinada ? 'text-white/30' : 'text-white/90',
+        )}
+      >
         {rotulo}
       </span>
-      <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.12em] text-white/30">
+      <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.14em] text-white/25">
         {grau}
       </span>
     </div>
   );
 };
 
-const GrupoDePericias: React.FC<{ ficha: FichaOp2; atributo: AtributoOp2 }> = ({
-  ficha,
-  atributo,
-}) => {
+const GrupoDePericias: React.FC<{
+  ficha: FichaOp2;
+  atributo: AtributoOp2;
+  tema: TemaDePerfil;
+}> = ({ ficha, atributo, tema }) => {
   const [mostrandoTodas, setMostrandoTodas] = useState(false);
 
   const referencias: { ref_: RefPericia; rotulo: string; descricao: string }[] = [
@@ -105,14 +112,17 @@ const GrupoDePericias: React.FC<{ ficha: FichaOp2; atributo: AtributoOp2 }> = ({
 
   const treinadas = referencias.filter((item) => dadoDaPericia(ficha, item.ref_) !== 'd4');
   const destreinadas = referencias.filter((item) => dadoDaPericia(ficha, item.ref_) === 'd4');
+  const dadoDoGrupo = dadoDoAtributo(ficha, atributo);
 
   return (
     <section className={cn(PAINEL, 'p-4 sm:p-5')}>
       <RotuloDeSecao
+        tema={tema}
         className="mb-4"
         acessorio={
-          <span className="font-mono text-base font-bold text-white">
-            {dadoDoAtributo(ficha, atributo)}
+          <span className="inline-flex items-center gap-2 text-white">
+            <IconeDeDado dado={dadoDoGrupo} tamanho={20} />
+            <span className="font-mono text-sm font-bold">{dadoDoGrupo}</span>
           </span>
         }
       >
@@ -120,7 +130,7 @@ const GrupoDePericias: React.FC<{ ficha: FichaOp2; atributo: AtributoOp2 }> = ({
       </RotuloDeSecao>
 
       {treinadas.length === 0 ? (
-        <p className="py-1 text-sm text-white/35">Nenhuma perícia treinada aqui.</p>
+        <p className="py-1 text-sm text-white/30">Nenhuma perícia treinada aqui.</p>
       ) : (
         <div className="space-y-1.5">
           {treinadas.map((item) => (
@@ -137,7 +147,7 @@ const GrupoDePericias: React.FC<{ ficha: FichaOp2; atributo: AtributoOp2 }> = ({
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 className="overflow-hidden"
               >
                 <div className={cn('space-y-1.5', treinadas.length > 0 && 'pt-1.5')}>
@@ -153,7 +163,7 @@ const GrupoDePericias: React.FC<{ ficha: FichaOp2; atributo: AtributoOp2 }> = ({
             type="button"
             onClick={() => setMostrandoTodas((atual) => !atual)}
             aria-expanded={mostrandoTodas}
-            className="mt-3 flex min-h-[2.5rem] w-full items-center justify-center gap-1.5 rounded-xl font-mono text-[10px] uppercase tracking-[0.2em] text-white/30 transition-colors hover:bg-white/[0.03] hover:text-white/60"
+            className="mt-3 flex min-h-[2.5rem] w-full items-center justify-center gap-1.5 rounded-xl font-mono text-[10px] uppercase tracking-[0.22em] text-white/25 transition-colors hover:bg-white/[0.03] hover:text-white/60"
           >
             <ChevronDown
               size={13}
@@ -183,6 +193,7 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
   className,
 }) => {
   const [aba, setAba] = useState<Aba>('acoes');
+  const tema = temaDe(ficha);
   const risco = estadoDeRisco(ficha);
 
   const habilidades = ficha.habilidades
@@ -193,41 +204,34 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
         lista.findIndex((outra) => outra.nome === habilidade.nome) === indice,
     );
 
-  const avisos = [
-    risco.precisaFerimento
-      ? {
-          chave: 'ferimento',
-          texto: `0 PV · Ferimento DT ${risco.dtFerimento} (Físico + Vigor)`,
-          classe: 'border-ordem-red/50 bg-ordem-red/[0.15] text-ordem-red-light',
-        }
-      : null,
-    risco.precisaTrauma
-      ? {
-          chave: 'trauma',
-          texto: `0 PD · Trauma DT ${risco.dtTrauma} (Emoção + Disciplina)`,
-          classe: 'border-ordem-purple/50 bg-ordem-purple/[0.15] text-ordem-purple',
-        }
-      : null,
-  ].filter((aviso): aviso is NonNullable<typeof aviso> => aviso !== null);
-
   return (
-    <div className={cn(ATMOSFERA, className)}>
+    <div className={cn(BASE_DA_PAGINA, className)}>
+      <div className={cn('pointer-events-none fixed inset-0 z-0', tema.aura)} />
+      <div className={TRAMA} />
+      <div className={VINHETA} />
+
       <div className={CONTEUDO}>
         <Aparecer>
-          <header className="mb-7">
+          <header className="mb-8">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <h1 className="truncate font-serif text-4xl leading-[1.05] text-white sm:text-5xl">
+                <div
+                  className={cn(
+                    'font-mono text-[10px] font-bold uppercase tracking-[0.4em]',
+                    tema.texto,
+                  )}
+                >
+                  {tema.rotulo}
+                </div>
+                <h1 className="mt-1 truncate font-serif text-[2.75rem] leading-[1.02] text-white sm:text-6xl">
                   {ficha.nome}
                 </h1>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <Distintivo className={CORES_DO_PERFIL[ficha.perfil.tipo]}>
-                    {ficha.perfil.tipo}
-                  </Distintivo>
-                  <span className="text-sm text-white/60">{ficha.ocupacao}</span>
-                  <span className="text-white/20">·</span>
-                  <span className="text-sm text-white/40">Nível {ficha.nivel}</span>
-                </div>
+                <div className={cn('mt-3 h-px w-24 bg-gradient-to-r to-transparent', tema.regua)} />
+                <p className="mt-3 text-sm text-white/45">
+                  {ficha.ocupacao}
+                  <span className="mx-2 text-white/15">·</span>
+                  Nível {ficha.nivel}
+                </p>
               </div>
 
               <div className="flex shrink-0 items-center gap-1.5 pt-2">
@@ -235,21 +239,25 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
                   className={cn(
                     'h-1.5 w-1.5 rounded-full',
                     conectado
-                      ? 'animate-pulse bg-ordem-green shadow-[0_0_8px_rgba(0,255,0,0.8)]'
-                      : 'bg-white/25',
+                      ? 'animate-pulse bg-ordem-green shadow-[0_0_10px_rgba(0,255,0,0.9)]'
+                      : 'bg-white/20',
                   )}
                 />
-                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/35">
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">
                   {conectado ? 'ao vivo' : 'offline'}
                 </span>
               </div>
             </div>
+
+            <p className="mt-4 max-w-prose text-sm italic leading-relaxed text-white/35">
+              {tema.lema}
+            </p>
           </header>
         </Aparecer>
 
-        <Aparecer atraso={0.05}>
+        <Aparecer atraso={0.06}>
           <section className={cn(PAINEL, 'mb-4 p-5 sm:p-6')}>
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="space-y-6">
               <BarraDeRecurso
                 rotulo="Pontos de Vida"
                 atual={pvAtual(ficha)}
@@ -286,26 +294,34 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
               ) : null}
             </div>
 
-            <div className="mt-6 grid grid-cols-3 gap-3 border-t border-white/[0.07] pt-5">
+            <div className="mt-7 grid grid-cols-3 gap-3 border-t border-white/[0.08] pt-6">
               {ATRIBUTOS_OP2.map((atributo) => (
-                <div key={atributo} className="text-center">
-                  <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/40">
+                <div key={atributo} className="flex flex-col items-center gap-1.5">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/40">
                     {ROTULO_ATRIBUTO[atributo]}
-                  </div>
-                  <div className="mt-1 font-mono text-3xl font-bold text-white">
-                    {ficha.atributos[atributo]}
-                  </div>
+                  </span>
+                  <span className={cn('flex items-center gap-2', tema.texto)}>
+                    <IconeDeDado dado={ficha.atributos[atributo]} tamanho={30} />
+                    <span className="font-mono text-3xl font-bold text-white">
+                      {ficha.atributos[atributo]}
+                    </span>
+                  </span>
                 </div>
               ))}
             </div>
 
-            {avisos.length > 0 || ficha.sessao.condicoes.length > 0 ? (
-              <div className="mt-5 flex flex-wrap gap-2 border-t border-white/[0.07] pt-5">
-                {avisos.map((aviso) => (
-                  <Distintivo key={aviso.chave} className={cn('animate-pulse', aviso.classe)}>
-                    {aviso.texto}
+            {risco.precisaFerimento || risco.precisaTrauma || ficha.sessao.condicoes.length > 0 ? (
+              <div className="mt-6 flex flex-wrap gap-2 border-t border-white/[0.08] pt-6">
+                {risco.precisaFerimento ? (
+                  <Distintivo className="animate-pulse border-ordem-red/50 bg-ordem-red/[0.16] text-ordem-red-light">
+                    0 PV · Ferimento DT {risco.dtFerimento} (Físico + Vigor)
                   </Distintivo>
-                ))}
+                ) : null}
+                {risco.precisaTrauma ? (
+                  <Distintivo className="animate-pulse border-ordem-purple/50 bg-ordem-purple/[0.16] text-ordem-purple">
+                    0 PD · Trauma DT {risco.dtTrauma} (Emoção + Disciplina)
+                  </Distintivo>
+                ) : null}
                 {ficha.sessao.condicoes.map((condicao) => (
                   <Distintivo
                     key={condicao}
@@ -318,14 +334,14 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
             ) : null}
 
             {ficha.sessao.passosDeCena.length > 0 ? (
-              <div className="mt-5 border-t border-white/[0.07] pt-5">
-                <RotuloDeSecao className="mb-2">Até o fim da cena</RotuloDeSecao>
+              <div className="mt-6 border-t border-white/[0.08] pt-6">
+                <RotuloDeSecao className="mb-3">Até o fim da cena</RotuloDeSecao>
                 <ul className="space-y-1">
                   {ficha.sessao.passosDeCena.map((passo, indice) => (
                     <li key={indice} className="text-sm text-ordem-gold">
                       {passo.delta > 0 ? '+' : ''}
                       {passo.delta} passo em {ROTULO_ATRIBUTO[passo.alvo]}
-                      <span className="text-white/35"> — {passo.motivo}</span>
+                      <span className="text-white/30"> — {passo.motivo}</span>
                     </li>
                   ))}
                 </ul>
@@ -334,11 +350,11 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
           </section>
         </Aparecer>
 
-        <div className="sticky top-0 z-30 -mx-4 mb-4 flex items-center gap-1 bg-ordem-black/85 px-4 py-2 backdrop-blur-md sm:-mx-6 sm:px-6">
-          <BotaoDeAba ativo={aba === 'acoes'} onClick={() => setAba('acoes')}>
+        <div className="sticky top-0 z-30 -mx-4 mb-4 flex items-center gap-2 bg-ordem-black/85 px-4 py-2 backdrop-blur-md sm:-mx-6 sm:px-6">
+          <BotaoDeAba tema={tema} ativo={aba === 'acoes'} onClick={() => setAba('acoes')}>
             O que posso fazer
           </BotaoDeAba>
-          <BotaoDeAba ativo={aba === 'pericias'} onClick={() => setAba('pericias')}>
+          <BotaoDeAba tema={tema} ativo={aba === 'pericias'} onClick={() => setAba('pericias')}>
             Perícias
           </BotaoDeAba>
 
@@ -347,14 +363,14 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
               <button
                 type="button"
                 onClick={() => aoAbrirOverlay('mini')}
-                className="min-h-[2.75rem] rounded-full px-3 font-mono text-[10px] uppercase tracking-[0.2em] text-white/30 transition-colors hover:text-white/70"
+                className="min-h-[2.75rem] rounded-lg px-3 font-mono text-[10px] uppercase tracking-[0.2em] text-white/25 transition-colors hover:text-white/70"
               >
                 Overlay
               </button>
               <button
                 type="button"
                 onClick={() => aoAbrirOverlay('full')}
-                className="min-h-[2.75rem] rounded-full px-3 font-mono text-[10px] uppercase tracking-[0.2em] text-white/30 transition-colors hover:text-white/70"
+                className="min-h-[2.75rem] rounded-lg px-3 font-mono text-[10px] uppercase tracking-[0.2em] text-white/25 transition-colors hover:text-white/70"
               >
                 Overlay+
               </button>
@@ -365,26 +381,28 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
         <AnimatePresence mode="wait">
           <motion.div
             key={aba}
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
             className="space-y-4"
           >
             {aba === 'acoes' ? (
               <>
                 <section className={cn(PAINEL, 'p-4 sm:p-6')}>
-                  <RotuloDeSecao className="mb-5">Suas habilidades</RotuloDeSecao>
-                  <ul className="space-y-5">
+                  <RotuloDeSecao tema={tema} className="mb-6">
+                    Suas habilidades
+                  </RotuloDeSecao>
+                  <ul className="space-y-6">
                     {habilidades.map((habilidade) => (
-                      <li key={habilidade.id}>
+                      <li key={habilidade.id} className={cn('border-l-2 pl-4', tema.borda)}>
                         <div className="flex flex-wrap items-baseline gap-2">
-                          <h3 className="font-serif text-xl text-white">{habilidade.nome}</h3>
+                          <h3 className="font-serif text-2xl text-white">{habilidade.nome}</h3>
                           {!temEfeitoEmRuntime(habilidade) ? (
                             <Distintivo>já na ficha</Distintivo>
                           ) : null}
                         </div>
-                        <p className="mt-1.5 max-w-prose text-sm leading-relaxed text-white/65">
+                        <p className="mt-2 max-w-prose text-[0.95rem] leading-relaxed text-white/60">
                           {habilidade.descricao}
                         </p>
                       </li>
@@ -392,14 +410,19 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
                   </ul>
                 </section>
 
-                <ReferenciaDeRegras />
+                <ReferenciaDeRegras tema={tema} />
               </>
             ) : (
               <>
                 {ATRIBUTOS_OP2.map((atributo) => (
-                  <GrupoDePericias key={atributo} ficha={ficha} atributo={atributo} />
+                  <GrupoDePericias
+                    key={atributo}
+                    ficha={ficha}
+                    atributo={atributo}
+                    tema={tema}
+                  />
                 ))}
-                <p className="px-1 font-mono text-[10px] leading-relaxed tracking-wide text-white/30">
+                <p className="px-1 font-mono text-[10px] leading-relaxed tracking-wide text-white/25">
                   d4 destreinado · d6 treinado · d8 especialista · d10 mestre · d12 grão-mestre.
                   O teste soma o dado do atributo com o da perícia.
                 </p>
@@ -409,7 +432,7 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
         </AnimatePresence>
 
         {atualizadoEm ? (
-          <p className="mt-8 text-center font-mono text-[10px] tracking-wide text-white/25">
+          <p className="mt-10 text-center font-mono text-[10px] tracking-wide text-white/20">
             Atualizado em {new Date(atualizadoEm).toLocaleString('pt-BR')}
           </p>
         ) : null}

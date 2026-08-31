@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { useOp2FichasStore } from '../estado/useOp2FichasStore';
 import { pdAtual, pvAtual } from '../regras/ficha';
 import type { FichaOp2 } from '../regras/tipos';
-import { CORES_DO_PERFIL } from './Pecas';
+import { temaDe } from './tema';
 import { CompartilharFicha } from './CompartilharFicha';
 import { FichaOp2View } from './FichaOp2View';
 import { PainelInvestigacao } from './PainelInvestigacao';
@@ -78,7 +78,7 @@ const PainelFichas: React.FC = () => {
               <span
                 className={cn(
                   'block text-[0.65rem] uppercase tracking-wide',
-                  CORES_DO_PERFIL[ficha.perfil.tipo],
+                  temaDe(ficha).texto,
                 )}
               >
                 {ficha.perfil.tipo}
