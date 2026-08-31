@@ -1,152 +1,204 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import type { DiceStep, FichaOp2 } from '../regras/tipos';
 
-export const FUNDO_DA_PAGINA =
-  'min-h-screen overflow-x-clip bg-ordem-black text-white bg-[radial-gradient(circle_at_top,rgba(139,0,0,0.18),transparent_34%),linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[size:auto,32px_32px,32px_32px]';
+export const ATMOSFERA = [
+  'relative min-h-screen w-full overflow-x-clip bg-ordem-black text-white',
+  'before:pointer-events-none before:fixed before:inset-0 before:z-0',
+  'before:bg-[radial-gradient(ellipse_90%_45%_at_50%_-10%,rgba(220,38,38,0.16),transparent_70%),radial-gradient(ellipse_60%_40%_at_50%_115%,rgba(168,85,247,0.07),transparent_70%)]',
+  'after:pointer-events-none after:fixed after:inset-0 after:z-0',
+  'after:bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_3px)]',
+].join(' ');
 
-export const CONTEUDO = 'w-full max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-6 safe-x safe-top safe-bottom';
+export const CONTEUDO =
+  'relative z-10 mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-8 safe-x safe-top safe-bottom';
 
-export const CARTAO = 'bg-ordem-ooze/30 border border-ordem-border rounded-xl p-3 sm:p-5';
-
-export const LADRILHO = 'min-w-0 border border-white/10 bg-black/35 rounded-xl p-3';
+export const PAINEL = [
+  'relative overflow-hidden rounded-2xl',
+  'border border-white/[0.07] bg-gradient-to-b from-white/[0.045] to-transparent',
+  'shadow-[0_1px_0_0_rgba(255,255,255,0.06)_inset,0_18px_40px_-24px_rgba(0,0,0,0.9)]',
+].join(' ');
 
 export const SOMBRA_DE_LEITURA =
-  '[text-shadow:0_1px_2px_rgba(0,0,0,0.95),0_2px_10px_rgba(0,0,0,0.75)]';
+  '[text-shadow:0_1px_2px_rgba(0,0,0,0.95),0_2px_12px_rgba(0,0,0,0.7)]';
 
 export const SOMBRA_DE_ELEMENTO = 'drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]';
 
 export const CORES_DO_PERFIL: Record<FichaOp2['perfil']['tipo'], string> = {
-  EXECUTOR: 'text-ordem-red border-ordem-red/30 bg-ordem-red/10',
-  ANALISTA: 'text-ordem-blue border-ordem-blue/30 bg-ordem-blue/10',
-  VIGILANTE: 'text-ordem-green border-ordem-green/30 bg-ordem-green/10',
+  EXECUTOR: 'text-ordem-red-light border-ordem-red/40 bg-ordem-red/[0.14]',
+  ANALISTA: 'text-ordem-cyan border-ordem-cyan/40 bg-ordem-cyan/[0.12]',
+  VIGILANTE: 'text-ordem-green-muted border-ordem-green/40 bg-ordem-green/[0.12]',
 };
 
 export const CORES_DO_DADO: Record<DiceStep, string> = {
-  d4: 'border-white/10 bg-black/40 text-ordem-text-muted',
-  d6: 'border-ordem-green-muted/40 bg-ordem-green/10 text-ordem-green-muted',
-  d8: 'border-ordem-cyan/40 bg-ordem-cyan/10 text-ordem-cyan',
-  d10: 'border-ordem-gold/40 bg-ordem-gold/10 text-ordem-gold',
-  d12: 'border-ordem-purple/40 bg-ordem-purple/10 text-ordem-purple',
-  d20: 'border-ordem-red/40 bg-ordem-red/10 text-ordem-red-light',
+  d4: 'border-white/[0.07] bg-white/[0.02] text-white/35',
+  d6: 'border-white/20 bg-white/[0.06] text-white/90',
+  d8: 'border-white/25 bg-white/[0.09] text-white',
+  d10: 'border-ordem-gold/45 bg-ordem-gold/[0.14] text-ordem-gold',
+  d12: 'border-ordem-gold/60 bg-ordem-gold/20 text-ordem-gold',
+  d20: 'border-ordem-red/60 bg-ordem-red/20 text-ordem-red-light',
 };
 
-export const RotuloDeSecao: React.FC<{ children: React.ReactNode; className?: string }> = ({
-  children,
-  className,
-}) => (
-  <div
-    className={cn(
-      'text-[10px] sm:text-xs font-mono tracking-[0.25em] sm:tracking-[0.3em] text-ordem-text-muted uppercase',
-      className,
-    )}
-  >
-    {children}
+export type TomDeRecurso = 'vida' | 'determinacao' | 'impeto' | 'avaliacao';
+
+const TONS: Record<TomDeRecurso, { barra: string; brilho: string; texto: string; pip: string }> = {
+  vida: {
+    barra: 'bg-gradient-to-r from-ordem-red-dark via-ordem-red to-ordem-red-light',
+    brilho: 'shadow-[0_0_12px_-1px_rgba(220,38,38,0.75)]',
+    texto: 'text-ordem-red-light',
+    pip: 'bg-ordem-red',
+  },
+  determinacao: {
+    barra: 'bg-gradient-to-r from-ordem-blue via-ordem-purple to-ordem-purple',
+    brilho: 'shadow-[0_0_12px_-1px_rgba(168,85,247,0.7)]',
+    texto: 'text-ordem-purple',
+    pip: 'bg-ordem-purple',
+  },
+  impeto: {
+    barra: 'bg-gradient-to-r from-ordem-red-dark to-ordem-gold',
+    brilho: 'shadow-[0_0_12px_-1px_rgba(255,215,0,0.6)]',
+    texto: 'text-ordem-gold',
+    pip: 'bg-ordem-gold',
+  },
+  avaliacao: {
+    barra: 'bg-gradient-to-r from-ordem-blue to-ordem-cyan',
+    brilho: 'shadow-[0_0_12px_-1px_rgba(34,211,238,0.6)]',
+    texto: 'text-ordem-cyan',
+    pip: 'bg-ordem-cyan',
+  },
+};
+
+export const RotuloDeSecao: React.FC<{
+  children: React.ReactNode;
+  acessorio?: React.ReactNode;
+  className?: string;
+}> = ({ children, acessorio, className }) => (
+  <div className={cn('flex items-center gap-3', className)}>
+    <span className="shrink-0 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-white/45">
+      {children}
+    </span>
+    <span className="h-px flex-1 bg-gradient-to-r from-white/[0.12] to-transparent" />
+    {acessorio ? <span className="shrink-0">{acessorio}</span> : null}
   </div>
 );
 
-export interface PilulaDeRecursoProps {
+export interface BarraDeRecursoProps {
   rotulo: string;
   atual: number;
   maximo: number;
-  tom: string;
+  tom: TomDeRecurso;
   alerta?: boolean;
+  compacta?: boolean;
+  className?: string;
 }
 
-export const PilulaDeRecurso: React.FC<PilulaDeRecursoProps> = ({
+export const BarraDeRecurso: React.FC<BarraDeRecursoProps> = ({
   rotulo,
   atual,
   maximo,
   tom,
   alerta,
+  compacta,
+  className,
 }) => {
-  const percentual = maximo > 0 ? Math.max(0, Math.min(100, (atual / maximo) * 100)) : 0;
+  const paleta = TONS[tom];
+  const percentual = maximo > 0 ? Math.max(0, Math.min(1, atual / maximo)) : 0;
+
   return (
-    <div
-      className={cn(
-        'relative min-w-0 overflow-hidden rounded-lg border bg-black/45 px-3 py-2',
-        alerta ? 'border-ordem-red/60' : 'border-white/10',
-      )}
-    >
-      <div
-        className={cn('absolute inset-y-0 left-0 opacity-20 transition-all duration-500', tom)}
-        style={{ width: `${percentual}%` }}
-      />
-      <div className="relative z-10 text-[10px] font-mono tracking-widest text-ordem-text-muted uppercase">
-        {rotulo}
+    <div className={cn('min-w-0', className)}>
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="truncate font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/50">
+          {rotulo}
+        </span>
+        <span className="shrink-0 font-mono tabular-nums">
+          <motion.span
+            key={atual}
+            initial={{ opacity: 0.3, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className={cn(
+              'inline-block font-bold',
+              compacta ? 'text-lg' : 'text-2xl',
+              alerta ? paleta.texto : 'text-white',
+            )}
+          >
+            {atual}
+          </motion.span>
+          <span className={cn('text-white/35', compacta ? 'text-xs' : 'text-sm')}>/{maximo}</span>
+        </span>
       </div>
+
       <div
         className={cn(
-          'relative z-10 text-lg font-bold leading-tight',
-          alerta ? 'text-ordem-red-light' : 'text-white',
+          'mt-1.5 overflow-hidden rounded-full bg-black/70 ring-1 ring-inset ring-white/[0.09]',
+          compacta ? 'h-2' : 'h-2.5',
         )}
       >
-        {atual}
-        <span className="text-xs text-ordem-text-muted">/{maximo}</span>
+        <motion.div
+          className={cn('h-full rounded-full', paleta.barra, percentual > 0 && paleta.brilho)}
+          initial={false}
+          animate={{ width: `${percentual * 100}%` }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        />
       </div>
     </div>
   );
 };
 
-export interface PilulaDeEspacosProps {
+export interface MedidorProps {
   rotulo: string;
   preenchidos: number;
   total: number;
-  tom: string;
+  tom: TomDeRecurso;
   ajuda?: string;
+  compacto?: boolean;
+  className?: string;
 }
 
-export const PilulaDeEspacos: React.FC<PilulaDeEspacosProps> = ({
+export const Medidor: React.FC<MedidorProps> = ({
   rotulo,
   preenchidos,
   total,
   tom,
   ajuda,
-}) => (
-  <div
-    className="min-w-0 rounded-lg border border-white/10 bg-black/45 px-3 py-2"
-    title={ajuda}
-  >
-    <div className="text-[10px] font-mono tracking-widest text-ordem-text-muted uppercase">
-      {rotulo}
-    </div>
-    <div className="mt-1.5 flex gap-1">
-      {Array.from({ length: total }, (_, indice) => (
-        <span
-          key={indice}
-          className={cn(
-            'h-3.5 flex-1 rounded-sm border transition-colors',
-            indice < preenchidos ? tom : 'border-white/10 bg-black/40',
-          )}
-        />
-      ))}
-    </div>
-  </div>
-);
+  compacto,
+  className,
+}) => {
+  const paleta = TONS[tom];
 
-export interface BotaoDeAbaProps {
-  ativo: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}
+  return (
+    <div className={cn('min-w-0', className)} title={ajuda}>
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="truncate font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/50">
+          {rotulo}
+        </span>
+        <span className="shrink-0 font-mono tabular-nums">
+          <span className={cn('font-bold', compacto ? 'text-lg' : 'text-2xl', paleta.texto)}>
+            {preenchidos}
+          </span>
+          <span className={cn('text-white/35', compacto ? 'text-xs' : 'text-sm')}>/{total}</span>
+        </span>
+      </div>
 
-export const BotaoDeAba: React.FC<BotaoDeAbaProps> = ({ ativo, onClick, children }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    aria-pressed={ativo}
-    className={cn(
-      'whitespace-nowrap rounded-full border px-4 py-2 text-[10px] font-mono tracking-widest shadow-sm transition-all sm:px-6 sm:py-2.5 sm:text-xs',
-      ativo
-        ? 'border-ordem-gold bg-ordem-gold/15 text-ordem-gold shadow-[0_0_10px_rgba(234,179,8,0.2)]'
-        : 'border-white/10 bg-black/40 text-ordem-white/50 hover:border-white/20 hover:bg-black/60 hover:text-white',
-    )}
-  >
-    {children}
-  </button>
-);
+      <div className={cn('mt-1.5 flex gap-1.5', compacto ? 'h-2' : 'h-2.5')}>
+        {Array.from({ length: total }, (_, indice) => (
+          <span
+            key={indice}
+            className={cn(
+              'flex-1 rounded-full ring-1 ring-inset transition-all duration-300',
+              indice < preenchidos
+                ? cn(paleta.pip, paleta.brilho, 'ring-white/25')
+                : 'bg-black/70 ring-white/[0.09]',
+            )}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export const DistintivoDeDado: React.FC<{ dado: DiceStep; className?: string }> = ({
   dado,
@@ -154,7 +206,7 @@ export const DistintivoDeDado: React.FC<{ dado: DiceStep; className?: string }> 
 }) => (
   <span
     className={cn(
-      'inline-flex w-12 shrink-0 items-center justify-center rounded-md border py-0.5 font-mono text-xs font-bold',
+      'inline-flex h-7 w-11 shrink-0 items-center justify-center rounded-md border font-mono text-xs font-bold tabular-nums',
       CORES_DO_DADO[dado],
       className,
     )}
@@ -169,10 +221,52 @@ export const Distintivo: React.FC<{ children: React.ReactNode; className?: strin
 }) => (
   <span
     className={cn(
-      'rounded border px-2 py-1 font-mono text-[10px] sm:text-xs',
-      className ?? 'border-white/10 bg-black/40 text-ordem-text-secondary',
+      'inline-flex items-center rounded-md border px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.12em]',
+      className ?? 'border-white/[0.12] bg-white/[0.04] text-white/60',
     )}
   >
     {children}
   </span>
+);
+
+export interface BotaoDeAbaProps {
+  ativo: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}
+
+export const BotaoDeAba: React.FC<BotaoDeAbaProps> = ({ ativo, onClick, children }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    aria-pressed={ativo}
+    className={cn(
+      'relative min-h-[2.75rem] whitespace-nowrap rounded-full px-5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors duration-200',
+      ativo ? 'text-ordem-black' : 'text-white/45 hover:text-white/80',
+    )}
+  >
+    {ativo ? (
+      <motion.span
+        layoutId="aba-ativa-op2"
+        className="absolute inset-0 rounded-full bg-ordem-gold shadow-[0_0_20px_-4px_rgba(255,215,0,0.6)]"
+        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+      />
+    ) : null}
+    <span className="relative z-10">{children}</span>
+  </button>
+);
+
+export const Aparecer: React.FC<{
+  children: React.ReactNode;
+  className?: string;
+  atraso?: number;
+}> = ({ children, className, atraso = 0 }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 12 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1], delay: atraso }}
+    className={className}
+  >
+    {children}
+  </motion.div>
 );

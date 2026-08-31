@@ -18,7 +18,13 @@ import {
   ROTULO_ATRIBUTO,
   type FichaOp2,
 } from '../regras/tipos';
-import { CORES_DO_PERFIL, SOMBRA_DE_ELEMENTO, SOMBRA_DE_LEITURA } from './Pecas';
+import {
+  BarraDeRecurso,
+  CORES_DO_PERFIL,
+  Medidor,
+  SOMBRA_DE_ELEMENTO,
+  SOMBRA_DE_LEITURA,
+} from './Pecas';
 
 export type FundoDoOverlay = 'transparente' | 'verde';
 
@@ -38,95 +44,6 @@ function usePulsoAoMudar(valor: number): 'subiu' | 'desceu' | null {
 
   return pulso;
 }
-
-interface BarraProps {
-  rotulo: string;
-  atual: number;
-  maximo: number;
-  tom: string;
-  alerta?: boolean;
-}
-
-const Barra: React.FC<BarraProps> = ({ rotulo, atual, maximo, tom, alerta }) => {
-  const pulso = usePulsoAoMudar(atual);
-  const percentual = maximo > 0 ? Math.max(0, Math.min(100, (atual / maximo) * 100)) : 0;
-
-  return (
-    <div className={cn('space-y-1', SOMBRA_DE_ELEMENTO)}>
-      <div className="flex items-baseline justify-between gap-2">
-        <span
-          className={cn(
-            'font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-white/70',
-            SOMBRA_DE_LEITURA,
-          )}
-        >
-          {rotulo}
-        </span>
-        <span
-          className={cn(
-            'font-mono text-xl font-bold tabular-nums transition-colors duration-300',
-            SOMBRA_DE_LEITURA,
-            alerta ? 'text-ordem-red-light' : 'text-white',
-            pulso === 'desceu' && 'text-ordem-red-light',
-            pulso === 'subiu' && 'text-ordem-green-muted',
-          )}
-        >
-          {atual}
-          <span className="text-sm font-normal text-white/45">/{maximo}</span>
-        </span>
-      </div>
-
-      <div className="h-3 overflow-hidden rounded-full bg-black/70 ring-1 ring-white/15">
-        <div
-          className={cn('h-full rounded-full transition-[width] duration-500 ease-out', tom)}
-          style={{ width: `${percentual}%` }}
-        />
-      </div>
-    </div>
-  );
-};
-
-interface PipsProps {
-  rotulo: string;
-  preenchidos: number;
-  total: number;
-  tom: string;
-}
-
-const Pips: React.FC<PipsProps> = ({ rotulo, preenchidos, total, tom }) => (
-  <div className={cn('space-y-1', SOMBRA_DE_ELEMENTO)}>
-    <div className="flex items-baseline justify-between gap-2">
-      <span
-        className={cn(
-          'font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-white/70',
-          SOMBRA_DE_LEITURA,
-        )}
-      >
-        {rotulo}
-      </span>
-      <span
-        className={cn(
-          'font-mono text-base font-bold tabular-nums text-white/80',
-          SOMBRA_DE_LEITURA,
-        )}
-      >
-        {preenchidos}
-        <span className="text-sm font-normal text-white/45">/{total}</span>
-      </span>
-    </div>
-    <div className="flex gap-1.5">
-      {Array.from({ length: total }, (_, indice) => (
-        <span
-          key={indice}
-          className={cn(
-            'h-3 flex-1 rounded-full ring-1 transition-colors duration-300',
-            indice < preenchidos ? `${tom} ring-white/25` : 'bg-black/70 ring-white/15',
-          )}
-        />
-      ))}
-    </div>
-  </div>
-);
 
 export interface OverlayOp2Props {
   ficha: FichaOp2;
@@ -177,36 +94,40 @@ export const OverlayOp2: React.FC<OverlayOp2Props> = ({
         </div>
 
         <div className="space-y-2.5">
-          <Barra
+          <BarraDeRecurso
             rotulo="Vida"
             atual={pvAtual(ficha)}
             maximo={ficha.pvMax}
-            tom="bg-gradient-to-r from-ordem-red-dark to-ordem-red"
+            tom="vida"
             alerta={risco.precisaFerimento}
+            className={SOMBRA_DE_ELEMENTO}
           />
-          <Barra
+          <BarraDeRecurso
             rotulo="Determinação"
             atual={pdAtual(ficha)}
             maximo={ficha.pdMax}
-            tom="bg-gradient-to-r from-ordem-purple/70 to-ordem-purple"
+            tom="determinacao"
             alerta={risco.precisaTrauma}
+            className={SOMBRA_DE_ELEMENTO}
           />
 
           {ficha.perfil.tipo === 'EXECUTOR' ? (
-            <Pips
+            <Medidor
               rotulo="Ímpeto"
               preenchidos={impetoDe(ficha)}
               total={MAXIMO_IMPETO}
-              tom="bg-ordem-gold"
+              tom="impeto"
+              className={SOMBRA_DE_ELEMENTO}
             />
           ) : null}
 
           {ficha.perfil.tipo === 'ANALISTA' ? (
-            <Pips
+            <Medidor
               rotulo="Avaliação"
               preenchidos={avaliacaoDe(ficha)}
               total={MAXIMO_AVALIACAO}
-              tom="bg-ordem-cyan"
+              tom="avaliacao"
+              className={SOMBRA_DE_ELEMENTO}
             />
           ) : null}
         </div>

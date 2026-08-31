@@ -10,7 +10,7 @@ import {
 } from '../regras/rolagem';
 import { DT_COMPARTILHAR, DT_RECAPITULAR, passosDeAjuda } from '../regras/resolucao';
 import { CUSTO_PD_EXAMINAR_SEM_NOVIDADE } from '../regras/investigacao';
-import { CARTAO, RotuloDeSecao } from './Pecas';
+import { PAINEL, RotuloDeSecao } from './Pecas';
 
 interface RegraProps {
   titulo: string;
@@ -18,11 +18,11 @@ interface RegraProps {
 }
 
 const Regra: React.FC<RegraProps> = ({ titulo, children }) => (
-  <div className="border-l-2 border-ordem-border pl-3">
-    <div className="font-mono text-[11px] uppercase tracking-[0.15em] text-ordem-gold">
+  <div>
+    <div className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-ordem-gold/80">
       {titulo}
     </div>
-    <p className="mt-1 text-sm leading-relaxed text-ordem-white-muted">{children}</p>
+    <p className="mt-1.5 max-w-prose text-sm leading-relaxed text-white/65">{children}</p>
   </div>
 );
 
@@ -31,10 +31,10 @@ const Numero: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 export const ReferenciaDeRegras: React.FC<{ className?: string }> = ({ className }) => (
-  <div className={cn(CARTAO, 'space-y-4', className)}>
+  <div className={cn(PAINEL, 'space-y-5 p-4 sm:p-6', className)}>
     <RotuloDeSecao>Como funciona um teste</RotuloDeSecao>
 
-    <div className="space-y-3">
+    <div className="space-y-5">
       <Regra titulo="A rolagem">
         Um dado do <Numero>atributo</Numero> mais um dado da <Numero>perícia</Numero>. Some os dois
         e compare com a dificuldade — <Numero>DT {DT_PADRAO}</Numero> quando o mestre não disser

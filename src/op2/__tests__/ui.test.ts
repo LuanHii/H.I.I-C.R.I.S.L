@@ -123,6 +123,19 @@ describe('a UI nao carrega regra propria', () => {
     }
   });
 
+  it('nenhum componente usa classes de tailwindcss-animate, que NAO esta instalado', () => {
+    const comClasseMorta = TODOS_OS_COMPONENTES.filter((arquivo) =>
+      /(animate-in|animate-out|fade-in|fade-out|slide-in-from|slide-out-to|zoom-in|zoom-out)/.test(
+        fonte(arquivo),
+      ),
+    );
+    expect(comClasseMorta).toEqual([]);
+  });
+
+  it('a animacao vem de framer-motion, que e dependencia real do projeto', () => {
+    expect(fonte('Pecas.tsx')).toContain("from 'framer-motion'");
+  });
+
   it('nenhum componente usa hex solto: a paleta ordem-* e a fonte de cor', () => {
     for (const arquivo of TODOS_OS_COMPONENTES) {
       expect(fonte(arquivo)).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);

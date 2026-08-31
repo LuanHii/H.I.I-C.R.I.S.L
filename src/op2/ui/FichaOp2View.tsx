@@ -32,13 +32,12 @@ import {
   type RefPericia,
 } from '../regras/tipos';
 import {
-  CARTAO,
+  BarraDeRecurso,
   CORES_DO_PERFIL,
   Distintivo,
   DistintivoDeDado,
-  LADRILHO,
-  PilulaDeEspacos,
-  PilulaDeRecurso,
+  Medidor,
+  PAINEL,
   RotuloDeSecao,
 } from './Pecas';
 import { TesteRapido } from './TesteRapido';
@@ -160,48 +159,48 @@ export const FichaOp2View: React.FC<FichaOp2ViewProps> = ({
 
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <div>
-            <PilulaDeRecurso
+            <BarraDeRecurso
               rotulo="PV"
               atual={pvAtual(ficha)}
               maximo={ficha.pvMax}
-              tom="bg-red-500"
+              tom="vida"
               alerta={risco.precisaFerimento}
             />
             {onAlterarPv ? <Ajustador rotulo="PV" onAlterar={onAlterarPv} /> : null}
           </div>
 
           <div>
-            <PilulaDeRecurso
+            <BarraDeRecurso
               rotulo="PD"
               atual={pdAtual(ficha)}
               maximo={ficha.pdMax}
-              tom="bg-violet-500"
+              tom="determinacao"
               alerta={risco.precisaTrauma}
             />
             {onAlterarPd ? <Ajustador rotulo="PD" onAlterar={onAlterarPd} /> : null}
           </div>
 
           {ficha.perfil.tipo === 'EXECUTOR' ? (
-            <PilulaDeEspacos
+            <Medidor
               rotulo="Ímpeto"
               preenchidos={impetoDe(ficha)}
               total={MAXIMO_IMPETO}
-              tom="border-ordem-gold bg-ordem-gold"
+              tom="impeto"
               ajuda="Enche a cada teste falhado. 1 espaço dá +1 passo; 3 espaços aumentam um atributo até o fim da cena."
             />
           ) : null}
 
           {ficha.perfil.tipo === 'ANALISTA' ? (
-            <PilulaDeEspacos
+            <Medidor
               rotulo="Avaliação"
               preenchidos={avaliacaoDe(ficha)}
               total={MAXIMO_AVALIACAO}
-              tom="border-ordem-cyan bg-ordem-cyan"
+              tom="avaliacao"
               ajuda="Ganhos com a ação Avaliação (2 PD). Valem só em testes relativos ao alvo observado."
             />
           ) : null}
 
-          <div className={LADRILHO}>
+          <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-3">
             <div className="font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted">
               Atributos
             </div>
@@ -257,7 +256,7 @@ export const FichaOp2View: React.FC<FichaOp2ViewProps> = ({
       </header>
 
       <div className="grid gap-4 lg:grid-cols-[1.15fr_1fr]">
-        <section className={CARTAO}>
+        <section className={cn(PAINEL, "p-4 sm:p-5")}>
           <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <RotuloDeSecao>Perícias</RotuloDeSecao>
             <span className="font-mono text-[10px] text-ordem-text-muted">
@@ -305,7 +304,7 @@ export const FichaOp2View: React.FC<FichaOp2ViewProps> = ({
           </div>
         </section>
 
-        <section className={CARTAO}>
+        <section className={cn(PAINEL, "p-4 sm:p-5")}>
           <RotuloDeSecao className="mb-3">Habilidades</RotuloDeSecao>
           <ul className="space-y-2">
             {habilidades.map((habilidade) => (
