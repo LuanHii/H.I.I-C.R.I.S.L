@@ -75,12 +75,20 @@ describe('a UI cobre todas as variantes do dominio', () => {
     }
   });
 
-  it('cada ficha mostra impeto e avaliacao so para o perfil que os tem', () => {
+  it('cada superficie mostra impeto e avaliacao so para o perfil que os tem', () => {
     for (const arquivo of ['FichaOp2Publica.tsx', 'FichaOp2View.tsx', 'OverlayOp2.tsx']) {
       const conteudo = fonte(arquivo);
       expect(conteudo).toContain("ficha.perfil.tipo === 'EXECUTOR'");
       expect(conteudo).toContain("ficha.perfil.tipo === 'ANALISTA'");
+    }
+  });
+
+  it('os recursos aparecem pelo nome por extenso, sem abreviacao criptica', () => {
+    for (const arquivo of ['FichaOp2Publica.tsx', 'FichaOp2View.tsx', 'OverlayOp2.tsx']) {
+      const conteudo = fonte(arquivo);
       expect(conteudo).toContain('Ímpeto');
+      expect(conteudo).toContain('Avaliação');
+      expect(conteudo).not.toMatch(/rotulo="(Ímp|Aval|Det|Determ\.)"/);
     }
   });
 
@@ -142,15 +150,33 @@ describe('a UI nao carrega regra propria', () => {
     }
   });
 
-  it('as duas fichas listam pericias a partir do catalogo, nao de uma lista escrita na UI', () => {
-    for (const arquivo of ['FichaOp2Publica.tsx', 'FichaOp2View.tsx']) {
+  it('toda superficie lista pericias a partir do catalogo, nao de uma lista escrita na UI', () => {
+    for (const arquivo of ['FichaOp2Publica.tsx', 'FichaOp2View.tsx', 'OverlayOp2.tsx']) {
       const conteudo = fonte(arquivo);
-      expect(conteudo).toContain('PERICIAS_SIMPLES');
-      expect(conteudo).toContain('CAMPOS_APTIDAO');
+      const vemDoCatalogo =
+        conteudo.includes('PERICIAS_SIMPLES') || conteudo.includes('periciasDoAtributo');
+      expect(vemDoCatalogo, `${arquivo} nao puxa pericias do catalogo`).toBe(true);
+
       const nomesEscritosAMao = [...PERICIAS_SIMPLES, ...CAMPOS_APTIDAO].filter(
         (nome) => conteudo.includes(`"${nome}"`) || conteudo.includes(`'${nome}'`),
       );
       expect(nomesEscritosAMao).toEqual([]);
+    }
+  });
+
+  it('a referencia de regras puxa os numeros do motor, nao os digita', () => {
+    const referencia = fonte('ReferenciaDeRegras.tsx');
+    for (const constante of [
+      'DT_PADRAO',
+      'VALOR_MINIMO_CRITICO',
+      'MAXIMO_DADOS_ROLADOS',
+      'MAXIMO_DADOS_SOMADOS',
+      'DT_RECAPITULAR',
+      'DT_COMPARTILHAR',
+      'passosDeAjuda',
+      'CUSTO_PD_EXAMINAR_SEM_NOVIDADE',
+    ]) {
+      expect(referencia).toContain(constante);
     }
   });
 });

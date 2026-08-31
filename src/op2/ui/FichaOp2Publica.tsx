@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Brain, HeartPulse, Zap } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   avaliacaoDe,
@@ -18,15 +18,16 @@ import {
   DESCRICAO_DA_PERICIA,
   DESCRICAO_DO_CAMPO_APTIDAO,
   GRAUS_DE_TREINAMENTO,
-  PERICIAS_SIMPLES,
   aptidao,
-  atributoBaseDe,
   pericia,
+  periciasDoAtributo,
 } from '../regras/pericias';
 import {
+  ATRIBUTOS_OP2,
   MAXIMO_AVALIACAO,
   MAXIMO_IMPETO,
   ROTULO_ATRIBUTO,
+  type AtributoOp2,
   type FichaOp2,
   type RefPericia,
 } from '../regras/tipos';
@@ -38,51 +39,121 @@ import {
   Distintivo,
   DistintivoDeDado,
   FUNDO_DA_PAGINA,
-  LADRILHO,
   PilulaDeEspacos,
   PilulaDeRecurso,
   RotuloDeSecao,
 } from './Pecas';
+import { ReferenciaDeRegras } from './ReferenciaDeRegras';
 
-type Aba = 'status' | 'pericias' | 'habilidades';
+type Aba = 'acoes' | 'pericias';
 
 interface LinhaDePericiaProps {
   ficha: FichaOp2;
   ref_: RefPericia;
   rotulo: string;
   descricao: string;
-  recuada?: boolean;
 }
 
-const LinhaDePericia: React.FC<LinhaDePericiaProps> = ({
-  ficha,
-  ref_,
-  rotulo,
-  descricao,
-  recuada,
-}) => {
+const LinhaDePericia: React.FC<LinhaDePericiaProps> = ({ ficha, ref_, rotulo, descricao }) => {
   const dado = dadoDaPericia(ficha, ref_);
-  const atributo = atributoBaseDe(ref_);
   const grau = dado === 'd20' ? 'Sobre-humano' : GRAUS_DE_TREINAMENTO[dado];
   const destreinada = dado === 'd4';
 
   return (
     <div
-      title={`${descricao} · ${grau}`}
+      title={descricao}
       className={cn(
-        'flex items-center gap-3 rounded-lg border px-3 py-2 transition-colors',
-        destreinada
-          ? 'border-white/5 bg-black/20 opacity-50'
-          : 'border-white/10 bg-black/40',
-        recuada && 'ml-4',
+        'flex min-h-[2.75rem] items-center gap-3 rounded-lg border px-3 py-2',
+        destreinada ? 'border-white/5 bg-black/20' : 'border-white/10 bg-black/40',
       )}
     >
       <DistintivoDeDado dado={dado} />
-      <span className="flex-1 truncate text-sm text-ordem-white-muted">{rotulo}</span>
-      <span className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted">
-        {ROTULO_ATRIBUTO[atributo]} {dadoDoAtributo(ficha, atributo)}
+      <span
+        className={cn(
+          'flex-1 truncate text-sm',
+          destreinada ? 'text-ordem-text-muted' : 'text-ordem-white-muted',
+        )}
+      >
+        {rotulo}
+      </span>
+      <span className="shrink-0 font-mono text-[10px] uppercase tracking-wide text-ordem-text-muted">
+        {grau}
       </span>
     </div>
+  );
+};
+
+interface GrupoDePericiasProps {
+  ficha: FichaOp2;
+  atributo: AtributoOp2;
+}
+
+const GrupoDePericias: React.FC<GrupoDePericiasProps> = ({ ficha, atributo }) => {
+  const [mostrandoTodas, setMostrandoTodas] = useState(false);
+
+  const referencias: { ref_: RefPericia; rotulo: string; descricao: string }[] = [
+    ...periciasDoAtributo(atributo).map((nome) => ({
+      ref_: pericia(nome),
+      rotulo: nome,
+      descricao: DESCRICAO_DA_PERICIA[nome],
+    })),
+    ...(atributo === 'MENTE'
+      ? CAMPOS_APTIDAO.map((campo) => ({
+          ref_: aptidao(campo),
+          rotulo: `Aptidão · ${campo}`,
+          descricao: DESCRICAO_DO_CAMPO_APTIDAO[campo],
+        }))
+      : []),
+  ];
+
+  const treinadas = referencias.filter((item) => dadoDaPericia(ficha, item.ref_) !== 'd4');
+  const destreinadas = referencias.filter((item) => dadoDaPericia(ficha, item.ref_) === 'd4');
+  const visiveis = mostrandoTodas ? [...treinadas, ...destreinadas] : treinadas;
+
+  return (
+    <section className={CARTAO}>
+      <div className="mb-3 flex items-baseline justify-between gap-2">
+        <RotuloDeSecao>{ROTULO_ATRIBUTO[atributo]}</RotuloDeSecao>
+        <span className="font-mono text-sm font-bold text-white">
+          {dadoDoAtributo(ficha, atributo)}
+        </span>
+      </div>
+
+      {treinadas.length === 0 && !mostrandoTodas ? (
+        <p className="py-2 text-sm text-ordem-text-muted">
+          Nenhuma perícia treinada aqui — tudo em d4.
+        </p>
+      ) : (
+        <div className="space-y-1.5">
+          {visiveis.map((item) => (
+            <LinhaDePericia
+              key={item.rotulo}
+              ficha={ficha}
+              ref_={item.ref_}
+              rotulo={item.rotulo}
+              descricao={item.descricao}
+            />
+          ))}
+        </div>
+      )}
+
+      {destreinadas.length > 0 ? (
+        <button
+          type="button"
+          onClick={() => setMostrandoTodas((atual) => !atual)}
+          aria-expanded={mostrandoTodas}
+          className="mt-2 flex min-h-[2.75rem] w-full items-center justify-center gap-1.5 rounded-lg border border-white/5 font-mono text-[11px] uppercase tracking-widest text-ordem-text-muted transition-colors hover:border-white/15 hover:text-ordem-white-muted"
+        >
+          <ChevronDown
+            size={13}
+            className={cn('transition-transform', mostrandoTodas && 'rotate-180')}
+          />
+          {mostrandoTodas
+            ? 'ocultar destreinadas'
+            : `${destreinadas.length} destreinada${destreinadas.length > 1 ? 's' : ''}`}
+        </button>
+      ) : null}
+    </section>
   );
 };
 
@@ -101,11 +172,9 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
   aoAbrirOverlay,
   className,
 }) => {
-  const [aba, setAba] = useState<Aba>('status');
+  const [aba, setAba] = useState<Aba>('acoes');
 
   const risco = estadoDeRisco(ficha);
-  const pv = pvAtual(ficha);
-  const pd = pdAtual(ficha);
 
   const habilidades = ficha.habilidades
     .map(habilidadePorId)
@@ -115,43 +184,48 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
         lista.findIndex((outra) => outra.nome === habilidade.nome) === indice,
     );
 
-  const treinadas = PERICIAS_SIMPLES.filter(
-    (nome) => dadoDaPericia(ficha, pericia(nome)) !== 'd4',
-  ).length;
-
   return (
     <div className={cn(FUNDO_DA_PAGINA, className)}>
       <div className={CONTEUDO}>
-        <header className="mb-4 flex flex-col gap-3 border-b border-ordem-border pb-4 sm:mb-6 sm:gap-4 sm:pb-5">
-          <div className="min-w-0">
-            <RotuloDeSecao>Ordem Paranormal 2 · Playtest</RotuloDeSecao>
-            <h1 className="mt-1 truncate font-serif text-2xl text-white sm:mt-2 sm:text-3xl md:text-4xl">
-              {ficha.nome}
-            </h1>
-            <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-3">
-              <Distintivo className={cn('uppercase', CORES_DO_PERFIL[ficha.perfil.tipo])}>
-                {ficha.perfil.tipo}
-              </Distintivo>
-              <span className="font-mono text-[10px] text-ordem-text-secondary sm:text-xs">
-                {ficha.ocupacao}
-              </span>
-              <span className="font-mono text-[10px] uppercase text-ordem-text-muted sm:text-xs">
-                Nível {ficha.nivel}
+        <header className="mb-5 border-b border-ordem-border pb-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="truncate font-serif text-3xl leading-tight text-white sm:text-4xl">
+                {ficha.nome}
+              </h1>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <Distintivo className={cn('uppercase', CORES_DO_PERFIL[ficha.perfil.tipo])}>
+                  {ficha.perfil.tipo}
+                </Distintivo>
+                <span className="text-sm text-ordem-text-secondary">{ficha.ocupacao}</span>
+                <span className="text-sm text-ordem-text-muted">Nível {ficha.nivel}</span>
+              </div>
+            </div>
+
+            <div className="flex shrink-0 items-center gap-1.5 pt-1">
+              <span
+                className={cn(
+                  'h-1.5 w-1.5 rounded-full',
+                  conectado ? 'animate-pulse bg-green-500' : 'bg-ordem-text-muted',
+                )}
+              />
+              <span className="font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted">
+                {conectado ? 'ao vivo' : 'offline'}
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
             <PilulaDeRecurso
-              rotulo="PV"
-              atual={pv}
+              rotulo="Pontos de Vida"
+              atual={pvAtual(ficha)}
               maximo={ficha.pvMax}
               tom="bg-red-500"
               alerta={risco.precisaFerimento}
             />
             <PilulaDeRecurso
-              rotulo="PD"
-              atual={pd}
+              rotulo="Determinação"
+              atual={pdAtual(ficha)}
               maximo={ficha.pdMax}
               tom="bg-violet-500"
               alerta={risco.precisaTrauma}
@@ -176,236 +250,129 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
                 ajuda="Ganhos com a ação Avaliação (2 PD). Valem só em testes relativos ao alvo observado."
               />
             ) : null}
-
-            <div className={LADRILHO}>
-              <div className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted">
-                <Zap size={11} /> Treinadas
-              </div>
-              <div className="text-lg font-bold leading-tight text-white">
-                {treinadas}
-                <span className="text-xs text-ordem-text-muted">/{PERICIAS_SIMPLES.length}</span>
-              </div>
-            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            {aoAbrirOverlay ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => aoAbrirOverlay('mini')}
-                  className="touch-target-sm rounded-lg border border-ordem-border-light px-3 py-2.5 font-mono text-[10px] tracking-[0.15em] text-ordem-white-muted transition hover:border-ordem-text-muted hover:text-white active:bg-ordem-ooze/50 sm:tracking-[0.25em]"
-                >
-                  OVERLAY MINI
-                </button>
-                <button
-                  type="button"
-                  onClick={() => aoAbrirOverlay('full')}
-                  className="touch-target-sm rounded-lg border border-ordem-border-light px-3 py-2.5 font-mono text-[10px] tracking-[0.15em] text-ordem-white-muted transition hover:border-ordem-text-muted hover:text-white active:bg-ordem-ooze/50 sm:tracking-[0.25em]"
-                >
-                  OVERLAY FULL
-                </button>
-              </>
-            ) : null}
-
-            <div className="flex w-full items-center justify-end gap-2 rounded-full border border-white/5 bg-black/30 px-2 py-1 sm:ml-auto sm:w-auto sm:border-0 sm:bg-transparent sm:p-0">
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {ATRIBUTOS_OP2.map((atributo) => (
               <div
-                className={cn(
-                  'h-2 w-2 rounded-full',
-                  conectado ? 'animate-pulse bg-green-500' : 'bg-ordem-text-muted',
-                )}
-              />
-              <span
-                className={cn(
-                  'font-mono text-[10px] sm:text-xs',
-                  conectado ? 'text-green-500' : 'text-ordem-text-secondary',
-                )}
+                key={atributo}
+                className="flex items-baseline justify-between rounded-lg border border-white/10 bg-black/40 px-3 py-2"
               >
-                {conectado ? 'CONECTADO' : 'OFFLINE'}
-              </span>
-            </div>
+                <span className="truncate font-mono text-[11px] uppercase tracking-wide text-ordem-text-muted">
+                  {ROTULO_ATRIBUTO[atributo]}
+                </span>
+                <span className="ml-2 font-mono text-lg font-bold text-white">
+                  {ficha.atributos[atributo]}
+                </span>
+              </div>
+            ))}
           </div>
+
+          {risco.precisaFerimento || risco.precisaTrauma || ficha.sessao.condicoes.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {risco.precisaFerimento ? (
+                <Distintivo className="border-ordem-red/50 bg-ordem-red/15 text-ordem-red-light">
+                  0 PV · Ferimento DT {risco.dtFerimento} (Físico + Vigor)
+                </Distintivo>
+              ) : null}
+              {risco.precisaTrauma ? (
+                <Distintivo className="border-ordem-purple/50 bg-ordem-purple/15 text-ordem-purple">
+                  0 PD · Trauma DT {risco.dtTrauma} (Emoção + Disciplina)
+                </Distintivo>
+              ) : null}
+              {ficha.sessao.condicoes.map((condicao) => (
+                <Distintivo
+                  key={condicao}
+                  className="border-ordem-red/40 bg-ordem-red/10 text-ordem-red-light"
+                >
+                  {condicao}
+                </Distintivo>
+              ))}
+            </div>
+          ) : null}
+
+          {ficha.sessao.passosDeCena.length > 0 ? (
+            <div className="mt-3 rounded-lg border border-ordem-gold/40 bg-ordem-gold/5 px-3 py-2">
+              <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-ordem-gold">
+                Ativo até o fim da cena
+              </div>
+              <ul className="mt-1 space-y-0.5">
+                {ficha.sessao.passosDeCena.map((passo, indice) => (
+                  <li key={indice} className="text-sm text-ordem-white-muted">
+                    {passo.delta > 0 ? '+' : ''}
+                    {passo.delta} passo em {ROTULO_ATRIBUTO[passo.alvo]}
+                    <span className="text-ordem-text-muted"> — {passo.motivo}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {aoAbrirOverlay ? (
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => aoAbrirOverlay('mini')}
+                className="min-h-[2.75rem] rounded-lg border border-ordem-border-light px-3 font-mono text-[10px] tracking-[0.2em] text-ordem-white-muted transition hover:border-ordem-text-muted hover:text-white"
+              >
+                OVERLAY
+              </button>
+              <button
+                type="button"
+                onClick={() => aoAbrirOverlay('full')}
+                className="min-h-[2.75rem] rounded-lg border border-ordem-border-light px-3 font-mono text-[10px] tracking-[0.2em] text-ordem-white-muted transition hover:border-ordem-text-muted hover:text-white"
+              >
+                OVERLAY+
+              </button>
+            </div>
+          ) : null}
         </header>
 
-        <div className="mb-4 flex gap-2 overflow-x-auto pb-1 sm:mb-6">
-          <BotaoDeAba ativo={aba === 'status'} onClick={() => setAba('status')}>
-            STATUS
+        <div className="sticky top-0 z-20 -mx-3 mb-4 flex gap-2 bg-ordem-black/90 px-3 py-2 backdrop-blur sm:-mx-4 sm:px-4">
+          <BotaoDeAba ativo={aba === 'acoes'} onClick={() => setAba('acoes')}>
+            O QUE POSSO FAZER
           </BotaoDeAba>
           <BotaoDeAba ativo={aba === 'pericias'} onClick={() => setAba('pericias')}>
             PERICIAS
           </BotaoDeAba>
-          <BotaoDeAba ativo={aba === 'habilidades'} onClick={() => setAba('habilidades')}>
-            HABILIDADES
-          </BotaoDeAba>
         </div>
 
-        {aba === 'status' ? (
-          <div className="grid grid-cols-1 gap-4 duration-500 animate-in fade-in slide-in-from-bottom-4 lg:grid-cols-2">
+        {aba === 'acoes' ? (
+          <div className="space-y-3 duration-500 animate-in fade-in slide-in-from-bottom-2">
             <section className={CARTAO}>
-              <RotuloDeSecao className="mb-4">Atributos</RotuloDeSecao>
-              <div className="space-y-2">
-                {(['FISICO', 'MENTE', 'EMOCAO'] as const).map((atributo) => (
-                  <div
-                    key={atributo}
-                    className="flex items-center gap-3 rounded-lg border border-white/10 bg-black/40 px-3 py-3"
-                  >
-                    <span className="flex-1 font-mono text-sm uppercase tracking-[0.2em] text-ordem-white-muted">
-                      {ROTULO_ATRIBUTO[atributo]}
-                    </span>
-                    <span className="font-mono text-2xl font-bold text-white">
-                      {ficha.atributos[atributo]}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-3 font-mono text-[10px] leading-relaxed text-ordem-text-muted">
-                Todo teste rola o dado do atributo + o dado da perícia e soma contra a DT
-                (7 por padrão).
-              </p>
-            </section>
-
-            <section className={CARTAO}>
-              <RotuloDeSecao className="mb-4">Situação</RotuloDeSecao>
-
-              <div className="space-y-2">
-                {risco.precisaFerimento ? (
-                  <div className="flex items-start gap-2 rounded-lg border border-ordem-red/50 bg-ordem-red/10 px-3 py-2">
-                    <HeartPulse size={14} className="mt-0.5 shrink-0 text-ordem-red-light" />
-                    <p className="text-xs text-ordem-red-light">
-                      <strong>0 PV.</strong> Teste de Ferimento (Físico + Vigor) contra DT{' '}
-                      {risco.dtFerimento}. Falhar é morrer.
-                    </p>
-                  </div>
-                ) : null}
-
-                {risco.precisaTrauma ? (
-                  <div className="flex items-start gap-2 rounded-lg border border-ordem-purple/50 bg-ordem-purple/10 px-3 py-2">
-                    <Brain size={14} className="mt-0.5 shrink-0 text-ordem-purple" />
-                    <p className="text-xs text-ordem-purple">
-                      <strong>0 PD.</strong> Teste de Trauma (Emoção + Disciplina) contra DT{' '}
-                      {risco.dtTrauma}. Falhar é colapso mental.
-                    </p>
-                  </div>
-                ) : null}
-
-                {ficha.sessao.condicoes.length > 0 ? (
-                  <div className="rounded-lg border border-white/10 bg-black/40 px-3 py-2">
-                    <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-red-400">
-                      Condições ativas
-                    </div>
-                    <div className="mt-1.5 flex flex-wrap gap-1.5">
-                      {ficha.sessao.condicoes.map((condicao) => (
-                        <Distintivo
-                          key={condicao}
-                          className="border-ordem-red/40 bg-ordem-red/10 text-ordem-red-light"
-                        >
-                          {condicao}
+              <RotuloDeSecao className="mb-3">Suas habilidades</RotuloDeSecao>
+              <ul className="space-y-3">
+                {habilidades.map((habilidade) => (
+                  <li key={habilidade.id} className="border-l-2 border-ordem-gold/40 pl-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-serif text-lg text-white">{habilidade.nome}</span>
+                      {!temEfeitoEmRuntime(habilidade) ? (
+                        <Distintivo className="border-white/10 bg-black/40 uppercase text-ordem-text-muted">
+                          já na ficha
                         </Distintivo>
-                      ))}
+                      ) : null}
                     </div>
-                  </div>
-                ) : null}
-
-                {ficha.sessao.passosDeCena.length > 0 ? (
-                  <div className="rounded-lg border border-ordem-gold/40 bg-ordem-gold/5 px-3 py-2">
-                    <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-ordem-gold">
-                      Ativo até o fim da cena
-                    </div>
-                    <ul className="mt-1.5 space-y-1">
-                      {ficha.sessao.passosDeCena.map((passo, indice) => (
-                        <li key={indice} className="text-xs text-ordem-white-muted">
-                          {passo.delta > 0 ? '+' : ''}
-                          {passo.delta} passo em {ROTULO_ATRIBUTO[passo.alvo]}
-                          <span className="text-ordem-text-muted"> — {passo.motivo}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-
-                {!risco.precisaFerimento &&
-                !risco.precisaTrauma &&
-                ficha.sessao.condicoes.length === 0 &&
-                ficha.sessao.passosDeCena.length === 0 ? (
-                  <p className="rounded-lg border border-white/5 bg-black/20 px-3 py-6 text-center font-mono text-xs text-ordem-text-muted">
-                    Nada afetando o personagem agora.
-                  </p>
-                ) : null}
-              </div>
+                    <p className="mt-1 text-sm leading-relaxed text-ordem-white-muted">
+                      {habilidade.descricao}
+                    </p>
+                  </li>
+                ))}
+              </ul>
             </section>
+
+            <ReferenciaDeRegras />
           </div>
-        ) : null}
-
-        {aba === 'pericias' ? (
-          <section
-            className={cn(CARTAO, 'duration-500 animate-in fade-in slide-in-from-bottom-4')}
-          >
-            <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-              <RotuloDeSecao>Perícias</RotuloDeSecao>
-              <span className="font-mono text-[10px] text-ordem-text-muted">
-                d4 destreinado · d6 treinado · d8 especialista · d10 mestre · d12 grão-mestre
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 gap-1.5 lg:grid-cols-2">
-              <div className="lg:col-span-2">
-                <div className="flex items-center gap-3 px-3 py-1">
-                  <span className="w-12 shrink-0 text-center font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted">
-                    campo
-                  </span>
-                  <span className="flex-1 font-mono text-xs uppercase tracking-[0.2em] text-ordem-white-muted">
-                    Aptidão
-                  </span>
-                  <span className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted">
-                    {ROTULO_ATRIBUTO.MENTE} {dadoDoAtributo(ficha, 'MENTE')}
-                  </span>
-                </div>
-              </div>
-              {CAMPOS_APTIDAO.map((campo) => (
-                <LinhaDePericia
-                  key={campo}
-                  ficha={ficha}
-                  ref_={aptidao(campo)}
-                  rotulo={campo}
-                  descricao={DESCRICAO_DO_CAMPO_APTIDAO[campo]}
-                  recuada
-                />
-              ))}
-
-              <div className="mt-2 lg:col-span-2" />
-
-              {PERICIAS_SIMPLES.map((nome) => (
-                <LinhaDePericia
-                  key={nome}
-                  ficha={ficha}
-                  ref_={pericia(nome)}
-                  rotulo={nome}
-                  descricao={DESCRICAO_DA_PERICIA[nome]}
-                />
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        {aba === 'habilidades' ? (
-          <section className="grid grid-cols-1 gap-3 duration-500 animate-in fade-in slide-in-from-bottom-4 lg:grid-cols-2">
-            {habilidades.map((habilidade) => (
-              <div key={habilidade.id} className={CARTAO}>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-serif text-lg text-white">{habilidade.nome}</span>
-                  {!temEfeitoEmRuntime(habilidade) ? (
-                    <Distintivo className="border-white/10 bg-black/40 uppercase text-ordem-text-muted">
-                      já na ficha
-                    </Distintivo>
-                  ) : null}
-                </div>
-                <p className="mt-2 text-xs leading-relaxed text-ordem-white-muted">
-                  {habilidade.descricao}
-                </p>
-              </div>
+        ) : (
+          <div className="space-y-3 duration-500 animate-in fade-in slide-in-from-bottom-2">
+            {ATRIBUTOS_OP2.map((atributo) => (
+              <GrupoDePericias key={atributo} ficha={ficha} atributo={atributo} />
             ))}
-          </section>
-        ) : null}
+            <p className="px-1 font-mono text-[11px] leading-relaxed text-ordem-text-muted">
+              d4 destreinado · d6 treinado · d8 especialista · d10 mestre · d12 grão-mestre.
+              O teste soma o dado do atributo com o da perícia.
+            </p>
+          </div>
+        )}
 
         {atualizadoEm ? (
           <p className="mt-6 text-center font-mono text-[10px] text-ordem-text-muted">

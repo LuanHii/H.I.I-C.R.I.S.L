@@ -277,6 +277,7 @@ export type { EstadoDaAssinatura, FichaOp2RemotaProps } from './ui/FichaOp2Remot
 export { FichaOp2Remota, useFichaOp2Remota } from './ui/FichaOp2Remota';
 export { FichaOp2Publica } from './ui/FichaOp2Publica';
 export { OverlayOp2 } from './ui/OverlayOp2';
+export type { FundoDoOverlay } from './ui/OverlayOp2';
 
 export { CompartilharFicha } from './ui/CompartilharFicha';
 
@@ -285,3 +286,5 @@ export {
   assinaturaDaFicha,
   precisaSincronizar,
 } from './nuvem/sincronizacao';
+
+export { ReferenciaDeRegras } from './ui/ReferenciaDeRegras';

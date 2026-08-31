@@ -13,6 +13,11 @@ export const CARTAO = 'bg-ordem-ooze/30 border border-ordem-border rounded-xl p-
 
 export const LADRILHO = 'min-w-0 border border-white/10 bg-black/35 rounded-xl p-3';
 
+export const SOMBRA_DE_LEITURA =
+  '[text-shadow:0_1px_2px_rgba(0,0,0,0.95),0_2px_10px_rgba(0,0,0,0.75)]';
+
+export const SOMBRA_DE_ELEMENTO = 'drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]';
+
 export const CORES_DO_PERFIL: Record<FichaOp2['perfil']['tipo'], string> = {
   EXECUTOR: 'text-ordem-red border-ordem-red/30 bg-ordem-red/10',
   ANALISTA: 'text-ordem-blue border-ordem-blue/30 bg-ordem-blue/10',

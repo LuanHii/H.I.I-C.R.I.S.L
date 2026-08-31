@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { assinarFichaOp2, type DocumentoAgenteOp2 } from '../nuvem/agentes';
 import type { FichaOp2 } from '../regras/tipos';
 import { FichaOp2Publica } from './FichaOp2Publica';
-import { OverlayOp2 } from './OverlayOp2';
+import { OverlayOp2, type FundoDoOverlay } from './OverlayOp2';
 
 export type EstadoDaAssinatura =
   | { fase: 'carregando' }
@@ -37,6 +37,7 @@ export interface FichaOp2RemotaProps {
   atualizadoEm?: string;
   overlay: boolean;
   modoDoOverlay: 'mini' | 'full';
+  fundoDoOverlay?: FundoDoOverlay;
   aoAbrirOverlay?: (modo: 'mini' | 'full') => void;
   embutida?: boolean;
 }
@@ -46,11 +47,12 @@ export const FichaOp2Remota: React.FC<FichaOp2RemotaProps> = ({
   atualizadoEm,
   overlay,
   modoDoOverlay,
+  fundoDoOverlay,
   aoAbrirOverlay,
   embutida,
 }) => {
   if (overlay) {
-    return <OverlayOp2 ficha={ficha} modo={modoDoOverlay} />;
+    return <OverlayOp2 ficha={ficha} modo={modoDoOverlay} fundo={fundoDoOverlay} />;
   }
 
   return (

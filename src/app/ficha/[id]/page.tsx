@@ -18,6 +18,7 @@ function PlayerAgentContent() {
   const isOverlay = searchParams.get('overlay') === 'true';
   const isFoundryEmbed = searchParams.get('embed') === 'foundry';
   const overlayMode = (searchParams.get('overlayMode') as 'mini' | 'full' | null) ?? 'mini';
+  const overlayFundo = searchParams.get('fundo') === 'verde' ? 'verde' : 'transparente';
 
   const auth = useAuthOptional();
   const { addWatch, removeWatch, isWatching, isAuthenticated } = useWatchedFichas();
@@ -86,6 +87,7 @@ function PlayerAgentContent() {
         atualizadoEm={op2.documento.updatedAt}
         overlay={isOverlay}
         modoDoOverlay={overlayMode}
+        fundoDoOverlay={overlayFundo}
         embutida={isFoundryEmbed}
         aoAbrirOverlay={isFoundryEmbed ? undefined : (modo) => {
           const url = new URL(window.location.href);
