@@ -112,7 +112,7 @@ export const TesteRapido: React.FC<TesteRapidoProps> = ({
             type="number"
             value={dt}
             onChange={(evento) => setDt(Number(evento.target.value))}
-            className="w-24 rounded border border-ordem-border bg-ordem-bg px-3 py-2 text-ordem-white"
+            className="w-24 rounded border border-ordem-border bg-ordem-black-deep px-3 py-2 text-ordem-white"
             aria-label="Dificuldade do teste"
           />
           {dt !== DT_PADRAO ? (
@@ -145,7 +145,7 @@ export const TesteRapido: React.FC<TesteRapidoProps> = ({
                   'w-full rounded border px-3 py-2 text-left text-sm transition-colors',
                   selecionadas.includes(habilidade.id)
                     ? 'border-ordem-green bg-ordem-ooze text-ordem-white'
-                    : 'border-ordem-border bg-ordem-bg text-ordem-text-secondary hover:border-ordem-border-light',
+                    : 'border-ordem-border bg-ordem-black-deep text-ordem-text-secondary hover:border-ordem-border-light',
                 )}
               >
                 <span className="font-bold">{habilidade.nome}</span>
@@ -174,7 +174,7 @@ export const TesteRapido: React.FC<TesteRapidoProps> = ({
                   'flex-1 rounded border px-3 py-2 text-sm transition-colors',
                   alvoDoPasso === alvo
                     ? 'border-ordem-green bg-ordem-ooze text-ordem-white'
-                    : 'border-ordem-border bg-ordem-bg text-ordem-text-secondary',
+                    : 'border-ordem-border bg-ordem-black-deep text-ordem-text-secondary',
                 )}
               >
                 {alvo === 'atributo'

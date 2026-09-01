@@ -56,7 +56,7 @@ const FormularioDeInformacao: React.FC<FormularioDeInformacaoProps> = ({ onAdici
   };
 
   return (
-    <div className="mt-2 flex flex-wrap items-end gap-2 rounded border border-ordem-border bg-ordem-bg p-2">
+    <div className="mt-2 flex flex-wrap items-end gap-2 rounded border border-ordem-border bg-ordem-black-deep p-2">
       <label className="flex flex-col">
         <span className="text-[0.6rem] uppercase tracking-wide text-ordem-text-muted">Perícia</span>
         <select
@@ -129,7 +129,7 @@ const PontoView: React.FC<PontoProps> = ({ cena, ponto, fichas }) => {
         <button
           type="button"
           onClick={() => removerPonto(cena.id, ponto.id)}
-          className="ml-auto text-xs text-ordem-red-light underline"
+          className="ml-auto text-xs text-red-400 underline"
         >
           remover
         </button>
@@ -158,7 +158,7 @@ const PontoView: React.FC<PontoProps> = ({ cena, ponto, fichas }) => {
                 'rounded border px-2 py-1.5 text-xs',
                 informacao.reveladaPara.length > 0
                   ? 'border-ordem-green/40 bg-ordem-ooze'
-                  : 'border-ordem-border bg-ordem-bg',
+                  : 'border-ordem-border bg-ordem-black-deep',
               )}
             >
               <div className="flex flex-wrap items-baseline gap-2">
@@ -196,7 +196,7 @@ const PontoView: React.FC<PontoProps> = ({ cena, ponto, fichas }) => {
       />
 
       {fichas.length > 0 ? (
-        <div className="mt-2 rounded border border-ordem-border-light bg-ordem-bg p-2">
+        <div className="mt-2 rounded border border-ordem-border-light bg-ordem-black-deep p-2">
           <span className="text-[0.6rem] uppercase tracking-wide text-ordem-text-muted">
             Ação Investigar — entrega sem rolagem o que a DT permite
           </span>
@@ -256,7 +256,7 @@ const PontoView: React.FC<PontoProps> = ({ cena, ponto, fichas }) => {
                 )}
               </p>
               {previa.bloqueadoPorAcesso ? (
-                <p className="mt-1 text-ordem-red-light">
+                <p className="mt-1 text-red-400">
                   Ponto bloqueado por desafio de acesso ainda não vencido.
                 </p>
               ) : previa.reveladas.length === 0 ? (

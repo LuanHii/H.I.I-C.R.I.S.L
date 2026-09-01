@@ -3,6 +3,8 @@ import { fichaDoPreset } from '../presets/sobreviventes';
 import { assinaturaDaFicha, precisaSincronizar } from '../nuvem/sincronizacao';
 import {
   alternarCondicao,
+  definirAvaliacao,
+  definirImpeto,
   encherImpeto,
   gastarPd,
   sofrerDano,
@@ -83,5 +85,33 @@ describe('decisao de reenviar', () => {
 
     enviada = assinaturaDaFicha(ferido);
     expect(precisaSincronizar(true, enviada, assinaturaDaFicha(ferido))).toBe(false);
+  });
+});
+
+describe('o ajuste de Impeto e Avaliacao chega ao link compartilhado', () => {
+  it('definir Impeto muda a assinatura, entao o reenvio automatico dispara', () => {
+    const alan = fichaDoPreset('alan');
+    expect(assinaturaDaFicha(definirImpeto(alan, 2))).not.toBe(assinaturaDaFicha(alan));
+  });
+
+  it('definir Avaliacao muda a assinatura', () => {
+    const eloisa = fichaDoPreset('eloisa');
+    expect(assinaturaDaFicha(definirAvaliacao(eloisa, 2))).not.toBe(assinaturaDaFicha(eloisa));
+  });
+
+  it('publicada e com assinatura nova, precisaSincronizar manda enviar', () => {
+    const alan = fichaDoPreset('alan');
+    const antes = assinaturaDaFicha(alan);
+    const depois = assinaturaDaFicha(definirImpeto(alan, 3));
+    expect(precisaSincronizar(true, antes, depois)).toBe(true);
+  });
+
+  it('ajustar de volta ao valor anterior nao reenvia: assinatura igual, nada a fazer', () => {
+    const alan = definirImpeto(fichaDoPreset('alan'), 2);
+    const assinatura = assinaturaDaFicha(alan);
+    const ida = definirImpeto(alan, 3);
+    const volta = definirImpeto(ida, 2);
+    expect(assinaturaDaFicha(volta)).toBe(assinatura);
+    expect(precisaSincronizar(true, assinatura, assinaturaDaFicha(volta))).toBe(false);
   });
 });

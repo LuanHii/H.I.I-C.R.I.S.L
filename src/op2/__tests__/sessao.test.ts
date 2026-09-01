@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { avaliacaoDe, impetoDe, pdAtual, pvAtual } from '../regras/ficha';
 import { fichaDoPreset } from '../presets/sobreviventes';
+import { MAXIMO_AVALIACAO, MAXIMO_IMPETO } from '../regras/tipos';
 import {
   adicionarPassoDeCena,
   alternarCondicao,
   aplicarResultadoDeTeste,
   ativarHabilidade,
   curar,
+  definirAvaliacao,
+  definirImpeto,
   definirPv,
   descansar,
   encerrarCena,
@@ -206,5 +209,35 @@ describe('condicoes', () => {
     const comCondicao = alternarCondicao(fichaDoPreset('alan'), 'Machucado');
     expect(comCondicao.sessao.condicoes).toEqual(['Machucado']);
     expect(alternarCondicao(comCondicao, 'Machucado').sessao.condicoes).toEqual([]);
+  });
+});
+
+describe('o mestre ajusta Impeto e Avaliacao direto, sem passar pela regra de gasto', () => {
+  it('definir satura no maximo em vez de estourar o contador', () => {
+    expect(impetoDe(definirImpeto(fichaDoPreset('alan'), 99))).toBe(MAXIMO_IMPETO);
+    expect(avaliacaoDe(definirAvaliacao(fichaDoPreset('eloisa'), 99))).toBe(MAXIMO_AVALIACAO);
+  });
+
+  it('definir satura em zero: o mestre corrigindo para baixo nao gera valor negativo', () => {
+    expect(impetoDe(definirImpeto(fichaDoPreset('alan'), -4))).toBe(0);
+    expect(avaliacaoDe(definirAvaliacao(fichaDoPreset('eloisa'), -4))).toBe(0);
+  });
+
+  it('definir NAO lanca quando falta recurso, ao contrario de gastar: ajuste nao e gasto', () => {
+    const alan = fichaDoPreset('alan');
+    expect(() => gastarImpeto(alan, 3)).toThrow();
+    expect(() => definirImpeto(alan, 3)).not.toThrow();
+    expect(impetoDe(definirImpeto(alan, 3))).toBe(3);
+  });
+
+  it('definir no perfil errado devolve a ficha intacta, sem trocar a variante do perfil', () => {
+    const victor = fichaDoPreset('victor');
+    expect(definirImpeto(victor, 3).perfil).toEqual(victor.perfil);
+    expect(definirAvaliacao(victor, 2).perfil).toEqual(victor.perfil);
+    expect(definirImpeto(fichaDoPreset('eloisa'), 3).perfil.tipo).toBe('ANALISTA');
+  });
+
+  it('valor fracionario e truncado: o contador e de espacos inteiros', () => {
+    expect(impetoDe(definirImpeto(fichaDoPreset('alan'), 2.9))).toBe(2);
   });
 });

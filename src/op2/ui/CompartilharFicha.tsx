@@ -246,7 +246,7 @@ export const CompartilharFicha: React.FC<CompartilharFichaProps> = ({ ficha, cla
       </p>
 
       {mensagemDeErro ? (
-        <p className="rounded-lg border border-ordem-red/50 bg-ordem-red/10 px-3 py-2 text-xs text-ordem-red-light">
+        <p className="rounded-lg border border-ordem-red/50 bg-ordem-red/10 px-3 py-2 text-xs text-red-400">
           {mensagemDeErro}
         </p>
       ) : null}

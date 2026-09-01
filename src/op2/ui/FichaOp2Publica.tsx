@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Dices } from 'lucide-react';
 import { GiEyeTarget, GiFlame } from 'react-icons/gi';
 import { cn } from '@/lib/utils';
 import {
@@ -56,27 +56,48 @@ import { temaDe, type TemaDePerfil } from './tema';
 
 type Aba = 'acoes' | 'pericias';
 
+export type MolduraDaFicha = 'pagina' | 'embutida';
+
+const Ajustador: React.FC<{ rotulo: string; onAlterar: (delta: number) => void }> = ({
+  rotulo,
+  onAlterar,
+}) => (
+  <div className="mt-2 flex gap-1.5">
+    {[-5, -1, 1, 5].map((delta) => (
+      <button
+        key={delta}
+        type="button"
+        onClick={() => onAlterar(delta)}
+        aria-label={`${delta > 0 ? 'Aumentar' : 'Reduzir'} ${rotulo} em ${Math.abs(delta)}`}
+        className="op2-chanfro min-h-[2.25rem] flex-1 border border-white/12 bg-black/40 font-dados text-[11px] text-white/45 transition-colors hover:border-white/35 hover:bg-white/10 hover:text-white"
+      >
+        {delta > 0 ? `+${delta}` : delta}
+      </button>
+    ))}
+  </div>
+);
+
 const LinhaDePericia: React.FC<{
   ficha: FichaOp2;
   ref_: RefPericia;
   rotulo: string;
   descricao: string;
   atributo: AtributoOp2;
-}> = ({ ficha, ref_, rotulo, descricao, atributo }) => {
+  onSelecionar?: (ref_: RefPericia) => void;
+}> = ({ ficha, ref_, rotulo, descricao, atributo, onSelecionar }) => {
   const dado = dadoDaPericia(ficha, ref_);
   const grau = dado === 'd20' ? 'Sobre-humano' : GRAUS_DE_TREINAMENTO[dado];
   const destreinada = dado === 'd4';
 
-  return (
-    <div
-      title={`${descricao} · ${grau}`}
-      className={cn(
-        'group flex min-h-[3rem] items-center gap-3 border-l-2 px-3 py-2 transition-colors',
-        destreinada
-          ? 'border-transparent bg-white/[0.012] hover:bg-white/[0.03]'
-          : 'border-[var(--op2-primary)]/50 bg-white/[0.04] hover:bg-white/[0.07]',
-      )}
-    >
+  const aparencia = cn(
+    'group flex min-h-[3rem] w-full items-center gap-3 border-l-2 px-3 py-2 text-left transition-colors',
+    destreinada
+      ? 'border-transparent bg-white/[0.012] hover:bg-white/[0.03]'
+      : 'border-[var(--op2-primary)]/50 bg-white/[0.04] hover:bg-white/[0.07]',
+  );
+
+  const conteudo = (
+    <>
       <DistintivoDeDado dado={dado} />
       <IconeDePericia
         ref_={ref_}
@@ -94,7 +115,32 @@ const LinhaDePericia: React.FC<{
       <span className="shrink-0 font-dados text-[11px] text-zinc-400">
         + {dadoDoAtributo(ficha, atributo).replace('d', '')} {ROTULO_ATRIBUTO[atributo]}
       </span>
-    </div>
+      {onSelecionar ? (
+        <Dices
+          size={14}
+          className="shrink-0 text-white/30 opacity-0 transition-opacity group-hover:opacity-100"
+        />
+      ) : null}
+    </>
+  );
+
+  if (!onSelecionar) {
+    return (
+      <div title={`${descricao} · ${grau}`} className={aparencia}>
+        {conteudo}
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSelecionar(ref_)}
+      title={`${descricao} · ${grau} · clique para rolar`}
+      className={aparencia}
+    >
+      {conteudo}
+    </button>
   );
 };
 
@@ -102,7 +148,8 @@ const GrupoDePericias: React.FC<{
   ficha: FichaOp2;
   atributo: AtributoOp2;
   tema: TemaDePerfil;
-}> = ({ ficha, atributo, tema }) => {
+  onSelecionar?: (ref_: RefPericia) => void;
+}> = ({ ficha, atributo, tema, onSelecionar }) => {
   const [mostrandoTodas, setMostrandoTodas] = useState(false);
 
   const referencias = [
@@ -146,7 +193,13 @@ const GrupoDePericias: React.FC<{
       ) : (
         <div className="space-y-1">
           {treinadas.map((item) => (
-            <LinhaDePericia key={item.rotulo} ficha={ficha} atributo={atributo} {...item} />
+            <LinhaDePericia
+              key={item.rotulo}
+              ficha={ficha}
+              atributo={atributo}
+              onSelecionar={onSelecionar}
+              {...item}
+            />
           ))}
         </div>
       )}
@@ -164,7 +217,13 @@ const GrupoDePericias: React.FC<{
               >
                 <div className={cn('space-y-1', treinadas.length > 0 && 'pt-1')}>
                   {destreinadas.map((item) => (
-                    <LinhaDePericia key={item.rotulo} ficha={ficha} atributo={atributo} {...item} />
+                    <LinhaDePericia
+                      key={item.rotulo}
+                      ficha={ficha}
+                      atributo={atributo}
+                      onSelecionar={onSelecionar}
+                      {...item}
+                    />
                   ))}
                 </div>
               </motion.div>
@@ -191,22 +250,36 @@ const GrupoDePericias: React.FC<{
 
 export interface FichaOp2PublicaProps {
   ficha: FichaOp2;
+  moldura?: MolduraDaFicha;
   atualizadoEm?: string;
   conectado?: boolean;
   aoAbrirOverlay?: (modo: 'mini' | 'full') => void;
+  onAlterarPv?: (delta: number) => void;
+  onAlterarPd?: (delta: number) => void;
+  onDefinirImpeto?: (valor: number) => void;
+  onDefinirAvaliacao?: (valor: number) => void;
+  onSelecionarPericia?: (ref_: RefPericia) => void;
   className?: string;
 }
 
 export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
   ficha,
+  moldura = 'pagina',
   atualizadoEm,
   conectado = true,
   aoAbrirOverlay,
+  onAlterarPv,
+  onAlterarPd,
+  onDefinirImpeto,
+  onDefinirAvaliacao,
+  onSelecionarPericia,
   className,
 }) => {
   const [aba, setAba] = useState<Aba>('acoes');
   const tema = temaDe(ficha);
   const risco = estadoDeRisco(ficha);
+  const paginaInteira = moldura === 'pagina';
+  const posicaoDoFundo = paginaInteira ? 'fixed' : 'absolute';
 
   const habilidades = ficha.habilidades
     .map(habilidadePorId)
@@ -217,12 +290,20 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
     );
 
   return (
-    <div data-perfil={ficha.perfil.tipo} className={cn(BASE_DA_PAGINA, className)}>
-      <div className={cn('pointer-events-none fixed inset-0 z-0', tema.aura)} />
-      <div className={GRAO} />
-      <div className={VINHETA} />
+    <div
+      data-perfil={ficha.perfil.tipo}
+      className={cn(
+        paginaInteira
+          ? BASE_DA_PAGINA
+          : 'relative w-full overflow-x-clip bg-[var(--op2-fundo)] p-4 text-white sm:p-6',
+        className,
+      )}
+    >
+      <div className={cn('pointer-events-none inset-0 z-0', posicaoDoFundo, tema.aura)} />
+      <div className={cn(GRAO, posicaoDoFundo)} />
+      <div className={cn(VINHETA, posicaoDoFundo)} />
 
-      <div className={CONTEUDO}>
+      <div className={cn(CONTEUDO, !paginaInteira && 'px-0 py-0 sm:px-0 sm:py-0')}>
         <Aparecer>
           <Painel className="mb-4 p-5 sm:p-7">
             <div className="flex items-start gap-4 sm:gap-6">
@@ -256,19 +337,21 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
                 </p>
               </div>
 
-              <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
-                <span
-                  className={cn(
-                    'h-1.5 w-1.5 rounded-full',
-                    conectado
-                      ? 'animate-pulse bg-ordem-green shadow-[0_0_10px_rgba(0,255,0,0.9)]'
-                      : 'bg-white/20',
-                  )}
-                />
-                <span className="font-carimbo text-[10px] uppercase tracking-[0.2em] text-white/30">
-                  {conectado ? 'ao vivo' : 'offline'}
-                </span>
-              </div>
+              {paginaInteira ? (
+                <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
+                  <span
+                    className={cn(
+                      'h-1.5 w-1.5 rounded-full',
+                      conectado
+                        ? 'animate-pulse bg-ordem-green shadow-[0_0_10px_rgba(0,255,0,0.9)]'
+                        : 'bg-white/20',
+                    )}
+                  />
+                  <span className="font-carimbo text-[10px] uppercase tracking-[0.2em] text-white/30">
+                    {conectado ? 'ao vivo' : 'offline'}
+                  </span>
+                </div>
+              ) : null}
             </div>
           </Painel>
         </Aparecer>
@@ -276,20 +359,27 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
         <Aparecer atraso={0.06}>
           <Painel className="mb-4 p-5 sm:p-6">
             <div className="space-y-6">
-              <BlocosDeRecurso
-                rotulo="Pontos de Vida"
-                atual={pvAtual(ficha)}
-                maximo={ficha.pvMax}
-                tom="vida"
-                alerta={risco.precisaFerimento}
-              />
-              <BlocosDeRecurso
-                rotulo="Determinação"
-                atual={pdAtual(ficha)}
-                maximo={ficha.pdMax}
-                tom="determinacao"
-                alerta={risco.precisaTrauma}
-              />
+              <div>
+                <BlocosDeRecurso
+                  rotulo="Pontos de Vida"
+                  atual={pvAtual(ficha)}
+                  maximo={ficha.pvMax}
+                  tom="vida"
+                  alerta={risco.precisaFerimento}
+                />
+                {onAlterarPv ? <Ajustador rotulo="Pontos de Vida" onAlterar={onAlterarPv} /> : null}
+              </div>
+
+              <div>
+                <BlocosDeRecurso
+                  rotulo="Determinação"
+                  atual={pdAtual(ficha)}
+                  maximo={ficha.pdMax}
+                  tom="determinacao"
+                  alerta={risco.precisaTrauma}
+                />
+                {onAlterarPd ? <Ajustador rotulo="Determinação" onAlterar={onAlterarPd} /> : null}
+              </div>
 
               {ficha.perfil.tipo === 'EXECUTOR' ? (
                 <EspacosDePerfil
@@ -298,6 +388,7 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
                   total={MAXIMO_IMPETO}
                   tom="impeto"
                   icone={<GiFlame size={14} />}
+                  onDefinir={onDefinirImpeto}
                   ajuda="Enche a cada teste falhado. 1 espaço dá +1 passo; 3 espaços aumentam um atributo até o fim da cena."
                 />
               ) : null}
@@ -309,6 +400,7 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
                   total={MAXIMO_AVALIACAO}
                   tom="avaliacao"
                   icone={<GiEyeTarget size={14} />}
+                  onDefinir={onDefinirAvaliacao}
                   ajuda="Ganhos com a ação Avaliação (2 PD). Valem só em testes relativos ao alvo observado."
                 />
               ) : null}
@@ -372,7 +464,12 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
           </Painel>
         </Aparecer>
 
-        <div className="sticky top-0 z-30 -mx-4 mb-4 flex items-center gap-2 bg-[var(--op2-fundo)]/90 px-4 py-2 backdrop-blur-md sm:-mx-6 sm:px-6">
+        <div
+          className={cn(
+            'z-30 mb-4 flex items-center gap-2 bg-[var(--op2-fundo)]/90 py-2 backdrop-blur-md',
+            paginaInteira ? 'sticky top-0 -mx-4 px-4 sm:-mx-6 sm:px-6' : 'relative px-1',
+          )}
+        >
           <BotaoDeAba tema={tema} ativo={aba === 'acoes'} onClick={() => setAba('acoes')}>
             O que posso fazer
           </BotaoDeAba>
@@ -397,6 +494,12 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
                 Overlay+
               </button>
             </div>
+          ) : null}
+
+          {onSelecionarPericia && aba === 'pericias' ? (
+            <span className="ml-auto hidden font-carimbo text-[10px] uppercase tracking-[0.2em] text-white/25 sm:inline">
+              clique para rolar
+            </span>
           ) : null}
         </div>
 
@@ -439,7 +542,13 @@ export const FichaOp2Publica: React.FC<FichaOp2PublicaProps> = ({
             ) : (
               <>
                 {ATRIBUTOS_OP2.map((atributo) => (
-                  <GrupoDePericias key={atributo} ficha={ficha} atributo={atributo} tema={tema} />
+                  <GrupoDePericias
+                    key={atributo}
+                    ficha={ficha}
+                    atributo={atributo}
+                    tema={tema}
+                    onSelecionar={onSelecionarPericia}
+                  />
                 ))}
                 <p className="px-1 font-carimbo text-[11px] leading-relaxed tracking-wide text-white/25">
                   d4 destreinado · d6 treinado · d8 especialista · d10 mestre · d12 grão-mestre.

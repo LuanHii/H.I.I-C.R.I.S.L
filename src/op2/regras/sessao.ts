@@ -94,6 +94,22 @@ export function gastarDadosDeAvaliacao(ficha: FichaOp2, dados: 1 | 2): FichaOp2 
   });
 }
 
+export function definirImpeto(ficha: FichaOp2, valor: number): FichaOp2 {
+  if (ficha.perfil.tipo !== 'EXECUTOR') return ficha;
+  return comPerfil(ficha, {
+    tipo: 'EXECUTOR',
+    impetoPreenchido: limitar(Math.trunc(valor), 0, MAXIMO_IMPETO),
+  });
+}
+
+export function definirAvaliacao(ficha: FichaOp2, valor: number): FichaOp2 {
+  if (ficha.perfil.tipo !== 'ANALISTA') return ficha;
+  return comPerfil(ficha, {
+    tipo: 'ANALISTA',
+    avaliacaoDisponivel: limitar(Math.trunc(valor), 0, MAXIMO_AVALIACAO),
+  });
+}
+
 export function adicionarPassoDeCena(
   ficha: FichaOp2,
   alvo: AtributoOp2,

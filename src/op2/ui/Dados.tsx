@@ -13,13 +13,6 @@ import {
 import { cn } from '@/lib/utils';
 import type { DiceStep } from '../regras/tipos';
 
-/**
- * Um icone por passo da escada, da colecao Game Icons.
- *
- * Nao vale reaproveitar o mesmo desenho para dois dados: o icone e o primeiro
- * sinal que o olho pega ao varrer a lista de pericias, e dois passos com a
- * mesma silhueta anulam essa leitura.
- */
 export const ICONES_DE_DADO: Record<DiceStep, IconType> = {
   d4: GiD4,
   d6: GiDiceSixFacesSix,
@@ -29,18 +22,13 @@ export const ICONES_DE_DADO: Record<DiceStep, IconType> = {
   d20: GiDiceTwentyFacesTwenty,
 };
 
-/**
- * Cor por NIVEL, nao por face. Seis cores de dado gastariam todo o orcamento
- * cromatico com informacao que a notacao ja carrega, e competiriam com os
- * recursos, que sao o que muda durante o jogo.
- */
 export const NIVEIS_DO_DADO: Record<DiceStep, string> = {
   d4: 'text-white/25',
   d6: 'text-white/80',
   d8: 'text-ordem-cyan',
   d10: 'text-ordem-gold',
   d12: 'text-ordem-gold',
-  d20: 'text-ordem-red-light',
+  d20: 'text-red-400',
 };
 
 export interface IconeDeDadoProps {

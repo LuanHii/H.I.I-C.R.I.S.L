@@ -29,6 +29,8 @@ const PainelFichas: React.FC = () => {
   const curar = useOp2FichasStore((estado) => estado.curar);
   const gastarPd = useOp2FichasStore((estado) => estado.gastarPd);
   const recuperarPd = useOp2FichasStore((estado) => estado.recuperarPd);
+  const definirImpeto = useOp2FichasStore((estado) => estado.definirImpeto);
+  const definirAvaliacao = useOp2FichasStore((estado) => estado.definirAvaliacao);
   const ativarHabilidade = useOp2FichasStore((estado) => estado.ativarHabilidade);
   const registrarResultadoDeTeste = useOp2FichasStore((estado) => estado.registrarResultadoDeTeste);
   const encerrarCena = useOp2FichasStore((estado) => estado.encerrarCena);
@@ -101,6 +103,8 @@ const PainelFichas: React.FC = () => {
             onAlterarPd={(delta) =>
               delta < 0 ? gastarPd(selecionada.id, -delta) : recuperarPd(selecionada.id, delta)
             }
+            onDefinirImpeto={(valor) => definirImpeto(selecionada.id, valor)}
+            onDefinirAvaliacao={(valor) => definirAvaliacao(selecionada.id, valor)}
             onResultado={({ habilidadesUsadas, contaComoFalhaParaImpeto }) => {
               habilidadesUsadas.forEach((id) => ativarHabilidade(selecionada.id, id));
               registrarResultadoDeTeste(selecionada.id, { contaComoFalhaParaImpeto });

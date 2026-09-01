@@ -14,6 +14,8 @@ function fonte(arquivo: string): string {
 
 const TODOS_OS_COMPONENTES = readdirSync(RAIZ_UI).filter((arquivo) => arquivo.endsWith('.tsx'));
 
+const SUPERFICIES = ['FichaOp2Publica.tsx', 'OverlayOp2.tsx'];
+
 describe('a UI cobre todas as variantes do dominio', () => {
   it('cada passo da escala tem forma e cor proprias em Dados.tsx', () => {
     const dados = fonte('Dados.tsx');
@@ -68,7 +70,7 @@ describe('a UI cobre todas as variantes do dominio', () => {
   });
 
   it('os atributos aparecem pelo NOME COMPLETO, nunca so por icone', () => {
-    for (const arquivo of ['FichaOp2Publica.tsx', 'FichaOp2View.tsx', 'OverlayOp2.tsx']) {
+    for (const arquivo of SUPERFICIES) {
       const conteudo = fonte(arquivo);
       expect(conteudo).toContain('ROTULO_ATRIBUTO[atributo]');
       expect(conteudo).not.toMatch(/ICONE_DO_ATRIBUTO/);
@@ -76,7 +78,7 @@ describe('a UI cobre todas as variantes do dominio', () => {
   });
 
   it('nenhum atributo depende de title para ser identificado: tooltip nao e rotulo', () => {
-    for (const arquivo of ['FichaOp2Publica.tsx', 'FichaOp2View.tsx', 'OverlayOp2.tsx']) {
+    for (const arquivo of SUPERFICIES) {
       expect(fonte(arquivo)).not.toContain('title={ROTULO_ATRIBUTO[atributo]}');
     }
   });
@@ -105,7 +107,7 @@ describe('a UI cobre todas as variantes do dominio', () => {
   });
 
   it('cada superficie mostra impeto e avaliacao so para o perfil que os tem', () => {
-    for (const arquivo of ['FichaOp2Publica.tsx', 'FichaOp2View.tsx', 'OverlayOp2.tsx']) {
+    for (const arquivo of SUPERFICIES) {
       const conteudo = fonte(arquivo);
       expect(conteudo).toContain("ficha.perfil.tipo === 'EXECUTOR'");
       expect(conteudo).toContain("ficha.perfil.tipo === 'ANALISTA'");
@@ -113,7 +115,7 @@ describe('a UI cobre todas as variantes do dominio', () => {
   });
 
   it('os recursos aparecem pelo nome por extenso, sem abreviacao criptica', () => {
-    for (const arquivo of ['FichaOp2Publica.tsx', 'FichaOp2View.tsx', 'OverlayOp2.tsx']) {
+    for (const arquivo of SUPERFICIES) {
       const conteudo = fonte(arquivo);
       expect(conteudo).toContain('Ímpeto');
       expect(conteudo).toContain('Avaliação');
@@ -146,7 +148,7 @@ describe('a UI cobre todas as variantes do dominio', () => {
 
 describe('a UI nao carrega regra propria', () => {
   it('nenhum componente reimplementa a DT padrao como literal', () => {
-    for (const arquivo of ['TesteRapido.tsx', 'ResultadoTeste.tsx', 'FichaOp2Publica.tsx']) {
+    for (const arquivo of ['TesteRapido.tsx', 'ResultadoTeste.tsx', ...SUPERFICIES]) {
       const conteudo = fonte(arquivo);
       expect(conteudo).not.toMatch(/dt\s*=\s*7\b/);
     }
@@ -185,7 +187,7 @@ describe('a UI nao carrega regra propria', () => {
   });
 
   it('a lista de habilidades da ficha vem do catalogo, nao de texto escrito na UI', () => {
-    const ficha = fonte('FichaOp2View.tsx');
+    const ficha = fonte('FichaOp2Publica.tsx');
     expect(ficha).toContain('habilidadePorId');
     for (const habilidade of HABILIDADES_OP2) {
       expect(ficha).not.toContain(habilidade.descricao);
@@ -193,7 +195,7 @@ describe('a UI nao carrega regra propria', () => {
   });
 
   it('toda superficie lista pericias a partir do catalogo, nao de uma lista escrita na UI', () => {
-    for (const arquivo of ['FichaOp2Publica.tsx', 'FichaOp2View.tsx', 'OverlayOp2.tsx']) {
+    for (const arquivo of SUPERFICIES) {
       const conteudo = fonte(arquivo);
       const vemDoCatalogo =
         conteudo.includes('PERICIAS_SIMPLES') || conteudo.includes('periciasDoAtributo');
@@ -245,5 +247,136 @@ describe('painel de investigacao', () => {
 
   it('o painel avisa do custo de 1 PD do Examinar', () => {
     expect(fonte('PainelInvestigacao.tsx')).toContain('1 PD');
+  });
+});
+
+describe('o tailwind enxerga a UI do op2', () => {
+  const RAIZ_PROJETO = path.resolve(RAIZ_UI, '../../..');
+  const RAIZ_SRC = path.join(RAIZ_PROJETO, 'src');
+
+  function componentesEstilizados(diretorio: string, achados: string[] = []): string[] {
+    for (const entrada of readdirSync(diretorio, { withFileTypes: true })) {
+      const caminho = path.join(diretorio, entrada.name);
+      if (entrada.isDirectory()) {
+        componentesEstilizados(caminho, achados);
+      } else if (
+        entrada.name.endsWith('.tsx') &&
+        readFileSync(caminho, 'utf8').includes('className=')
+      ) {
+        achados.push(path.relative(RAIZ_SRC, caminho).split(path.sep).join('/'));
+      }
+    }
+    return achados;
+  }
+
+  function diretoriosVarridos(): string[] {
+    const config = readFileSync(path.join(RAIZ_PROJETO, 'tailwind.config.ts'), 'utf8');
+    const inicio = config.indexOf('content:');
+    const bloco = config.slice(inicio, config.indexOf(']', inicio));
+    return bloco
+      .split('\n')
+      .map((linha) => linha.match(/["']\.\/src\/([^*"']+)/))
+      .filter((casamento): casamento is RegExpMatchArray => casamento !== null)
+      .map((casamento) => casamento[1].replace(/\/+$/, ''));
+  }
+
+  it('todo componente estilizado mora num diretorio varrido: classe fora do glob nao vira CSS', () => {
+    const varridos = diretoriosVarridos();
+    const invisiveis = componentesEstilizados(RAIZ_SRC).filter(
+      (arquivo) => !varridos.some((prefixo) => arquivo.startsWith(prefixo + '/')),
+    );
+    expect(invisiveis).toEqual([]);
+  });
+});
+
+describe('a paleta ordem-* existe de fato', () => {
+  function tokensDaPaleta(): Set<string> {
+    const config = readFileSync(
+      path.resolve(RAIZ_UI, '../../..', 'tailwind.config.ts'),
+      'utf8',
+    );
+    const inicio = config.indexOf('ordem: {');
+    const bloco = config.slice(inicio, config.indexOf('},', inicio));
+    return new Set(
+      bloco
+        .split('\n')
+        .map((linha) => linha.match(/^\s*"?([a-z-]+)"?:/))
+        .filter((casamento): casamento is RegExpMatchArray => casamento !== null)
+        .map((casamento) => casamento[1]),
+    );
+  }
+
+  it('nenhuma classe aponta para token inexistente: ela sai literalmente sem cor', () => {
+    const paleta = tokensDaPaleta();
+    const mortos = new Set<string>();
+    for (const arquivo of [...TODOS_OS_COMPONENTES, 'tema.ts']) {
+      const usos =
+        fonte(arquivo).match(
+          /(?:bg|text|border|from|to|via|ring|fill|stroke|divide|outline|accent)-ordem-[a-z-]+/g,
+        ) ?? [];
+      for (const uso of usos) {
+        if (!paleta.has(uso.replace(/^[a-z]+-ordem-/, ''))) mortos.add(uso);
+      }
+    }
+    expect(Array.from(mortos)).toEqual([]);
+  });
+});
+
+describe('a ficha do mestre e a mesma superficie que o jogador ve', () => {
+  it('a view do mestre delega a renderizacao em vez de manter markup proprio', () => {
+    const view = fonte('FichaOp2View.tsx');
+    expect(view).toContain('<FichaOp2Publica');
+    expect(view).toContain('moldura="embutida"');
+  });
+
+  it('a view do mestre nao tem className literal: markup proprio faria as duas divergirem', () => {
+    expect(fonte('FichaOp2View.tsx')).not.toMatch(/className="/);
+  });
+
+  it('a view do mestre nao monta lista propria de pericia nem de habilidade', () => {
+    const view = fonte('FichaOp2View.tsx');
+    expect(view).not.toContain("from '../regras/pericias'");
+    expect(view).not.toContain("from '../regras/habilidades'");
+  });
+
+  it('o mestre ajusta todos os quatro recursos, os de perfil inclusive', () => {
+    const painel = fonte('PainelOp2.tsx');
+    for (const acao of ['onAlterarPv', 'onAlterarPd', 'onDefinirImpeto', 'onDefinirAvaliacao']) {
+      expect(painel).toContain(acao);
+    }
+  });
+
+  it('a ficha compartilhada nao recebe nenhum ajuste: o jogador le, o mestre edita', () => {
+    const remota = fonte('FichaOp2Remota.tsx');
+    for (const acao of ['onAlterarPv', 'onAlterarPd', 'onDefinirImpeto', 'onDefinirAvaliacao']) {
+      expect(remota).not.toContain(acao);
+    }
+  });
+
+  it('os espacos de perfil so viram botao quando ha onDefinir', () => {
+    const pecas = fonte('Pecas.tsx');
+    expect(pecas).toContain('onDefinir?: (valor: number) => void;');
+    expect(pecas).toContain('if (!onDefinir)');
+  });
+
+  it('as pericias destreinadas ficam escondidas atras do mesmo botao nas duas fichas', () => {
+    const publica = fonte('FichaOp2Publica.tsx');
+    expect(publica).toContain('destreinadas');
+    expect(publica).toContain('aria-expanded={mostrandoTodas}');
+    expect(fonte('FichaOp2View.tsx')).not.toContain('destreinada');
+  });
+});
+
+describe('a porta publica nao fica ambigua', () => {
+  it('nenhum componente reexporta simbolo de outro modulo: o barrel usa export * e colidiria', () => {
+    const reexportam = TODOS_OS_COMPONENTES.filter((arquivo) => /^export \{/m.test(fonte(arquivo)));
+    expect(reexportam).toEqual([]);
+  });
+
+  it('as acoes novas de sessao saem pela porta publica, como as de PV e PD', () => {
+    const porta = readFileSync(path.resolve(RAIZ_UI, '..', 'index.ts'), 'utf8');
+    for (const acao of ['definirImpeto', 'definirAvaliacao', 'definirPv', 'definirPd']) {
+      expect(porta).toContain(`  ${acao},`);
+    }
   });
 });

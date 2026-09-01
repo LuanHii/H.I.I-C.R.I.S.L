@@ -7,6 +7,8 @@ import {
   aplicarResultadoDeTeste,
   ativarHabilidade,
   curar,
+  definirAvaliacao,
+  definirImpeto,
   definirPd,
   definirPv,
   descansar,
@@ -44,6 +46,8 @@ interface Op2FichasState {
   gastarImpeto: (id: string, espacos: 1 | 3) => void;
   ganharDadosDeAvaliacao: (id: string) => void;
   gastarDadosDeAvaliacao: (id: string, dados: 1 | 2) => void;
+  definirImpeto: (id: string, valor: number) => void;
+  definirAvaliacao: (id: string, valor: number) => void;
 
   ativarHabilidade: (id: string, habilidadeId: string) => void;
   registrarResultadoDeTeste: (id: string, resultado: { contaComoFalhaParaImpeto: boolean }) => void;
@@ -105,6 +109,9 @@ export const useOp2FichasStore = create<Op2FichasState>()(
         ganharDadosDeAvaliacao: (id) => transformar(id, ganharDadosDeAvaliacao),
         gastarDadosDeAvaliacao: (id, dados) =>
           transformar(id, (ficha) => gastarDadosDeAvaliacao(ficha, dados)),
+        definirImpeto: (id, valor) => transformar(id, (ficha) => definirImpeto(ficha, valor)),
+        definirAvaliacao: (id, valor) =>
+          transformar(id, (ficha) => definirAvaliacao(ficha, valor)),
 
         ativarHabilidade: (id, habilidadeId) =>
           transformar(id, (ficha) => ativarHabilidade(ficha, habilidadeId)),

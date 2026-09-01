@@ -14,7 +14,7 @@ const Dado: React.FC<DadoProps> = ({ dado }) => (
       'flex flex-col items-center justify-center rounded-md border-2 px-3 py-2 min-w-[3.25rem] transition-opacity',
       dado.somado
         ? 'border-ordem-green bg-ordem-ooze text-ordem-white'
-        : 'border-ordem-border bg-ordem-bg text-ordem-text-muted opacity-60',
+        : 'border-ordem-border bg-ordem-black-deep text-ordem-text-muted opacity-60',
       dado.substituido && 'border-ordem-gold',
     )}
     title={`${dado.motivo} · d${dado.faces}${dado.somado ? '' : ' · descartado da soma'}`}
@@ -103,7 +103,7 @@ export const ResultadoTesteView: React.FC<ResultadoTesteProps> = ({
         ) : null}
         {!passouPelaSoma ? <span>O crítico decide o teste, a soma não</span> : null}
         {resultado.extrasIgnorados.length > 0 ? (
-          <span className="text-ordem-red-light">
+          <span className="text-red-400">
             {resultado.extrasIgnorados.length} extra(s) não couberam no limite de 4 dados
           </span>
         ) : null}

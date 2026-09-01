@@ -41,7 +41,7 @@ export const SeletorDePresets: React.FC<SeletorDePresetsProps> = ({ onImportar, 
               'flex-1 rounded border px-3 py-2 text-sm transition-colors',
               jogadores === tamanho
                 ? 'border-ordem-green bg-ordem-ooze text-ordem-white'
-                : 'border-ordem-border bg-ordem-bg text-ordem-text-secondary hover:border-ordem-border-light',
+                : 'border-ordem-border bg-ordem-black-deep text-ordem-text-secondary hover:border-ordem-border-light',
             )}
           >
             {tamanho} jogadores
@@ -59,7 +59,7 @@ export const SeletorDePresets: React.FC<SeletorDePresetsProps> = ({ onImportar, 
               className={cn(
                 'rounded border px-3 py-2 transition-opacity',
                 excluido
-                  ? 'border-ordem-border bg-ordem-bg opacity-40'
+                  ? 'border-ordem-border bg-ordem-black-deep opacity-40'
                   : 'border-ordem-border-light bg-ordem-ooze',
               )}
             >

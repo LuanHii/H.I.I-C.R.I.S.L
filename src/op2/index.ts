@@ -162,6 +162,8 @@ export {
   ativarHabilidade,
   curar,
   custoDaHabilidade,
+  definirAvaliacao,
+  definirImpeto,
   definirPd,
   definirPv,
   descansar,

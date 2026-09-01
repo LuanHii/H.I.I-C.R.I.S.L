@@ -3,6 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { DiceStep } from '../regras/tipos';
 import { IconeDeDado, NIVEIS_DO_DADO } from './Dados';
@@ -33,7 +34,6 @@ export const SOMBRA_DE_ELEMENTO = 'drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]';
 
 export const CORES_DO_DADO: Record<DiceStep, string> = NIVEIS_DO_DADO;
 
-/** Painel com moldura de cantos recortados na cor do perfil. */
 export const Painel: React.FC<{
   children: React.ReactNode;
   cantos?: boolean;
@@ -61,7 +61,6 @@ export const Painel: React.FC<{
 export const PAINEL =
   'relative border border-white/10 bg-[var(--op2-superficie)] shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_24px_50px_-30px_rgba(0,0,0,1)]';
 
-/** Badge com aparencia de fita/carimbo, levemente torta. */
 export const Fita: React.FC<{
   children: React.ReactNode;
   variante?: 'perfil' | 'neutra' | 'alerta';
@@ -102,13 +101,6 @@ export const RotuloDeSecao: React.FC<{
   </div>
 );
 
-/**
- * Contador em BLOCOS, como nos cartoes do playtest, em vez de barra continua.
- *
- * Uma barra continua diz "mais ou menos pela metade". Blocos dizem "sete de
- * dez", que e a leitura que a mesa precisa: quantos pontos ainda dao para
- * gastar. Quebra em duas linhas quando passa de 10 para nao virar fatia fina.
- */
 export interface BlocosDeRecursoProps {
   rotulo: string;
   atual: number;
@@ -193,7 +185,28 @@ export const BlocosDeRecurso: React.FC<BlocosDeRecursoProps> = ({
   );
 };
 
-/** Ímpeto e Avaliação: poucos espaços, blocos grandes e chanfrados. */
+const PassoDeRecurso: React.FC<{
+  rotulo: string;
+  direcao: -1 | 1;
+  desabilitado: boolean;
+  onClick: () => void;
+}> = ({ rotulo, direcao, desabilitado, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={desabilitado}
+    aria-label={`${direcao > 0 ? 'Aumentar' : 'Reduzir'} ${rotulo}`}
+    className={cn(
+      'op2-chanfro flex h-7 w-7 shrink-0 items-center justify-center border border-white/12 bg-black/40 text-white/50 transition-colors',
+      desabilitado
+        ? 'cursor-not-allowed opacity-25'
+        : 'hover:border-white/35 hover:bg-white/10 hover:text-white',
+    )}
+  >
+    {direcao > 0 ? <Plus size={14} /> : <Minus size={14} />}
+  </button>
+);
+
 export interface EspacosDePerfilProps {
   rotulo: string;
   preenchidos: number;
@@ -202,6 +215,7 @@ export interface EspacosDePerfilProps {
   icone?: React.ReactNode;
   ajuda?: string;
   compacto?: boolean;
+  onDefinir?: (valor: number) => void;
   className?: string;
 }
 
@@ -213,6 +227,7 @@ export const EspacosDePerfil: React.FC<EspacosDePerfilProps> = ({
   icone,
   ajuda,
   compacto,
+  onDefinir,
   className,
 }) => {
   const paleta = TONS[tom];
@@ -224,33 +239,79 @@ export const EspacosDePerfil: React.FC<EspacosDePerfilProps> = ({
           {icone ? <span className={paleta.texto}>{icone}</span> : null}
           {rotulo}
         </span>
-        <span className="shrink-0 font-dados leading-none tabular-nums">
-          <span className={cn('font-bold', compacto ? 'text-xl' : 'text-3xl', paleta.texto)}>
-            {preenchidos}
+
+        <span className="flex shrink-0 items-center gap-2">
+          {onDefinir ? (
+            <PassoDeRecurso
+              rotulo={rotulo}
+              direcao={-1}
+              desabilitado={preenchidos <= 0}
+              onClick={() => onDefinir(preenchidos - 1)}
+            />
+          ) : null}
+
+          <span className="font-dados leading-none tabular-nums">
+            <span className={cn('font-bold', compacto ? 'text-xl' : 'text-3xl', paleta.texto)}>
+              {preenchidos}
+            </span>
+            <span className={cn('text-white/30', compacto ? 'text-xs' : 'text-base')}>
+              /{total}
+            </span>
           </span>
-          <span className={cn('text-white/30', compacto ? 'text-xs' : 'text-base')}>/{total}</span>
+
+          {onDefinir ? (
+            <PassoDeRecurso
+              rotulo={rotulo}
+              direcao={1}
+              desabilitado={preenchidos >= total}
+              onClick={() => onDefinir(preenchidos + 1)}
+            />
+          ) : null}
         </span>
       </div>
 
       <div className={cn('mt-2 flex gap-1.5', compacto ? 'h-3' : 'h-4')}>
-        {Array.from({ length: total }, (_, indice) => (
-          <motion.span
-            key={indice}
-            initial={false}
-            animate={{ scale: indice < preenchidos ? 1 : 0.94 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
-            className={cn(
-              'op2-chanfro flex-1 transition-colors duration-300',
-              indice < preenchidos
-                ? cn(paleta.cheio, paleta.brilho)
-                : cn(paleta.vazio, 'ring-1 ring-inset ring-white/10'),
-            )}
-          />
-        ))}
+        {Array.from({ length: total }, (_, indice) => {
+          const cheio = indice < preenchidos;
+          const aparencia = cn(
+            'op2-chanfro flex-1 transition-colors duration-300',
+            cheio
+              ? cn(paleta.cheio, paleta.brilho)
+              : cn(paleta.vazio, 'ring-1 ring-inset ring-white/10'),
+          );
+
+          if (!onDefinir) {
+            return (
+              <motion.span
+                key={indice}
+                initial={false}
+                animate={{ scale: cheio ? 1 : 0.94 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                className={aparencia}
+              />
+            );
+          }
+
+          const alvo = preenchidos === indice + 1 ? indice : indice + 1;
+
+          return (
+            <motion.button
+              key={indice}
+              type="button"
+              initial={false}
+              animate={{ scale: cheio ? 1 : 0.94 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={() => onDefinir(alvo)}
+              aria-label={`Definir ${rotulo} em ${alvo} de ${total}`}
+              className={cn(aparencia, 'cursor-pointer hover:ring-1 hover:ring-white/45')}
+            />
+          );
+        })}
       </div>
     </div>
   );
 };
+
 
 export const DistintivoDeDado: React.FC<{ dado: DiceStep; className?: string }> = ({
   dado,
@@ -362,4 +423,3 @@ export const Aparecer: React.FC<{
   </motion.div>
 );
 
-export { TONS, type TomDeRecurso, type TemaDePerfil };

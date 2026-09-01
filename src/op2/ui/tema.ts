@@ -3,14 +3,6 @@ import type { IdSobrevivente } from '../presets/sobreviventes';
 
 export type Perfil = FichaOp2['perfil']['tipo'];
 
-/**
- * O HEX de cada perfil vive em globals.css, sob `[data-perfil='...']`. Aqui
- * ficam apenas as classes que LEEM essas variaveis.
- *
- * A separacao nao e cosmetica: mantem o guard de "sem hex solto em
- * componente" com significado, e permite trocar a paleta inteira de uma ficha
- * mudando um unico atributo no elemento raiz.
- */
 export interface TemaDePerfil {
   rotulo: string;
   lema: string;
@@ -66,16 +58,11 @@ export interface TomVisual {
   vazio: string;
 }
 
-/**
- * Recurso guarda cor semantica FIXA em toda ficha, independente do perfil.
- * Quem aprendeu "a barra vermelha e minha vida" nao pode reaprender ao trocar
- * de personagem — e a barra e o primeiro lugar onde o olho cai numa cena.
- */
 export const TONS: Record<TomDeRecurso, TomVisual> = {
   vida: {
     cheio: 'bg-ordem-red',
     brilho: 'shadow-[0_0_10px_-2px_rgba(229,57,53,0.9)]',
-    texto: 'text-ordem-red-light',
+    texto: 'text-red-400',
     vazio: 'bg-ordem-red-dark/20',
   },
   determinacao: {
@@ -87,7 +74,7 @@ export const TONS: Record<TomDeRecurso, TomVisual> = {
   impeto: {
     cheio: 'bg-ordem-red',
     brilho: 'shadow-[0_0_12px_-2px_rgba(229,57,53,0.95)]',
-    texto: 'text-ordem-red-light',
+    texto: 'text-red-400',
     vazio: 'bg-ordem-red-dark/20',
   },
   avaliacao: {
@@ -112,11 +99,6 @@ function chaveDoNome(nome: string): string {
   return nome.trim().toLowerCase();
 }
 
-/**
- * Os retratos sao dos cinco sobreviventes do playtest, casados pelo NOME.
- * Ficha com outro nome simplesmente nao tem imagem — a UI cai para as
- * iniciais em vez de mostrar um retrato de outra pessoa.
- */
 export function tokenDoPersonagem(nome: string): string | null {
   const chave = RETRATOS[chaveDoNome(nome)];
   return chave ? `/op2/tokens/${chave}.webp` : null;
