@@ -3,6 +3,11 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
+import {
+  useBibliotecaOp2,
+  type BibliotecaOp2,
+  type SituacaoDaBiblioteca,
+} from '../estado/useBibliotecaOp2';
 import { useOp2FichasStore } from '../estado/useOp2FichasStore';
 import { pdAtual, pvAtual } from '../regras/ficha';
 import type { FichaOp2 } from '../regras/tipos';
@@ -18,6 +23,25 @@ const ABAS: { id: Aba; rotulo: string }[] = [
   { id: 'fichas', rotulo: 'Fichas' },
   { id: 'investigacao', rotulo: 'Investigação' },
 ];
+
+const RECADO_DA_BIBLIOTECA: Record<SituacaoDaBiblioteca, string> = {
+  'sem-conta': 'Só neste navegador — entre na sua conta para salvar no perfil',
+  carregando: 'Carregando as fichas do perfil…',
+  'salva-no-perfil': 'Salvas no seu perfil',
+  salvando: 'Salvando no perfil…',
+  erro: 'Falha ao salvar no perfil',
+};
+
+const EstadoDaBiblioteca: React.FC<BibliotecaOp2> = ({ situacao, mensagemDeErro }) => (
+  <p
+    className={cn(
+      'font-mono text-[0.7rem] uppercase tracking-wide',
+      situacao === 'erro' ? 'text-red-400' : 'text-ordem-text-muted',
+    )}
+  >
+    {situacao === 'erro' && mensagemDeErro ? mensagemDeErro : RECADO_DA_BIBLIOTECA[situacao]}
+  </p>
+);
 
 const PainelFichas: React.FC = () => {
   const fichas = useOp2FichasStore((estado) => estado.fichas);
@@ -35,6 +59,7 @@ const PainelFichas: React.FC = () => {
   const registrarResultadoDeTeste = useOp2FichasStore((estado) => estado.registrarResultadoDeTeste);
   const encerrarCena = useOp2FichasStore((estado) => estado.encerrarCena);
 
+  const biblioteca = useBibliotecaOp2();
   const [mostrandoPresets, setMostrandoPresets] = useState(false);
 
   const selecionada = fichas.find((ficha) => ficha.id === fichaAtiva);
@@ -47,7 +72,8 @@ const PainelFichas: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <EstadoDaBiblioteca {...biblioteca} />
         <Button onClick={() => setMostrandoPresets((atual) => !atual)}>
           {mostrandoPresets ? 'Fechar' : 'Importar sobreviventes'}
         </Button>

@@ -74,6 +74,11 @@ export function urlDoOverlay(
   agenteId: string,
   origem: string,
   modo: 'mini' | 'full' = 'mini',
+  fundo: 'transparente' | 'verde' = 'transparente',
 ): string {
-  return `${origem}/ficha/${agenteId}?overlay=true&overlayMode=${modo}`;
+  const parametros = new URLSearchParams();
+  if (modo === 'full') parametros.set('modo', 'full');
+  if (fundo === 'verde') parametros.set('fundo', 'verde');
+  const busca = parametros.toString();
+  return `${origem}/op2/overlay/${agenteId}${busca ? `?${busca}` : ''}`;
 }

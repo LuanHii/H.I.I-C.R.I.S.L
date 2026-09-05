@@ -26,12 +26,13 @@ import {
 interface Op2FichasState {
   fichas: FichaOp2[];
   fichaAtiva: string | null;
+  atualizadoEm: Record<string, string>;
 
   setFichaAtiva: (id: string | null) => void;
   adicionarFicha: (ficha: FichaOp2) => void;
   substituirFicha: (ficha: FichaOp2) => void;
   removerFicha: (id: string) => void;
-  definirFichas: (fichas: FichaOp2[]) => void;
+  definirFichas: (fichas: FichaOp2[], carimbos?: Record<string, string>) => void;
   fichaPorId: (id: string) => FichaOp2 | undefined;
 
   transformar: (id: string, transformacao: (ficha: FichaOp2) => FichaOp2) => void;
@@ -63,14 +64,25 @@ interface Op2FichasState {
 export const useOp2FichasStore = create<Op2FichasState>()(
   persist(
     (set, get) => {
+      const agora = () => new Date().toISOString();
+
       const transformar = (id: string, transformacao: (ficha: FichaOp2) => FichaOp2) =>
-        set((estado) => ({
-          fichas: estado.fichas.map((ficha) => (ficha.id === id ? transformacao(ficha) : ficha)),
-        }));
+        set((estado) => {
+          let mudou = false;
+          const fichas = estado.fichas.map((ficha) => {
+            if (ficha.id !== id) return ficha;
+            const nova = transformacao(ficha);
+            if (nova !== ficha) mudou = true;
+            return nova;
+          });
+          if (!mudou) return { fichas: estado.fichas };
+          return { fichas, atualizadoEm: { ...estado.atualizadoEm, [id]: agora() } };
+        });
 
       return {
         fichas: [],
         fichaAtiva: null,
+        atualizadoEm: {},
 
         setFichaAtiva: (id) => set({ fichaAtiva: id }),
 
@@ -79,20 +91,31 @@ export const useOp2FichasStore = create<Op2FichasState>()(
             fichas: estado.fichas.some((atual) => atual.id === ficha.id)
               ? estado.fichas.map((atual) => (atual.id === ficha.id ? ficha : atual))
               : [...estado.fichas, ficha],
+            atualizadoEm: { ...estado.atualizadoEm, [ficha.id]: agora() },
           })),
 
         substituirFicha: (ficha) =>
           set((estado) => ({
             fichas: estado.fichas.map((atual) => (atual.id === ficha.id ? ficha : atual)),
+            atualizadoEm: { ...estado.atualizadoEm, [ficha.id]: agora() },
           })),
 
         removerFicha: (id) =>
-          set((estado) => ({
-            fichas: estado.fichas.filter((ficha) => ficha.id !== id),
-            fichaAtiva: estado.fichaAtiva === id ? null : estado.fichaAtiva,
-          })),
+          set((estado) => {
+            const carimbos = { ...estado.atualizadoEm };
+            delete carimbos[id];
+            return {
+              fichas: estado.fichas.filter((ficha) => ficha.id !== id),
+              fichaAtiva: estado.fichaAtiva === id ? null : estado.fichaAtiva,
+              atualizadoEm: carimbos,
+            };
+          }),
 
-        definirFichas: (fichas) => set({ fichas }),
+        definirFichas: (fichas, carimbos) =>
+          set((estado) => ({
+            fichas,
+            atualizadoEm: carimbos ?? estado.atualizadoEm,
+          })),
 
         fichaPorId: (id) => get().fichas.find((ficha) => ficha.id === id),
 
@@ -131,7 +154,7 @@ export const useOp2FichasStore = create<Op2FichasState>()(
     },
     {
       name: 'op2-fichas-store',
-      partialize: (estado) => ({ fichas: estado.fichas }),
+      partialize: (estado) => ({ fichas: estado.fichas, atualizadoEm: estado.atualizadoEm }),
     },
   ),
 );

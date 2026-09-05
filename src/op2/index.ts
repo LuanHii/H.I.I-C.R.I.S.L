@@ -293,4 +293,18 @@ export {
   precisaSincronizar,
 } from './nuvem/sincronizacao';
 
+export type { RegistroOp2 } from './nuvem/mesclagem';
+export { diferencaParaNuvem, mesclarPrimeiraCarga } from './nuvem/mesclagem';
+
+export {
+  SUBCOLECAO_OP2,
+  assinarBibliotecaOp2,
+  caminhoDaBiblioteca,
+  removerFichaOp2DoPerfil,
+  salvarFichaOp2NoPerfil,
+} from './nuvem/biblioteca';
+
+export type { BibliotecaOp2, SituacaoDaBiblioteca } from './estado/useBibliotecaOp2';
+export { useBibliotecaOp2 } from './estado/useBibliotecaOp2';
+
 export { ReferenciaDeRegras } from './ui/ReferenciaDeRegras';

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { assinarFichaOp2, ehDocumentoOp2 } from '../nuvem/agentes';
+import { assinarFichaOp2, ehDocumentoOp2, urlDaFicha, urlDoOverlay } from '../nuvem/agentes';
 
 const onSnapshotMock = vi.fn();
 
@@ -83,5 +83,26 @@ describe('discriminante do documento', () => {
     expect(ehDocumentoOp2(null)).toBe(false);
     expect(ehDocumentoOp2(undefined)).toBe(false);
     expect(ehDocumentoOp2('op2')).toBe(false);
+  });
+});
+
+describe('os enderecos que o mestre copia', () => {
+  it('o overlay aponta para a rota dedicada, nao para a ficha com query legada', () => {
+    const url = urlDoOverlay('abc', 'https://x.app');
+    expect(url).toBe('https://x.app/op2/overlay/abc');
+    expect(url).not.toContain('overlay=true');
+  });
+
+  it('o modo completo e o fundo verde viajam como parametro que a rota le', () => {
+    expect(urlDoOverlay('abc', 'https://x.app', 'full')).toContain('modo=full');
+    expect(urlDoOverlay('abc', 'https://x.app', 'mini', 'verde')).toContain('fundo=verde');
+  });
+
+  it('o overlay transparente e mini nao carrega parametro nenhum', () => {
+    expect(urlDoOverlay('abc', 'https://x.app', 'mini', 'transparente')).not.toContain('?');
+  });
+
+  it('a ficha compartilhada continua na rota que o jogador ja tem', () => {
+    expect(urlDaFicha('abc', 'https://x.app')).toBe('https://x.app/ficha/abc');
   });
 });
