@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { carimbarSincronizacao } from './carimboDeSincronizacao';
 import { Personagem } from '../types';
 import { useAuthOptional } from '../firebase/auth';
 import {
@@ -256,10 +257,12 @@ export function useCloudFichas() {
       const now = new Date().toISOString();
 
       try {
-        await saveFichaToCloud(userId, paraNuvem({ ...alvo, atualizadoEm: now }));
+        const carimbado = carimbarSincronizacao(alvo, now);
+
+        await saveFichaToCloud(userId, paraNuvem(carimbado));
         await saveAgentToCloud(alvo.id, alvo.personagem);
 
-        setFichas((prev) => prev.map(f => f.id === id ? { ...f, sincronizadaNaNuvem: true, atualizadoEm: now } : f));
+        setFichas((prev) => prev.map(f => f.id === id ? carimbado : f));
       } catch (err) {
         console.error('Erro ao sincronizar ficha manualmente:', err);
         throw err;
@@ -280,7 +283,7 @@ export function useCloudFichas() {
 
       setFichas((prev) => {
         const atualizadas = prev.map((f) =>
-          f.id === id ? { ...f, sincronizadaNaNuvem: true, atualizadoEm: new Date().toISOString() } : f
+          f.id === id ? carimbarSincronizacao(f, new Date().toISOString()) : f
         );
         gravarFichasLocal(atualizadas);
         return atualizadas;

@@ -460,6 +460,8 @@ describe('o motor novo não é autoritativo', () => {
     'components/master/NivelPanel.tsx',
     'core/storage/useCloudFichas.ts',
     'core/storage/useStoredFichas.ts',
+    'core/storage/carimboDeSincronizacao.ts',
+    'core/storage/__tests__/carimboDeSincronizacao.test.ts',
     'core/storage/__tests__/dualWrite.test.ts',
     'core/firebase/userDataService.ts',
   ];
