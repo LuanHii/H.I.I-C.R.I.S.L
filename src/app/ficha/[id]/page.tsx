@@ -9,6 +9,7 @@ import { OverlayView } from './OverlayView';
 import { useWatchedFichas } from '../../../core/storage';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { useAuthOptional } from '../../../core/firebase/auth';
+import { FichaOp2Remota, useFichaOp2Remota } from '@/op2';
 
 function PlayerAgentContent() {
   const params = useParams();
@@ -17,9 +18,13 @@ function PlayerAgentContent() {
   const isOverlay = searchParams.get('overlay') === 'true';
   const isFoundryEmbed = searchParams.get('embed') === 'foundry';
   const overlayMode = (searchParams.get('overlayMode') as 'mini' | 'full' | null) ?? 'mini';
+  const overlayFundo = searchParams.get('fundo') === 'verde' ? 'verde' : 'transparente';
 
   const auth = useAuthOptional();
   const { addWatch, removeWatch, isWatching, isAuthenticated } = useWatchedFichas();
+
+  const op2 = useFichaOp2Remota(id);
+  const ehOp2 = op2.fase === 'op2';
 
   const [agent, setAgent] = useState<Personagem | null>(null);
   const [loading, setLoading] = useState(true);
@@ -29,7 +34,7 @@ function PlayerAgentContent() {
   const isCurrentlyWatching = isWatching(id);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || ehOp2) return;
 
     const unsubscribe = subscribeToAgent(id, (data) => {
       if (data) {
@@ -42,7 +47,7 @@ function PlayerAgentContent() {
     });
 
     return () => unsubscribe();
-  }, [id]);
+  }, [id, ehOp2]);
 
   const handleToggleWatch = async () => {
     if (!agent) return;
@@ -75,7 +80,30 @@ function PlayerAgentContent() {
     window.open(url.toString(), '_blank', 'width=520,height=680,menubar=no,toolbar=no,location=no,status=no');
   };
 
-  if (loading) {
+  if (op2.fase === 'op2') {
+    return (
+      <FichaOp2Remota
+        ficha={op2.documento}
+        atualizadoEm={op2.documento.updatedAt}
+        overlay={isOverlay}
+        modoDoOverlay={overlayMode}
+        fundoDoOverlay={overlayFundo}
+        embutida={isFoundryEmbed}
+        aoAbrirOverlay={isFoundryEmbed ? undefined : (modo) => {
+          const url = new URL(window.location.href);
+          url.searchParams.set('overlay', 'true');
+          url.searchParams.set('overlayMode', modo);
+          window.open(
+            url.toString(),
+            '_blank',
+            `width=${modo === 'full' ? 520 : 500},height=${modo === 'full' ? 680 : 500},menubar=no,toolbar=no,location=no,status=no`,
+          );
+        }}
+      />
+    );
+  }
+
+  if (loading || op2.fase === 'carregando') {
     if (isOverlay) return null;
     return (
       <div className="min-h-screen bg-ordem-black text-white flex items-center justify-center font-mono">

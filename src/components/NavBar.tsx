@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-const LINKS: Array<{ label: string; href: Route }> = [
+const LINKS: Array<{ label: string; href: Route; discreto?: boolean }> = [
   { label: 'Novo Agente', href: '/agente/novo' },
   { label: 'Fichas', href: '/mestre/fichas' },
+  { label: 'OP2', href: '/op2', discreto: true },
 ];
 
 export function NavBar() {
@@ -38,9 +39,12 @@ export function NavBar() {
               <Link
                 key={link.href}
                 href={link.href}
+                title={link.discreto ? 'Ordem Paranormal 2 — Playtest Alpha' : undefined}
                 className={`px-3 py-2 border tracking-[0.3em] transition ${active
                   ? 'border-ordem-green text-ordem-green'
-                  : 'border-ordem-white/20 text-ordem-white/70 hover:border-ordem-white'
+                  : link.discreto
+                    ? 'border-ordem-white/10 text-ordem-white/40 hover:border-ordem-white/40 hover:text-ordem-white/70'
+                    : 'border-ordem-white/20 text-ordem-white/70 hover:border-ordem-white'
                   }`}
               >
                 {link.label}

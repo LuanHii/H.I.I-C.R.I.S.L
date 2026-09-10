@@ -233,3 +233,84 @@ body {
 .animate-slide-down {
   animation: slideDown 0.3s ease-in forwards;
 }
+/* ─── Ordem Paranormal 2 — camada de tema por perfil ─────────────────────
+   O hex mora AQUI, nunca nos componentes. Os componentes leem var(--op2-*),
+   o que mantem o guard de "sem hex solto" util e permite trocar o tema
+   inteiro trocando um atributo data-perfil no elemento raiz da ficha.      */
+
+[data-perfil] {
+  --op2-superficie: #121217;
+  --op2-superficie-alta: #181820;
+  --op2-fundo: #0a0a0c;
+}
+
+[data-perfil='EXECUTOR'] {
+  --op2-primary: #e53935;
+  --op2-primary-fundo: #b71c1c;
+  --op2-glow: rgba(229, 57, 53, 0.35);
+  --op2-border: #7f1d1d;
+  --op2-badge: #991b1b;
+}
+
+[data-perfil='VIGILANTE'] {
+  --op2-primary: #43a047;
+  --op2-primary-fundo: #2e7d32;
+  --op2-glow: rgba(67, 160, 71, 0.35);
+  --op2-border: #14532d;
+  --op2-badge: #166534;
+}
+
+[data-perfil='ANALISTA'] {
+  --op2-primary: #0288d1;
+  --op2-primary-fundo: #01579b;
+  --op2-glow: rgba(2, 136, 209, 0.35);
+  --op2-border: #0c4a6e;
+  --op2-badge: #075985;
+}
+
+.op2-grao {
+  background-image: url('/noise.png');
+  background-repeat: repeat;
+  opacity: 0.035;
+}
+
+.op2-canto {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: var(--op2-primary);
+  opacity: 0.75;
+}
+
+.op2-canto-se {
+  top: -1px;
+  left: -1px;
+  border-top-width: 2px;
+  border-left-width: 2px;
+}
+.op2-canto-sd {
+  top: -1px;
+  right: -1px;
+  border-top-width: 2px;
+  border-right-width: 2px;
+}
+.op2-canto-ie {
+  bottom: -1px;
+  left: -1px;
+  border-bottom-width: 2px;
+  border-left-width: 2px;
+}
+.op2-canto-id {
+  bottom: -1px;
+  right: -1px;
+  border-bottom-width: 2px;
+  border-right-width: 2px;
+}
+
+.op2-chanfro {
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+
+.op2-fita {
+  clip-path: polygon(0 0, 100% 3%, 99% 100%, 1% 96%);
+}
