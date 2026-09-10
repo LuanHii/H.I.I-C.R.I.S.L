@@ -10,23 +10,9 @@ import type {
   ValorEscolha,
 } from './tipos';
 
-/**
- * Registro de escolha — a única porta de escrita no log.
- *
- * Duas propriedades que o motor antigo não tem:
- *
- *  - **Overwrite, não append.** Como o id vem da obrigação e não da resposta,
- *    responder de novo o mesmo slot substitui a resposta anterior. "Voltar e
- *    alterar" sai de graça, sem caso especial e sem duplicata no log.
- *  - **Nunca lança.** Uma escolha inválida volta como `Problema`. O motor antigo
- *    faz `throw` em `progression.choosePower`, o que num render vira tela branca
- *    em vez de mensagem.
- */
-
 export interface ResultadoRegistro {
   ficha: FichaPersistida;
   problemas: Problema[];
-  /** True se a escolha foi aceita e o log mudou. */
   aplicada: boolean;
 }
 
@@ -35,15 +21,10 @@ function contextoDe(ficha: FichaPersistida): ContextoOpcoes {
   return { identidade: ficha.identidade, parcial: estadoFinal };
 }
 
-/** Mesma forma de valor que o slot espera? Barra trocas de tipo silenciosas. */
 function tipoCompativel(slot: Slot, valor: ValorEscolha): boolean {
   switch (slot.kind) {
     case 'trilha':
       return valor.tipo === 'trilha';
-    /*
-     * Versatilidade tem forma PRÓPRIA. Aceitar `{tipo:'trilha'}` aqui era o que
-     * deixava uma resposta de versatilidade trocar a trilha do personagem.
-     */
     case 'versatilidade':
       return valor.tipo === 'versatilidade';
     case 'trilhaHabilidade':
@@ -58,13 +39,12 @@ function tipoCompativel(slot: Slot, valor: ValorEscolha): boolean {
       return valor.tipo === 'afinidade';
     case 'ritual':
       return valor.tipo === 'ritual';
-    /*
-     * Transcender concede um poder de fato, então a forma é a MESMA do slot de
-     * poder de classe. O que difere é a lista oferecida (paranormais), e isso é
-     * papel de `opcoesPara`, não da checagem de forma.
-     */
     case 'poderParanormal':
       return valor.tipo === 'poder';
+    case 'poderDiletante':
+      return valor.tipo === 'poder';
+    case 'origem':
+      return valor.tipo === 'origem';
     case 'escolhaInterna':
       return valor.tipo === 'escolhaInterna';
   }
@@ -135,7 +115,6 @@ export function registrarEscolha(
     });
   }
 
-  // Overwrite: substitui a resposta anterior do mesmo slot, em vez de duplicar.
   const nova: Escolha = { id, valor };
   const semAntiga = ficha.escolhas.filter((e) => e.id !== id);
 
@@ -146,10 +125,6 @@ export function registrarEscolha(
   };
 }
 
-/**
- * Remove a resposta de um slot. Escolhas-filhas da cascata caem com ela — um
- * Transcender desfeito não deixa o poder paranormal órfão pendurado no log.
- */
 export function limparEscolha(ficha: FichaPersistida, id: EscolhaId): FichaPersistida {
   const prefixo = `${id}/`;
   return {

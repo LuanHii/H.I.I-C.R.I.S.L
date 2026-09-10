@@ -100,11 +100,14 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="flex justify-between items-end mb-2">
-        <span className="text-ordem-white font-bold text-sm sm:text-base tracking-wider uppercase">
+      <div className="mb-2 flex items-baseline gap-2">
+        <span className={cn(
+          'font-carimbo text-xs font-bold uppercase tracking-[0.18em] sm:text-sm',
+          config.accent,
+        )}>
           {label}
         </span>
-        <div className="flex items-center gap-1 font-mono text-lg sm:text-xl relative min-w-0 overflow-visible">
+        <div className="relative flex min-w-0 items-baseline gap-1 overflow-visible font-mono text-xl font-bold tabular-nums sm:text-2xl">
           <motion.span
             className={cn(
               isLow && 'text-ordem-red',
@@ -116,7 +119,6 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
             {current}
           </motion.span>
 
-          { }
           <AnimatePresence>
             {showDelta !== null && (
               <motion.span
@@ -161,76 +163,40 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
           )}
         </div>
       </div>
-      <div className={cn(
-        'relative h-9 sm:h-8 bg-ordem-black-deep border rounded-lg overflow-hidden',
-        config.border
-      )}>
-        <div className="absolute inset-0 opacity-10 bg-[url('/noise.png')]" />
-
-        <motion.div
-          className={cn(
-            'h-full relative overflow-hidden',
-            config.bar,
-            isPulsing && config.glow
-          )}
-          initial={{ width: 0 }}
-          animate={{ width: `${percentage}%` }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
-        >
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-white/30" />
-
-          <div className="absolute inset-0 opacity-20 bg-[linear-gradient(45deg,rgba(255,255,255,0.1)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.1)_50%,rgba(255,255,255,0.1)_75%,transparent_75%,transparent)] bg-[length:20px_20px]" />
-
-          <AnimatePresence>
-            {isPulsing && (
-              <motion.div
-                initial={{ x: '-100%' }}
-                animate={{ x: '100%' }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.6 }}
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-              />
-            )}
-          </AnimatePresence>
-        </motion.div>
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span className={cn(
-            'text-[10px] font-mono font-bold text-white/60 drop-shadow-md',
-            isCritical && 'text-white animate-pulse'
-          )}>
-            {Math.round(percentage)}%
-          </span>
-        </div>
+      <div className="flex h-6 gap-[3px]" aria-hidden>
+        {Array.from({ length: 20 }, (_, indice) => {
+          const aceso = indice < Math.round((percentage / 100) * 20);
+          return (
+            <span
+              key={indice}
+              className={cn(
+                'flex-1 rounded-[1px] transition-colors',
+                aceso ? config.bar : 'bg-white/[0.06]',
+                aceso && isPulsing && config.glow,
+              )}
+            />
+          );
+        })}
       </div>
-      {!readOnly && (
-        <div className="flex justify-between mt-2 gap-2">
-          <div className="flex gap-1.5">
-            {[-5, -1].map((amount) => (
-              <motion.button
-                key={amount}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleAdjust(amount)}
-                className="min-w-[44px] px-3 py-2 bg-ordem-ooze hover:bg-ordem-red/20 active:bg-ordem-red/30 border border-ordem-border-light text-sm text-ordem-white-muted rounded-lg transition-colors"
-              >
-                {amount}
-              </motion.button>
-            ))}
-          </div>
 
-          <div className="flex gap-1.5">
-            {[1, 5].map((amount) => (
-              <motion.button
-                key={amount}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleAdjust(amount)}
-                className="min-w-[44px] px-3 py-2 bg-ordem-ooze hover:bg-ordem-green/20 active:bg-ordem-green/30 border border-ordem-border-light text-sm text-ordem-white-muted rounded-lg transition-colors"
-              >
-                +{amount}
-              </motion.button>
-            ))}
-          </div>
+      {!readOnly && (
+        <div className="mt-2 grid grid-cols-4 gap-1.5">
+          {[-5, -1, 1, 5].map((amount) => (
+            <motion.button
+              key={amount}
+              whileTap={{ scale: 0.96 }}
+              onClick={() => handleAdjust(amount)}
+              className={cn(
+                'border py-1.5 text-center font-mono text-xs transition-colors',
+                'border-white/10 bg-white/[0.02] text-ordem-text-secondary',
+                amount < 0
+                  ? 'hover:border-ordem-red/50 hover:bg-ordem-red/10 hover:text-ordem-red'
+                  : 'hover:border-ordem-green/50 hover:bg-ordem-green/10 hover:text-ordem-green',
+              )}
+            >
+              {amount > 0 ? `+${amount}` : amount}
+            </motion.button>
+          ))}
         </div>
       )}
     </motion.div>

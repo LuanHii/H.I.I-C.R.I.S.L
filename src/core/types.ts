@@ -34,13 +34,6 @@ export interface PatenteConfig {
   nome: Patente;
   credito: 'Baixo' | 'Médio' | 'Alto' | 'Muito Alto' | 'Ilimitado';
   limiteItens: LimiteItens;
-  /**
-   * Pontos de Prestígio mínimos para a patente (Tabela 3.1).
-   *
-   * Patente é posição hierárquica na Ordem e NÃO deriva do NEX, que mede poder
-   * individual — o livro é explícito nisso (Cap. 3, "Patente"). Antes deste
-   * campo o motor usava `nexMin`, o que acoplava as duas escalas.
-   */
   ppMin: number;
 }
 
@@ -66,12 +59,8 @@ export interface Origem {
   poder: {
     nome: string;
     descricao: string;
-    /**
-     * Efeitos mecânicos estruturados. Quando presente, é a fonte de verdade —
-     * `descricao` vira só o texto exibido. Ausente significa que a origem
-     * ainda não foi migrada (o teste de cobertura mantém a lista do que falta).
-     */
     efeitos?: Efeito[];
+    escolha?: Poder['escolha'];
   };
   livro: 'Regras Básicas' | 'Sobrevivendo ao Horror';
 }
@@ -86,44 +75,9 @@ import type { OrigemDeRegra } from './rules/catalogo';
 export interface Poder {
   nome: string;
   descricao: string;
-  /**
-   * Efeitos mecânicos estruturados.
-   *
-   * Antes deste campo, NENHUM bônus de poder era aplicado: o `derivedStats` não
-   * recebia sequer a lista de poderes do personagem. Vitalidade Reforçada,
-   * Vontade Inabalável, Atlético e os Resistir a <Elemento> eram decorativos.
-   */
   efeitos?: Efeito[];
-  /**
-   * O livro permite escolher este poder mais de uma vez ("Pode ser escolhido
-   * várias vezes").
-   *
-   * Antes desta flag havia QUATRO portas independentes decidindo isso, cada uma
-   * com uma lista diferente: o PowerChoiceModal liberava três nomes,
-   * `getPoderesElegiveis` nenhum, `getPoderesParanormaisElegiveis` só Aprender
-   * Ritual, e `choosePower` lançava exceção para qualquer repetição. Um poder
-   * repetível ficava disponível ou bloqueado dependendo da tela usada.
-   */
   repetivel?: boolean;
-  /**
-   * Escolha que o poder exige do jogador, no mesmo formato das habilidades de
-   * trilha. `Poder` não tinha este campo, então todo poder que concede uma
-   * escolha era ligado à mão num modal — ou não era ligado, e ficava sem efeito.
-   */
   escolha?: {
-    /**
-     * `ritual` e `ritualAprendido` são distintos de propósito, e a distinção é
-     * de regra, não de estilo:
-     *
-     *  - `ritual` REFERENCIA um ritual que o personagem já conhece (Ritual
-     *    Predileto: "Escolha um ritual que você conhece");
-     *  - `ritualAprendido` ENSINA um ritual novo (Aprender Ritual: "você aprende
-     *    e pode conjurar um ritual de 1º círculo à sua escolha").
-     *
-     * Com um único valor para os dois, responder Ritual Predileto adicionaria um
-     * ritual ao grimório — o personagem ganharia um ritual de graça ao escolher
-     * um desconto.
-     */
     tipo:
       | 'pericia'
       | 'elemento'
@@ -132,6 +86,8 @@ export interface Poder {
       | 'ritual'
       | 'ritualAprendido'
       | 'poderParanormal'
+      | 'poderDiletante'
+      | 'origem'
       | 'custom';
     quantidade: number;
     opcoes?: string[];
@@ -145,16 +101,6 @@ export interface Poder {
   apelidos?: string[];
   custo?: string;
   acao?: string;
-  /**
-   * O que o jogador escolheu ao ADQUIRIR o poder — o ritual de Aprender Ritual,
-   * o elemento de Especialista em Elemento, a perícia de Foco em Perícia.
-   *
-   * Vive na instância que a ficha carrega, nunca na entrada do catálogo. Antes
-   * deste campo a escolha era concatenada na `descricao` como "[Escolha: X]", e
-   * três gerações de código escreveram três sufixos diferentes (`[Escolha:]`,
-   * `[Escolhido:]`, `[Ritual Escolhido:]`) — foi por isso que o level-down
-   * passou a descobrir o que remover por regex numa string de exibição.
-   */
   escolhaInterna?: string;
   livro: 'Regras Básicas' | 'Sobrevivendo ao Horror';
 }
@@ -299,14 +245,9 @@ export interface Trilha {
   classe: ClasseName;
   descricao: string;
   habilidades: {
-    /** NEX exigido. Em trilhas de sobrevivente, é o ESTÁGIO. */
     nex: number;
     nome: string;
     descricao: string;
-    /**
-     * Efeitos mecânicos estruturados, aplicados quando o personagem alcança
-     * `nex`. O gate vem do próprio dado — não precisa de `if` no motor.
-     */
     efeitos?: Efeito[];
     escolha?: {
       tipo: 'pericia' | 'elemento' | 'arma' | 'atributo' | 'ritual' | 'custom';
@@ -352,7 +293,6 @@ export interface PendenciaNex {
 
   opcoes?: string[];
 
-  
   circuloMaximo?: 1 | 2 | 3 | 4;
 
   valorEscolhido?: string | string[];
@@ -414,12 +354,6 @@ export interface Personagem {
   estagio?: number;
   qtdTranscender?: number;
   patente?: Patente;
-  /**
-   * Pontos de Prestígio acumulados. A patente é derivada daqui
-   * (ver `getPatentePorPP`), mas `patente` continua podendo ser fixada à mão
-   * pelo mestre — promoções valem só a partir da missão seguinte, então o
-   * valor gravado nem sempre acompanha o PP no mesmo instante.
-   */
   pp?: number;
   pontosAtributoPendentes?: number;
   periciasTreinadasPendentes?: number;

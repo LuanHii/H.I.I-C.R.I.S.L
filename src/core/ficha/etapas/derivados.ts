@@ -14,19 +14,6 @@ import { calcularRecursosClasse } from '../../../logic/progression';
 import type { EstadoParcial } from '../slots';
 import type { AjustesGm, EstadoSessao, FichaIdentidade, Escolha, PoderDerivado } from '../tipos';
 
-/**
- * Etapa de derivação: transforma o resultado do fold em números da ficha.
- *
- * Reaproveita `calculateDerivedStats` e `calcularPericiasDetalhadas` do motor
- * existente de propósito. São as funções puras boas do repo, já cobertas por
- * tabela golden — reescrevê-las criaria uma terceira fonte de verdade para as
- * mesmas fórmulas, que é exatamente o problema que este plano combate.
- *
- * O que muda aqui é a ORDEM e a PROCEDÊNCIA das entradas: tudo vem de
- * `(identidade, progressao, escolhas, ajustes)`, nunca de um campo persistido
- * que precise ser reconciliado depois.
- */
-
 export interface EntradaDerivacao {
   identidade: FichaIdentidade;
   atributos: Atributos;
@@ -49,7 +36,6 @@ export interface Derivados {
   patente: string;
   defesa: number;
   deslocamento: number;
-  /** Limite de PE por rodada (NEX ÷ 5). */
   peRodada: number;
 }
 
@@ -66,14 +52,6 @@ function grausIniciais(
   return graus;
 }
 
-/**
- * Aplica as promoções de grau vindas das escolhas de perícia.
- *
- * Cada escolha carrega o nível no id, então o grau-alvo é o daquele marco —
- * NEX 35 promove para veterano, NEX 70 para expert. Uma perícia destreinada não
- * é promovida (a enumeração já a marca inelegível, mas um documento migrado
- * pode conter a escolha inválida).
- */
 function aplicarPromocoes(
   graus: Record<PericiaName, GrauTreinamento>,
   escolhas: readonly Escolha[],
@@ -87,7 +65,6 @@ function aplicarPromocoes(
 
     for (const pericia of escolha.valor.pericias) {
       if (graus[pericia] === 'Destreinado') continue;
-      // Nunca rebaixa: se já está acima do alvo do marco, mantém.
       if (ordem(graus[pericia]) >= ordem(alvo)) continue;
       graus[pericia] = alvo;
     }
@@ -113,9 +90,11 @@ export function derivar(entrada: EntradaDerivacao): Derivados {
     patente: entrada.patente as never,
     usarPd: sessao.pdGasto !== undefined,
     origemNome: origem?.nome,
+    beneficioOrigem: identidade.beneficioOrigem,
     trilhaNome: entrada.parcial.trilha,
     marcas: sessao.marcas,
     poderes: entrada.poderes.map((p) => ({ nome: p.nome })),
+    qtdTranscender: entrada.poderes.filter((p) => p.nome === 'Transcender').length,
     periciasTreinadas: (Object.entries(graus) as [PericiaName, GrauTreinamento][])
       .filter(([, g]) => g !== 'Destreinado')
       .map(([nome]) => nome),
@@ -137,12 +116,6 @@ export function derivar(entrada: EntradaDerivacao): Derivados {
     dados: recursos.periciaDados,
   });
 
-  /*
-   * Ajustes do mestre entram como DELTA.
-   *
-   * No motor antigo `overrides.pvMax` é absoluto, então quem ajusta PV uma vez
-   * para de ganhar PV para sempre. Em delta o ajuste compõe com a progressão.
-   */
   const pvMax = Math.max(1, recursos.pv + (ajustes.pvMaxDelta ?? 0));
   const peMax = Math.max(0, recursos.pe + (ajustes.peMaxDelta ?? 0));
   const sanMax = Math.max(0, recursos.san + (ajustes.sanMaxDelta ?? 0));
@@ -150,10 +123,6 @@ export function derivar(entrada: EntradaDerivacao): Derivados {
     ? undefined
     : Math.max(0, recursos.pd + (ajustes.pdMaxDelta ?? 0));
 
-  /*
-   * Guardamos DANO, não valor atual. As cinco reconciliações divergentes do
-   * motor antigo colapsam nesta linha, e `machucado`/`perturbado` caem de graça.
-   */
   const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max);
 
   return {

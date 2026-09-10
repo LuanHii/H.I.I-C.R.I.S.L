@@ -24,6 +24,7 @@ export function calcularRecursosClasse(params: {
   usarPd?: boolean;
   pvBonus?: number;
   origemNome?: string;
+  beneficioOrigem?: 'pericias' | 'poder' | 'ambos';
   trilhaNome?: string;
   qtdTranscender?: number;
   marcas?: readonly Marca[];
@@ -36,6 +37,7 @@ export function calcularRecursosClasse(params: {
     nex: params.nex,
     estagio: params.estagio,
     origemNome: params.origemNome,
+    beneficioOrigem: params.beneficioOrigem,
     trilhaNome: params.trilhaNome,
     qtdTranscender: params.qtdTranscender,
     marcas: params.marcas,
@@ -44,7 +46,6 @@ export function calcularRecursosClasse(params: {
   });
 
   return {
-    // Bônus de perícia de origem, trilha e poderes, todos pelo mesmo interpretador.
     periciaBonus: derived.periciaBonus,
     periciaDados: derived.periciaDados,
     pv: derived.pvMax + (params.pvBonus ?? 0),
@@ -52,11 +53,6 @@ export function calcularRecursosClasse(params: {
     san: derived.sanMax,
     pd: params.usarPd ? derived.pdMax : undefined,
     limitePeRodada: derived.peRodada,
-    /*
-     * Defesa e deslocamento saem daqui também porque o motor novo precisa
-     * devolvê-los ao renderizar a ficha. Recalculá-los num segundo lugar seria
-     * criar a sexta cópia da mesma fórmula — o problema que este plano combate.
-     */
     defesa: derived.defesa,
     deslocamento: derived.deslocamento,
   };
@@ -170,7 +166,6 @@ function recalculateStats(char: Personagem) {
     maxima: cargaInfo.maxima
   };
 
-  // Mapa geral: cobre qualquer perícia, não só as cinco com campo nomeado.
   const extrasFixos: Partial<Record<PericiaName, number>> = { ...derived.periciaBonus };
 
   const overridesFixos = char.overrides?.periciaFixos || {};
@@ -195,15 +190,6 @@ function recalculateStats(char: Personagem) {
 export function recalcularRecursosPersonagem(personagem: Personagem): Personagem {
   const char = { ...personagem };
   recalculateStats(char);
-  /*
-   * Segundo ponto do shadow mode.
-   *
-   * `normalizePersonagem` roda só em três caminhos de save. ESTE é o recálculo
-   * que roda ao abrir e editar ficha, com 7 call sites — e são dois caminhos
-   * independentes que não se conhecem, o que já é parte do problema que a
-   * remodelagem resolve. Enganchar só no primeiro deixava o shadow mode mudo
-   * na navegação normal.
-   */
   observar(char);
   return char;
 }

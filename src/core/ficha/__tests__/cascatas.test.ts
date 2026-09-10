@@ -3,7 +3,8 @@ import type { Personagem } from '@/core/types';
 import { normalizePersonagem } from '@/core/personagemUtils';
 import { criarFicha } from '@/testUtils/fixtures';
 import { RITUAIS } from '@/data/magic/rituals';
-import { contarPoderesElemento } from '@/data/character/powers';
+import { PODERES, contarPoderesElemento } from '@/data/character/powers';
+import { ORIGENS } from '@/data/character/origins';
 import { migrarFicha } from '../migracao/migrarFicha';
 import { pendenciasResolviveis, opcoesDaPendencia } from '../pendencias';
 import { registrarEscolha } from '../registrarEscolha';
@@ -21,11 +22,6 @@ const fichaDe = (over: Parameters<typeof criarFicha>[0]) => {
   v0Cache.push({ identidade: ficha.identidade, v0 });
   return ficha;
 };
-/**
- * A v0 só entra como portadora do que o motor não modela (equipamentos, log).
- * `registrarEscolha` devolve fichas novas preservando a mesma `identidade` por
- * referência, então é ela que liga uma ficha derivada à portadora original.
- */
 const carregador = (f: FichaPersistida): Personagem => {
   const achado = v0Cache.find((e) => e.identidade === f.identidade);
   if (!achado) throw new Error('sem v0 para esta ficha');
@@ -34,7 +30,6 @@ const carregador = (f: FichaPersistida): Personagem => {
 const view = (f: FichaPersistida) =>
   paraPersonagem({ ficha: f, carregarDe: carregador(f), build: buildFicha({ ficha: f }) });
 
-/** Responde um slot e devolve a ficha nova, falhando alto se foi recusado. */
 const responder = (
   ficha: FichaPersistida,
   id: string,
@@ -47,16 +42,6 @@ const responder = (
 
 const slotsDe = (f: FichaPersistida) =>
   derivarSlots(f.identidade, f.progressao, f.escolhas).slots;
-
-/**
- * CASCATAS.
- *
- * `montarIdFilho` existia desde o motor novo e nenhum fluxo o usava. A
- * consequência não era cosmética: escolher Transcender concedia NADA, porque o
- * poder paranormal que o livro manda escolher nunca era escolhido, e escolher
- * Aprender Ritual não registrava QUAL ritual — o que deixa o poder sem elemento
- * e trava os requisitos "<Elemento> N" dos outros poderes paranormais.
- */
 
 describe('um poder que exige decisão abre um slot filho', () => {
   const primeiroPoderDeClasse = (f: FichaPersistida) => {
@@ -88,15 +73,10 @@ describe('um poder que exige decisão abre um slot filho', () => {
 
     const rotulos = opcoesDaPendencia(f, filho).map((o) => o.rotulo);
     expect(rotulos.length, 'nenhum paranormal oferecido').toBeGreaterThan(10);
-    // Um poder de combatente NÃO pode aparecer aqui.
     expect(rotulos.join(' | ')).not.toContain('Ataque de Oportunidade');
   });
 
   it('responder o filho concede o poder paranormal de verdade', () => {
-    /*
-     * O teste que importa: sem a cascata, Transcender entrava na ficha e o
-     * personagem ficava com um poder que, pelo livro, deveria ter virado outro.
-     */
     const base = fichaDe({ classe: 'Combatente', nex: 30, trilha: 'Aniquilador' });
     const pai = primeiroPoderDeClasse(base);
     let f = responder(base, pai.id, { tipo: 'poder', poder: 'Transcender' });
@@ -111,14 +91,6 @@ describe('um poder que exige decisão abre um slot filho', () => {
     );
   });
 
-  /**
-   * Ocultista com os slots de ritual já respondidos.
-   *
-   * Ficha migrada nasce com os rituais PENDENTES — o motor antigo dava 0 rituais
-   * ao ocultista, e o conversor não inventa o que não estava lá. Então uma ficha
-   * recém-convertida legitimamente não tem ritual conhecido nenhum, e é por isso
-   * que este helper existe em vez de o teste supor que tem.
-   */
   const ocultistaComRituais = () => {
     let f = fichaDe({ classe: 'Ocultista', nex: 45, trilha: 'Conjurador' });
     for (const p of pendenciasResolviveis(f).filter((x) => x.slot.kind === 'ritual')) {
@@ -129,12 +101,6 @@ describe('um poder que exige decisão abre um slot filho', () => {
   };
 
   it('Ritual Predileto oferece só rituais que o personagem JÁ conhece', () => {
-    /*
-     * "Escolha um ritual que você conhece" (Ordem:1220). É por isso que
-     * `escolha.tipo` distingue `ritual` de `ritualAprendido`: com um só valor,
-     * este slot listaria o catálogo inteiro e o ocultista ganharia o desconto
-     * num ritual que não tem.
-     */
     const base = ocultistaComRituais();
     const pai = primeiroPoderDeClasse(base);
     const f = responder(base, pai.id, { tipo: 'poder', poder: 'Ritual Predileto' });
@@ -149,16 +115,10 @@ describe('um poder que exige decisão abre um slot filho', () => {
     for (const r of oferecidos) {
       expect(conhecidos, `${r} não é conhecido pelo personagem`).toContain(r);
     }
-    // E o catálogo inteiro NÃO é oferecido — é essa a diferença que interessa.
     expect(oferecidos.length).toBeLessThan(RITUAIS.length);
   });
 
   it('sem ritual conhecido, Ritual Predileto não oferece nada — e não inventa', () => {
-    /*
-     * Beco sem saída conhecido, registrado de propósito: uma ficha convertida sem
-     * rituais deixa este slot vazio. Oferecer o catálogo inteiro "para não travar"
-     * seria dar ao personagem um desconto num ritual que ele não conhece.
-     */
     const base = fichaDe({ classe: 'Ocultista', nex: 45, trilha: 'Conjurador' });
     const conhecidos = derivarSlots(base.identidade, base.progressao, base.escolhas)
       .estadoFinal.rituais;
@@ -171,8 +131,6 @@ describe('um poder que exige decisão abre um slot filho', () => {
   });
 
   it('e Ritual Predileto NÃO adiciona um ritual ao grimório', () => {
-    // A confusão que a distinção de tipos evita: escolher um desconto não pode
-    // ensinar o ritual.
     const base = ocultistaComRituais();
     const pai = primeiroPoderDeClasse(base);
     let f = responder(base, pai.id, { tipo: 'poder', poder: 'Ritual Predileto' });
@@ -187,8 +145,6 @@ describe('um poder que exige decisão abre um slot filho', () => {
   });
 
   it('um poder sem escolha declarada não abre cascata nenhuma', () => {
-    // Guarda contra o oposto: cascata em todo poder geraria uma pendência
-    // fantasma por escolha, que é o defeito que o motor antigo tinha com trilha.
     const base = fichaDe({ classe: 'Combatente', nex: 30, trilha: 'Aniquilador' });
     const pai = primeiroPoderDeClasse(base);
     const f = responder(base, pai.id, { tipo: 'poder', poder: 'Ataque de Oportunidade' });
@@ -197,8 +153,6 @@ describe('um poder que exige decisão abre um slot filho', () => {
   });
 
   it('Treinamento em Perícia abre DOIS filhos, com ordinais próprios', () => {
-    // "Escolha duas perícias" — dois slots, não um de quantidade 2, para que
-    // trocar a segunda não desfaça a primeira.
     const base = fichaDe({ classe: 'Combatente', nex: 30, trilha: 'Aniquilador' });
     const pai = primeiroPoderDeClasse(base);
     const f = responder(base, pai.id, { tipo: 'poder', poder: 'Treinamento em Perícia' });
@@ -229,11 +183,6 @@ describe('Aprender Ritual: a cascata que faz a contagem de elemento funcionar', 
   });
 
   it('o ritual escolhido vira o elemento do poder na view v0', () => {
-    /*
-     * Ponta a ponta, e é o teste que prova que a correção de elemento não ficou
-     * inerte: motor → paraPersonagem → contarPoderesElemento.
-     * "Este poder conta como um poder do elemento do ritual escolhido" (Ordem:4156).
-     */
     const { ficha, idAprender } = ocultistaComTranscender();
     const neto = slotsDe(ficha).find((s) => s.paiId === idAprender)!;
 
@@ -265,19 +214,11 @@ describe('Aprender Ritual: a cascata que faz a contagem de elemento funcionar', 
 });
 
 describe('a decisão interna vai para O poder certo, não para todos', () => {
-  /**
-   * `gravarEscolhaInterna` acha o poder alvo por `provenancia.escolhaId`, não por
-   * nome. Achar por nome quebra em poder repetível — duas cópias de Transcender,
-   * e a segunda escolha sobrescreveria a primeira. Achar por "todos" é pior
-   * ainda: a escolha vaza para poderes que não têm escolha nenhuma.
-   */
   it('nenhum outro poder da ficha é marcado pela cascata', () => {
     let f = fichaDe({ classe: 'Combatente', nex: 30, trilha: 'Aniquilador' });
     const pai = pendenciasResolviveis(f).find((p) => p.slot.kind === 'poderClasse')!.slot;
     f = responder(f, pai.id, { tipo: 'poder', poder: 'Transcender' });
     const filho = slotsDe(f).find((s) => s.kind === 'poderParanormal')!;
-    // Escolhido da lista elegível: os paranormais de 2º nível exigem
-    // "<Elemento> 1", que um combatente de NEX 30 sem paranormal nenhum não tem.
     const opcao = opcoesDaPendencia(f, filho).find((o) => o.elegivel)!;
     const escolhido = (opcao.valor as { poder: string }).poder;
     f = responder(f, filho.id, opcao.valor);
@@ -291,10 +232,6 @@ describe('a decisão interna vai para O poder certo, não para todos', () => {
   });
 
   it('duas cópias de um repetível guardam escolhas DIFERENTES', () => {
-    /*
-     * O caso que uma busca por nome perde. Dois Transcender em marcos distintos,
-     * dois poderes paranormais diferentes — e cada cópia tem de lembrar o seu.
-     */
     let f = fichaDe({ classe: 'Combatente', nex: 45, trilha: 'Aniquilador' });
     const paisDePoder = slotsDe(f).filter((s) => s.kind === 'poderClasse' && !s.paiId);
     expect(paisDePoder.length, 'precisa de dois slots de poder').toBeGreaterThanOrEqual(2);
@@ -318,15 +255,6 @@ describe('a decisão interna vai para O poder certo, não para todos', () => {
 });
 
 describe('duas cópias de Aprender Ritual guardam elementos diferentes', () => {
-  /**
-   * O caso mais afiado da busca por `escolhaId`: dois Aprender Ritual, dois
-   * rituais de elementos diferentes.
-   *
-   * Achar o poder alvo por NOME faria a segunda escolha sobrescrever a primeira,
-   * e `contarPoderesElemento` devolveria 2 de um elemento e 0 do outro em vez de
-   * 1 e 1 — o personagem perderia acesso a metade dos poderes paranormais que
-   * havia pagado.
-   */
   it('cada cópia conta para o seu elemento', () => {
     let f = fichaDe({ classe: 'Ocultista', nex: 45, trilha: 'Conjurador' });
     const paisDePoder = slotsDe(f).filter((s) => s.kind === 'poderClasse' && !s.paiId);
@@ -358,16 +286,6 @@ describe('duas cópias de Aprender Ritual guardam elementos diferentes', () => {
 });
 
 describe('enumeração e aceitação concordam no mesmo marco', () => {
-  /**
-   * Bug achado ao escrever os testes de cascata, e independente dela.
-   *
-   * `opcoesDaPendencia` filtrava as escolhas por `nivel < slot.nivel`, o que
-   * deixa cada slot cego para os IRMÃOS do próprio marco. Os três slots de
-   * ritual de NEX 5% são o caso: o painel oferecia um ritual já escolhido e
-   * `registrarEscolha` recusava com "Você já conhece este ritual".
-   *
-   * O sintoma é o pior tipo: uma opção oferecida que dá erro ao ser clicada.
-   */
   it('os três rituais de NEX 5% não se oferecem repetidos', () => {
     let f = fichaDe({ classe: 'Ocultista', nex: 45, trilha: 'Conjurador' });
     const escolhidos: string[] = [];
@@ -383,7 +301,6 @@ describe('enumeração e aceitação concordam no mesmo marco', () => {
         expect(nomes, `ofereceu ${ja}, que já foi escolhido no mesmo marco`).not.toContain(ja);
       }
 
-      // E aceitar a primeira opção oferecida nunca pode ser recusado.
       f = responder(f, slot!.id, opcoes[0].valor);
       escolhidos.push(nomes[0]);
     }
@@ -392,11 +309,6 @@ describe('enumeração e aceitação concordam no mesmo marco', () => {
   });
 
   it('mas o pré-requisito continua sendo de AQUISIÇÃO, não do estado final', () => {
-    /*
-     * A correção não pode virar "avaliar contra a ficha de hoje". Um slot de
-     * NEX 15 tem de seguir cego para o que foi respondido em NEX 30 — senão
-     * passa poder que a ficha não podia ter no marco em que está encaixado.
-     */
     let f = fichaDe({ classe: 'Combatente', nex: 45, trilha: 'Aniquilador' });
     const slots = derivarSlots(f.identidade, f.progressao, f.escolhas).slots
       .filter((x) => x.kind === 'poderClasse');
@@ -405,8 +317,6 @@ describe('enumeração e aceitação concordam no mesmo marco', () => {
 
     f = responder(f, tarde.id, { tipo: 'poder', poder: 'Proteção Pesada' });
 
-    // Tanque de Guerra exige Proteção Pesada. Respondido em NEX 45, não pode
-    // valer para o slot de NEX 15.
     const opcao = opcoesDaPendencia(f, cedo).find((o) => (o.valor as { poder: string }).poder === 'Tanque de Guerra');
     expect(opcao, 'Tanque de Guerra ausente da enumeração').toBeDefined();
     expect(opcao!.elegivel, 'requisito de NEX 45 vazou para o slot de NEX 15').toBe(false);
@@ -429,11 +339,6 @@ describe('cascata não quebra as propriedades do motor', () => {
   });
 
   it('rebaixar retém a escolha filha como inerte, não a descarta', () => {
-    /*
-     * É a propriedade que faz "rebaixar para corrigir e subir de novo" não
-     * perder o trabalho do jogador. Uma cascata é o caso difícil: o filho não
-     * tem marco próprio, herda o nível do pai.
-     */
     const f = comCascata();
     const rebaixado: FichaPersistida = { ...f, progressao: { nex: 5 } };
     const build = buildFicha({ ficha: rebaixado });
@@ -446,17 +351,11 @@ describe('cascata não quebra as propriedades do motor', () => {
       }
     }
 
-    // E subir de novo recupera tudo, byte a byte.
     const devolta = buildFicha({ ficha: { ...rebaixado, progressao: f.progressao } });
     expect(JSON.stringify(devolta)).toBe(JSON.stringify(buildFicha({ ficha: f })));
   });
 
   it('re-responder o pai com outro poder não deixa o filho órfão vivo', () => {
-    /*
-     * Trocar Transcender por Ataque de Oportunidade tem de fechar a cascata. Se
-     * o slot filho sumir mas a escolha dele continuar sendo aplicada, o
-     * personagem fica com um poder paranormal que nada concedeu.
-     */
     const f = comCascata();
     const pai = slotsDe(f).find((s) => s.kind === 'poderClasse' && !s.paiId)!;
     const trocado = responder(f, pai.id, { tipo: 'poder', poder: 'Ataque de Oportunidade' });
@@ -465,5 +364,267 @@ describe('cascata não quebra as propriedades do motor', () => {
     const nomes = view(trocado).poderes.map((p) => p.nome);
     expect(nomes, 'o poder da cascata sobreviveu à troca do pai').not.toContain('Aprender Ritual');
     expect(nomes).toContain('Ataque de Oportunidade');
+  });
+});
+
+const poderDeClasseEm = (f: FichaPersistida, nivel: number) => {
+  const p = pendenciasResolviveis(f).find(
+    (x) => x.slot.kind === 'poderClasse' && x.slot.nivel === nivel && !x.slot.paiId,
+  );
+  expect(p, `ficha sem pendência de poder de classe em NEX ${nivel}`).toBeDefined();
+  return p!.slot;
+};
+
+describe('Especialista Diletante concede um poder de OUTRA classe (SOH:494)', () => {
+  const especialista = () => fichaDe({ classe: 'Especialista', nex: 30, trilha: 'Técnico' });
+
+  const comDiletante = () => {
+    const base = especialista();
+    const pai = poderDeClasseEm(base, 30);
+    return { pai, ficha: responder(base, pai.id, { tipo: 'poder', poder: 'Especialista Diletante' }) };
+  };
+
+  const filhoDe = (f: FichaPersistida) => {
+    const s = slotsDe(f).find((x) => x.kind === 'poderDiletante');
+    expect(s, 'Especialista Diletante não abriu cascata').toBeDefined();
+    return s!;
+  };
+
+  it('abre um slot filho pendurado no poder que o concedeu', () => {
+    const base = especialista();
+    expect(slotsDe(base).filter((s) => s.kind === 'poderDiletante'), 'filho existia antes').toEqual([]);
+
+    const { pai, ficha } = comDiletante();
+    const filho = filhoDe(ficha);
+    expect(filho.id).toBe(montarIdFilho(pai.id, 'poderDiletante', 0));
+    expect(filho.paiId).toBe(pai.id);
+    expect(filho.poderPai).toBe('Especialista Diletante');
+  });
+
+  it('oferece poder de outra classe, e nenhum da sua', () => {
+    const { ficha } = comDiletante();
+    const rotulos = opcoesDaPendencia(ficha, filhoDe(ficha)).map((o) => o.rotulo);
+
+    expect(rotulos, 'nenhum poder de combatente oferecido').toContain('Ataque de Oportunidade');
+    for (const daPropriaClasse of ['Hacker', 'Nerd', 'Leitura Fria', 'Especialista Diletante']) {
+      expect(rotulos, `${daPropriaClasse} é da própria classe e foi oferecido`).not.toContain(daPropriaClasse);
+    }
+  });
+
+  it('poder GERAL entra: SOH:813 diz que ele não pertence a classe nenhuma', () => {
+    const { ficha } = comDiletante();
+    const rotulos = opcoesDaPendencia(ficha, filhoDe(ficha)).map((o) => o.rotulo);
+
+    expect(rotulos, 'poder geral do SOH ficou de fora').toContain('Acrobático');
+    expect(
+      rotulos,
+      'Artista Marcial é poder de combatente promovido a geral por SOH:813',
+    ).toContain('Artista Marcial');
+  });
+
+  it('mas Transcender e Treinamento em Perícia não, porque estão na SUA lista', () => {
+    const { ficha } = comDiletante();
+    const rotulos = opcoesDaPendencia(ficha, filhoDe(ficha)).map((o) => o.rotulo);
+
+    for (const naMinhaLista of ['Transcender', 'Treinamento em Perícia']) {
+      expect(rotulos, `${naMinhaLista} está na lista do especialista`).not.toContain(naMinhaLista);
+    }
+  });
+
+  it('poder de ORIGEM continua fora — é o que Flashback concede', () => {
+    const { ficha } = comDiletante();
+    const rotulos = opcoesDaPendencia(ficha, filhoDe(ficha)).map((o) => o.rotulo);
+    const poderesDeOrigem = ORIGENS.map((o) => o.poder.nome);
+
+    const vazados = rotulos.filter((r) => poderesDeOrigem.includes(r));
+    expect(
+      vazados,
+      'poder de origem oferecido pelo Diletante tornaria Flashback redundante',
+    ).toEqual([]);
+  });
+
+  it('nunca oferece poder de trilha nem paranormal — é o parêntese do livro', () => {
+    const { ficha } = comDiletante();
+    const oferecidos = opcoesDaPendencia(ficha, filhoDe(ficha)).map((o) => o.rotulo);
+    expect(oferecidos.length, 'lista vazia faria este teste passar à toa').toBeGreaterThan(20);
+
+    for (const nome of oferecidos) {
+      const poder = PODERES.find((p) => p.nome === nome);
+      expect(poder, `${nome} não existe no catálogo`).toBeDefined();
+      expect(['Trilha', 'Paranormal', 'Origem'], `${nome} é ${poder!.tipo}`).not.toContain(poder!.tipo);
+    }
+  });
+
+  it('pré-requisito não cumprido volta INELEGÍVEL com motivo, não sumido da lista', () => {
+    const { ficha } = comDiletante();
+    const barrado = opcoesDaPendencia(ficha, filhoDe(ficha)).find((o) => o.rotulo === 'Armamento Pesado');
+
+    expect(barrado, 'Armamento Pesado sumiu da lista em vez de vir com o motivo').toBeDefined();
+    expect(barrado!.elegivel).toBe(false);
+    expect(barrado!.motivos.join(' ')).toMatch(/For/i);
+  });
+
+  it('e registrar o inelegível é recusado', () => {
+    const { ficha } = comDiletante();
+    const r = registrarEscolha(ficha, filhoDe(ficha).id, { tipo: 'poder', poder: 'Armamento Pesado' });
+    expect(r.aplicada).toBe(false);
+    expect(r.problemas.map((p) => p.codigo)).toContain('opcao_inelegivel');
+  });
+
+  it('responder o filho concede o poder de verdade', () => {
+    const { ficha } = comDiletante();
+    const f = responder(ficha, filhoDe(ficha).id, { tipo: 'poder', poder: 'Ataque de Oportunidade' });
+
+    const nomes = view(f).poderes.map((p) => p.nome);
+    expect(nomes).toContain('Especialista Diletante');
+    expect(nomes, 'o poder escolhido não entrou na ficha').toContain('Ataque de Oportunidade');
+  });
+});
+
+describe('Flashback concede o poder de outra origem (SOH:497)', () => {
+  const comFlashback = () => {
+    const base = fichaDe({ classe: 'Especialista', nex: 30, trilha: 'Técnico', origemNome: 'Desgarrado' });
+    const pai = poderDeClasseEm(base, 15);
+    return { pai, ficha: responder(base, pai.id, { tipo: 'poder', poder: 'Flashback' }) };
+  };
+
+  const filhoDe = (f: FichaPersistida) => {
+    const s = slotsDe(f).find((x) => x.kind === 'origem');
+    expect(s, 'Flashback não abriu cascata').toBeDefined();
+    return s!;
+  };
+
+  const ASTRONAUTA = ORIGENS.find((o) => o.nome === 'Astronauta')!;
+
+  it('abre um slot de ORIGEM, não de poder', () => {
+    const { pai, ficha } = comFlashback();
+    const filho = filhoDe(ficha);
+    expect(filho.id).toBe(montarIdFilho(pai.id, 'origem', 0));
+    expect(filho.poderPai).toBe('Flashback');
+  });
+
+  it('oferece todas as origens menos a sua', () => {
+    const { ficha } = comFlashback();
+    const opcoes = opcoesDaPendencia(ficha, filhoDe(ficha));
+
+    expect(opcoes).toHaveLength(ORIGENS.length - 1);
+    const origens = opcoes.map((o) => (o.valor as { origem: string }).origem);
+    expect(origens, 'a própria origem foi oferecida').not.toContain('Desgarrado');
+  });
+
+  it('concede o poder da origem escolhida', () => {
+    const { ficha } = comFlashback();
+    const f = responder(ficha, filhoDe(ficha).id, { tipo: 'origem', origem: 'Astronauta' });
+
+    const nomes = view(f).poderes.map((p) => p.nome);
+    expect(nomes, 'o poder da origem escolhida não entrou na ficha').toContain(ASTRONAUTA.poder.nome);
+  });
+
+  it('e NÃO concede as perícias dela — o livro diz "o poder dessa origem"', () => {
+    const { ficha } = comFlashback();
+    const antes = buildFicha({ ficha }).derivados.graus;
+    const f = responder(ficha, filhoDe(ficha).id, { tipo: 'origem', origem: 'Astronauta' });
+    const depois = buildFicha({ ficha: f }).derivados.graus;
+
+    expect(depois).toEqual(antes);
+  });
+
+  it('a origem escolhida fica gravada no próprio Flashback', () => {
+    const { ficha } = comFlashback();
+    const f = responder(ficha, filhoDe(ficha).id, { tipo: 'origem', origem: 'Astronauta' });
+
+    const flashback = view(f).poderes.find((p) => p.nome === 'Flashback');
+    expect(flashback?.escolhaInterna).toBe('Astronauta');
+  });
+
+  it('um poder não passa por um slot de origem', () => {
+    const { ficha } = comFlashback();
+    const r = registrarEscolha(ficha, filhoDe(ficha).id, { tipo: 'poder', poder: 'Hacker' });
+    expect(r.aplicada).toBe(false);
+    expect(r.problemas.map((p) => p.codigo)).toContain('tipo_incompativel');
+  });
+
+  it('trocar o pai leva o poder da origem junto', () => {
+    const { pai, ficha } = comFlashback();
+    const comPoder = responder(ficha, filhoDe(ficha).id, { tipo: 'origem', origem: 'Astronauta' });
+    expect(view(comPoder).poderes.map((p) => p.nome)).toContain(ASTRONAUTA.poder.nome);
+
+    const trocado = responder(comPoder, pai.id, { tipo: 'poder', poder: 'Nerd' });
+    expect(slotsDe(trocado).filter((s) => s.kind === 'origem')).toEqual([]);
+    expect(
+      view(trocado).poderes.map((p) => p.nome),
+      'o poder de origem sobreviveu à troca do pai',
+    ).not.toContain(ASTRONAUTA.poder.nome);
+  });
+});
+
+describe('Traços do Outro Lado concede um poder paranormal (Ordem:371)', () => {
+  const cultista = (over: Parameters<typeof fichaDe>[0] = { classe: 'Ocultista' }) =>
+    fichaDe({ ...over, origemNome: 'Cultista Arrependido' });
+
+  const slotParanormal = (f: FichaPersistida) =>
+    slotsDe(f).find((s) => s.kind === 'poderParanormal' && !s.paiId);
+
+  it('a origem abre o slot na criação, sem depender de marco de NEX', () => {
+    const f = cultista({ classe: 'Ocultista', nex: 5 });
+    const slot = slotParanormal(f);
+
+    expect(slot, 'Traços do Outro Lado não abriu cascata').toBeDefined();
+    expect(slot!.id).toBe(montarId('poderParanormal', chaveNex(5), 0));
+    expect(slot!.poderPai).toBe('Traços do Outro Lado');
+  });
+
+  it('nenhuma outra origem abre esse slot', () => {
+    const f = fichaDe({ classe: 'Ocultista', nex: 5, origemNome: 'Desgarrado' });
+    expect(slotParanormal(f)).toBeUndefined();
+  });
+
+  it('responder concede o poder paranormal de verdade', () => {
+    const base = cultista({ classe: 'Ocultista', nex: 5 });
+    const slot = slotParanormal(base)!;
+    const escolhido = opcoesDaPendencia(base, slot).find((o) => o.elegivel)!;
+    const f = responder(base, slot.id, escolhido.valor);
+
+    const nomes = view(f).poderes.map((p) => p.nome);
+    expect(nomes).toContain('Traços do Outro Lado');
+    expect(nomes, 'o poder paranormal escolhido não entrou na ficha').toContain(
+      (escolhido.valor as { poder: string }).poder,
+    );
+  });
+
+  it('quem levou só as perícias da origem não ganha a escolha', () => {
+    const base = cultista({ classe: 'Ocultista', nex: 5 });
+    const soPericias: FichaPersistida = {
+      ...base,
+      identidade: { ...base.identidade, beneficioOrigem: 'pericias' },
+    };
+    expect(
+      slotParanormal(soPericias),
+      'a escolha veio sem o poder que a concede',
+    ).toBeUndefined();
+  });
+
+  it('o pré-requisito continua valendo (Ordem:607), com o motivo à vista', () => {
+    const base = cultista({ classe: 'Ocultista', nex: 5 });
+    const opcoes = opcoesDaPendencia(base, slotParanormal(base)!);
+
+    expect(opcoes.length, 'nenhum paranormal oferecido').toBeGreaterThan(20);
+    const barrados = opcoes.filter((o) => !o.elegivel);
+    expect(barrados.length, 'em NEX 5 tudo passou, o pré-requisito não foi avaliado')
+      .toBeGreaterThan(0);
+    for (const b of barrados) {
+      expect(b.motivos.length, `${b.rotulo} é inelegível e não diz por quê`).toBeGreaterThan(0);
+    }
+  });
+
+  it('e a cascata compõe: Aprender Ritual escolhido aqui abre o slot do ritual', () => {
+    const base = cultista({ classe: 'Ocultista', nex: 5 });
+    const slot = slotParanormal(base)!;
+    const f = responder(base, slot.id, { tipo: 'poder', poder: 'Aprender Ritual' });
+
+    const neto = slotsDe(f).find((s) => s.paiId === slot.id);
+    expect(neto, 'Aprender Ritual não abriu o slot de ritual').toBeDefined();
+    expect(neto!.kind).toBe('ritual');
+    expect(neto!.id).toBe(montarIdFilho(slot.id, 'ritual', 0));
   });
 });

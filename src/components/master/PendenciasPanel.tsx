@@ -5,30 +5,10 @@ import type { FichaPersistida, Problema, Slot, ValorEscolha } from '../../core/f
 import type { Opcao } from '../../core/ficha/opcoes';
 import { pendenciasResolviveis } from '../../core/ficha/pendencias';
 
-/**
- * Painel de pendências — as obrigações que a ficha ainda deve.
- *
- * Substitui os dois sistemas paralelos do motor antigo (`pendenciasNex` e seis
- * contadores escalares que não se conhecem). Aqui a pendência é DERIVADA: some
- * quando respondida porque o slot deixa de ser emitido, não porque alguém
- * lembrou de marcar `resolvida: true`.
- *
- * Duas decisões de interface que vêm direto de defeitos do motor antigo:
- *
- *  - **Opção inelegível aparece, com o motivo.** `getPoderesElegiveis` filtra o
- *    inelegível para fora, então o mestre não tem como saber por que um poder
- *    não está na lista — e um pré-requisito escrito errado no catálogo fica
- *    invisível para sempre. Mostrar o motivo é o que torna o dado auditável.
- *  - **Responder de novo é permitido e não duplica.** O id vem da obrigação, não
- *    da resposta, então trocar de ideia é overwrite. "Voltar e alterar" não
- *    precisa de caso especial.
- */
-
 export interface PendenciasPanelProps {
   ficha: FichaPersistida;
   onResponder: (escolhaId: string, valor: ValorEscolha) => Promise<Problema[]> | void;
   onDesfazer?: (escolhaId: string) => void;
-  /** Escolhas já respondidas, para permitir revisão. */
   mostrarRespondidas?: boolean;
 }
 
@@ -42,14 +22,11 @@ const TITULO: Record<string, string> = {
   versatilidade: 'Versatilidade',
   ritual: 'Ritual',
   poderParanormal: 'Poder paranormal (Transcender)',
+  poderDiletante: 'Poder de outra classe (Especialista Diletante)',
+  origem: 'Origem (Flashback)',
   escolhaInterna: 'Decisão do poder',
 };
 
-/**
- * Título de um slot de cascata inclui o poder que o abriu. Sem isso, um mestre
- * com dois Transcender vê duas linhas "Decisão do poder" idênticas e não sabe
- * qual é qual.
- */
 function tituloDoSlot(slot: Slot): string {
   const base = TITULO[slot.kind] ?? slot.kind;
   return slot.poderPai ? `${slot.poderPai}: escolha` : base;
@@ -76,13 +53,6 @@ function ListaDeOpcoes({
     return opcoes.filter((o) => o.rotulo.toLowerCase().includes(termo));
   }, [opcoes, busca]);
 
-  /*
-   * Elegíveis primeiro, inelegíveis depois — mas na MESMA lista.
-   *
-   * Separar em duas seções faria a segunda parecer "outra coisa"; misturar sem
-   * ordem faria o mestre caçar. Ordenar mantém as duas visíveis e a decisão
-   * óbvia.
-   */
   const ordenadas = useMemo(
     () => [...filtradas].sort((a, b) => Number(b.elegivel) - Number(a.elegivel)),
     [filtradas],
@@ -107,11 +77,6 @@ function ListaDeOpcoes({
             }`}
           >
             <span className={opcao.elegivel ? '' : 'line-through'}>{opcao.rotulo}</span>
-            {/*
-              * O motivo é o conteúdo principal da linha inelegível, não um
-              * tooltip: escondê-lo atrás de hover o torna invisível em tablet,
-              * que é onde o mestre joga.
-              */}
             {!opcao.elegivel && opcao.motivos.length > 0 && (
               <span className="block text-[11px] text-ordem-red mt-0.5">{opcao.motivos.join('; ')}</span>
             )}
@@ -187,9 +152,6 @@ export function PendenciasPanel({ ficha, onResponder, onDesfazer }: PendenciasPa
                 value={busca}
                 onChange={(e) => setBuscaPorSlot((b) => ({ ...b, [slot.id]: e.target.value }))}
                 placeholder="Filtrar…"
-                /* `bg-ordem-black-deep` explícito: o token `ordem-bg` que o resto
-                 * dos modais usa não existe no tailwind.config, então aqueles
-                 * campos de busca ficam literalmente sem fundo. */
                 className="w-full bg-ordem-black-deep border border-ordem-border rounded px-2 py-1 text-sm text-ordem-text-primary"
               />
             )}

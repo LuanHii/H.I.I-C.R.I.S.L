@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { apenasAsQueMudaram, moverNaOrdem, priorizarNaOrdem } from './ordemCampanhas';
 import { useAuthOptional } from '../firebase/auth';
 import {
   saveCampanhaToCloud,
@@ -166,6 +167,39 @@ export function useCloudCampanhas() {
     [campanhas, isAuthenticated, userId]
   );
 
+  const aplicarNovaOrdem = useCallback(
+    async (renumeradas: CampanhaCloudType[] | null) => {
+      if (!renumeradas) return;
+      const mudaram = apenasAsQueMudaram(campanhas, renumeradas);
+      if (mudaram.length === 0) return;
+
+      if (isAuthenticated && userId) {
+        setCampanhas(renumeradas);
+        try {
+          await Promise.all(mudaram.map((c) => saveCampanhaToCloud(userId, c)));
+        } catch (err) {
+          console.error('Erro ao reordenar campanhas na nuvem:', err);
+        }
+      } else {
+        setCampanhas(() => {
+          gravarCampanhasLocal(renumeradas);
+          return renumeradas;
+        });
+      }
+    },
+    [campanhas, isAuthenticated, userId]
+  );
+
+  const moverCampanha = useCallback(
+    (id: string, direcao: -1 | 1) => aplicarNovaOrdem(moverNaOrdem(campanhas, id, direcao)),
+    [campanhas, aplicarNovaOrdem]
+  );
+
+  const priorizarCampanha = useCallback(
+    (id: string) => aplicarNovaOrdem(priorizarNaOrdem(campanhas, id)),
+    [campanhas, aplicarNovaOrdem]
+  );
+
   return useMemo(
     () => ({
       campanhas,
@@ -174,8 +208,10 @@ export function useCloudCampanhas() {
       renomearCampanha,
       removerCampanha,
       alterarCorCampanha,
+      moverCampanha,
+      priorizarCampanha,
       isCloudMode: isAuthenticated,
     }),
-    [campanhas, loading, criarCampanha, renomearCampanha, removerCampanha, alterarCorCampanha, isAuthenticated]
+    [campanhas, loading, criarCampanha, renomearCampanha, removerCampanha, alterarCorCampanha, moverCampanha, priorizarCampanha, isAuthenticated]
   );
 }

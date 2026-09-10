@@ -14,12 +14,11 @@ interface CampanhaSectionProps {
     onRenomear?: (id: string, nome: string) => void;
     onRemoverCampanha?: (id: string) => void;
     onExportarCampanha?: (fichas: FichaRegistro[], campanhaNome: string, campanhaId?: string) => void;
-    /**
-     * Abre o comparador de conversão com as fichas da campanha que ainda não
-     * foram convertidas. Nada é convertido por clicar aqui — o wizard continua
-     * pedindo confirmação ficha a ficha.
-     */
     onConverterCampanha?: (fichas: FichaRegistro[], campanhaNome: string) => void;
+    onMoverCampanha?: (id: string, direcao: -1 | 1) => void;
+    onPriorizarCampanha?: (id: string) => void;
+    podeSubir?: boolean;
+    podeDescer?: boolean;
     forceExpanded?: boolean;
     autoExpand?: boolean;
 }
@@ -36,6 +35,10 @@ export function CampanhaSection({
     onRemoverCampanha,
     onExportarCampanha,
     onConverterCampanha,
+    onMoverCampanha,
+    onPriorizarCampanha,
+    podeSubir,
+    podeDescer,
     forceExpanded,
     autoExpand,
 }: CampanhaSectionProps) {
@@ -60,11 +63,6 @@ export function CampanhaSection({
     const id = campanha?.id;
     const hasSelected = Boolean(selecionada && fichas.some((f) => f.id === selecionada));
 
-    /*
-     * Já convertidas ficam de fora do lote: reabrir o comparador para elas
-     * transformaria "converter a campanha" numa tela que o mestre tem de
-     * despachar N vezes clicando em "Manter v0".
-     */
     const naoConvertidas = fichas.filter((f) => !f.ficha);
 
     const handleSalvarNome = () => {
@@ -76,7 +74,6 @@ export function CampanhaSection({
 
     return (
         <div className="mb-4">
-            {}
             <div
                 className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition hover:bg-ordem-ooze/50"
                 style={{ borderLeft: `3px solid ${cor}` }}
@@ -135,6 +132,46 @@ export function CampanhaSection({
                     </span>
                 )}
 
+                {onPriorizarCampanha && campanha && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onPriorizarCampanha(campanha.id);
+                        }}
+                        className="px-1 text-xs text-ordem-text-muted transition hover:text-ordem-gold"
+                        title="Priorizar: manda esta campanha para o topo da lista"
+                    >
+                        ★
+                    </button>
+                )}
+
+                {onMoverCampanha && campanha && (
+                    <span className="flex items-center">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onMoverCampanha(campanha.id, -1);
+                            }}
+                            disabled={!podeSubir}
+                            className="px-1 text-[11px] leading-none text-ordem-text-muted transition hover:text-white disabled:opacity-25 disabled:hover:text-ordem-text-muted"
+                            title="Subir na lista"
+                        >
+                            ▲
+                        </button>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onMoverCampanha(campanha.id, 1);
+                            }}
+                            disabled={!podeDescer}
+                            className="px-1 text-[11px] leading-none text-ordem-text-muted transition hover:text-white disabled:opacity-25 disabled:hover:text-ordem-text-muted"
+                            title="Descer na lista"
+                        >
+                            ▼
+                        </button>
+                    </span>
+                )}
+
                 {onExportarCampanha && fichas.length > 0 && (
                     <button
                         onClick={(e) => {
@@ -148,34 +185,20 @@ export function CampanhaSection({
                     </button>
                 )}
 
-                {/*
-                  * Contador de pendentes no CABEÇALHO, não dentro da seção.
-                  *
-                  * As seções nascem colapsadas, então um aviso interno ficaria
-                  * invisível justamente para quem ainda não converteu nada — que é
-                  * quem precisa vê-lo.
-                  */}
                 {onConverterCampanha && naoConvertidas.length > 0 && (
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
                             onConverterCampanha(naoConvertidas, nome);
                         }}
-                        className="text-[10px] px-2 py-0.5 rounded border border-ordem-purple text-ordem-purple hover:bg-ordem-purple/10 transition"
+                        className="font-carimbo text-[10px] uppercase tracking-[0.14em] text-ordem-text-muted underline-offset-2 transition hover:text-ordem-purple hover:underline"
                         title={`Comparar e converter ${naoConvertidas.length} ficha(s) desta campanha`}
                     >
                         converter {naoConvertidas.length}
                     </button>
                 )}
 
-                {onConverterCampanha && naoConvertidas.length === 0 && fichas.length > 0 && (
-                    <span
-                        className="text-[10px] px-2 py-0.5 rounded border border-ordem-green text-ordem-green"
-                        title="Todas as fichas desta campanha usam o motor novo"
-                    >
-                        ✓ v2
-                    </span>
-                )}
+
 
                 {id && onRemoverCampanha && (
                     <button
@@ -193,14 +216,12 @@ export function CampanhaSection({
                 )}
             </div>
 
-            {}
             {expandida && (
                 <div className="mt-2 space-y-2 pl-4">
                     {fichas.map((registro) => (
                         <div key={registro.id} className="relative group">
                             {renderFichaCard(registro)}
 
-                            {}
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition">
                                 <button
                                     onClick={(e) => {

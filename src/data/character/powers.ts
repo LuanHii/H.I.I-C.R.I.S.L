@@ -62,7 +62,6 @@ export const PODERES: Poder[] = [
     requisitos: 'Vig 2',
     livro: 'Sobrevivendo ao Horror',
     efeitos: [
-      // "Seu limite de carga aumenta em 5 espaços" (SOH, Mochileiro).
       { tipo: 'cargaEspacos', valor: 5 },
       { tipo: 'narrativo', nota: 'Pode se beneficiar de uma vestimenta adicional.' },
     ],
@@ -317,6 +316,7 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Especialista Diletante',
+    escolha: { tipo: 'poderDiletante', quantidade: 1 },
     descricao: 'Você aprende um poder que não pertença à sua classe (exceto poderes de trilha ou paranormais), à sua escolha, cujos pré-requisitos possa cumprir.',
     tipo: 'Classe',
     requisitos: 'NEX 30%',
@@ -324,7 +324,8 @@ export const PODERES: Poder[] = [
   },
   {
     nome: 'Flashback',
-    descricao: 'Escolha uma origem que não seja a sua. Você recebe o poder dessa origem. Só pode ser usado uma vez por personagem.',
+    escolha: { tipo: 'origem', quantidade: 1 },
+    descricao: 'Escolha uma origem que não seja a sua. Você recebe o poder dessa origem.',
     tipo: 'Classe',
     livro: 'Sobrevivendo ao Horror'
   },
@@ -1231,7 +1232,6 @@ export const PODERES: Poder[] = [
     elemento: 'Sangue',
     livro: 'Sobrevivendo ao Horror',
     efeitos: [
-      // "Você recebe +5 em Furtividade" — permanente, sem condição.
       { tipo: 'periciaBonus', pericia: 'Furtividade', valor: 5 },
       { tipo: 'narrativo', nota: 'Em perseguição como caçador, usa Furtividade em vez de Atletismo; faz ações discretas sem –1d20. Afinidade: o bônus sobe para +10.' },
     ],
@@ -1304,8 +1304,6 @@ export const PODERES: Poder[] = [
     requisitos: 'Conhecimento 1',
     livro: 'Regras Básicas',
     efeitos: [
-      // "+2 em Defesa e em testes de resistência" — resistência em Ordem é
-      // Fortitude, Reflexos e Vontade.
       { tipo: 'defesa', valor: 2 },
       { tipo: 'periciaBonus', pericia: 'Fortitude', valor: 2 },
       { tipo: 'periciaBonus', pericia: 'Reflexos', valor: 2 },
@@ -1341,7 +1339,6 @@ export const PODERES: Poder[] = [
     elemento: 'Conhecimento',
     livro: 'Regras Básicas',
     efeitos: [
-      // "+5 em testes de Diplomacia, Intimidação e Intuição" — permanente.
       { tipo: 'periciaBonus', pericia: 'Diplomacia', valor: 5 },
       { tipo: 'periciaBonus', pericia: 'Intimidação', valor: 5 },
       { tipo: 'periciaBonus', pericia: 'Intuição', valor: 5 },
@@ -1356,7 +1353,6 @@ export const PODERES: Poder[] = [
     requisitos: 'Conhecimento 1',
     livro: 'Regras Básicas',
     efeitos: [
-      // "+5 em testes de Percepção e enxerga no escuro" — o bônus é permanente.
       { tipo: 'periciaBonus', pericia: 'Percepção', valor: 5 },
       { tipo: 'narrativo', nota: 'Enxerga no escuro. Afinidade: ignora camuflagem.' },
     ],
@@ -1554,6 +1550,24 @@ export function getPoderesGerais(): Poder[] {
   return PODERES.filter(p => p.tipo === 'Geral');
 }
 
+export function getPoderesForaDaClasse(classe: ClasseName): Poder[] {
+  const daMinhaClasse = new Set(PODERES_POR_CLASSE[classe] ?? []);
+  const foraDaMinha = new Set<string>();
+
+  for (const [outra, nomes] of Object.entries(PODERES_POR_CLASSE)) {
+    if (outra === classe) continue;
+    for (const nome of nomes) {
+      if (!daMinhaClasse.has(nome)) foraDaMinha.add(nome);
+    }
+  }
+
+  for (const geral of getPoderesGerais()) {
+    if (!daMinhaClasse.has(geral.nome)) foraDaMinha.add(geral.nome);
+  }
+
+  return PODERES.filter(p => foraDaMinha.has(p.nome));
+}
+
 export function verificarRequisitos(
   poder: Poder,
   estado: EstadoParaRequisitos
@@ -1593,12 +1607,6 @@ export function getPoderesParanormais(): Poder[] {
   return PODERES.filter(p => p.tipo === 'Paranormal');
 }
 
-/**
- * Conta poderes de um elemento. A regra de qual é o elemento de um poder mora em
- * `core/rules/requisitos.elementoEfetivo` — inclusive o caso de Aprender Ritual,
- * que não tem elemento próprio e conta pelo elemento do ritual escolhido
- * (Ordem:4156). Esta função é só a contagem; a regra não é duplicada aqui.
- */
 export function contarPoderesElemento(personagem: Personagem, elemento: Elemento): number {
   return personagem.poderes.filter(p => elementoEfetivo(p) === elemento).length;
 }
@@ -1615,7 +1623,6 @@ export function getPoderesParanormaisElegiveis(personagem: Personagem): (Poder &
   const nomesPossuidos = new Set(personagem.poderes.map(p => p.nome));
 
   return paranormais.map(p => {
-
     const podeRepetir = p.repetivel === true;
     const jaPossui = nomesPossuidos.has(p.nome);
 

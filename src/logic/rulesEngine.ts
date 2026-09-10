@@ -69,21 +69,6 @@ const GRAU_BONUS: Record<GrauTreinamento, number> = {
   Expert: 15,
 };
 
-/**
- * Tabela 3.1: Patentes (Livro de Regras, Cap. 3).
- *
- *   PP    Patente                Crédito      I  II  III  IV
- *   0     Recruta                Baixo        2   —   —   —
- *   20    Operador               Médio        3   1   —   —
- *   50    Agente especial        Médio        3   2   1   —
- *   100   Oficial de operações   Alto         3   3   2   1
- *   200   Agente de elite        Ilimitado    3   3   3   2
- *
- * O limite de categoria I é 3 em toda patente acima de recruta — nunca
- * ilimitado. A tabela anterior dava I:5 para agente especial e I:99 para
- * oficial e elite, além de II:5 para elite, o que liberava equipamento que a
- * Ordem não fornece.
- */
 const PATENTE_CONFIGS: PatenteConfig[] = [
   {
     nome: 'Recruta',
@@ -116,8 +101,6 @@ const PATENTE_CONFIGS: PatenteConfig[] = [
     ppMin: 200,
   },
 ];
-
-
 
 export const TODAS_PATENTES: Patente[] = PATENTE_CONFIGS.map((cfg) => cfg.nome);
 const ORDEM_PATENTE: Patente[] = TODAS_PATENTES;
@@ -188,14 +171,6 @@ export function listarPatentes(): PatenteConfig[] {
   return PATENTE_CONFIGS;
 }
 
-/**
- * Patente a partir dos Pontos de Prestígio (Tabela 3.1).
- *
- * Serve tanto para promoção quanto para rebaixamento: o livro manda devolver
- * itens aos quais o agente perdeu acesso se o PP cair abaixo do mínimo da
- * patente atual. Como promoção e rebaixamento só valem a partir da MISSÃO
- * SEGUINTE, quem chama decide quando gravar isso em `Personagem.patente`.
- */
 export function getPatentePorPP(pp: number): Patente {
   const config = [...PATENTE_CONFIGS]
     .sort((a, b) => b.ppMin - a.ppMin)
@@ -203,7 +178,6 @@ export function getPatentePorPP(pp: number): Patente {
   return config?.nome ?? 'Recruta';
 }
 
-/** PP que faltam para a próxima patente, ou null se já está no topo. */
 export function ppParaProximaPatente(pp: number): { proxima: Patente; faltam: number } | null {
   const acima = [...PATENTE_CONFIGS]
     .sort((a, b) => a.ppMin - b.ppMin)
@@ -299,7 +273,7 @@ export function gerarFicha(input: CriacaoInput): Personagem {
     estagio,
     origemNome: origem.nome,
     trilhaNome: input.trilha,
-    sobreviventeBeneficioOrigem: input.sobreviventeBeneficioOrigem,
+    beneficioOrigem: input.sobreviventeBeneficioOrigem,
     qtdTranscender: 0,
     marcas: input.marcas,
   });
@@ -668,13 +642,6 @@ export function calcularPericiasDetalhadas(
   });
 }
 
-/**
- * Efeitos de um nome, procurando nos DOIS catálogos.
- *
- * O motor guarda poderes em `PODERES` e habilidades de trilha em `TRILHAS`, mas
- * a ficha mistura os dois numa lista só de `Poder`. Quem recebe apenas a lista
- * — como `calcularCarga` — não tem como saber de qual catálogo cada nome veio.
- */
 function efeitosPorNome(nome: string): Efeito[] | undefined {
   const doCatalogo = PODERES.find((p) => p.nome === nome || (p.apelidos ?? []).includes(nome));
   if (doCatalogo?.efeitos) return doCatalogo.efeitos as Efeito[];
@@ -698,26 +665,6 @@ export function calcularCarga(params: {
   const temMochilaMilitar = params.itens.some(i => i.nome === 'Mochila Militar');
   if (temMochilaMilitar) cargaMaxima += 2;
 
-  /*
-   * O bônus de carga vem do INTERPRETADOR DE EFEITOS, não de nome de poder.
-   *
-   * Aqui havia `if (nome === 'Mascate') cargaMaxima += 5` — uma exceção
-   * hard-coded para um poder só. `Mochileiro` diz a mesma coisa no livro
-   * ("seu limite de carga aumenta em 5 espaços") e não recebia nada, porque
-   * ninguém escreveu o `if` dele. Não escala: cada poder novo com efeito de
-   * carga exigiria mais um `if`, e quem escrevesse o poder não teria como saber.
-   *
-   * `cargaAtributo` também estava morto — acumulava em `BonusAcumulado` e nada
-   * lia de volta.
-   *
-   * A busca varre PODERES **e** habilidades de trilha, e isso não é detalhe:
-   * `Mascate` é habilidade da trilha Muambeiro, não entrada de `PODERES`. Ao
-   * remover o `if`, uma busca só em `PODERES` teria quebrado o Mascate em
-   * silêncio — e foi o teste dele que pegou.
-   *
-   * Não há risco de contagem dupla com `calcularBonusTrilha`: aquele caminho
-   * alimenta PV/PE/perícia, e nenhum deles lê carga.
-   */
   const efeitosDeCarga = aplicarVarios(
     (params.poderes ?? []).map((p) => efeitosPorNome(p.nome)),
     { nex: 0, atributos: params.atributos },
@@ -752,17 +699,6 @@ function criarBonusOrigemVazio(): BonusPoderOrigem {
   };
 }
 
-
-
-
-
-
-
-
-
-
-
-
 function calcularBonusPoderOrigem(
   origem: Origem,
   nex: number,
@@ -773,7 +709,6 @@ function calcularBonusPoderOrigem(
   const nomePoder = origem.poder.nome;
 
   switch (nomeOrigem) {
-
     case 'Desgarrado':
 
       bonus.pvBonus = Math.floor(nex / 5);

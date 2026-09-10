@@ -51,27 +51,32 @@ export function SkillsTabContent({
           if (skills.length === 0) return null;
           return (
             <div key={attr}>
-              <h4 className="text-ordem-text-secondary font-bold text-xs uppercase tracking-widest mb-2 border-b border-ordem-border pb-1 flex items-center gap-2">
-                <span className="w-2 h-2 bg-ordem-text-muted rotate-45 inline-block"></span>
-                {attr} <span className="text-ordem-text-secondary">({agent.atributos[attr]})</span>
+              <h4 className="mb-2 flex items-center gap-2 border-b border-white/10 pb-1.5 font-carimbo text-[11px] uppercase tracking-[0.22em] text-ordem-text-muted">
+                <span className="inline-block h-1.5 w-1.5 rotate-45 bg-[var(--mestre-primary,#DC2626)]" aria-hidden></span>
+                {attr}
+                <span className="font-mono text-ordem-text-secondary">{agent.atributos[attr]}</span>
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2">
                 {skills.map(([nome, detalhe]) => (
-                  <div key={nome} className={`flex justify-between items-center p-2.5 bg-ordem-black-deep/30 rounded-lg border transition-colors gap-3 ${isEditingMode ? 'border-ordem-border-light hover:border-ordem-text-muted' : 'border-ordem-border-light/50 hover:border-ordem-text-muted'}`}>
-                    <div className={`flex-1 min-w-0 ${isEditingMode ? 'cursor-pointer hover:text-white' : ''}`} onClick={() => isEditingMode && onToggleSkillGrade(nome as PericiaName)} title={isEditingMode ? "Clique para alterar o grau" : ""}>
-                      <span className="text-sm text-ordem-white-muted truncate block">{nome}</span>
+                  <div key={nome} className={`group flex items-center justify-between gap-3 border px-2.5 py-2 transition-colors ${(detalhe.grau || 'Destreinado') === 'Destreinado'
+                    ? 'border-white/[0.06] bg-transparent hover:border-white/15'
+                    : 'border-white/12 bg-white/[0.03] hover:border-[var(--mestre-primary,#DC2626)]/40'}`}>
+                    <div className={`min-w-0 flex-1 ${isEditingMode ? 'cursor-pointer hover:text-white' : ''}`} onClick={() => isEditingMode && onToggleSkillGrade(nome as PericiaName)} title={isEditingMode ? "Clique para alterar o grau" : ""}>
+                      <span className={`block truncate text-sm ${(detalhe.grau || 'Destreinado') === 'Destreinado' ? 'text-ordem-text-muted' : 'font-medium text-white'}`}>{nome}</span>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <button type="button" onClick={() => { const pericia = nome as PericiaName; const det = agent.periciasDetalhadas[pericia]; if (!det) return; onLastRollChange({ pericia, result: rollPericia(det) }); }} className="p-1.5 rounded border border-ordem-border-light text-ordem-white-muted hover:border-ordem-text-muted hover:text-white transition-colors" title="Rolar teste">
+                      <button type="button" onClick={() => { const pericia = nome as PericiaName; const det = agent.periciasDetalhadas[pericia]; if (!det) return; onLastRollChange({ pericia, result: rollPericia(det) }); }} className="border border-white/10 p-1.5 text-ordem-text-muted opacity-0 transition-all hover:border-ordem-text-muted hover:text-white focus:opacity-100 group-hover:opacity-100" title="Rolar teste">
                         <Dices size={14} />
                       </button>
-                      <span onClick={() => isEditingMode && onToggleSkillGrade(nome as PericiaName)} className={`text-[10px] px-1.5 py-0.5 rounded border ${isEditingMode ? 'cursor-pointer hover:opacity-80' : ''} ${(detalhe.grau || 'Destreinado') === 'Destreinado' ? 'border-ordem-border text-ordem-text-secondary' : detalhe.grau === 'Treinado' ? 'border-green-900 text-green-500' : detalhe.grau === 'Veterano' ? 'border-blue-900 text-blue-500' : 'border-purple-900 text-purple-500'}`}>
-                        {(detalhe.grau || 'Destreinado').substring(0, 3).toUpperCase()}
-                      </span>
+                      {((detalhe.grau || 'Destreinado') !== 'Destreinado' || isEditingMode) && (
+                        <span onClick={() => isEditingMode && onToggleSkillGrade(nome as PericiaName)} className={`font-carimbo text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 border ${isEditingMode ? 'cursor-pointer hover:opacity-80' : ''} ${(detalhe.grau || 'Destreinado') === 'Destreinado' ? 'border-white/10 text-ordem-text-muted' : detalhe.grau === 'Treinado' ? 'border-ordem-green/40 text-ordem-green' : detalhe.grau === 'Veterano' ? 'border-ordem-blue/40 text-ordem-blue' : 'border-ordem-purple/40 text-ordem-purple'}`}>
+                          {(detalhe.grau || 'Destreinado').substring(0, 3).toUpperCase()}
+                        </span>
+                      )}
                       {isEditingMode && editingSkill === nome ? (
                         <input type="number" value={tempSkillBonus} onChange={(e) => onTempSkillBonusChange(e.target.value)} onBlur={() => onManualSkillBonusChange(nome as PericiaName, parseInt(tempSkillBonus) || 0)} onKeyDown={(e) => e.key === 'Enter' && onManualSkillBonusChange(nome as PericiaName, parseInt(tempSkillBonus) || 0)} autoFocus className="w-12 bg-ordem-ooze text-white text-center font-mono text-xs border border-ordem-red rounded focus:outline-none" />
                       ) : (
-                        <span onClick={() => isEditingMode && onStartEditingSkill(nome as PericiaName, detalhe.bonusFixo)} className={`font-mono text-zinc-100 font-bold text-sm ${isEditingMode ? 'cursor-pointer hover:text-ordem-red underline decoration-dashed underline-offset-4' : ''}`} title={isEditingMode ? "Editar bônus" : ""}>
+                        <span onClick={() => isEditingMode && onStartEditingSkill(nome as PericiaName, detalhe.bonusFixo)} className={`w-8 text-right font-mono text-base font-bold tabular-nums ${(detalhe.grau || 'Destreinado') === 'Destreinado' ? 'text-ordem-text-muted' : 'text-white'} ${isEditingMode ? 'cursor-pointer underline decoration-dashed underline-offset-4 hover:text-ordem-red' : ''}`} title={isEditingMode ? "Editar bônus" : ""}>
                           +{detalhe.bonusFixo || 0}
                         </span>
                       )}

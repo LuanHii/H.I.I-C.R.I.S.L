@@ -117,7 +117,6 @@ export function detectingPendenciesAndAutoApply(
 
             case 'Trilha':
                 if (evento.requisito === 10) {
-
                     if (!personagem.trilha) {
                         pendencias.push({
                             id: gerarIdPendencia(),
@@ -127,11 +126,9 @@ export function detectingPendenciesAndAutoApply(
                             resolvida: false,
                         });
                     } else {
-
                         checkTrilhaAbility(personagem, evento.requisito, pendencias, autoPoderes);
                     }
                 } else {
-
                     if (personagem.trilha) {
                         checkTrilhaAbility(personagem, evento.requisito, pendencias, autoPoderes);
                     }
@@ -139,7 +136,7 @@ export function detectingPendenciesAndAutoApply(
                 break;
 
             case 'Pericia':
-                
+
                 const qtdPericias = personagem.classe === 'Especialista'
                     ? 5 + personagem.atributos.INT
                     : 2 + personagem.atributos.INT;
@@ -181,9 +178,8 @@ export function detectingPendenciesAndAutoApply(
                 break;
 
             case 'Ritual':
-                
+
                 if (personagem.classe === 'Ocultista') {
-                    
                     const circuloMaximo = circuloMaximoPorNex(evento.requisito);
                     pendencias.push({
                         id: gerarIdPendencia(),
@@ -223,10 +219,8 @@ function checkTrilhaAbility(
             descricao: `Habilidade de Trilha: ${habilidade.nome} (${personagem.trilha} ${nex}%)`,
             nex: nex,
             resolvida: false,
-
         });
     } else {
-
         autoPoderes.push({
             nome: habilidade.nome,
             descricao: habilidade.descricao,
@@ -277,7 +271,6 @@ export function subirNex(
 
     const { pendencias: pendenciasNovas, autoPoderes } = detectingPendenciesAndAutoApply(personagem, eventosDesbloqueados);
 
-    // Subir de NEX NÃO promove: patente é posição na Ordem, medida em PP.
     const patenteAtual = personagem.patente ?? 'Recruta';
     const novaPatenteConfig = getPatenteConfig(patenteAtual);
 
@@ -473,12 +466,10 @@ export function resolverPendencia(
 
         case 'versatilidade':
             if (typeof valorEscolhido === 'string') {
-
                 const poderClasse = PODERES.find(p => p.nome === valorEscolhido);
                 if (poderClasse) {
                     personagemAtualizado.poderes = [...personagemAtualizado.poderes, poderClasse];
                 } else {
-
                     let poderTrilha: Poder | undefined;
                     for (const t of TRILHAS) {
                         const h = t.habilidades.find(h => h.nome === valorEscolhido);
@@ -507,7 +498,6 @@ export function resolverPendencia(
                 const tData = TRILHAS.find(t => t.nome === trilhaNome);
                 const hData = tData?.habilidades.find(h => h.nex === nexP);
                 if (hData) {
-
                     personagemAtualizado.poderes = [
                         ...personagemAtualizado.poderes,
                         {
@@ -518,16 +508,6 @@ export function resolverPendencia(
                         }
                     ];
 
-                    /*
-                     * Aplica a perícia escolhida. Este ramo era um `if` VAZIO:
-                     * a escolha ficava só no texto da descrição e nenhuma
-                     * perícia subia.
-                     *
-                     * Vale para `tipo: 'pericia'` e para o `tipo: 'custom'` com
-                     * lista de perícias (é assim que a Carteirada do Agente
-                     * Secreto é modelada). Segue o padrão do livro: treina, ou
-                     * dá +2 se já treinada.
-                     */
                     const escolhaEhPericia =
                         hData.escolha?.tipo === 'pericia' ||
                         (hData.escolha?.tipo === 'custom' &&
@@ -555,12 +535,10 @@ export function resolverPendencia(
 
         case 'pericia':
             if (Array.isArray(valorEscolhido)) {
-
                 const alvo = grauAlvoPromocao(pendencia.nex);
 
                 const novasPericias = { ...personagemAtualizado.pericias };
                 valorEscolhido.forEach(pNome => {
-
                     novasPericias[pNome as any] = alvo;
                 });
                 personagemAtualizado.pericias = novasPericias;
@@ -614,13 +592,6 @@ export function rebaixarNex(
         .filter(p => p.nex > novoNex)
         .sort((a, b) => b.nex - a.nex);
 
-    /*
-     * Multiconjunto, não Set.
-     *
-     * Um poder repetível (Transcender, Aprender Ritual, Foco em Perícia…) pode
-     * aparecer N vezes na ficha. Com um Set e um `filter`, rebaixar um único NEX
-     * apagava TODAS as cópias de uma vez. Aqui conta-se quantas remover.
-     */
     const poderesARemover = new Map<string, number>();
     const marcarParaRemover = (nome: string) => {
         poderesARemover.set(nome, (poderesARemover.get(nome) ?? 0) + 1);
@@ -695,7 +666,6 @@ export function rebaixarNex(
     }
 
     if (poderesARemover.size > 0) {
-        // Remove da última cópia para a primeira, respeitando a contagem.
         const restante = new Map(poderesARemover);
         const mantidos: typeof atualizado.poderes = [];
         for (let i = atualizado.poderes.length - 1; i >= 0; i -= 1) {
@@ -719,7 +689,6 @@ export function rebaixarNex(
 
     atualizado.nex = novoNex;
 
-    // Patente e limite de itens não se alteram por NEX — só por PP.
     atualizado.limiteItens = getPatenteConfig(atualizado.patente ?? 'Recruta').limiteItens;
 
     const recursosNovos = calcularRecursosParaNex(

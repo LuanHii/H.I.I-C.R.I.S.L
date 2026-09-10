@@ -7,10 +7,12 @@ import { resolverPersonagem, type RegistroLegivel } from '../leitura';
 import { paraPersonagem } from '../paraPersonagem';
 import { atualizarSessao } from '../sessao';
 import { buildFicha } from '../buildFicha';
+import { pendenciasResolviveis, opcoesDaPendencia } from '../pendencias';
+import { registrarEscolha } from '../registrarEscolha';
+import { RITUAIS } from '@/data/magic/rituals';
 
 const salvar = (p: Personagem) => normalizePersonagem(p, false);
 
-/** Monta um registro já convertido, como o `migrar` do store faria. */
 function registroMigrado(v0: Personagem, over: Partial<RegistroLegivel> = {}): RegistroLegivel {
   const atualizadoEm = '2026-07-01T00:00:00.000Z';
   return {
@@ -52,11 +54,6 @@ describe('a virada é POR DOCUMENTO', () => {
   );
 
   it('uma ficha ruim cai sozinha, sem afetar as outras', () => {
-    /*
-     * É a razão de a chave ser por documento. Com chave global, uma ficha ruim
-     * obriga a reverter a campanha inteira — aí ninguém reverte, e o mestre
-     * convive com a ficha errada.
-     */
     const boa = registroMigrado(salvar(criarFicha({ classe: 'Combatente', nex: 20 })));
     const ruim: RegistroLegivel = {
       ...boa,
@@ -77,11 +74,6 @@ describe('portas que derrubam para o v0', () => {
   });
 
   it('números que não batem mais derrubam, mesmo com o replay verde', () => {
-    /*
-     * As duas checagens são independentes: o replay prova que o v2 é
-     * internamente legal, não que ele ainda corresponde a ESTE v0. Sem esta
-     * porta a ficha do mestre mudaria de números sozinha ao abrir.
-     */
     const v0 = salvar(criarFicha({ classe: 'Combatente', nex: 50 }));
     const base = registroMigrado(v0);
     const desencontrado: RegistroLegivel = {
@@ -127,11 +119,6 @@ describe('portas que derrubam para o v0', () => {
 });
 
 describe('paraPersonagem: a fronteira do que cada motor possui', () => {
-  /**
-   * Esta é a lista que torna a virada revisável. Sem ela, qualquer campo
-   * esquecido some da ficha no instante em que a chave vira — em silêncio,
-   * porque `Personagem` tem 40+ campos e ninguém confere um por um.
-   */
   const DO_MOTOR_NOVO = [
     'nome', 'classe', 'origem', 'nex', 'atributos', 'pericias', 'periciasDetalhadas',
     'trilha', 'patente', 'pp', 'defesa', 'deslocamento', 'carga', 'poderes',
@@ -139,7 +126,7 @@ describe('paraPersonagem: a fronteira do que cada motor possui', () => {
   ] as const;
 
   const CARREGADO_DO_V0 = [
-    'equipamentos', 'rituais', 'proficiencias', 'efeitosAtivos', 'usarPd', 'ativo',
+    'equipamentos', 'proficiencias', 'efeitosAtivos', 'usarPd', 'ativo',
   ] as const;
 
   it('o que é carregado do v0 chega intacto', () => {
@@ -156,13 +143,11 @@ describe('paraPersonagem: a fronteira do que cada motor possui', () => {
     for (const campo of CARREGADO_DO_V0) {
       expect(saida[campo], campo).toEqual(enriquecido[campo]);
     }
-    expect(saida.rituais, 'rituais somem se o motor novo tentar derivá-los').toEqual(enriquecido.rituais);
   });
 
   it('o que o motor novo possui vem do build, não do v0', () => {
     const v0 = salvar(criarFicha({ classe: 'Combatente', nex: 50 }));
     const ficha = migrarFicha(v0).ficha;
-    // v0 adulterado: se algum campo "possuído" vier daqui, o teste pega.
     const mentiroso: Personagem = {
       ...v0,
       defesa: 999,
@@ -183,15 +168,6 @@ describe('paraPersonagem: a fronteira do que cada motor possui', () => {
   });
 
   it('os dois sistemas de pendência do motor antigo não sobrevivem à virada', () => {
-    /*
-     * `AgentDetailView:338` testa `pendenciasNex.length > 0` em vez de
-     * não-resolvidas, e como resolvidas nunca são removidas isso fica
-     * permanentemente true depois do primeiro level up — desabilitando quatro
-     * modais para sempre. Numa ficha lida do motor novo o array nasce vazio e o
-     * bug não tem onde acontecer.
-     */
-    // Com trilha escolhida: assim o slot de trilha está RESPONDIDO e a asserção
-    // sobre `escolhaTrilhaPendente` mede o carregamento, não uma pendência real.
     const v0 = salvar(criarFicha({ classe: 'Combatente', nex: 50, trilha: 'Aniquilador' }));
     const sujo: Personagem = {
       ...v0,
@@ -206,13 +182,6 @@ describe('paraPersonagem: a fronteira do que cada motor possui', () => {
     expect(saida.pendenciasNex).toEqual([]);
     expect(saida.escolhaTrilhaPendente).toBe(false);
 
-    /*
-     * O contador não vem do v0 (7) — vem do build. E o build diz 3, porque esta
-     * ficha DEVE MESMO três poderes de classe: `resolverPendencia` não tem
-     * `case 'poder'`, então o motor antigo marcava a pendência como resolvida e
-     * o poder nunca entrava. Fichas de NEX 50 estão com três escolhas por fazer
-     * e ninguém sabia.
-     */
     const slotsDePoder = build.pendencias.filter((p) => p.slot.kind === 'poderClasse').length;
     expect(saida.poderesClassePendentes).toBe(slotsDePoder);
     expect(saida.poderesClassePendentes).not.toBe(7);
@@ -249,7 +218,6 @@ describe('atualizarSessao: o que mantém o v2 vivo durante o jogo', () => {
     expect(r.estrutural, r.divergiu.join(', ')).toBe(false);
     expect(r.ficha.sessao.pvDano).toBe(12);
     expect(r.ficha.sessao.peGasto).toBe(3);
-    // E o build reflete: sem isso, o dano some ao reabrir.
     expect(buildFicha({ ficha: r.ficha }).derivados.pv.atual).toBe(view.pv.max - 12);
   });
 
@@ -259,11 +227,6 @@ describe('atualizarSessao: o que mantém o v2 vivo durante o jogo', () => {
     ['trilha', (v: Personagem) => ({ ...v, trilha: 'Tropa de Choque' })],
     ['poderes', (v: Personagem) => ({ ...v, poderes: [] })],
   ] as const)('mudança em %s é marcada como estrutural, não adivinhada', (_rotulo, mexer) => {
-    /*
-     * Adivinhar aqui ("o FOR subiu 1, deve ter sido o marco de NEX 20") seria
-     * reintroduzir a atribuição-por-palpite que o replay para frente existe para
-     * pegar. O motor prefere se declarar desatualizado.
-     */
     const { ficha, view } = preparar();
     const r = atualizarSessao(ficha, mexer(view));
     expect(r.estrutural).toBe(true);
@@ -288,19 +251,6 @@ describe('atualizarSessao: o que mantém o v2 vivo durante o jogo', () => {
 });
 
 describe('a porta do replay é independente da dos números', () => {
-  /**
-   * Este teste existe porque o outro não bastava.
-   *
-   * Ao verificar falseabilidade, substituí `replayParaFrente` por um stub que
-   * sempre aprova — e NENHUM teste falhou. A suíte estava cobrindo a porta dos
-   * números e deixando a do replay passar de graça: as fichas ruins que eu havia
-   * construído eram reprovadas pelo endpoint antes de o replay ser consultado.
-   *
-   * O caso que separa as duas é justamente o que o replay existe para pegar:
-   * um documento cujos NÚMEROS batem perfeitamente e cuja HISTÓRIA é ilegal.
-   * "Ciente das Cicatrizes" exige treinamento que a ficha não tem em NEX 15%;
-   * o poder não altera PV/PE/SAN, então o endpoint não vê nada de errado.
-   */
   const comHistoriaIlegal = (): RegistroLegivel => {
     const v0 = salvar(criarFicha({ classe: 'Combatente', nex: 50, trilha: 'Aniquilador' }));
     const base = registroMigrado(v0);
@@ -332,9 +282,69 @@ describe('a porta do replay é independente da dos números', () => {
   });
 
   it('e o motivo diz QUAL marco e por quê, não só que falhou', () => {
-    // Um relatório que só diz "deu erro" não ajuda o mestre a decidir nada.
     const r = resolverPersonagem(comHistoriaIlegal());
     expect(r.motivo).toContain('15%');
     expect(r.motivo).toContain('Ciente das Cicatrizes');
+  });
+});
+
+describe('rituais: união do que o v0 carrega com o que o motor deriva', () => {
+  const ocultista = () => salvar(criarFicha({ classe: 'Ocultista', nex: 45, trilha: 'Conjurador' }));
+
+  const comRitualEscolhido = (v0: Personagem) => {
+    let ficha = migrarFicha(v0).ficha;
+    const pendencia = pendenciasResolviveis(ficha).find((p) => p.slot.kind === 'ritual');
+    expect(pendencia, 'ocultista sem slot de ritual').toBeDefined();
+    const opcao = opcoesDaPendencia(ficha, pendencia!.slot).find((o) => o.elegivel);
+    expect(opcao, 'slot de ritual sem opção elegível').toBeDefined();
+    const r = registrarEscolha(ficha, pendencia!.slot.id, opcao!.valor);
+    expect(r.aplicada, JSON.stringify(r.problemas)).toBe(true);
+    return { ficha: r.ficha, nome: (opcao!.valor as { ritual: string }).ritual };
+  };
+
+  it('o ritual escolhido no motor novo chega na view', () => {
+    const v0 = ocultista();
+    expect(v0.rituais ?? [], 'premissa: ficha convertida nasce sem ritual').toEqual([]);
+
+    const { ficha, nome } = comRitualEscolhido(v0);
+    expect(buildFicha({ ficha }).rituais, 'o build nem derivou o ritual').toContain(nome);
+
+    const saida = paraPersonagem({ ficha, carregarDe: v0 });
+    expect(
+      (saida.rituais ?? []).map((r) => r.nome),
+      'o ritual escolhido foi descartado no render',
+    ).toContain(nome);
+  });
+
+  it('ritual presente nos dois lados não duplica', () => {
+    const v0base = ocultista();
+    const { nome } = comRitualEscolhido(v0base);
+    const doCatalogo = RITUAIS.find((r) => r.nome === nome);
+    expect(doCatalogo).toBeDefined();
+
+    const v0: Personagem = { ...v0base, rituais: [doCatalogo!] };
+    const { ficha } = comRitualEscolhido(v0);
+
+    const nomes = (paraPersonagem({ ficha, carregarDe: v0 }).rituais ?? []).map((r) => r.nome);
+    expect(nomes.filter((n) => n === nome)).toHaveLength(1);
+  });
+
+  it('ritual do v0 que a conversão NÃO soube atribuir sobrevive', () => {
+    const homebrew = { ...RITUAIS[0], nome: 'Ritual Caseiro do Mestre' };
+    const v0: Personagem = { ...ocultista(), rituais: [homebrew as never] };
+    const { ficha } = comRitualEscolhido(v0);
+    expect(
+      RITUAIS.some((r) => r.nome === homebrew.nome),
+      'premissa: se o catálogo conhecesse este ritual, o lado derivado o materializaria sozinho',
+    ).toBe(false);
+    expect(
+      buildFicha({ ficha }).rituais,
+      'premissa: a conversão registrou o nome, mas o catálogo não tem o objeto',
+    ).toContain(homebrew.nome);
+
+    const nomes = (paraPersonagem({ ficha, carregarDe: v0 }).rituais ?? []).map((r) => r.nome);
+    expect(nomes, 'a união filtrou pelo catálogo e comeu o ritual do mestre').toContain(
+      'Ritual Caseiro do Mestre',
+    );
   });
 });

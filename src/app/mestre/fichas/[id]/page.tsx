@@ -101,11 +101,6 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
             <span>/</span>
             <span className="text-ordem-white truncate max-w-[200px]">{personagemAtual.nome}</span>
           </nav>
-          <header className="flex items-center justify-between mb-4 shrink-0">
-            <h1 className="text-xl font-bold text-white">
-              Editando: <span className="text-ordem-red">{personagemAtual.nome}</span>
-            </h1>
-          </header>
 
           <div className="flex-1 overflow-y-auto bg-ordem-ooze/50 border border-ordem-border rounded-xl">
             <AgentDetailView
@@ -113,6 +108,7 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
               onUpdate={atualizarPersonagem}
               readOnly={false}
               disableInteractionModals={true}
+              progressaoNoMotorNovo={registro?.fonte === 'v2' && !!registro.ficha}
             />
           </div>
         </div>

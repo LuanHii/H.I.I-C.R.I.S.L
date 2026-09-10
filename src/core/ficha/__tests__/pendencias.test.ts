@@ -16,12 +16,6 @@ const fichaDe = (over: Parameters<typeof criarFicha>[0]) => migrarFicha(salvar(c
 
 describe('as pendências que as fichas reais estão devendo', () => {
   it('uma ficha de NEX 50 deve três poderes de classe', () => {
-    /*
-     * Não é artefato do conversor. `resolverPendencia` não tem `case 'poder'`:
-     * a pendência era marcada como resolvida e o poder nunca entrava em
-     * `personagem.poderes`. As fichas de campanha estão devendo essas escolhas
-     * desde sempre, e nada no motor antigo tinha como mostrar isso.
-     */
     const ficha = fichaDe({ classe: 'Combatente', nex: 50, trilha: 'Aniquilador' });
     const poderes = pendenciasResolviveis(ficha).filter((p) => p.slot.kind === 'poderClasse');
     expect(poderes.map((p) => p.slot.nivel)).toEqual([15, 30, 45]);
@@ -39,27 +33,7 @@ describe('as pendências que as fichas reais estão devendo', () => {
 });
 
 describe('as opções são avaliadas NO NÍVEL DO SLOT', () => {
-  /**
-   * Pré-requisito em Ordem Paranormal é de AQUISIÇÃO: vale o estado no momento
-   * da escolha. Avaliar contra o estado final deixaria passar poderes que a
-   * ficha não podia ter no marco em que estão sendo encaixados — e depois o
-   * replay do conversor reprovaria a própria escolha que a UI ofereceu.
-   */
   it('um poder que depende de outro só é elegível DEPOIS do marco que o concede', () => {
-    /*
-     * O caso que separa "avaliar no nível do slot" de "avaliar no estado final".
-     * `Tanque de Guerra` exige o poder `Proteção Pesada`. Com ele respondido no
-     * marco de NEX 45:
-     *
-     *   - em NEX 15 o personagem AINDA NÃO o tem → inelegível
-     *   - em NEX 60 já tem                       → elegível
-     *
-     * Avaliando contra o estado final, os dois marcos ficariam elegíveis — e a
-     * UI ofereceria em NEX 15 uma escolha que o replay do conversor reprovaria
-     * depois. A primeira versão deste teste comparava só o TAMANHO dos conjuntos
-     * e passava com as duas implementações; substituir `opcoesDaPendencia` por
-     * uma que ignora o nível não quebrava nada.
-     */
     const base = fichaDe({ classe: 'Combatente', nex: 60, trilha: 'Aniquilador' });
     const ficha: FichaPersistida = {
       ...base,
@@ -89,11 +63,6 @@ describe('as opções são avaliadas NO NÍVEL DO SLOT', () => {
   });
 
   it('opção inelegível VEM na lista, com o motivo — não é escondida', () => {
-    /*
-     * `getPoderesElegiveis` do motor antigo filtra o inelegível para fora, então
-     * um pré-requisito escrito errado no catálogo fica invisível para sempre:
-     * o poder simplesmente não aparece e ninguém sabe por quê.
-     */
     const ficha = fichaDe({ classe: 'Combatente', nex: 15 });
     const slot = pendenciasResolviveis(ficha).find((p) => p.slot.kind === 'poderClasse')!;
 
@@ -103,8 +72,6 @@ describe('as opções são avaliadas NO NÍVEL DO SLOT', () => {
   });
 
   it('o grau de treinamento só oferece perícias já treinadas', () => {
-    // Sem passar os graus ao enumerador, TODAS ficariam inelegíveis e o mestre
-    // veria uma tela cinza sem explicação.
     const ficha = fichaDe({ classe: 'Especialista', nex: 35 });
     const slot = pendenciasResolviveis(ficha).find((p) => p.slot.kind === 'pericia')!;
     const elegiveis = slot.opcoes.filter((o) => o.elegivel);
@@ -181,12 +148,6 @@ describe('responder uma pendência', () => {
   });
 
   it('a ficha continua legível do motor novo depois de responder', () => {
-    /*
-     * O ponto de integração que quebra silenciosamente: responder muda os
-     * números do v2, e se o espelho v0 não for atualizado junto, a conferência
-     * de endpoint derruba a ficha para o motor antigo — a escolha some da tela
-     * sem erro nenhum. É por isso que `responderEscolha` grava os dois.
-     */
     const { v0, ficha } = preparar();
     const slot = pendenciasResolviveis(ficha).find((p) => p.slot.kind === 'poderClasse')!;
     const escolhida = slot.opcoes.find((o) => o.elegivel)!;
@@ -207,20 +168,19 @@ describe('responder uma pendência', () => {
   });
 
   it('gravar só o log — sem o espelho — derruba a ficha; é o erro que o store evita', () => {
-    // O contrapeso do teste acima: prova que a conferência realmente pega.
     const { v0, ficha } = preparar();
     const slot = pendenciasResolviveis(ficha).find(
       (p) => p.slot.kind === 'poderClasse'
         && p.opcoes.some((o) => o.elegivel && /Vigor|Vitalidade|Resistência/i.test(o.rotulo)),
     );
-    if (!slot) return; // nenhum poder com efeito de recurso neste marco.
+    if (!slot) return;
 
     const comPv = slot.opcoes.find((o) => o.elegivel && /Vigor|Vitalidade|Resistência/i.test(o.rotulo))!;
     const depois = registrarEscolha(ficha, slot.slot.id, comPv.valor).ficha;
 
     const agora = '2026-07-15T00:00:00.000Z';
     const r = resolverPersonagem({
-      personagem: v0, // espelho NÃO atualizado
+      personagem: v0,
       atualizadoEm: agora,
       ficha: depois,
       fichaMigradaDe: agora,
@@ -249,15 +209,6 @@ describe('a cascata de escolhas não deixa órfão', () => {
 });
 
 describe('versatilidade NÃO substitui a trilha', () => {
-  /**
-   * Bug real, encontrado testando o motor: o slot de versatilidade usava
-   * `{tipo:'trilha'}` — a mesma forma da escolha de trilha — e `aplicar` não
-   * tinha como distinguir os dois. Responder versatilidade TROCAVA a trilha do
-   * personagem: um Aniquilador virava Agente Secreto e perdia as habilidades da
-   * trilha original. Sem erro, sem aviso.
-   *
-   * Dois significados diferentes não podem compartilhar a mesma forma.
-   */
   const comVersatilidade = () => {
     const ficha = fichaDe({ classe: 'Combatente', nex: 50, trilha: 'Aniquilador' });
     const slot = pendenciasResolviveis(ficha).find((p) => p.slot.kind === 'versatilidade')!;
@@ -299,8 +250,6 @@ describe('versatilidade NÃO substitui a trilha', () => {
   });
 
   it('um valor de trilha é RECUSADO no slot de versatilidade', () => {
-    // O gate de tipo: sem ele, um documento antigo com o valor errado voltaria a
-    // trocar a trilha em silêncio.
     const { ficha, slot } = comVersatilidade();
     const r = registrarEscolha(ficha, slot.slot.id, { tipo: 'trilha', trilha: 'Tropa de Choque' });
     expect(r.aplicada).toBe(false);
@@ -323,28 +272,12 @@ describe('rituais do Ocultista', () => {
 
     expect(build.rituais).toContain('Vulto Alienígena');
     expect(build.rituais).toContain('Amaldiçoar');
-    // Duas vagas ocupadas: sobram as restantes como pendência, não as duas.
     const pendentes = build.pendencias.filter((p) => p.slot.kind === 'ritual').length;
     const total = build.slots.filter((s) => s.kind === 'ritual').length;
     expect(total - pendentes).toBe(2);
   });
 
   it('o mais restrito pega o marco alto — a ordem inversa inventaria lacuna', () => {
-    /*
-     * O caso SATURADO, que é o único em que a ordem importa. A primeira versão
-     * deste teste dava 17 rituais para 19 vagas: com folga assim, o de 4º círculo
-     * achava o marco de NEX 85 livre em qualquer ordem, e inverter a ordenação
-     * não quebrava nada.
-     *
-     * Em NEX 85 há 19 vagas (3 em NEX 5% + uma em cada marco de 10 a 85) e
-     * exatamente UMA aceita 4º círculo: a de NEX 85. Com 19 rituais de 1º
-     * círculo + 1 de 4º, alguém vai sobrar — e QUEM sobra é decidido pela ordem:
-     *
-     *   ascendente  → os de 1º ocupam tudo, inclusive NEX 85; o de 4º fica sem
-     *                 lugar e o conversor reporta uma lacuna que não existe.
-     *   descendente → o de 4º pega NEX 85, e sobra um de 1º, que caberia em
-     *                 qualquer marco. É a sobra certa.
-     */
     const v0 = salvar(criarFicha({ classe: 'Ocultista', nex: 85 }));
     const quarto = RITUAIS.find((r) => r.circulo === 4)!;
     const primeiros = RITUAIS.filter((r) => r.circulo === 1).slice(0, 19);
@@ -361,7 +294,6 @@ describe('rituais do Ocultista', () => {
 
   it('ritual sem vaga é reportado, não descartado', () => {
     const v0 = salvar(criarFicha({ classe: 'Ocultista', nex: 5 }));
-    // NEX 5 tem 3 vagas; quatro rituais não cabem.
     const quatro = RITUAIS.filter((r) => r.circulo === 1).slice(0, 4);
     const { ficha, naoInferido } = migrarFicha({ ...v0, rituais: quatro });
 

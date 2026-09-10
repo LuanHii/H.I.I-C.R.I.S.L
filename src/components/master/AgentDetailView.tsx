@@ -35,9 +35,10 @@ interface AgentDetailViewProps {
     onUpdate: (updated: Personagem) => void;
     readOnly?: boolean;
     disableInteractionModals?: boolean;
+    progressaoNoMotorNovo?: boolean;
 }
 
-export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdate, readOnly, disableInteractionModals }) => {
+export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdate, readOnly, disableInteractionModals, progressaoNoMotorNovo }) => {
     type TabId = 'skills' | 'inventory' | 'powers' | 'rituals' | 'actions' | 'progression' | 'conditions';
     const [activeTab, setActiveTab] = useState<TabId>(readOnly ? 'actions' : 'skills');
 
@@ -106,11 +107,15 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     };
 
 
+    const escolhasPeloMotorAntigo = !disableInteractionModals && !progressaoNoMotorNovo;
+
     const handleLevelUp = () => {
+        if (progressaoNoMotorNovo) return;
         setIsLevelUpModalOpen({ open: true, resume: false });
     };
 
     const handleLevelDown = () => {
+        if (progressaoNoMotorNovo) return;
         const decrement = agent.classe === 'Sobrevivente' ? 1 : (agent.nex === 99 ? 4 : 5);
         const alvo = agent.classe === 'Sobrevivente' ? Math.max(1, (agent.estagio || 1) - 1) : Math.max(5, agent.nex - decrement);
         const updated = rebaixarNex(agent, alvo);
@@ -419,16 +424,20 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     ];
 
     return (
-        <div className={`flex flex-col h-full transition-all duration-300 relative ${isEditingMode ? 'ring-2 ring-dashed ring-red-500/50 bg-red-900/5 rounded-xl' : ''}`}>
+        <div
+            data-classe={agent.classe}
+            className={`relative flex h-full flex-col transition-all duration-300 ${isEditingMode ? 'ring-2 ring-dashed ring-red-500/50 bg-red-900/5' : ''}`}
+        >
+            <span aria-hidden className="mestre-aura pointer-events-none absolute inset-x-0 top-0 h-64" />
 
             
             {!readOnly && (
-                <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5">
+                <span className="hidden">
                     <button
                         onClick={() => setIsEditingMode(!isEditingMode)}
-                        className={`flex items-center gap-2 px-4 py-3 rounded-full font-bold shadow-xl transition-all ${isEditingMode
-                            ? 'bg-ordem-red text-white shadow-ordem-red/50 animate-pulse hover:bg-red-700'
-                            : 'bg-ordem-ooze text-ordem-text-secondary border border-ordem-border-light hover:border-ordem-text-muted hover:text-white'
+                        className={`flex items-center gap-2 border px-3 py-1.5 font-carimbo text-[10px] uppercase tracking-[0.16em] transition-colors ${isEditingMode
+                            ? 'border-ordem-red bg-ordem-red/15 text-ordem-red'
+                            : 'border-white/10 text-ordem-text-muted hover:border-ordem-text-muted hover:text-white'
                             }`}
                         title={isEditingMode ? "Desativar Modo de Edição Livre" : "Ativar Modo de Edição Livre (Override)"}
                     >
@@ -444,11 +453,11 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                             </>
                         )}
                     </button>
-                </div>
+                </span>
             )}
 
             
-            {hasPendingStuff && isPendingChoiceModalSuppressed && !disableInteractionModals && (
+            {hasPendingStuff && isPendingChoiceModalSuppressed && escolhasPeloMotorAntigo && (
                 <button
                     onClick={() => {
                         setIsPendingChoiceModalSuppressed(false)
@@ -467,19 +476,19 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
             )}
 
             
-            {!disableInteractionModals && !isPendingChoiceModalSuppressed && !(agent.periciasPromocaoPendentes && agent.periciasPromocaoPendentes.restante > 0) && agent.periciasTreinadasPendentes && agent.periciasTreinadasPendentes > 0 && !activePendencies && (
+            {escolhasPeloMotorAntigo && !isPendingChoiceModalSuppressed && !(agent.periciasPromocaoPendentes && agent.periciasPromocaoPendentes.restante > 0) && agent.periciasTreinadasPendentes && agent.periciasTreinadasPendentes > 0 && !activePendencies && (
                 <SkillSelectorModal isOpen={true} currentSkills={agent.pericias} onSelect={handleSkillSelection} onDefer={() => setIsPendingChoiceModalSuppressed(true)} />
             )}
-            {!disableInteractionModals && !isPendingChoiceModalSuppressed && agent.periciasPromocaoPendentes && agent.periciasPromocaoPendentes.restante > 0 && (
+            {escolhasPeloMotorAntigo && !isPendingChoiceModalSuppressed && agent.periciasPromocaoPendentes && agent.periciasPromocaoPendentes.restante > 0 && (
                 <SkillSelectorModal isOpen={true} currentSkills={agent.pericias} onSelect={handleSkillPromotionSelection} onDefer={() => setIsPendingChoiceModalSuppressed(true)} eligibleFrom={grauRequeridoParaAlvo(agent.periciasPromocaoPendentes.alvo)} title={`Grau de Treinamento (${agent.periciasPromocaoPendentes.alvo})`} description={`Pela regra de Grau de Treinamento (NEX ${agent.periciasPromocaoPendentes.alvo === 'Veterano' ? '35%' : '70%'}), escolha perícias elegíveis para promover. Restante: ${agent.periciasPromocaoPendentes.restante}.`} confirmLabel="Promover" />
             )}
-            {!disableInteractionModals && !isPendingChoiceModalSuppressed && agent.escolhaTrilhaPendente && (
+            {escolhasPeloMotorAntigo && !isPendingChoiceModalSuppressed && agent.escolhaTrilhaPendente && (
                 <TrackSelectorModal agent={agent} onConfirm={handleTrackSelection} onDefer={() => setIsPendingChoiceModalSuppressed(true)} />
             )}
-            {!disableInteractionModals && !isPendingChoiceModalSuppressed && pendingChoice && !activePendencies && (
+            {escolhasPeloMotorAntigo && !isPendingChoiceModalSuppressed && pendingChoice && !activePendencies && (
                 <PendingChoiceModal agent={agent} pendingChoice={pendingChoice} onConfirm={onUpdate} onDefer={() => setIsPendingChoiceModalSuppressed(true)} />
             )}
-            {!disableInteractionModals && !isPendingChoiceModalSuppressed && agent.poderesClassePendentes && agent.poderesClassePendentes > 0 && !activePendencies && (
+            {escolhasPeloMotorAntigo && !isPendingChoiceModalSuppressed && agent.poderesClassePendentes && agent.poderesClassePendentes > 0 && !activePendencies && (
                 <PowerChoiceModal
                     agent={agent}
                     onSelect={(poderNome) => { try { const updated = choosePower(agent, poderNome); onUpdate(updated); } catch (error: any) { console.error('Erro ao escolher poder:', error.message); } }}
@@ -499,6 +508,21 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                     warnings={warnings}
                     onLevelUp={handleLevelUp}
                     onLevelDown={handleLevelDown}
+                    progressaoExterna={progressaoNoMotorNovo}
+                    acaoDeFicha={!readOnly ? (
+                        <button
+                            type="button"
+                            onClick={() => setIsEditingMode(!isEditingMode)}
+                            title={isEditingMode ? 'Desativar Modo de Edição Livre' : 'Ativar Modo de Edição Livre (Override)'}
+                            className={`flex items-center gap-1.5 border px-2.5 py-1 font-carimbo text-[10px] uppercase tracking-[0.16em] transition-colors ${isEditingMode
+                                ? 'border-ordem-red bg-ordem-red/15 text-ordem-red'
+                                : 'border-white/10 text-ordem-text-muted hover:border-ordem-text-muted hover:text-white'
+                                }`}
+                        >
+                            <Edit2 size={12} />
+                            {isEditingMode ? 'Editando' : 'Editar'}
+                        </button>
+                    ) : undefined}
                     onPatenteClick={() => setIsPatenteModalOpen(true)}
                     onTogglePd={togglePdMode}
                     onFixInconsistencies={fixInconsistencies}
@@ -521,28 +545,35 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
             
             
             
-            <div className="bg-ordem-ooze border-b border-ordem-border-light px-2 sm:px-4 overflow-x-auto touch-scroll">
-                <div className="flex gap-0.5 min-w-max">
-                    {TABS.map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-1.5 px-3 py-2.5 text-xs sm:text-sm font-medium transition-all border-b-2 whitespace-nowrap ${activeTab === tab.id
-                                ? 'border-ordem-red text-white bg-ordem-red/10'
-                                : 'border-transparent text-ordem-text-secondary hover:text-ordem-white-muted hover:bg-white/5'
-                            }`}
-                        >
-                            {tab.icon}
-                            <span className="hidden sm:inline">{tab.label}</span>
-                            {tab.badge}
-                        </button>
-                    ))}
+            <div className="touch-scroll overflow-x-auto border-y border-white/10 bg-black/30 px-2 sm:px-4">
+                <div className="flex min-w-max gap-1">
+                    {TABS.map(tab => {
+                        const ativa = activeTab === tab.id;
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                aria-current={ativa ? 'page' : undefined}
+                                className={`relative flex items-center gap-1.5 whitespace-nowrap px-3 py-3 font-carimbo text-[11px] uppercase tracking-[0.14em] transition-colors ${ativa
+                                    ? 'text-[var(--mestre-primary,#DC2626)]'
+                                    : 'text-ordem-text-muted hover:text-ordem-white-muted'
+                                }`}
+                            >
+                                <span className={ativa ? 'opacity-100' : 'opacity-60'}>{tab.icon}</span>
+                                <span className="hidden sm:inline">{tab.label}</span>
+                                {tab.badge}
+                                {ativa && (
+                                    <span
+                                        aria-hidden
+                                        className="absolute inset-x-2 bottom-0 h-[2px] bg-[var(--mestre-primary,#DC2626)] shadow-[0_0_10px_-1px_var(--mestre-glow)]"
+                                    />
+                                )}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
-            {}
-            {}
-            {}
             <div className="flex-1 overflow-y-auto bg-ordem-ooze/50 rounded-b-xl">
                 <div className="p-4 sm:p-5">
 
@@ -588,21 +619,18 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                         />
                     )}
 
-                    {}
                     {activeTab === 'actions' && (
                         <div className="animate-in fade-in-0 slide-in-from-bottom-2 duration-200">
                             <ActionsTab character={agent} useSanity={!agent.usarPd} />
                         </div>
                     )}
 
-                    {}
                     {activeTab === 'progression' && (
                         <div className="animate-in fade-in-0 slide-in-from-bottom-2 duration-200 h-[500px]">
                             <ProgressionTab character={agent} />
                         </div>
                     )}
 
-                    {}
                     {activeTab === 'conditions' && (
                         <div className="animate-in fade-in-0 slide-in-from-bottom-2 duration-200">
                             <ConditionsManager personagem={agent} onUpdate={onUpdate} readOnly={readOnly} />
@@ -611,12 +639,11 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                 </div>
             </div>
 
-            {}
             <ItemSelectorModal isOpen={isItemModalOpen} onClose={() => setIsItemModalOpen(false)} onSelect={handleAddItem} />
             <AbilitySelectorModal isOpen={isAbilityModalOpen} onClose={() => setIsAbilityModalOpen(false)} onSelect={handleAddAbility} />
             <PatenteSelectorModal isOpen={isPatenteModalOpen} currentPatente={agent.patente || 'Recruta'} onSelect={handlePatenteChange} onClose={() => setIsPatenteModalOpen(false)} />
             {isRitualModalOpen && <RitualChoiceModal agent={agent} onSelect={handleAddRitual} onClose={() => setIsRitualModalOpen(false)} circuloMaximo={4} />}
-            {isLevelUpModalOpen.open && (
+            {isLevelUpModalOpen.open && !progressaoNoMotorNovo && (
                 <LevelUpModal agent={agent} isResume={isLevelUpModalOpen.resume} onConfirm={(updatedAgent) => { onUpdate(updatedAgent); setIsLevelUpModalOpen({ open: false, resume: false }); }} onClose={() => setIsLevelUpModalOpen({ open: false, resume: false })} />
             )}
         </div>

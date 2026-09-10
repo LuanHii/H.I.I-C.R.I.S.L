@@ -6,25 +6,6 @@ import { nivelDoId } from '../ids';
 import type { FichaPersistida } from '../tipos';
 import type { FalhaReplay } from './tipos';
 
-/**
- * REPLAY PARA FRENTE — a salvaguarda que decide se a conversão é segura.
- *
- * Round trip numérico não basta, e a razão não é sutil: ele é **cego a causa mal
- * atribuída**. VIG-base um acima e o aumento de NEX 20% um abaixo produzem
- * exatamente o mesmo `pv.max` no fim, e um futuro diferente — o personagem
- * evolui errado a partir do próximo marco, sem que nada nunca acuse.
- *
- * O que distingue as duas hipóteses é o CAMINHO, não o destino. Então aqui a
- * ficha convertida é reconstruída marco a marco desde o primeiro, e cada estado
- * intermediário tem de ser legal. Má atribuição aparece como ilegalidade no
- * meio: um atributo estourando o teto num marco anterior, um poder cujo
- * pré-requisito não estava satisfeito no NEX em que foi atribuído, um recurso
- * que diminui ao subir de nível.
- *
- * Nunca lança: toda falha vira `FalhaReplay`.
- */
-
-/** Níveis legais até o nível da ficha, em ordem ascendente. */
 function niveisAte(ficha: FichaPersistida): number[] {
   if (ficha.identidade.classe === 'Sobrevivente') {
     const estagio = ficha.progressao.estagio ?? 1;
@@ -32,7 +13,6 @@ function niveisAte(ficha: FichaPersistida): number[] {
   }
   const marcos = Array.from(new Set(NEX_EVENTOS.map((e) => e.requisito))).sort((a, b) => a - b);
   const alcancados = marcos.filter((n) => n <= ficha.progressao.nex);
-  // NEX 5% não é marco de evento, mas é o ponto de partida de toda ficha.
   return Array.from(new Set([5, ...alcancados])).sort((a, b) => a - b);
 }
 
@@ -56,7 +36,6 @@ export function replayParaFrente(ficha: FichaPersistida): {
         codigo: 'excecao_no_build',
         mensagem: `O build falhou neste marco: ${String(erro)}`,
       });
-      // Sem estado, os marcos seguintes não têm o que comparar.
       return { ok: false, falhas };
     }
 
@@ -69,13 +48,6 @@ export function replayParaFrente(ficha: FichaPersistida): {
       });
     }
 
-    /*
-     * Teto de atributo NO CAMINHO, não só no fim.
-     *
-     * Uma distribuição pode terminar legal e passar por ilegal: se a inferência
-     * põe dois aumentos cedo num atributo que já estava no teto, o total final
-     * fecha e o meio não. `buildFicha` reporta isso como `atributo_no_teto`.
-     */
     const noTeto = build.problemas.filter((p) => p.codigo === 'atributo_no_teto');
     for (const problema of noTeto) {
       falhas.push({
@@ -85,10 +57,6 @@ export function replayParaFrente(ficha: FichaPersistida): {
       });
     }
 
-    /*
-     * Recurso nunca encolhe ao subir de nível. Se encolheu, a atribuição de
-     * atributo a marcos está errada — é o sintoma direto de causa trocada.
-     */
     const { pv, pe, san } = build.derivados;
     if (pv.max < pvAnterior) {
       falhas.push({ nivel, codigo: 'recurso_regrediu', mensagem: `PV máximo caiu de ${pvAnterior} para ${pv.max} ao chegar em ${nivel}.` });
@@ -109,14 +77,6 @@ export function replayParaFrente(ficha: FichaPersistida): {
   return { ok: falhas.length === 0, falhas };
 }
 
-/**
- * Todo poder escolhido era elegível NO NEX EM QUE FOI ESCOLHIDO?
- *
- * Pré-requisito em Ordem Paranormal é de AQUISIÇÃO: vale o estado no momento da
- * escolha, não o final. Um poder atribuído a um slot cedo demais passa pela
- * checagem final e falha aqui — que é exatamente a má atribuição que o conversor
- * pode cometer ao encaixar poderes no "slot mais cedo viável".
- */
 function verificarRequisitosDeAquisicao(ficha: FichaPersistida): FalhaReplay[] {
   const falhas: FalhaReplay[] = [];
 
@@ -132,13 +92,8 @@ function verificarRequisitosDeAquisicao(ficha: FichaPersistida): FalhaReplay[] {
     if (valor.tipo !== 'poder') continue;
 
     const slot = resultado.slots.find((s) => s.id === escolha.id);
-    if (!slot) continue; // órfã: já reportada como problema pelo build.
+    if (!slot) continue;
 
-    /*
-     * O contexto é o do NÍVEL DO SLOT: reconstrói-se a ficha até ali e
-     * pergunta-se ao enumerador se o poder estava disponível. Usar o estado
-     * final aqui tornaria o teste vazio — no fim, tudo é elegível.
-     */
     const ate = derivarSlots(
       ficha.identidade,
       ficha.identidade.classe === 'Sobrevivente'

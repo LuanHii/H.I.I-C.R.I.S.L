@@ -1,35 +1,23 @@
 import type { Elemento, GrauTreinamento, PericiaName, Poder } from '../types';
 import { avaliarPoder, type EstadoParaRequisitos } from '../rules/requisitos';
 import { TODAS_PERICIAS } from '../rules/pericias';
-import { PODERES, getPoderesClasse, getPoderesGerais, getPoderesParanormais } from '../../data/character/powers';
+import { PODERES, getPoderesClasse, getPoderesForaDaClasse, getPoderesGerais, getPoderesParanormais } from '../../data/character/powers';
 import { TRILHAS } from '../../data/character/tracks';
+import { ORIGENS } from '../../data/character/origins';
 import { RITUAIS } from '../../data/magic/rituals';
 import type { EstadoParcial } from './slots';
 import type { FichaIdentidade, Slot, ValorEscolha } from './tipos';
 
-/**
- * Enumeração de opções por slot.
- *
- * Diferença central em relação ao motor antigo: uma opção inelegível é
- * DEVOLVIDA com o motivo, não escondida. Hoje `getPoderesElegiveis` filtra o
- * inelegível para fora, então o mestre não tem como saber por que um poder não
- * aparece na lista — e um pré-requisito escrito errado fica invisível.
- */
-
 export interface Opcao {
-  /** Rótulo exibido. */
   rotulo: string;
-  /** O valor que `registrarEscolha` deve receber. */
   valor: ValorEscolha;
   elegivel: boolean;
   motivos: string[];
-  /** Requisitos que não deu para avaliar com o estado disponível. */
   indeterminados: string[];
 }
 
 const ELEMENTOS: Elemento[] = ['Conhecimento', 'Energia', 'Morte', 'Sangue'];
 
-/** Círculo máximo de ritual acessível por NEX (Escolhido pelo Outro Lado). */
 export function circuloMaximoPorNivel(nex: number): 1 | 2 | 3 | 4 {
   if (nex >= 85) return 4;
   if (nex >= 55) return 3;
@@ -37,13 +25,6 @@ export function circuloMaximoPorNivel(nex: number): 1 | 2 | 3 | 4 {
   return 1;
 }
 
-/**
- * Monta o estado que `avaliarPoder` espera, a partir do snapshot parcial.
- *
- * O pré-requisito em Ordem Paranormal é de AQUISIÇÃO: vale o estado no NEX em
- * que a escolha foi feita, não o estado final. Por isso o snapshot é do nível
- * do slot, e não da ficha inteira.
- */
 function estadoParaRequisitos(
   identidade: FichaIdentidade,
   parcial: EstadoParcial,
@@ -71,7 +52,6 @@ function grausVazios(): Record<PericiaName, GrauTreinamento> {
 export interface ContextoOpcoes {
   identidade: FichaIdentidade;
   parcial: EstadoParcial;
-  /** Graus de perícia no momento do slot. Sem isto, "treinado em X" nunca passa. */
   graus?: Record<PericiaName, GrauTreinamento>;
 }
 
@@ -88,7 +68,6 @@ function opcoesDePoder(
     const avaliacao = avaliarPoder(poder, estado);
     const motivos = [...avaliacao.motivos];
 
-    // Repetição vem da flag no dado, nunca de lista de nomes.
     if (possuidos.has(poder.nome) && !poder.repetivel) {
       motivos.push('Você já possui este poder');
     }
@@ -124,11 +103,6 @@ export function opcoesPara(slot: Slot, ctx: ContextoOpcoes): Opcao[] {
       if (!hab) {
         return [];
       }
-      /*
-       * A habilidade em si não é escolha — vem determinada pela trilha e pelo
-       * nível. O que pode haver é uma escolha INTERNA (a Carteirada do Agente
-       * Secreto escolhe entre Diplomacia e Enganação).
-       */
       const internas = hab.escolha?.opcoes ?? [];
       if (internas.length === 0) {
         return [{
@@ -174,12 +148,6 @@ export function opcoesPara(slot: Slot, ctx: ContextoOpcoes): Opcao[] {
       }));
 
     case 'versatilidade':
-      /*
-       * Concede a primeira habilidade de uma trilha que NÃO é a sua — e o valor
-       * é `{tipo:'versatilidade'}`, não `{tipo:'trilha'}`. Com a forma
-       * compartilhada, responder este slot substituía a trilha do personagem e
-       * apagava as habilidades dela.
-       */
       return TRILHAS
         .filter((t) => t.classe === identidade.classe && t.nome !== parcial.trilha)
         .map((t) => {
@@ -213,29 +181,35 @@ export function opcoesPara(slot: Slot, ctx: ContextoOpcoes): Opcao[] {
       });
     }
 
-    /*
-     * Cascata de Transcender: poderes PARANORMAIS, não os da classe. Se caísse
-     * no ramo de `poderClasse`, Transcender ofereceria a lista da própria classe
-     * e o poder que o livro manda escolher ("Escolha um poder paranormal") não
-     * estaria nela.
-     */
     case 'poderParanormal':
       return opcoesDePoder(getPoderesParanormais(), slot, ctx);
 
-    /*
-     * Cascata de decisão interna. O QUE se escolhe está no catálogo, em
-     * `Poder.escolha.tipo` do poder que abriu a cascata — daí `slot.poderPai`.
-     */
+    case 'poderDiletante':
+      return opcoesDePoder(getPoderesForaDaClasse(identidade.classe), slot, ctx);
+
+    case 'origem': {
+      const possuidos = new Set(parcial.poderes.map((p) => p.nome));
+      return ORIGENS
+        .filter((o) => o.nome !== identidade.origem)
+        .map((o) => {
+          const motivos = possuidos.has(o.poder.nome)
+            ? ['Você já possui este poder']
+            : [];
+          return {
+            rotulo: `${o.nome}: ${o.poder.nome}`,
+            valor: { tipo: 'origem' as const, origem: o.nome },
+            elegivel: motivos.length === 0,
+            motivos,
+            indeterminados: [],
+          };
+        });
+    }
+
     case 'escolhaInterna':
       return opcoesDeEscolhaInterna(slot, ctx);
 
     case 'pericia': {
       const graus = ctx.graus ?? grausVazios();
-      /*
-       * O marco de grau de treinamento promove perícias que JÁ SÃO treinadas.
-       * Uma destreinada não pode ser promovida — e o motor antigo não checa
-       * isso, o que deixa o mestre promover algo que não existe.
-       */
       return TODAS_PERICIAS.map((pericia) => {
         const grau = graus[pericia] ?? 'Destreinado';
         const motivos = grau === 'Destreinado'
@@ -255,12 +229,10 @@ export function opcoesPara(slot: Slot, ctx: ContextoOpcoes): Opcao[] {
   }
 }
 
-/** Só as elegíveis. Conveniência para quem não vai exibir motivo. */
 export function opcoesElegiveis(slot: Slot, ctx: ContextoOpcoes): Opcao[] {
   return opcoesPara(slot, ctx).filter((o) => o.elegivel);
 }
 
-/** Poderes paranormais, para o slot de Transcender (cascata). */
 export function opcoesParanormais(slot: Slot, ctx: ContextoOpcoes): Opcao[] {
   return opcoesDePoder(getPoderesParanormais(), slot, ctx);
 }
@@ -273,15 +245,6 @@ const simples = (rotulo: string, valor: string): Opcao => ({
   indeterminados: [],
 });
 
-/**
- * Opções de uma cascata de decisão interna.
- *
- * A lista sai do catálogo do poder pai, e é aqui que a distinção
- * `ritual` vs `ritualAprendido` paga: Ritual Predileto oferece só os rituais que
- * o personagem JÁ CONHECE ("Escolha um ritual que você conhece"), enquanto
- * Aprender Ritual — que ensina — nem passa por esta função, e cai no slot
- * `ritual` normal, com o teto de círculo do marco.
- */
 function opcoesDeEscolhaInterna(slot: Slot, ctx: ContextoOpcoes): Opcao[] {
   const poder = PODERES.find((p) => p.nome === slot.poderPai);
   const escolha = poder?.escolha;
@@ -304,8 +267,6 @@ function opcoesDeEscolhaInterna(slot: Slot, ctx: ContextoOpcoes): Opcao[] {
       });
     }
     default:
-      // 'arma' e 'custom': o catálogo não enumera as opções, então o mestre
-      // preenche à mão. Devolver [] é honesto — inventar uma lista não é.
       return [];
   }
 }

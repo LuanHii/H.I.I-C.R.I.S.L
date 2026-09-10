@@ -314,3 +314,56 @@ body {
 .op2-fita {
   clip-path: polygon(0 0, 100% 3%, 99% 100%, 1% 96%);
 }
+
+/* Ordem 1, painel de mestre — tema por classe do personagem.
+   Mesma ideia da camada [data-perfil] do op2: o hex mora aqui, os
+   componentes leem var(--mestre-*), e trocar a classe troca a identidade. */
+
+[data-classe] {
+  --mestre-primary: #DC2626;
+  --mestre-glow: rgba(220, 38, 38, 0.28);
+  --mestre-borda: #7f1d1d;
+  --mestre-superficie: #16161a;
+}
+
+[data-classe='Combatente'] {
+  --mestre-primary: #DC2626;
+  --mestre-glow: rgba(220, 38, 38, 0.28);
+  --mestre-borda: #7f1d1d;
+}
+
+[data-classe='Especialista'] {
+  --mestre-primary: #FFD700;
+  --mestre-glow: rgba(255, 215, 0, 0.22);
+  --mestre-borda: #7c5e00;
+}
+
+[data-classe='Ocultista'] {
+  --mestre-primary: #A855F7;
+  --mestre-glow: rgba(168, 85, 247, 0.26);
+  --mestre-borda: #5b21b6;
+}
+
+[data-classe='Sobrevivente'] {
+  --mestre-primary: #22D3EE;
+  --mestre-glow: rgba(34, 211, 238, 0.24);
+  --mestre-borda: #155e75;
+}
+
+.mestre-canto {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: var(--mestre-primary, #DC2626);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.mestre-canto-se { top: -1px; left: -1px; border-top-width: 2px; border-left-width: 2px; }
+.mestre-canto-sd { top: -1px; right: -1px; border-top-width: 2px; border-right-width: 2px; }
+.mestre-canto-ie { bottom: -1px; left: -1px; border-bottom-width: 2px; border-left-width: 2px; }
+.mestre-canto-id { bottom: -1px; right: -1px; border-bottom-width: 2px; border-right-width: 2px; }
+
+.mestre-aura {
+  background: radial-gradient(ellipse 75% 55% at 50% -15%, var(--mestre-glow, transparent), transparent 70%);
+}

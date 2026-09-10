@@ -19,6 +19,8 @@ interface CharacterHeaderProps {
   warnings: string[];
   onLevelUp: () => void;
   onLevelDown: () => void;
+  progressaoExterna?: boolean;
+  acaoDeFicha?: React.ReactNode;
   onPatenteClick: () => void;
   onTogglePd: () => void;
   onFixInconsistencies: () => void;
@@ -32,6 +34,8 @@ export function CharacterHeader({
   warnings,
   onLevelUp,
   onLevelDown,
+  progressaoExterna,
+  acaoDeFicha,
   onPatenteClick,
   onTogglePd,
   onFixInconsistencies,
@@ -42,17 +46,20 @@ export function CharacterHeader({
     <div>
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="min-w-0">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-tight truncate">{agent.nome}</h2>
+          <span className="mb-1 block h-px w-16 bg-gradient-to-r from-[var(--mestre-primary,#DC2626)] to-transparent" aria-hidden />
+          <h2 className="truncate font-display text-2xl uppercase leading-none tracking-[0.06em] text-white sm:text-3xl md:text-4xl [text-shadow:0_2px_12px_rgba(0,0,0,0.8)]">
+            {agent.nome}
+          </h2>
           <div className="flex flex-wrap items-center gap-1.5 mt-1.5 text-ordem-white-muted font-mono text-[10px] sm:text-xs">
             <span className="bg-ordem-black-deep/50 px-2 py-1 rounded border border-ordem-text-muted">{agent.classe}</span>
             <div className="flex items-center bg-ordem-black-deep/50 rounded border border-ordem-text-muted overflow-hidden">
-              {!readOnly && (
+              {!readOnly && !progressaoExterna && (
                 <button type="button" onClick={onLevelDown} className="px-2 py-1 hover:bg-ordem-border-light text-ordem-text-secondary hover:text-white transition-colors border-r border-ordem-text-muted touch-target-sm" title="Diminuir Nível">-</button>
               )}
               <span className="px-2 py-1 text-zinc-100">
                 {agent.classe === 'Sobrevivente' ? `Est. ${agent.estagio || 1}` : `${agent.nex}%`}
               </span>
-              {!readOnly && (
+              {!readOnly && !progressaoExterna && (
                 <button type="button" onClick={onLevelUp} className="px-2 py-1 hover:bg-ordem-border-light text-ordem-text-secondary hover:text-white transition-colors border-l border-ordem-text-muted touch-target-sm" title="Aumentar Nível">+</button>
               )}
             </div>
@@ -76,11 +83,14 @@ export function CharacterHeader({
             )}
           </div>
         </div>
-        <div className="flex flex-col items-center shrink-0">
-          <div className="text-[10px] sm:text-xs text-ordem-text-secondary uppercase tracking-widest">Defesa</div>
+        <div className="flex shrink-0 flex-col items-end gap-2">
+          {acaoDeFicha}
+          <div className="flex flex-col items-center">
+          <div className="font-carimbo text-[10px] uppercase tracking-[0.22em] text-ordem-text-muted sm:text-xs">Defesa</div>
           <div className="text-2xl sm:text-3xl font-bold text-zinc-100 flex items-center gap-1.5">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-secondary sm:w-6 sm:h-6"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /></svg>
             {defesa}
+          </div>
           </div>
         </div>
       </div>

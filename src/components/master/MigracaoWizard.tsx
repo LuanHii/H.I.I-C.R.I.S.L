@@ -9,29 +9,10 @@ import { migrarFicha } from '../../core/ficha/migracao/migrarFicha';
 import type { Confianca } from '../../core/ficha/inferirFicha';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalBody, ModalFooter } from '../ui/Modal';
 
-/**
- * Wizard de migração v0 → v2.
- *
- * Três painéis, lado a lado, porque a pergunta que o mestre precisa responder é
- * de comparação: *o que eu tenho hoje* × *o que o conversor entendeu* × *o que
- * sai disso*. Um resumo textual esconderia justamente a coluna do meio, que é
- * onde mora o risco.
- *
- * Duas regras de produto embutidas aqui:
- *
- *  - **Nunca converte sozinho.** Um documento v2 gravado não é permissão para
- *    usá-lo; a leitura só muda quando o mestre clica, e o v0 nunca é tocado.
- *  - **"Manter v0" é sempre uma saída legítima**, não um cancelamento. Sai do
- *    mesmo tamanho visual que "Converter", porque não converter é uma decisão
- *    tão válida quanto converter.
- */
-
 export interface MigracaoWizardProps {
   isOpen: boolean;
   onClose: () => void;
-  /** As fichas a inspecionar. Mais de uma ativa a visão em lote. */
   fichas: { id: string; personagem: Personagem }[];
-  /** Grava o documento v2. Só é chamado por clique explícito. */
   onConverter: (id: string, ficha: FichaPersistida, opcoes: { confirmada: boolean }) => Promise<void> | void;
   titulo?: string;
 }
@@ -80,7 +61,6 @@ function descreverEscolha(valor: unknown): string {
   const v = valor as Record<string, string | string[]>;
   switch (v?.tipo) {
     case 'trilha': return `Trilha: ${v.trilha}`;
-    // Sem este caso a versatilidade cairia no `JSON.stringify` do default.
     case 'versatilidade': return `Versatilidade: 1ª habilidade de ${v.trilha}`;
     case 'poder': return `Poder: ${v.poder}`;
     case 'atributo': return `Aumento de atributo: ${v.atributo}`;
@@ -88,22 +68,16 @@ function descreverEscolha(valor: unknown): string {
     case 'ritual': return `Ritual: ${v.ritual}`;
     case 'pericias': return `Perícias: ${(v.pericias as string[]).join(', ')}`;
     case 'habilidadeTrilha': return `Habilidade de trilha: ${v.habilidade}${v.escolhaInterna ? ` (${v.escolhaInterna})` : ''}`;
+    case 'escolhaInterna': return `Escolha do poder: ${v.valor}`;
+    case 'origem': return `Flashback: poder da origem ${v.origem}`;
     default: return JSON.stringify(valor);
   }
 }
 
 export function MigracaoWizard({ isOpen, onClose, fichas, onConverter, titulo }: MigracaoWizardProps) {
   const [indice, setIndice] = useState(0);
-  /** Escolhas que o mestre rejeitou: voltam a ser pendência em vez de virar fato. */
   const [rejeitadas, setRejeitadas] = useState<Record<string, string[]>>({});
   const [convertendo, setConvertendo] = useState(false);
-  /**
-   * Convertidas NESTA sessão do wizard.
-   *
-   * A lista de fichas é congelada na abertura do lote, então não dá para
-   * perguntar ao store se já converteu — o registro chegou aqui como snapshot.
-   * Sem esta marca, num lote de 8 o mestre não tem como saber onde parou.
-   */
   const [feitas, setFeitas] = useState<string[]>([]);
 
   const alvo = fichas[Math.min(indice, Math.max(0, fichas.length - 1))];
@@ -113,13 +87,6 @@ export function MigracaoWizard({ isOpen, onClose, fichas, onConverter, titulo }:
     [alvo],
   );
 
-  /*
-   * A ficha efetivamente gravada respeita as rejeições do mestre.
-   *
-   * Rejeitar não é apagar dado: `limparEscolha` remove a ENTRADA DO LOG, então o
-   * slot volta a ficar pendente e reaparece no fluxo normal de level up. É a
-   * diferença entre "o conversor chutou e eu não concordo" e "isso não existe".
-   */
   const fichaFinal = useMemo(() => {
     if (!resultado || !alvo) return null;
     const ids = rejeitadas[alvo.id] ?? [];
@@ -152,16 +119,9 @@ export function MigracaoWizard({ isOpen, onClose, fichas, onConverter, titulo }:
   const converter = async () => {
     setConvertendo(true);
     try {
-      // `confirmada` só faz sentido quando o round trip NÃO passou: é o registro
-      // de que o mestre assumiu a conversão apesar do relatório vermelho.
       await onConverter(alvo.id, fichaFinal, { confirmada: !roundTrip.ok });
       setFeitas((f) => (f.includes(alvo.id) ? f : [...f, alvo.id]));
 
-      /*
-       * Avança para a próxima AINDA NÃO FEITA, não para a seguinte no índice:
-       * num lote em que o mestre pulou algumas, avançar em ordem o levaria de
-       * volta a uma já convertida.
-       */
       const pendente = fichas.findIndex((f, i) => i > indice && !feitas.includes(f.id) && f.id !== alvo.id);
       if (pendente >= 0) setIndice(pendente);
       else onClose();
@@ -172,8 +132,6 @@ export function MigracaoWizard({ isOpen, onClose, fichas, onConverter, titulo }:
 
   return (
     <Modal open={isOpen} onOpenChange={(aberto) => { if (!aberto) onClose(); }}>
-      {/* `wide`: três painéis lado a lado não caem em 896px (o `full` tem clamp
-        * `sm:max-w-4xl`). */}
       <ModalContent size="wide" className="bg-ordem-black border border-ordem-border">
         <ModalHeader>
           <ModalTitle className="font-mono text-ordem-text-primary">
@@ -292,6 +250,27 @@ export function MigracaoWizard({ isOpen, onClose, fichas, onConverter, titulo }:
 
             <Painel titulo="Ficha reconstruída (v2)">
               <Linha
+                rotulo="Classe"
+                valor={`${fichaFinal.identidade.classe} ${
+                  fichaFinal.identidade.classe === 'Sobrevivente'
+                    ? `est. ${fichaFinal.progressao.estagio ?? 1}`
+                    : `NEX ${fichaFinal.progressao.nex}%`
+                }`}
+                divergente={dif(
+                  `${v0.classe} ${v0.classe === 'Sobrevivente' ? `est. ${v0.estagio ?? 1}` : `NEX ${v0.nex}%`}`,
+                  `${fichaFinal.identidade.classe} ${
+                    fichaFinal.identidade.classe === 'Sobrevivente'
+                      ? `est. ${fichaFinal.progressao.estagio ?? 1}`
+                      : `NEX ${fichaFinal.progressao.nex}%`
+                  }`,
+                )}
+              />
+              <Linha
+                rotulo="Origem"
+                valor={fichaFinal.identidade.origem}
+                divergente={dif(v0.origem, fichaFinal.identidade.origem)}
+              />
+              <Linha
                 rotulo="Trilha"
                 valor={reconstruido.trilha ?? '—'}
                 divergente={dif(v0.trilha ?? undefined, reconstruido.trilha ?? undefined)}
@@ -363,11 +342,6 @@ export function MigracaoWizard({ isOpen, onClose, fichas, onConverter, titulo }:
           >
             {fichas.length > 1 ? 'Fechar' : 'Manter v0'}
           </button>
-          {/*
-            * "Pular" existe só no lote, e é diferente de "Manter v0": manter é
-            * decisão sobre ESTA ficha, pular é adiar sem decidir. Colapsar os dois
-            * num botão obrigaria a decidir para poder seguir.
-            */}
           {fichas.length > 1 && indice < fichas.length - 1 && (
             <button
               type="button"

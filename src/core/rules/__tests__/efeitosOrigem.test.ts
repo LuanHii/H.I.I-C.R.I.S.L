@@ -5,15 +5,12 @@ import { normalizePersonagem } from '@/core/personagemUtils';
 import { calcularBonusOrigem } from '@/core/rules/derivedStats';
 import { temEfeitoMecanico } from '@/core/rules/efeitos';
 import { criarFicha } from '@/testUtils/fixtures';
+import { migrarFicha } from '@/core/ficha/migracao/migrarFicha';
+import { buildFicha } from '@/core/ficha/buildFicha';
 
 const salvar = (p: Parameters<typeof normalizePersonagem>[0]) => normalizePersonagem(p, false);
 
 describe('o bônus da origem sobrevive ao save (split-brain)', () => {
-  /**
-   * Antes, quatro origens só existiam no switch da criação. O bônus aparecia
-   * na ficha nova e sumia no primeiro save, porque o recálculo lia apenas
-   * `overrides.periciaFixos`. Cada caso abaixo é uma dessas.
-   */
   it.each([
     ['Diplomata', 'Diplomacia' as PericiaName, 2],
     ['Profetizado', 'Vontade' as PericiaName, 2],
@@ -31,7 +28,6 @@ describe('o bônus da origem sobrevive ao save (split-brain)', () => {
   });
 
   it('Experimento mantém o –1d20 em Diplomacia depois do save', () => {
-    // A penalidade de dado é registrada em `bonusO`, não em `dados`.
     const experimento = salvar(criarFicha({ classe: 'Combatente', nex: 10, origemNome: 'Experimento' }));
     const controle = salvar(criarFicha({ classe: 'Combatente', nex: 10, origemNome: 'Policial' }));
     expect(experimento.periciasDetalhadas.Diplomacia.bonusO).toBe(-1);
@@ -84,20 +80,10 @@ describe('efeitos numéricos das origens migradas', () => {
   });
 });
 
-describe('cobertura: texto mecânico exige efeito estruturado', () => {
-  /**
-   * Origens cujo poder ainda não foi transcrito para `efeitos`. A lista tem de
-   * ENCOLHER. Adicionar nome aqui é dívida consciente; remover é progresso.
-   *
-   * Só entram aqui poderes cujo efeito depende de escolha do jogador, de gasto
-   * de recurso em uso, ou de arbitragem do mestre — nunca bônus passivo.
-   */
-  const AINDA_NAO_ESTRUTURADAS = new Set<string>([
-    'Astronauta', 'Colegial', 'Cosplayer', 'Fanático por Criaturas',
-    'Jovem Místico', 'Motorista', 'Artista',
-  ]);
+const CITA_NUMERO =
+  /[+\-–−]\s?\d|\b\d+\s?(PV|PE|SAN|espaços)\b|\b\d?d20\b|\bmetade\b|\bdobro\b/;
 
-  /** Marcas de efeito passivo permanente na prosa. */
+describe('cobertura: texto mecânico exige efeito estruturado', () => {
   const MARCA_PASSIVA = /voc[êe] recebe \+\d|\+\d+ em Defesa|\+\d+ PV\b|\+\d+ PE\b|para cada \d+% de NEX|resist[êe]ncia a dano/i;
 
   const comMarca = ORIGENS.filter((o) => MARCA_PASSIVA.test(o.poder.descricao));
@@ -106,18 +92,9 @@ describe('cobertura: texto mecânico exige efeito estruturado', () => {
     expect(comMarca.length).toBeGreaterThan(10);
   });
 
-  /*
-   * O critério é "foi analisado", não "tem número".
-   *
-   * Uma origem pode legitimamente terminar só com `narrativo` — o Religioso é o
-   * caso: o +5 em Religião do livro vale APENAS para acalmar, e aplicá-lo liso
-   * inflaria todo teste da perícia. Declarar isso como narrativo é a resposta
-   * certa, e é diferente de ninguém ter olhado.
-   */
   it.each(comMarca.map((o) => [o.nome] as const))(
     '%s: texto promete número, então precisa ter sido analisado',
     (nome) => {
-      if (AINDA_NAO_ESTRUTURADAS.has(nome)) return;
       const origem = ORIGENS.find((o) => o.nome === nome)!;
       expect(
         (origem.poder.efeitos ?? []).length,
@@ -126,24 +103,116 @@ describe('cobertura: texto mecânico exige efeito estruturado', () => {
     },
   );
 
-  it('a allowlist não tem nome morto', () => {
-    const nomes = new Set(ORIGENS.map((o) => o.nome));
-    const fantasmas = Array.from(AINDA_NAO_ESTRUTURADAS).filter((n) => !nomes.has(n));
-    expect(fantasmas, 'origem na allowlist que não existe mais').toEqual([]);
+  it('só as origens com efeito estruturado alimentam valor de ficha', () => {
+    const estruturadas = ORIGENS.filter((o) => temEfeitoMecanico(o.poder.efeitos));
+    expect(estruturadas.map((o) => o.nome).sort()).toEqual([
+      'Cultista Arrependido', 'Desgarrado', 'Diplomata', 'Experimento', 'Lutador',
+      'Mergulhador', 'Militar', 'Policial', 'Profetizado', 'Teórico da Conspiração',
+      'Universitário', 'Vítima',
+    ]);
   });
 
-  it('nenhuma origem da allowlist já foi estruturada sem sair da lista', () => {
-    const jaFeitas = Array.from(AINDA_NAO_ESTRUTURADAS).filter((nome) => {
-      const origem = ORIGENS.find((o) => o.nome === nome);
-      return origem ? (origem.poder.efeitos ?? []).length > 0 : false;
-    });
-    expect(jaFeitas, 'já tem efeitos: remova da allowlist').toEqual([]);
+  it('origem sem veredito nenhum é origem que não cita número', () => {
+    const semVeredito = ORIGENS.filter((o) => !(o.poder.efeitos ?? []).length);
+    expect(semVeredito.length, 'se zerar, este teste vira vácuo').toBeGreaterThan(0);
+
+    const citandoNumero = semVeredito.filter((o) => CITA_NUMERO.test(o.poder.descricao));
+    expect(
+      citandoNumero.map((o) => o.nome),
+      'origem com número na descrição e nenhum veredito',
+    ).toEqual([]);
+  });
+});
+
+const origensComNumero = ORIGENS.filter((o) => CITA_NUMERO.test(o.poder.descricao));
+
+describe('triagem de efeitos das origens: número na descrição exige veredito', () => {
+  it('o detector encontra alguma coisa, senão o teste é vácuo', () => {
+    expect(origensComNumero.length).toBeGreaterThan(30);
   });
 
-  it('as 12 origens migradas de fato produzem número, fora o Religioso', () => {
-    const comEfeito = ORIGENS.filter((o) => (o.poder.efeitos ?? []).length > 0);
-    expect(comEfeito).toHaveLength(12);
-    const soNarrativas = comEfeito.filter((o) => !temEfeitoMecanico(o.poder.efeitos));
-    expect(soNarrativas.map((o) => o.nome)).toEqual(['Religioso']);
+  it('toda origem que cita número tem efeitos[] — estruturado ou narrativo', () => {
+    const naoTriadas = origensComNumero
+      .filter((o) => !o.poder.efeitos?.length)
+      .map((o) => o.nome);
+
+    expect(
+      naoTriadas,
+      `origens citando número sem nenhum veredito em efeitos[]:\n  ${naoTriadas.join('\n  ')}`,
+    ).toEqual([]);
+  });
+
+  it('nenhuma nota narrativa é rótulo vazio', () => {
+    const vagas = ORIGENS.flatMap((o) =>
+      (o.poder.efeitos ?? [])
+        .filter((e): e is { tipo: 'narrativo'; nota: string } => e.tipo === 'narrativo')
+        .filter((e) => e.nota.trim().length < 25 || /^(ver|vide)\b/i.test(e.nota.trim()))
+        .map(() => o.nome),
+    );
+    expect(vagas, `notas narrativas curtas ou vazias: ${vagas.join(', ')}`).toEqual([]);
+  });
+
+  it('Cultista Arrependido declara o fator de meia Sanidade com a citação', () => {
+    const cultista = ORIGENS.find((o) => o.nome === 'Cultista Arrependido');
+    const efeitos = cultista?.poder.efeitos ?? [];
+
+    const fator = efeitos.find(
+      (e): e is { tipo: 'sanInicialFator'; fator: number } => e.tipo === 'sanInicialFator',
+    );
+    expect(fator, 'o fator de SAN inicial sumiu do catálogo').toBeDefined();
+    expect(fator!.fator).toBe(0.5);
+
+    const nota = efeitos
+      .filter((e): e is { tipo: 'narrativo'; nota: string } => e.tipo === 'narrativo')
+      .map((e) => e.nota)
+      .join(' ');
+    expect(nota, 'a citação Ordem:371 saiu da nota').toMatch(/Ordem:371/);
+  });
+
+  it('nenhuma outra origem mexe na Sanidade inicial', () => {
+    const comFator = ORIGENS.filter((o) =>
+      (o.poder.efeitos ?? []).some((e) => e.tipo === 'sanInicialFator'),
+    );
+    expect(comFator.map((o) => o.nome)).toEqual(['Cultista Arrependido']);
+  });
+});
+
+describe('Cultista Arrependido: metade da Sanidade inicial (Ordem:371)', () => {
+  const sanDe = (classe: 'Combatente' | 'Especialista' | 'Ocultista', nex: number, origemNome: string) => {
+    const v0 = normalizePersonagem(criarFicha({ classe, nex, origemNome }), false);
+    return buildFicha({ ficha: migrarFicha(v0).ficha }).derivados.san.max;
+  };
+
+  it.each([
+    ['Combatente', 12, 6],
+    ['Especialista', 16, 8],
+    ['Ocultista', 20, 10],
+  ] as const)('%s começa com %i de SAN e o cultista com %i', (classe, normal, metade) => {
+    expect(sanDe(classe, 5, 'Desgarrado')).toBe(normal);
+    expect(sanDe(classe, 5, 'Cultista Arrependido')).toBe(metade);
+  });
+
+  it('o corte é só na SAN inicial — o ganho por NEX continua inteiro', () => {
+    const diferencaNoInicio = sanDe('Combatente', 5, 'Desgarrado') - sanDe('Combatente', 5, 'Cultista Arrependido');
+    const diferencaNoFim = sanDe('Combatente', 50, 'Desgarrado') - sanDe('Combatente', 50, 'Cultista Arrependido');
+
+    expect(
+      diferencaNoFim,
+      'a diferença cresceu com o NEX, então o fator vazou para o ganho por nível',
+    ).toBe(diferencaNoInicio);
+  });
+
+  it('quem levou só as perícias da origem não paga a Sanidade', () => {
+    const v0 = normalizePersonagem(criarFicha({ classe: 'Ocultista', nex: 5, origemNome: 'Cultista Arrependido' }), false);
+    const base = migrarFicha(v0).ficha;
+    const soPericias = {
+      ...base,
+      identidade: { ...base.identidade, beneficioOrigem: 'pericias' as const },
+    };
+
+    expect(
+      buildFicha({ ficha: soPericias }).derivados.san.max,
+      'a metade veio junto sem o poder que a impõe',
+    ).toBe(20);
   });
 });

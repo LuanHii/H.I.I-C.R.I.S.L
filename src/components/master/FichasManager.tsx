@@ -16,15 +16,16 @@ import { observar } from '../../core/ficha/sombra';
 import { MigracaoWizard } from './MigracaoWizard';
 import { PendenciasPanel } from './PendenciasPanel';
 import { NivelPanel } from './NivelPanel';
-import { Cloud, CloudOff, ChevronLeft, Menu, Plus, Download, Eye, PanelLeftClose, PanelLeft, RefreshCw } from 'lucide-react';
+import { Cloud, CloudOff, ChevronLeft, Menu, Plus, Download, Eye, PanelLeftClose, PanelLeft, RefreshCw, MoreHorizontal } from 'lucide-react';
 import { WeaponModsButton } from './WeaponModsModal';
 import { WatchedFichasSection } from './WatchedFichasSection';
+import { Cantos, Fita, Recurso, iniciaisDoNome } from './ui/Pecas';
 
 type FichasViewMode = 'minhas' | 'observadas';
 
 export function FichasManager() {
   const { fichas, fichasBrutas, remover, duplicar, salvar, moverParaCampanha, marcarComoSincronizada, sincronizarFicha, migrar, reverterMigracao, responderEscolha, desfazerEscolha, definirNivelDaFicha, isCloudMode, loading: fichasLoading } = useCloudFichas();
-  const { campanhas, criarCampanha, renomearCampanha, removerCampanha, loading: campanhasLoading } = useCloudCampanhas();
+  const { campanhas, criarCampanha, renomearCampanha, removerCampanha, moverCampanha, priorizarCampanha, loading: campanhasLoading } = useCloudCampanhas();
   const { watchedFichas, isAuthenticated: isLoggedIn } = useWatchedFichas();
   const [selecionada, setSelecionada] = useState<string | null>(null);
   const [busca, setBusca] = useState('');
@@ -41,9 +42,18 @@ export function FichasManager() {
 
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
-  /** Fichas abertas no wizard de migração. Vazio = wizard fechado. */
   const [migrando, setMigrando] = useState<{ id: string; personagem: Personagem }[]>([]);
   const [pendenciasAbertas, setPendenciasAbertas] = useState(false);
+  const [acoesAbertas, setAcoesAbertas] = useState<Set<string>>(new Set());
+
+  const alternarAcoes = (id: string) => {
+    setAcoesAbertas((prev) => {
+      const proximo = new Set(prev);
+      if (proximo.has(id)) proximo.delete(id);
+      else proximo.add(id);
+      return proximo;
+    });
+  };
 
   const registroAtual = fichas.find((ficha) => ficha.id === selecionada);
   const fichaAtual = registroAtual?.personagem;
@@ -216,7 +226,6 @@ export function FichasManager() {
   };
 
   const handleRemoverCampanha = (campanhaId: string) => {
-
     fichas
       .filter((f) => f.campanha === campanhaId)
       .forEach((f) => moverParaCampanha(f.id, undefined));
@@ -236,15 +245,6 @@ export function FichasManager() {
     }
   };
 
-  /*
-   * SHADOW MODE onde ele de fato observa.
-   *
-   * As duas primeiras tentativas engancharam em `normalizePersonagem` e
-   * `recalcularRecursosPersonagem` — que rodam em SAVE e em RECÁLCULO, não ao
-   * abrir uma ficha. Navegando normalmente, o motor novo nunca era exercitado e
-   * o console ficava mudo. Aqui roda uma vez por ficha aberta, que é justamente
-   * o corpus que interessa: as fichas reais que o mestre olha.
-   */
   useEffect(() => {
     if (registroAtual?.personagem) observar(registroAtual.personagem);
   }, [registroAtual?.id, registroAtual?.personagem]);
@@ -258,12 +258,6 @@ export function FichasManager() {
     setMobileDetailOpen(false);
   };
 
-  /**
-   * Abre o comparador com um lote. Sempre a partir do v0 CRU.
-   *
-   * Numa ficha já lida do motor novo, `registro.personagem` é a view renderizada
-   * — converter a partir dela seria converter a saída do próprio conversor.
-   */
   const handleConverterCampanha = (doLote: FichaRegistro[]) => {
     setMigrando(
       doLote.map((registro) => {
@@ -339,67 +333,75 @@ export function FichasManager() {
             handleSelectFicha(registro.id);
           }
         }}
-        className={`w-full text-left border rounded-xl p-4 transition relative overflow-hidden touch-active ${selecionada === registro.id
-          ? 'border-ordem-red bg-ordem-red/10'
-          : 'border-ordem-border bg-ordem-black/40 hover:border-ordem-text-muted active:bg-ordem-ooze/50'
+        data-classe={registro.personagem.classe}
+        className={`group relative w-full border p-3.5 text-left transition-colors touch-active shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset,0_18px_40px_-30px_rgba(0,0,0,1)] ${selecionada === registro.id
+          ? 'border-[var(--mestre-primary)]/50 bg-[var(--mestre-primary)]/[0.05]'
+          : 'border-white/10 bg-ordem-black/50 hover:border-white/20 hover:bg-ordem-ooze/25'
           }`}
       >
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_20%_0%,rgba(220,38,38,0.08),transparent_55%)]" />
+        {selecionada === registro.id && <Cantos />}
+        <span aria-hidden className="mestre-aura pointer-events-none absolute inset-0" />
 
-        { }
-        <div className="flex justify-between items-start text-xs text-ordem-white/60 relative mb-2 gap-2">
-          <div className="flex flex-col min-w-0">
-            <span className="font-medium">{registro.personagem.classe}</span>
-            <span className="text-[10px] text-ordem-text-muted">
-              Atualizado: {formatUpdated(registro.atualizadoEm)}
-            </span>
+        <div className="relative flex items-start gap-3">
+          <span
+            aria-hidden
+            className={`grid h-10 w-10 shrink-0 place-items-center border font-carimbo text-xs tracking-widest ${selecionada === registro.id
+              ? 'border-[var(--mestre-primary)]/60 bg-[var(--mestre-primary)]/10 text-[var(--mestre-primary)]'
+              : 'border-ordem-border bg-ordem-black/60 text-ordem-text-secondary'
+              }`}
+          >
+            {iniciaisDoNome(registro.personagem.nome)}
+          </span>
+
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-display text-[15px] font-semibold leading-tight tracking-wide text-white">
+              {registro.personagem.nome}
+            </p>
+            <div className="mt-1 flex flex-wrap items-center gap-1">
+              <Fita variante={selecionada === registro.id ? 'classe' : 'neutra'}>
+                {registro.personagem.classe}
+              </Fita>
+              <Fita variante="neutra">
+                {registro.personagem.classe === 'Sobrevivente'
+                  ? `Est. ${registro.personagem.estagio ?? 1}`
+                  : `NEX ${registro.personagem.nex}%`}
+              </Fita>
+            </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            {registro.sincronizadaNaNuvem && (
-              <span
-                className="text-ordem-green"
-                title="Ficha sincronizada na nuvem"
-              >
-                <Cloud size={14} />
-              </span>
-            )}
+
+          <div className="flex shrink-0 items-center gap-1.5">
             {summary.total > 0 && (
               <span
-                className={`px-2 py-0.5 rounded border text-[10px] font-mono tracking-widest ${summary.errors > 0
-                  ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
-                  : 'border-ordem-gold text-ordem-gold bg-ordem-gold/10'
-                  }`}
+                className={`h-1.5 w-1.5 rounded-full ${summary.errors > 0 ? 'bg-ordem-red' : 'bg-ordem-gold'}`}
                 title={title}
-              >
-                {summary.errors > 0 ? 'ERRO' : 'AVISO'}
-              </span>
+              />
             )}
+            <button
+              type="button"
+              aria-label={acoesAbertas.has(registro.id) ? 'Esconder ações' : 'Mostrar ações'}
+              aria-expanded={acoesAbertas.has(registro.id)}
+              onClick={(event) => {
+                event.stopPropagation();
+                alternarAcoes(registro.id);
+              }}
+              className={`grid h-7 w-7 place-items-center rounded transition ${acoesAbertas.has(registro.id)
+                ? 'bg-ordem-ooze text-white'
+                : 'text-ordem-text-muted hover:bg-ordem-ooze/60 hover:text-white'
+                }`}
+            >
+              <MoreHorizontal size={15} />
+            </button>
           </div>
         </div>
 
-        { }
-        <p className="text-lg font-semibold text-white relative truncate">{registro.personagem.nome}</p>
-
-        { }
-        <p className="text-sm text-ordem-text-secondary relative mt-1">
-          NEX {registro.personagem.nex}% · {registro.personagem.patente}
-        </p>
-
-        { }
-        <div className="mt-3 flex gap-3 text-xs text-ordem-text-secondary relative">
-          <span className="bg-ordem-ooze/50 px-2 py-1 rounded">
-            PV {registro.personagem.pv.atual}/{registro.personagem.pv.max}
-          </span>
-          <span className="bg-ordem-ooze/50 px-2 py-1 rounded">
-            PE {registro.personagem.pe.atual}/{registro.personagem.pe.max}
-          </span>
-          <span className="bg-ordem-ooze/50 px-2 py-1 rounded">
-            SAN {registro.personagem.san.atual}/{registro.personagem.san.max}
-          </span>
+        <div className="relative mt-3 grid grid-cols-3 gap-3">
+          <Recurso tom="pv" compacto atual={registro.personagem.pv.atual} max={registro.personagem.pv.max} />
+          <Recurso tom="pe" compacto atual={registro.personagem.pe.atual} max={registro.personagem.pe.max} />
+          <Recurso tom="san" compacto atual={registro.personagem.san.atual} max={registro.personagem.san.max} />
         </div>
 
-        { }
-        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 relative">
+        {acoesAbertas.has(registro.id) && (
+        <div className="relative mt-3 grid grid-cols-2 gap-1.5 border-t border-ordem-border/60 pt-3 sm:grid-cols-3">
           <button
             type="button"
             onClick={(event) => {
@@ -446,11 +448,6 @@ export function FichasManager() {
             type="button"
             onClick={(event) => {
               event.stopPropagation();
-              /*
-               * O v0 CRU, não `registro.personagem`: numa ficha já lida do motor
-               * novo, `personagem` é a view renderizada — reconverter a partir
-               * dela seria converter a saída do conversor.
-               */
               const bruto = fichasBrutas.find((f) => f.id === registro.id);
               setMigrando([{ id: registro.id, personagem: bruto?.personagem ?? registro.personagem }]);
             }}
@@ -463,12 +460,6 @@ export function FichasManager() {
             }`}
             title={registro.motivoDaFonte ?? 'Comparar com o motor novo e converter (a ficha atual não é alterada)'}
           >
-            {/*
-              * Três estados, não dois: convertida E sendo lida do motor novo
-              * (verde), convertida mas CAÍDA para o motor antigo (âmbar), e não
-              * convertida (roxo). O âmbar é o que importa — sem ele, uma ficha que
-              * silenciosamente voltou ao v0 pareceria idêntica a uma que não voltou.
-              */}
             {registro.fonte === 'v2' ? '✓ v2' : registro.ficha ? '⚠ v0' : 'MIGRAR'}
           </button>
           <Link
@@ -509,13 +500,13 @@ export function FichasManager() {
             REMOVER
           </button>
         </div>
+        )}
       </article>
     );
   };
 
   return (
     <div className="flex flex-col lg:grid lg:grid-cols-3 h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)] overflow-hidden">
-      { }
       <section
         className={`
           lg:border-r border-ordem-border
@@ -524,7 +515,6 @@ export function FichasManager() {
           ${isSidebarCollapsed ? 'lg:hidden' : ''}
         `}
       >
-        { }
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
@@ -543,7 +533,7 @@ export function FichasManager() {
             </div>
             <h2 className="text-xl lg:text-2xl font-serif text-white truncate">Fichas</h2>
             <div className="text-xs font-mono text-ordem-text-muted mt-1">
-              {fichasLoading ? 'Carregando...' : `${fichasFiltradas.length} de ${fichas.length} ficha(s)`}
+              {fichasLoading ? 'Carregando...' : ''}
             </div>
           </div>
           <div className="flex gap-2 shrink-0">
@@ -662,12 +652,8 @@ export function FichasManager() {
                   </button>
                 )}
               </div>
-              <div className="flex items-center justify-between gap-2 text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">
-                <span>Total: {fichas.length} ficha(s)</span>
-                <span>Campanhas: {campanhas.length}</span>
-              </div>
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">Ordenar</span>
+              <div className="flex items-center gap-2">
+                <span className="shrink-0 font-carimbo text-[10px] uppercase tracking-[0.18em] text-ordem-text-muted">Ordenar por</span>
                 <select
                   value={ordem}
                   onChange={(e) => setOrdem(e.target.value as any)}
@@ -712,7 +698,9 @@ export function FichasManager() {
               </div>
               <div className="flex items-center justify-between gap-2">
                 <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">
-                  {fichasFiltradas.length} resultado(s)
+                  {fichasFiltradas.length === fichas.length
+                    ? `${fichas.length} fichas`
+                    : `${fichasFiltradas.length} de ${fichas.length}`}
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -733,10 +721,8 @@ export function FichasManager() {
               </div>
             </div>
 
-            { }
             <div className="flex-1 overflow-y-auto touch-scroll custom-scrollbar -mx-4 px-4 lg:mx-0 lg:px-0 lg:pr-2 space-y-3">
-              { }
-              {campanhas.map((campanha) => (
+              {campanhas.map((campanha, indiceCampanha) => (
                 <CampanhaSection
                   key={campanha.id}
                   campanha={campanha}
@@ -750,12 +736,15 @@ export function FichasManager() {
                   onRemoverCampanha={handleRemoverCampanha}
                   onExportarCampanha={handleExportarCampanha}
                   onConverterCampanha={handleConverterCampanha}
+                  onMoverCampanha={moverCampanha}
+                  onPriorizarCampanha={priorizarCampanha}
+                  podeSubir={indiceCampanha > 0}
+                  podeDescer={indiceCampanha < campanhas.length - 1}
                   forceExpanded={expandAll}
                   autoExpand={busca.trim().length > 0}
                 />
               ))}
 
-              { }
               <CampanhaSection
                 campanha={null}
                 fichas={fichasPorCampanha.get(undefined) || []}
@@ -770,7 +759,6 @@ export function FichasManager() {
                 autoExpand={busca.trim().length > 0}
               />
 
-              { }
               <NovaCampanhaForm onCriar={criarCampanha} />
 
               {fichas.length === 0 && (
@@ -806,7 +794,6 @@ export function FichasManager() {
         )}
       </section>
 
-      { }
       <section
         className={`
           lg:col-span-2 bg-ordem-black-deep overflow-hidden flex flex-col
@@ -816,7 +803,6 @@ export function FichasManager() {
       >
         {fichaAtual ? (
           <div className="flex-1 flex flex-col min-h-0">
-            { }
             <div className="lg:hidden flex items-center gap-3 p-4 border-b border-ordem-border bg-ordem-black safe-top shrink-0">
               <button
                 onClick={handleCloseDetail}
@@ -840,9 +826,10 @@ export function FichasManager() {
                 >
                   {isSidebarCollapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
                 </button>
-                <div className="flex flex-col min-w-0">
-                  <h2 className="font-semibold text-white truncate text-xl leading-none">{fichaAtual.nome}</h2>
-                  <p className="text-sm text-ordem-text-secondary mt-1">{fichaAtual.classe} · NEX {fichaAtual.nex}%</p>
+                <div className="min-w-0">
+                  <p className="truncate font-carimbo text-[11px] uppercase tracking-[0.22em] text-ordem-text-muted">
+                    {fichaAtual.nome}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -863,27 +850,12 @@ export function FichasManager() {
               </div>
             </div>
 
-            { }
             <div className="flex-1 overflow-y-auto touch-scroll p-4 lg:p-6 safe-bottom">
               <div className="rounded-xl border border-ordem-border overflow-hidden">
-                {/*
-                  * Faixa de procedência: de qual motor esta ficha está sendo lida.
-                  *
-                  * Fica acima da ficha, sempre visível, porque durante a transição
-                  * essa é a informação mais importante da tela — o mestre precisa
-                  * saber se o que está vendo veio do motor que ele já conhece ou do
-                  * novo, sem ter que deduzir por um número parecer estranho.
-                  */}
-                {registroAtual?.ficha && (
-                  <div
-                    className={`mb-3 rounded border px-3 py-2 text-xs flex items-start justify-between gap-3 ${
-                      registroAtual.fonte === 'v2'
-                        ? 'border-ordem-green/60 text-ordem-green'
-                        : 'border-ordem-gold/60 text-ordem-gold'
-                    }`}
-                  >
+                {registroAtual?.ficha && registroAtual.fonte !== 'v2' && (
+                  <div className="mb-3 flex items-start justify-between gap-3 rounded border border-ordem-gold/60 px-3 py-2 text-xs text-ordem-gold">
                     <span>
-                      <strong>{registroAtual.fonte === 'v2' ? 'Motor novo' : 'Motor antigo'}</strong>
+                      <strong>Lendo a ficha antiga</strong>
                       {' — '}
                       {registroAtual.motivoDaFonte}
                     </span>
@@ -903,13 +875,6 @@ export function FichasManager() {
                     </button>
                   </div>
                 )}
-                {/*
-                  * Pendências só aparecem quando a ficha É LIDA do motor novo.
-                  *
-                  * Numa ficha lida do v0 o painel mostraria obrigações que o motor
-                  * antigo não sabe resolver — o mestre responderia e nada
-                  * aconteceria na ficha que ele está vendo. Melhor não oferecer.
-                  */}
                 {registroAtual?.fonte === 'v2' && registroAtual.ficha && (
                   <div className="mb-3">
                     <button
@@ -921,12 +886,6 @@ export function FichasManager() {
                     </button>
                     {pendenciasAbertas && (
                       <div className="mt-2 space-y-4">
-                        {/*
-                          * Progressão vem ANTES das pendências, e não é acidente de
-                          * layout: avançar de marco é o que CRIA pendência. Na ordem
-                          * inversa o mestre resolveria o que já estava aberto, subiria,
-                          * e teria de voltar à mesma tela.
-                          */}
                         <NivelPanel
                           ficha={registroAtual.ficha}
                           onDefinirNivel={(nivel) => definirNivelDaFicha(registroAtual.id, nivel)}
@@ -940,7 +899,12 @@ export function FichasManager() {
                     )}
                   </div>
                 )}
-                <AgentDetailView agent={fichaAtual} onUpdate={handleUpdate} readOnly={false} />
+                <AgentDetailView
+                  agent={fichaAtual}
+                  onUpdate={handleUpdate}
+                  readOnly={false}
+                  progressaoNoMotorNovo={registroAtual?.fonte === 'v2' && !!registroAtual.ficha}
+                />
               </div>
             </div>
           </div>
@@ -963,11 +927,6 @@ export function FichasManager() {
         }}
       />
 
-      {/*
-        * DUAL-WRITE: `migrar` grava o documento v2 e NÃO toca no `personagem`.
-        * A ficha continua sendo lida do v0 — o motor novo só acumula conversões
-        * verificadas. Desfazer é apagar o campo, sem perda.
-        */}
       <MigracaoWizard
         isOpen={migrando.length > 0}
         fichas={migrando}
