@@ -17,17 +17,6 @@ const poder = (nome: string) => {
   return achado;
 };
 
-/**
- * Poderes que o livro diz explicitamente serem repetíveis.
- *
- * A frase exata varia e as três variantes têm consequências diferentes:
- *  - Transcender / Treinamento em Perícia: "Você pode escolher este poder
- *    várias vezes." (Ordem:817, 821) — sem restrição.
- *  - Foco em Perícia: "outras vezes para perícias diferentes" (SOH:849) — a
- *    repetição existe, mas não pode recair na mesma perícia.
- *  - Aprender Ritual: "quantas vezes quiser, mas está sujeito ao limite de
- *    rituais conhecidos" (Ordem:4156, limite = Intelecto em Ordem:4380).
- */
 const REPETIVEIS = [
   'Transcender',
   'Treinamento em Perícia',
@@ -36,26 +25,6 @@ const REPETIVEIS = [
   'Aumento de Atributo',
 ];
 
-/**
- * O CONTRÁRIO: poderes que o catálogo alegava repetíveis e o livro não concede.
- *
- * A auditoria contra o PyMuPDF encontrou duas entradas cuja descrição *afirmava*
- * "Pode ser escolhido várias vezes" sem nada disso no livro. Decisão: seguir o
- * livro. A frase saiu da descrição e a flag saiu do dado.
- *
- *  - Ritual Predileto (Ordem:1220-1221): "Escolha um ritual que você conhece.
- *    Você reduz em –1 PE o custo do ritual. Essa redução se acumula com
- *    reduções fornecidas por outras fontes." — o que o livro concede é ACÚMULO
- *    com outras fontes, não repetição do poder. Fácil de ler como repetição:
- *    acumular com "outras fontes" inclui um segundo desconto, mas de outra
- *    fonte, não de uma segunda cópia deste poder.
- *  - Especialista em Elemento (Ordem:1130-1133): "Escolha um elemento. A DT
- *    para resistir aos seus rituais desse elemento aumenta em +2." — duas
- *    frases, nenhuma sobre repetir.
- *
- * O contraste que fecha o argumento: Transcender (Ordem:818) diz a frase
- * explicitamente. Em Ordem Paranormal um poder não é repetível por omissão.
- */
 const NAO_REPETIVEIS_NO_LIVRO = ['Ritual Predileto', 'Especialista em Elemento'];
 
 describe('a flag repetivel vive no dado', () => {
@@ -78,8 +47,6 @@ describe('a flag repetivel vive no dado', () => {
   });
 
   it.each(NAO_REPETIVEIS_NO_LIVRO)('%s deixa de ser oferecido depois de tomado', (nome) => {
-    // A consequência prática da flag: sem ela o poder sai da lista de elegíveis.
-    // Se isto passar mas a lista continuar oferecendo, a correção foi cosmética.
     const base = criarFicha({ classe: 'Ocultista', nex: 45 });
     const antes = getPoderesElegiveis(base).map((p) => p.nome);
     expect(antes, `${nome} nem aparece na lista do Ocultista`).toContain(nome);
@@ -98,15 +65,11 @@ describe('a flag repetivel vive no dado', () => {
   });
 
   it('as repetições restritas carregam a restrição do livro', () => {
-    // Sem a cláusula, "repetível" lido de fora autoriza mais do que o livro.
     expect(poder('Foco em Perícia').descricao).toContain('perícias diferentes');
     expect(poder('Aprender Ritual').descricao).toContain('limite de rituais conhecidos');
   });
 
   it('nenhum poder é marcado repetível sem o texto dizer', () => {
-    // Aumento de Atributo é a única exceção deliberada: é concedido em NEX
-    // 20/50/80/95, então aparece várias vezes na ficha sem a frase padrão na
-    // descrição — o próprio livro escreve o marco em vez da frase.
     const EXCECOES = new Set(['Aumento de Atributo']);
     const marcados = PODERES.filter((p) => p.repetivel && !EXCECOES.has(p.nome));
     const semTexto = marcados
@@ -185,13 +148,6 @@ describe('rebaixar NEX remove uma cópia, não todas', () => {
 
 describe('não há mais lista de nomes repetíveis no código', () => {
   it('nenhuma linha decide repetição comparando nome de poder', () => {
-    /*
-     * A verificação é por LINHA, não por arquivo: o PowerChoiceModal
-     * legitimamente compara `=== 'Transcender'` para abrir o seletor de poder
-     * paranormal. O que não pode voltar é usar o nome para decidir REPETIÇÃO,
-     * que é o formato `if (p.nome === 'X') return true;` dentro do filtro de
-     * poderes já possuídos.
-     */
     const raiz = join(process.cwd(), 'src');
     const suspeitos: string[] = [];
     const NOME_REPETIVEL = /nome === '(Transcender|Treinamento em Perícia|Aprender Ritual|Aumento de Atributo|Foco em Perícia|Ritual Predileto|Especialista em Elemento)'/;
@@ -238,8 +194,6 @@ describe('escolhas declaradas nos poderes (becos sem saída do plano)', () => {
   });
 
   it('todo poder com escolha declarada e repetível tem as duas flags coerentes', () => {
-    // Um poder que exige escolha e é repetível precisa das duas: sem `repetivel`
-    // o jogador escolhe uma vez só; sem `escolha` a repetição não tem efeito.
     for (const nome of ['Treinamento em Perícia', 'Foco em Perícia']) {
       const p = poder(nome);
       expect(p.repetivel, `${nome}.repetivel`).toBe(true);
@@ -248,8 +202,6 @@ describe('escolhas declaradas nos poderes (becos sem saída do plano)', () => {
   });
 
   it('escolha declarada NÃO implica repetível', () => {
-    // Ritual Predileto e Especialista em Elemento exigem uma escolha e valem
-    // uma vez só. A inversa era a suposição que produziu as duas flags erradas.
     for (const nome of NAO_REPETIVEIS_NO_LIVRO) {
       expect(poder(nome).escolha, `${nome}.escolha`).toBeDefined();
       expect(poder(nome).repetivel ?? false, `${nome}.repetivel`).toBe(false);

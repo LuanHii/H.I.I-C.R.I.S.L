@@ -134,19 +134,6 @@ function temPericia(estado: EstadoParaRequisitos, pericia: PericiaName): boolean
   return grauDe(estado, pericia) !== 'Destreinado';
 }
 
-/**
- * Elemento efetivo de um poder paranormal.
- *
- * Quase todos declaram `elemento` no catálogo. Aprender Ritual é a exceção, e o
- * livro resolve a exceção explicitamente (Ordem:4156): "Este poder conta como um
- * poder do elemento do ritual escolhido." O elemento vem, então, do ritual que o
- * jogador escolheu — registrado em `escolhaInterna` na instância da ficha.
- *
- * Exportada porque `contarPoderesElemento` em `data/character/powers.ts`
- * respondia à mesma pergunta com outra regra (sem sequer checar
- * `tipo === 'Paranormal'`), e duas contagens divergentes de elemento é como um
- * poder fica elegível numa tela e bloqueado na outra.
- */
 export function elementoEfetivo(poder: Poder): Elemento | undefined {
   if (poder.tipo !== 'Paranormal') return undefined;
   if (poder.elemento) return poder.elemento;

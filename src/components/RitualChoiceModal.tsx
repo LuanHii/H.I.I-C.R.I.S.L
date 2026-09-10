@@ -92,7 +92,6 @@ export function RitualChoiceModal({
                 className="relative w-full max-w-3xl max-h-[90vh] bg-ordem-ooze border border-ordem-border rounded-xl overflow-hidden flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
-                {}
                 <div className="p-4 border-b border-ordem-border bg-gradient-to-r from-blue-900/30 to-ordem-ooze">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -114,7 +113,6 @@ export function RitualChoiceModal({
                         )}
                     </div>
 
-                    {}
                     <div className="flex gap-2 flex-wrap">
                         <div className="flex-1 min-w-[200px] relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-ordem-text-muted" size={16} />
@@ -127,7 +125,6 @@ export function RitualChoiceModal({
                             />
                         </div>
 
-                        {}
                         <div className="flex gap-1">
                             <button
                                 onClick={() => setFiltroCirculo('todos')}
@@ -157,7 +154,6 @@ export function RitualChoiceModal({
                         </div>
                     </div>
 
-                    {}
                     <div className="flex gap-1 mt-2 flex-wrap">
                         <button
                             onClick={() => setFiltroElemento('todos')}
@@ -192,7 +188,6 @@ export function RitualChoiceModal({
                     </div>
                 </div>
 
-                {}
                 <div className="flex-1 overflow-y-auto p-4 space-y-2">
                     <AnimatePresence mode="popLayout">
                         {rituaisFiltrados.length === 0 ? (
@@ -250,7 +245,6 @@ export function RitualChoiceModal({
                     </AnimatePresence>
                 </div>
 
-                {}
                 <div className="p-4 border-t border-ordem-border bg-ordem-ooze/80 flex justify-end gap-2">
                     {onClose && (
                         <button

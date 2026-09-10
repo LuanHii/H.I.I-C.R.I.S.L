@@ -2,37 +2,9 @@ import type { Personagem } from '../types';
 import { buildFicha } from './buildFicha';
 import type { FichaPersistida } from './tipos';
 
-/**
- * Sincroniza o estado de SESSÃO do v0 para o documento v2.
- *
- * O problema que isto resolve: com a leitura virada, cada save do mestre grava o
- * `personagem` e faz `fichaMigradaDe` divergir de `atualizadoEm` — então a ficha
- * cai para o v0 no próximo render. Sem esta função, ler do motor novo duraria
- * exatamente até o primeiro clique em "-1 PV", que é inútil.
- *
- * A saída correta não é "reconverter automaticamente" — auto-migrar dentro de um
- * write-back é como se perde campanha no meio da sessão. É distinguir:
- *
- *  - **Mudança de sessão** (dano, PE gasto, sanidade, PP, condições, marcas):
- *    o documento v2 absorve e continua válido. É a esmagadora maioria dos saves
- *    durante o jogo.
- *  - **Mudança estrutural** (atributo, NEX, trilha, poder, perícia): o documento
- *    v2 NÃO tenta adivinhar o que aconteceu. Fica marcado como desatualizado, a
- *    ficha volta a ser lida do v0, e o mestre reconverte quando quiser.
- *
- * Recusar-se a adivinhar é a decisão de design aqui. Um motor que tentasse
- * inferir "ah, o FOR subiu 1, deve ter sido o marco de NEX 20" reintroduziria
- * exatamente a atribuição-por-palpite que o replay para frente existe para pegar.
- */
-
 export interface ResultadoSessao {
   ficha: FichaPersistida;
-  /**
-   * Houve mudança que o estado de sessão não explica? Se sim, o documento v2
-   * ficou para trás e a leitura deve cair para o v0.
-   */
   estrutural: boolean;
-  /** Quais campos divergiram — para dizer ao mestre o que reconverter. */
   divergiu: string[];
 }
 
@@ -43,11 +15,6 @@ export function atualizarSessao(
   const build = buildFicha({ ficha });
   const divergiu: string[] = [];
 
-  /*
-   * A comparação é contra o BUILD, não contra o documento: é o build que a UI
-   * mostrou e o mestre editou. Comparar com o documento cru acusaria diferença
-   * em todo campo derivado.
-   */
   for (const atributo of ['AGI', 'FOR', 'INT', 'PRE', 'VIG'] as const) {
     if (personagem.atributos[atributo] !== build.atributos[atributo]) {
       divergiu.push(`atributo ${atributo}`);
@@ -73,10 +40,6 @@ export function atualizarSessao(
     }
   }
 
-  /*
-   * Dano, não valor atual. `max` vem do motor novo, então `atual` do v0 já está
-   * na mesma escala — subtrair dá o dano diretamente.
-   */
   const sessao: FichaPersistida['sessao'] = {
     ...ficha.sessao,
     pvDano: Math.max(0, personagem.pv.max - personagem.pv.atual),

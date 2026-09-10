@@ -10,19 +10,6 @@ import {
   type Previsao,
 } from '../../core/ficha/progressao';
 
-/**
- * Progressão de nível no motor novo.
- *
- * A diferença que importa em relação ao fluxo antigo: aqui o mestre VÊ o marco
- * antes de aplicá-lo. `useLevelUpFlow` chama `subirNex` dentro de um `useEffect`
- * no mount, então quando a tela aparece o NEX já subiu — o "resumo" é um fato
- * consumado, não uma decisão. Fechar o modal descarta tudo em silêncio.
- *
- * Aqui `previsao` é pura: calcula o diff sem gravar. Aplicar é um clique
- * separado, e desfazer é voltar o nível — sem perda, porque as escolhas acima
- * ficam retidas.
- */
-
 export interface NivelPanelProps {
   ficha: FichaPersistida;
   onDefinirNivel: (nivel: number) => Promise<void> | void;
@@ -95,10 +82,6 @@ function Preview({ p, rotuloNivel }: { p: Previsao; rotuloNivel: (n: number) => 
 
       {p.reativadas.length > 0 && (
         <p className="text-xs text-ordem-cyan">
-          {/*
-            * Só aparece ao SUBIR depois de ter rebaixado. É a prova visível de
-            * que o level-down não apagou nada.
-            */}
           {p.reativadas.length} escolha(s) que estavam guardadas voltam a valer.
         </p>
       )}
@@ -183,11 +166,6 @@ export function NivelPanel({ ficha, onDefinirNivel }: NivelPanelProps) {
       {confirmandoQueda && anterior !== null && previsaoDescer && (
         <div className="border border-ordem-gold/60 rounded p-3 space-y-2">
           <p className="text-xs text-ordem-gold">
-            {/*
-              * Dizer isto em voz alta importa: no motor antigo rebaixar apaga o
-              * histórico (`levelUp.ts:651`), então a perda é irreversível e o
-              * mestre justificadamente evita usar. Aqui não é.
-              */}
             Rebaixar não apaga nada. As escolhas acima de {rotuloNivel(anterior)} ficam
             guardadas e voltam se você subir de novo.
           </p>

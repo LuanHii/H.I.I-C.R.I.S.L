@@ -81,7 +81,6 @@ describe('aplicarEfeitos: escala por NEX', () => {
   });
 
   it('conta degraus completos, nunca arredonda para cima', () => {
-    // NEX 34% são 6 degraus de 5%, não 7.
     expect(aplicarEfeitos([{ tipo: 'pv', valor: 1, porNex: 5 }], ctx(34)).pvBonus).toBe(6);
   });
 
@@ -133,8 +132,6 @@ describe('contratos do interpretador', () => {
   });
 
   it('aplicar duas vezes o mesmo efeito soma — não é idempotente de propósito', () => {
-    // Guarda contra alguém "consertar" isso: dois poderes que dão +2 na mesma
-    // perícia têm mesmo que virar +4.
     const efeito: Efeito[] = [{ tipo: 'periciaBonus', pericia: 'Luta', valor: 2 }];
     const destino = bonusVazio();
     aplicarEfeitos(efeito, ctx(5), destino);

@@ -119,7 +119,6 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
       </CardHeader>
 
       <CardContent className="pt-0">
-        {}
         <AnimatePresence>
           {activeConditions.length > 0 && (
             <motion.div
@@ -137,7 +136,6 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
           )}
         </AnimatePresence>
 
-        {}
         <AnimatePresence>
           {isAdding && (
             <motion.div
@@ -147,7 +145,6 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
               exit="exit"
               className="mb-4 p-4 bg-ordem-black-deep rounded-lg border border-ordem-border"
             >
-              {}
               <Input
                 placeholder="Buscar condição..."
                 value={searchTerm}
@@ -156,7 +153,6 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
                 className="mb-3"
               />
 
-              {}
               <div className="flex flex-wrap gap-1.5 mb-3">
                 {categories.map(cat => (
                   <motion.button
@@ -174,7 +170,6 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
                 ))}
               </div>
 
-              {}
               <motion.div
                 variants={listContainer}
                 initial="initial"
@@ -231,7 +226,6 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
           )}
         </AnimatePresence>
 
-        {}
         <motion.div
           variants={listContainer}
           initial="initial"
@@ -300,7 +294,6 @@ const ConditionCardActive: React.FC<ConditionCardActiveProps> = ({ nome, onRemov
       layout
       className={`border rounded-lg overflow-hidden transition-all ${categoriaClasses}`}
     >
-      {}
       <motion.button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -316,7 +309,6 @@ const ConditionCardActive: React.FC<ConditionCardActiveProps> = ({ nome, onRemov
                 {cond.categoria}
               </span>
             )}
-            {}
             {cond.efeito?.defesa && (
               <Badge variant="danger" size="sm">
                 DEF {cond.efeito.defesa}
@@ -370,7 +362,6 @@ const ConditionCardActive: React.FC<ConditionCardActiveProps> = ({ nome, onRemov
         </div>
       </motion.button>
 
-      {}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -381,7 +372,6 @@ const ConditionCardActive: React.FC<ConditionCardActiveProps> = ({ nome, onRemov
             className="overflow-hidden"
           >
             <div className="px-3 pb-3 pt-0 border-t border-current/20">
-              {}
               {cond.efeito && (
                 <div className="mt-2 p-2 bg-black/20 rounded space-y-1">
                   <div className="text-[10px] font-mono uppercase tracking-wider opacity-60 mb-1">
@@ -440,7 +430,6 @@ const ConditionCardActive: React.FC<ConditionCardActiveProps> = ({ nome, onRemov
                 </div>
               )}
 
-              {}
               <div className="mt-2 space-y-1 text-[11px]">
                 {cond.especial && (
                   <div className="flex gap-1">

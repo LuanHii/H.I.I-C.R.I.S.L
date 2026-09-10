@@ -108,7 +108,6 @@ export const CompartilharFicha: React.FC<CompartilharFichaProps> = ({ ficha, cla
     return () => {
       cancelado = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ficha.id]);
 
   const enviar = useCallback(async () => {

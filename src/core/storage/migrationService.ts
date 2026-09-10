@@ -153,17 +153,12 @@ export function clearLocalDataAfterMigration(): void {
 export async function migrateDataOnLogin(
   userId: string
 ): Promise<{ success: boolean; migrated: { fichas: number; campanhas: number; monstros: number; items: number } } | null> {
-
   if (!hasLocalData()) {
     return null;
   }
 
   const localData = getLocalData();
 
-  /*
-   * Spread, não literal de campos: um literal descartaria o documento v2 ao
-   * subir as fichas locais para a nuvem no primeiro login.
-   */
   const fichasCloud: FichaRegistroCloud[] = localData.fichas.map(f => ({ ...f }));
 
   const campanhasCloud: CampanhaCloud[] = localData.campanhas.map(c => ({

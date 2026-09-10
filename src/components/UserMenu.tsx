@@ -120,7 +120,6 @@ export function UserMenu({ migrationStatus, hasPendingLocalData, onMigrateClick 
             transition={{ duration: 0.15 }}
             className="absolute right-0 top-full mt-2 w-64 bg-ordem-black border border-ordem-green/30 rounded-sm shadow-xl z-50"
           >
-            {}
             <div className="px-4 py-3 border-b border-ordem-white/10">
               <div className="flex items-center gap-3">
                 {user?.photoURL ? (
@@ -222,7 +221,6 @@ export function UserMenu({ migrationStatus, hasPendingLocalData, onMigrateClick 
         )}
       </AnimatePresence>
 
-      {}
       {migrationStatus?.inProgress && (
         <div className="fixed inset-0 bg-ordem-black/80 flex items-center justify-center z-[100]">
           <div className="bg-ordem-black border border-ordem-green/50 p-6 rounded-lg text-center max-w-sm">

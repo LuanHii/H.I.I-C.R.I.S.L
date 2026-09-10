@@ -104,7 +104,6 @@ export function DiceRoller({ compact = false, onRollResult }: DiceRollerProps) {
 
             {!showDamage ? (
                 <div className="space-y-3">
-                    {}
                     <div className="flex items-center gap-2">
                         <span className="text-xs text-ordem-text-secondary w-16">Dados:</span>
                         <button
@@ -132,7 +131,6 @@ export function DiceRoller({ compact = false, onRollResult }: DiceRollerProps) {
                         </span>
                     </div>
 
-                    {}
                     <div className="flex items-center gap-2">
                         <span className="text-xs text-ordem-text-secondary w-16">Bônus:</span>
                         <button
@@ -155,7 +153,6 @@ export function DiceRoller({ compact = false, onRollResult }: DiceRollerProps) {
                         </button>
                     </div>
 
-                    {}
                     <button
                         onClick={handleD20Roll}
                         className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
@@ -165,7 +162,6 @@ export function DiceRoller({ compact = false, onRollResult }: DiceRollerProps) {
                 </div>
             ) : (
                 <div className="space-y-3">
-                    {}
                     <div className="grid grid-cols-4 gap-2">
                         {[
                             { label: '1d4', sides: 4, count: 1 },
@@ -187,7 +183,6 @@ export function DiceRoller({ compact = false, onRollResult }: DiceRollerProps) {
                         ))}
                     </div>
 
-                    {}
                     <div className="flex items-center gap-2">
                         <span className="text-xs text-ordem-text-secondary">Bônus dano:</span>
                         <button
@@ -207,7 +202,6 @@ export function DiceRoller({ compact = false, onRollResult }: DiceRollerProps) {
                 </div>
             )}
 
-            {}
             <AnimatePresence mode="wait">
                 {lastRoll && (
                     <motion.div

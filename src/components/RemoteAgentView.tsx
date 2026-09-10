@@ -122,9 +122,7 @@ export function RemoteAgentView({
   return (
     <div className="min-h-screen overflow-x-clip bg-ordem-black text-white bg-[radial-gradient(circle_at_top,rgba(139,0,0,0.18),transparent_34%),linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[size:auto,32px_32px,32px_32px]">
       <div className="w-full max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-6 safe-x safe-top safe-bottom">
-        { }
         <div className="flex flex-col gap-3 sm:gap-4 border-b border-ordem-border pb-4 sm:pb-5 mb-4 sm:mb-6">
-          { }
           <div className="min-w-0">
             <div className="text-[10px] sm:text-xs font-mono tracking-[0.25em] sm:tracking-[0.35em] text-ordem-text-muted uppercase">Visualização Remota</div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif text-white truncate mt-1 sm:mt-2">{agent.nome}</h1>
@@ -155,7 +153,6 @@ export function RemoteAgentView({
             </div>
           </div>
 
-          { }
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {onOpenOverlayMini && (
               <button
@@ -223,7 +220,6 @@ export function RemoteAgentView({
           </div>
         )}
 
-        { }
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
           <div className="min-w-0 border border-white/10 bg-black/35 rounded-xl p-3">
@@ -257,7 +253,6 @@ export function RemoteAgentView({
           <TabButton id="inventario" label="INVENTARIO" />
         </div>
 
-        { }
         {tab === 'status' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="bg-gradient-to-br from-ordem-black/90 to-black/60 border border-white/10 shadow-2xl rounded-3xl p-6 sm:p-8 relative overflow-hidden backdrop-blur-md">

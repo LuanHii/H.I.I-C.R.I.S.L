@@ -3,19 +3,6 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import config from '../../../tailwind.config';
 
-/**
- * Tokens de cor: existir e ter contraste.
- *
- * Duas falhas silenciosas que este arquivo pega:
- *
- *  1. **Classe sem token não emite CSS.** Não é erro de build, não aparece no
- *     console: simplesmente nada acontece. `bg-ordem-bg` era usado 17 vezes e o
- *     token não existia, então todos os campos de busca dos modais de level up
- *     ficavam sem fundo.
- *  2. **Contraste afirmado no comentário, não medido.** O config dizia
- *     "WCAG AA" ao lado de uma cor que reprova sobre metade dos fundos do app.
- */
-
 const paleta = (config.theme?.extend?.colors as { ordem: Record<string, string> }).ordem;
 
 function luminancia(hex: string): number {
@@ -30,10 +17,6 @@ function contraste(a: string, b: string): number {
 }
 
 describe('todo token de cor usado no código existe na paleta', () => {
-  /**
-   * Varre o `src/` procurando `text-ordem-X`, `bg-ordem-X` etc. e exige que `X`
-   * esteja na paleta. É o único detector barato para "essa classe não faz nada".
-   */
   it('nenhuma classe `-ordem-*` aponta para token inexistente', () => {
     const raiz = join(process.cwd(), 'src');
     const usados = new Set<string>();
@@ -56,7 +39,6 @@ describe('todo token de cor usado no código existe na paleta', () => {
 
     const inexistentes = Array.from(usados)
       .filter((t) => !(t in paleta))
-      // `/50`, `/30` etc. já saem fora pelo lookahead; o resto tem de existir.
       .sort();
 
     expect(inexistentes, 'classes que não emitem CSS nenhum').toEqual([]);
@@ -64,11 +46,6 @@ describe('todo token de cor usado no código existe na paleta', () => {
 });
 
 describe('contraste medido, não afirmado', () => {
-  /**
-   * WCAG 2.1: 4.5:1 para texto normal, 3:1 para texto grande. As combinações
-   * abaixo aparecem dezenas de vezes nos modais; `text-muted` sobre `ooze` dava
-   * 3.46:1 e o comentário no config dizia "WCAG AA".
-   */
   const FUNDOS = ['black', 'black-deep', 'ooze', 'bg'] as const;
 
   it.each(FUNDOS)('text-primary passa AA sobre %s', (fundo) => {
@@ -86,8 +63,6 @@ describe('contraste medido, não afirmado', () => {
   });
 
   it('ooze é o fundo mais claro em uso — é ele que aperta o limite', () => {
-    // Documenta por que `ooze` é o caso crítico: qualquer token de texto que
-    // passe aqui passa nos outros.
     const luminancias = FUNDOS.map((f) => [f, luminancia(paleta[f])] as const);
     const maisClaro = luminancias.sort((a, b) => b[1] - a[1])[0][0];
     expect(maisClaro).toBe('ooze');

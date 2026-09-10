@@ -46,11 +46,6 @@ export function AuthProvider({ children, onLogin }: AuthProviderProps) {
   const [hasTriggeredLogin, setHasTriggeredLogin] = useState(false);
 
   useEffect(() => {
-    /*
-     * Modo local: sem credenciais, não há a quem perguntar quem está logado.
-     * Antes isto lançava e derrubava o app inteiro — a nuvem é opcional aqui, as
-     * fichas vivem em localStorage, então "não autenticado" é um estado válido.
-     */
     if (!firebaseConfigurado()) {
       setUser(null);
       setLoading(false);
@@ -85,7 +80,6 @@ export function AuthProvider({ children, onLogin }: AuthProviderProps) {
     setLoading(true);
     try {
       await signInWithPopup(auth, googleProvider);
-
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao fazer login';
       setError(message);

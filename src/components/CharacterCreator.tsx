@@ -582,7 +582,6 @@ export default function CharacterCreator({
   return (
     <div className="w-full max-w-5xl mx-auto p-4 sm:p-6 md:p-8 safe-x">
       <header className="mb-6 sm:mb-10 flex flex-col gap-4 border-b border-ordem-border pb-4">
-        { }
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3">
           <div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif text-white tracking-wider mb-1 sm:mb-2">
@@ -595,7 +594,6 @@ export default function CharacterCreator({
           </div>
         </div>
 
-        { }
         <div className="flex items-center gap-1 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-visible touch-scroll no-select">
           {[0, 1, 2, 3, 4, 5, 6, 7].map((step) => {
 
@@ -701,7 +699,6 @@ export default function CharacterCreator({
               )}
             </div>
 
-            { }
             <div className="grid grid-cols-1 gap-4 overflow-y-auto custom-scrollbar pr-2 max-h-[60vh] sm:max-h-none lg:grid-cols-3">
               {trilhasDisponiveis.map((trilha) => {
                 const isSelected = trilhaSelecionada?.nome === trilha.nome;
@@ -729,7 +726,6 @@ export default function CharacterCreator({
               })}
             </div>
 
-            { }
             {trilhaSelecionada && habilidadesDesbloqueadas.length > 0 && (
               <div className="mt-6 bg-ordem-ooze/30 border border-ordem-border rounded-lg p-4">
                 <h4 className="text-sm font-bold text-ordem-gold uppercase tracking-widest mb-4">
@@ -746,7 +742,6 @@ export default function CharacterCreator({
                       </div>
                       <p className="text-xs text-ordem-text-secondary mb-2">{hab.descricao}</p>
 
-                      { }
                       {hab.escolha && (() => {
 
                         let opcoes: string[] = [];
@@ -848,7 +843,6 @@ export default function CharacterCreator({
 
       </div>
 
-      { }
       <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 border-t border-ordem-border pt-4 sm:pt-6 safe-bottom">
         <button
           onClick={handleReset}
@@ -858,7 +852,6 @@ export default function CharacterCreator({
         </button>
 
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 order-1 sm:order-2">
-          { }
           {state.step > 0 && (
             <button
               onClick={() => {

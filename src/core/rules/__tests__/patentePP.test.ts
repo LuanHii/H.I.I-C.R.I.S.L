@@ -12,13 +12,6 @@ import { normalizePersonagem } from '@/core/personagemUtils';
 import { subirNex } from '@/logic/levelUp';
 import { criarFicha } from '@/testUtils/fixtures';
 
-/**
- * TABELA 3.1: PATENTES — Livro de Regras, Capítulo 3.
- * Transcrita do livro. Se o motor divergir daqui, o motor está errado.
- *
- * "Sua patente representa sua posição hierárquica na Ordem — diferente do NEX,
- * que mede seu poder individual."
- */
 const TABELA_3_1: ReadonlyArray<{
   pp: number;
   patente: Patente;
@@ -50,7 +43,6 @@ describe('Tabela 3.1: patentes e limites de item', () => {
   });
 
   it('nenhuma patente passa de 3 itens de categoria I', () => {
-    // A tabela antiga dava I:5 ao agente especial e I:99 ao oficial e ao elite.
     for (const cfg of listarPatentes()) {
       expect(cfg.limiteItens.I, `${cfg.nome} libera itens de mais`).toBeLessThanOrEqual(3);
     }
@@ -134,11 +126,6 @@ describe('migração de fichas anteriores ao campo PP', () => {
 });
 
 describe('os limites de item têm uma fonte só', () => {
-  /**
-   * Havia duas tabelas de limite: a do motor e um mapa de strings no
-   * NexPatenteSelector. As duas divergiam do livro e entre si. Este teste
-   * impede que uma terceira apareça.
-   */
   it('nenhum componente escreve limites de item à mão', () => {
     const raiz = join(process.cwd(), 'src');
     const suspeitos: string[] = [];

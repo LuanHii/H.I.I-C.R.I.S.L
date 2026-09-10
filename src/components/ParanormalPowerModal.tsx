@@ -120,7 +120,6 @@ export function ParanormalPowerModal({
                 className="relative w-full max-w-3xl max-h-[90vh] bg-ordem-ooze border border-ordem-border rounded-xl overflow-hidden flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
-                {}
                 <div className="p-4 border-b border-ordem-border bg-gradient-to-r from-purple-900/30 to-ordem-ooze">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -142,7 +141,6 @@ export function ParanormalPowerModal({
                         )}
                     </div>
 
-                    {}
                     <div className="flex gap-2 mb-4">
                         {(['Sangue', 'Morte', 'Conhecimento', 'Energia'] as Elemento[]).map(elem => {
                             const config = ELEMENTO_CONFIG[elem];
@@ -164,7 +162,6 @@ export function ParanormalPowerModal({
                         })}
                     </div>
 
-                    {}
                     <div className="flex gap-2 flex-wrap">
                         <div className="flex-1 min-w-[200px] relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-ordem-text-muted" size={16} />
@@ -211,7 +208,6 @@ export function ParanormalPowerModal({
                     </div>
                 </div>
 
-                {}
                 <div className="flex-1 overflow-y-auto p-4 space-y-2">
                     <AnimatePresence mode="popLayout">
                         {poderesFiltrados.length === 0 ? (
@@ -287,7 +283,6 @@ export function ParanormalPowerModal({
                     </AnimatePresence>
                 </div>
 
-                {}
                 <div className="p-4 border-t border-ordem-border bg-ordem-ooze/80 flex justify-between items-center gap-2">
                     <p className="text-xs text-ordem-text-muted">
                         ⚠ Ao escolher Transcender, você <strong>não ganha Sanidade</strong> neste aumento de NEX.

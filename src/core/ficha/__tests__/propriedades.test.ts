@@ -38,8 +38,6 @@ const escolhaAtributo = (nex: number, atributo: 'AGI' | 'FOR' | 'INT' | 'PRE' | 
   valor: { tipo: 'atributo', atributo },
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-
 describe('ids determinísticos', () => {
   it('monta e decompõe ida e volta', () => {
     const id = montarId('poderClasse', chaveNex(15), 0);
@@ -55,7 +53,6 @@ describe('ids determinísticos', () => {
   });
 
   it('id malformado devolve null em vez de lançar', () => {
-    // Ids vêm de documentos persistidos; corrupção tem de virar relatório.
     for (const lixo of ['', 'poderClasse', 'poderClasse@15#0', '@nex:15#0', 'x@nex:abc#0']) {
       expect(decomporId(lixo), lixo).toBeNull();
     }
@@ -85,8 +82,6 @@ describe('ids determinísticos', () => {
   });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-
 describe('propriedade: determinismo', () => {
   it('dois builds do mesmo dado são idênticos', () => {
     fc.assert(
@@ -99,8 +94,6 @@ describe('propriedade: determinismo', () => {
   });
 
   it('nenhum arquivo de core/ficha usa Date.now ou Math.random', () => {
-    // Determinismo é propriedade estrutural: se entrar relógio ou sorte aqui,
-    // simetria e comparação entre builds param de valer.
     const raiz = join(process.cwd(), 'src', 'core', 'ficha');
     const suspeitos: string[] = [];
     const varrer = (dir: string) => {
@@ -111,11 +104,6 @@ describe('propriedade: determinismo', () => {
           continue;
         }
         if (!/\.ts$/.test(entrada)) continue;
-        /*
-         * Comentários são removidos antes da varredura: estes arquivos CITAM
-         * `Date.now` na documentação, explicando o que o motor antigo faz de
-         * errado. Sem strip, o guard acusa a própria explicação.
-         */
         const texto = readFileSync(caminho, 'utf8')
           .replace(/\/\*[\s\S]*?\*\//g, '')
           .replace(/\/\/.*$/gm, '');
@@ -128,10 +116,6 @@ describe('propriedade: determinismo', () => {
 });
 
 describe('propriedade: salto ≡ passos', () => {
-  /**
-   * Esta é a propriedade que o motor ANTIGO viola: `subirNex(f, 99)` num salto
-   * difere de 19 subidas de 5%, porque o salto não vê as escolhas intermediárias.
-   */
   it('build direto em N == build subindo marco a marco até N', () => {
     fc.assert(
       fc.property(fc.constantFrom(...NEX_LEGAIS), (destino) => {
@@ -189,7 +173,6 @@ describe('propriedade: simetria (rebaixar e subir de volta)', () => {
     const build = buildFicha({ ficha: descido });
 
     expect(build.escolhasInertes.map((e) => e.id)).toContain('atributo@nex:50#0');
-    // O documento não perdeu nada: o log continua com as duas escolhas.
     expect(descido.escolhas).toHaveLength(2);
   });
 
@@ -236,20 +219,10 @@ describe('o fold cria dependência entre marcos', () => {
   it('sem trilha escolhida, não existe slot de habilidade de trilha', () => {
     const build = buildFicha({ ficha: fichaBase({ progressao: { nex: 99 }, escolhas: [] }) });
     expect(build.slots.filter((s) => s.kind === 'trilhaHabilidade')).toEqual([]);
-    // Mas o slot da ESCOLHA de trilha existe, e fica pendente.
     expect(build.pendencias.some((p) => p.slot.kind === 'trilha')).toBe(true);
   });
 
   it('com trilha escolhida, as habilidades são CONCEDIDAS nos marcos 10/40/65/99', () => {
-    /*
-     * O livro não oferece escolha aqui: "você escolhe uma das trilhas e recebe o
-     * primeiro poder da trilha escolhida. Você recebe um novo poder da trilha
-     * escolhida em NEX 40%, 65% e 99%."
-     *
-     * Logo o que os marcos produzem é PODER, não pendência. A versão anterior
-     * deste teste media SLOTS, e passava porque o motor emitia um slot por marco
-     * — uma pendência fantasma que nenhuma resposta jamais fecharia.
-     */
     const build = buildFicha({
       ficha: fichaBase({ progressao: { nex: 99 }, escolhas: [escolhaTrilha('Operações Especiais')] }),
     });
@@ -272,16 +245,10 @@ describe('o fold cria dependência entre marcos', () => {
   });
 
   it('só a habilidade com decisão INTERNA gera pendência', () => {
-    /*
-     * Das ~80 habilidades de trilha, 8 carregam uma decisão embutida ("escolha
-     * Diplomacia ou Enganação", "escolha um elemento"). Essas — e só essas —
-     * abrem slot. Aniquilador em NEX 10% é "A Favorita", que pede uma arma.
-     */
     const comDecisao = buildFicha({
       ficha: fichaBase({ progressao: { nex: 10 }, escolhas: [escolhaTrilha('Aniquilador')] }),
     });
     expect(comDecisao.pendencias.map((p) => p.slot.kind)).toContain('trilhaHabilidade');
-    // A habilidade entra na ficha de qualquer forma: pendente é só a decisão.
     expect(comDecisao.poderes.map((p) => p.nome)).toContain('A Favorita');
 
     const semDecisao = buildFicha({
@@ -292,14 +259,6 @@ describe('o fold cria dependência entre marcos', () => {
 });
 
 describe('poderes automáticos entram na ficha', () => {
-  /**
-   * `buildFicha` precisa devolver a lista COMPLETA de poderes.
-   *
-   * Enquanto o motor novo era inalcançável pelo app isso não aparecia. No wizard
-   * de migração apareceria de imediato: o painel "reconstruído" mostraria toda
-   * ficha perdendo o poder de origem e a habilidade de classe, e o mestre
-   * recusaria a conversão — com razão.
-   */
   it('o poder de origem entra, uma vez só, com procedência de origem', () => {
     const build = buildFicha({ ficha: fichaBase() });
     const origem = build.poderes.find((p) => p.provenancia.kind === 'origem');
@@ -345,8 +304,6 @@ describe('poderes automáticos entram na ficha', () => {
   });
 
   it('poder manual do mestre sobrevive ao build', () => {
-    // O outro lado do "nada é descartado": o conversor joga o que não casou em
-    // `poderesManuais`, e o build tem de trazê-lo de volta para a view.
     const build = buildFicha({
       ficha: fichaBase({ ajustes: { poderesManuais: ['Poder Caseiro do Mestre'] } }),
     });
@@ -367,41 +324,22 @@ describe('gating por classe conferido no livro', () => {
   });
 
   it('o Ocultista aprende UM ritual por marco de NEX, e três no primeiro', () => {
-    /*
-     * A versão anterior deste teste esperava `[5, 25, 55, 85]` — os quatro
-     * eventos de `NEX_EVENTOS`. Mas aqueles são os marcos de DESBLOQUEIO DE
-     * CÍRCULO, não de aprender ritual: o teste derivava a expectativa da
-     * implementação e por isso só repetia o bug.
-     *
-     * Livro de Regras, "Escolhido pelo Outro Lado": *"você começa com três
-     * rituais de 1º círculo. Sempre que avança de NEX, aprende um ritual"*.
-     * Em NEX 99%: 3 + 19 = 22.
-     */
     const slots = derivarSlots(
       { ...fichaBase().identidade, classe: 'Ocultista' }, { nex: 99 }, [],
     ).slots.filter((s) => s.kind === 'ritual');
 
-    // Um marco por nível da escada, do 5 ao 99.
     const niveis = Array.from(new Set(slots.map((s) => s.nivel)));
     expect(niveis).toEqual([...Array.from({ length: 19 }, (_, i) => (i + 1) * 5), 99]);
 
-    /*
-     * TRÊS slots em NEX 5 (ordinais 0/1/2), um em cada marco seguinte. São
-     * escolhas independentes: trocar um dos três iniciais não deve obrigar a
-     * refazer os outros dois.
-     */
     expect(slots.filter((s) => s.nivel === 5)).toHaveLength(3);
     expect(slots.filter((s) => s.nivel > 5).every((s) => s.quantidade === 1)).toBe(true);
     expect(slots.every((s) => s.quantidade === 1)).toBe(true);
 
     expect(slots.length, 'o livro dá 22 rituais em NEX 99%').toBe(22);
-    // Ids distintos: sem ordinal, os três iniciais colidiriam num só.
     expect(new Set(slots.map((s) => s.id)).size).toBe(22);
   });
 
   it('o teto de círculo é coisa separada da quantidade', () => {
-    // 1º/2º/3º/4º em NEX 5/25/55/85 — isso continua valendo e limita O QUE pode
-    // ser escolhido, não QUANTOS.
     expect(circuloMaximoPorNivel(5)).toBe(1);
     expect(circuloMaximoPorNivel(20)).toBe(1);
     expect(circuloMaximoPorNivel(25)).toBe(2);
@@ -410,7 +348,6 @@ describe('gating por classe conferido no livro', () => {
   });
 
   it('o Ocultista de NEX 5 nasce devendo três rituais, não zero', () => {
-    // O sintoma que o plano registrou: "ficha nasce com 0 rituais".
     const build = buildFicha({
       ficha: fichaBase({
         identidade: { ...fichaBase().identidade, classe: 'Ocultista' },
@@ -422,11 +359,6 @@ describe('gating por classe conferido no livro', () => {
   });
 
   it('afinidade em NEX 50 vale para TODAS as classes de agente', () => {
-    /*
-     * Capítulo 5: "Quando você atinge NEX 50%... Escolha um elemento entre
-     * Conhecimento, Energia, Morte ou Sangue." É regra geral de exposição, não
-     * habilidade de Ocultista. O motor antigo restringe ao Ocultista.
-     */
     for (const classe of ['Combatente', 'Especialista', 'Ocultista'] as const) {
       const slots = derivarSlots({ ...fichaBase().identidade, classe }, { nex: 50 }, []).slots;
       expect(slots.some((s) => s.kind === 'afinidade'), classe).toBe(true);
@@ -472,12 +404,6 @@ describe('Sobrevivente progride por estágio, não por NEX', () => {
   });
 
   it('a trilha "Esperto" pede decisão nos dois estágios; "Durão" em nenhum', () => {
-    /*
-     * Esperto/estágio 2 e Entendido/estágio 4 mandam escolher uma perícia; as
-     * habilidades de Durão não pedem nada. É esse par que torna falsificável a
-     * regra "slot só quando há decisão interna" — sem ele, um motor que nunca
-     * emitisse slot de trilha passaria igual.
-     */
     const kinds = (trilha: string) => buildFicha({
       ficha: sobrevivente(4, [{ id: montarId('trilha', 'est:2'), valor: { tipo: 'trilha', trilha } }]),
     }).slots.filter((s) => s.kind === 'trilhaHabilidade').map((s) => s.nivel);
@@ -510,7 +436,6 @@ describe('escolha órfã vira problema, não exceção', () => {
       escolhas: [{ id: 'poderClasse@nex:15#0', valor: { tipo: 'poder', poder: 'Qualquer' } }],
     });
     const build = buildFicha({ ficha });
-    // NEX 15 está acima de 10, então é inerte — não órfã.
     expect(build.escolhasInertes).toHaveLength(1);
     expect(build.problemas.filter((p) => p.codigo === 'escolha_orfa')).toEqual([]);
   });
@@ -520,30 +445,12 @@ describe('escolha órfã vira problema, não exceção', () => {
       progressao: { nex: 10 },
       escolhas: [{ id: 'ritual@nex:5#0', valor: { tipo: 'ritual', ritual: 'X' } }],
     });
-    // Combatente não tem slot de ritual em NEX 5.
     const build = buildFicha({ ficha });
     expect(build.problemas.some((p) => p.codigo === 'escolha_orfa')).toBe(true);
   });
 });
 
 describe('o motor novo não é autoritativo', () => {
-  /**
-   * O motor novo deixou de ser inalcançável neste commit — o dual-write precisa
-   * dele. O que continua valendo, e é o que importa, é que **nada LÊ dele**: a
-   * ficha exibida vem de `personagem` (v0) em todos os caminhos.
-   *
-   * A lista abaixo é a superfície inteira, e é curta de propósito. Cada entrada
-   * tem uma razão:
-   *
-   *   personagemUtils / progression  — `observar`, o shadow mode (read-only)
-   *   FichasManager                  — `observar` + abrir o wizard
-   *   MigracaoWizard                 — o conversor, atrás de clique explícito
-   *   storage/*, firebase/*          — só o TIPO do documento, para carregá-lo
-   *                                    adiante nas escritas sem interpretá-lo
-   *
-   * Um arquivo novo aqui significa que alguém ligou o motor novo a mais um
-   * ponto do app. Pode ser legítimo — mas tem de ser deliberado.
-   */
   const PONTE_PERMITIDA = [
     'core/personagemUtils.ts',
     'logic/progression.ts',
@@ -564,13 +471,6 @@ describe('o motor novo não é autoritativo', () => {
       for (const entrada of readdirSync(dir)) {
         const caminho = join(dir, entrada);
         if (statSync(caminho).isDirectory()) {
-          /*
-           * `__tests__` fica de fora: o que este guard protege é o APP não
-           * alcançar o motor novo fora do shadow mode. Teste que exercita o
-           * motor é o objetivo, não a violação — e sem esta exclusão qualquer
-           * teste novo de motor, em qualquer pasta, derruba o guard e a saída
-           * mais fácil passa a ser afrouxá-lo de verdade.
-           */
           if (entrada !== 'node_modules' && entrada !== '__tests__') varrer(caminho);
           continue;
         }
@@ -578,15 +478,6 @@ describe('o motor novo não é autoritativo', () => {
         if (/\.test\.tsx?$/.test(entrada)) continue;
         if (caminho.includes(join('core', 'ficha'))) continue;
         const texto = readFileSync(caminho, 'utf8');
-        /*
-         * Casa tanto `@/core/ficha/x` quanto o relativo `../ficha/x`.
-         *
-         * A primeira versão exigia a string "core/ficha" literal, então os
-         * arquivos de storage — que importam por caminho relativo — nunca eram
-         * sequer detectados como importadores. O guard passava sem olhar para
-         * eles: um teste que não testa é pior que teste nenhum, porque compra
-         * confiança.
-         */
         if (!/from ['"][^'"]*(?:core\/)?ficha\/[^'"]*['"]/.test(texto)) continue;
         const relativo = caminho.slice(raiz.length + 1).split(/[\\/]/).join('/');
         if (PONTE_PERMITIDA.includes(relativo)) continue;
@@ -604,25 +495,12 @@ describe('o motor novo não é autoritativo', () => {
       join(process.cwd(), 'src', 'components', 'master', 'FichasManager.tsx'),
     ]) {
       const texto = readFileSync(arquivo, 'utf8');
-      // `observar` não devolve valor; se alguém atribuir o retorno, virou autoritativo.
       expect(/=\s*observar\(/.test(texto), `${arquivo}: o retorno de observar está sendo usado`).toBe(false);
       expect(/buildFicha|inferirFicha/.test(texto), `${arquivo}: chamando o motor novo direto`).toBe(false);
     }
   });
 
   it('o store NUNCA converte uma ficha por conta própria', () => {
-    /*
-     * Esta é a regra que sobrevive a todos os commits desta série, e a mais
-     * importante delas: converter é ato explícito do mestre, com o relatório na
-     * frente. Um `migrarFicha` dentro de um caminho de escrita do store seria
-     * auto-migração num write-back — é assim que se perde campanha no meio da
-     * sessão, o mestre salva uma mudança de PV e descobre depois que a ficha
-     * inteira foi reinterpretada.
-     *
-     * O store PODE ler (`resolverPersonagem`), absorver sessão
-     * (`atualizarSessao`) e registrar escolha (`registrarEscolha`). Não pode
-     * inferir.
-     */
     for (const arquivo of [
       join(process.cwd(), 'src', 'core', 'storage', 'useCloudFichas.ts'),
       join(process.cwd(), 'src', 'core', 'storage', 'useStoredFichas.ts'),
@@ -637,8 +515,6 @@ describe('o motor novo não é autoritativo', () => {
   });
 
   it('só o wizard converte', () => {
-    // O contrapeso do teste acima: a conversão tem de existir em algum lugar, e
-    // esse lugar é a UI que mostra os três painéis antes de perguntar.
     const wizard = readFileSync(
       join(process.cwd(), 'src', 'components', 'master', 'MigracaoWizard.tsx'), 'utf8',
     );
@@ -646,10 +522,6 @@ describe('o motor novo não é autoritativo', () => {
   });
 
   it('resolverPersonagem cai para o v0 em toda porta que fecha', () => {
-    /*
-     * Ler do motor novo tem de degradar para o motor antigo, nunca para tela
-     * branca. Cada `return` que não é o do caminho feliz precisa devolver `v0`.
-     */
     const fonte = readFileSync(join(process.cwd(), 'src', 'core', 'ficha', 'leitura.ts'), 'utf8');
     const retornosV0 = fonte.match(/fonte: 'v0'/g) ?? [];
     expect(retornosV0.length, 'esperava várias quedas para o v0').toBeGreaterThanOrEqual(4);

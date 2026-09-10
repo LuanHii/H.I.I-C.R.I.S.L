@@ -11,7 +11,6 @@ const poder = (nome: string) => {
   return achado;
 };
 
-/** Ficha normalizada, com os poderes indicados e (opcionalmente) perícias treinadas. */
 function ficha(
   nomes: string[],
   opcoes: { nex?: number; treinadas?: PericiaName[]; destreinadas?: PericiaName[] } = {},
@@ -28,11 +27,6 @@ function ficha(
 
 const semPoder = (opcoes: { nex?: number; treinadas?: PericiaName[]; destreinadas?: PericiaName[] } = {}) => ficha([], opcoes);
 
-/**
- * Nenhum bônus de poder era aplicado antes disto: `calculateDerivedStats` não
- * recebia a lista de poderes da ficha. Um jogador escolhia Vitalidade Reforçada
- * e não ganhava PV nenhum.
- */
 describe('poderes passivos agora produzem número', () => {
   it('Vitalidade Reforçada dá +1 PV a cada 5% de NEX', () => {
     expect(ficha(['Vitalidade Reforçada'], { nex: 40 }).pv.max
@@ -77,8 +71,6 @@ describe('o padrão "+2 se já treinado" do livro', () => {
   });
 
   it('sem treinamento prévio, o poder não vira +2 (ele concede o treinamento)', () => {
-    // A ficha de teste às vezes já treina Atletismo entre as perícias livres,
-    // então é preciso zerar explicitamente para exercitar o outro ramo.
     const com = ficha(['Atlético'], { destreinadas: ['Atletismo'] });
     const sem = semPoder({ destreinadas: ['Atletismo'] });
     expect(com.periciasDetalhadas.Atletismo.bonusFixo)
@@ -95,7 +87,6 @@ describe('outros efeitos de poder', () => {
   });
 
   it('Reflexos Defensivos dá +2 de Defesa', () => {
-    // Defesa vive em derivedStats; conferida via o próprio catálogo declarado.
     expect(poder('Reflexos Defensivos').efeitos).toContainEqual({ tipo: 'defesa', valor: 2 });
   });
 
@@ -141,11 +132,6 @@ describe('cobertura de efeitos nos poderes', () => {
   });
 
   it('todo poder geral com "recebe treinamento em" declara o treinamento', () => {
-    /*
-     * Treinado em Armas é homebrew e deixa o jogador escolher entre Pontaria e
-     * Luta, então não há uma perícia única a declarar. Fica de fora até o
-     * commit de escolhas.
-     */
     const COM_ESCOLHA = new Set(['Treinado em Armas']);
     const faltando = PODERES
       .filter((p) => p.tipo === 'Geral' && /recebe treinamento em/i.test(p.descricao))

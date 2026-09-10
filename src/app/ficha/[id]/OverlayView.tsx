@@ -20,7 +20,6 @@ const StatusCompact = ({ icon, label, current, max, color }: StatusCompactProps)
 
   return (
     <div className="flex flex-col bg-ordem-ooze/90 rounded-lg p-3 border border-ordem-border relative overflow-hidden group min-h-[85px] justify-between">
-      {}
       <div
         className={`absolute bottom-0 left-0 h-1 transition-all duration-500`}
         style={{ width: `${percent}%`, backgroundColor: color }}
@@ -52,10 +51,8 @@ export function OverlayView({ agent, mode = 'mini' }: OverlayViewProps) {
 
     <div className="min-h-screen w-full bg-[#00FF00] flex items-center justify-center p-4">
 
-      {}
       <div className="w-full max-w-[420px] bg-ordem-black border-2 border-ordem-border rounded-xl shadow-2xl overflow-hidden flex flex-col">
 
-        {}
         <div className="bg-ordem-ooze border-b border-ordem-border p-4 pb-3 flex justify-between items-center gap-3">
           <div className="overflow-hidden mr-2">
             <h1 className="text-2xl font-bold text-white truncate leading-tight">
@@ -78,14 +75,12 @@ export function OverlayView({ agent, mode = 'mini' }: OverlayViewProps) {
             </div>
           </div>
 
-          {}
           <div className="flex flex-col items-center bg-ordem-black-deep px-3 py-1.5 rounded border border-ordem-border">
             <Shield size={16} className="text-ordem-text-muted mb-0.5" />
             <span className="text-lg font-bold text-ordem-white-muted leading-none">{agent.defesa}</span>
           </div>
         </div>
 
-        {}
         <div className={`p-3 grid gap-3 bg-black/95 ${usarDeterminacao ? 'grid-cols-2' : 'grid-cols-2'}`}>
           <div className={usarDeterminacao ? '' : 'col-span-2'}>
             <StatusCompact
@@ -130,7 +125,6 @@ export function OverlayView({ agent, mode = 'mini' }: OverlayViewProps) {
           <div className="border-t border-ordem-border bg-ordem-black-deep/60 p-3 space-y-3">
             <div className="flex items-center justify-between">
               <div className="text-[10px] font-bold tracking-[0.3em] text-ordem-text-secondary uppercase">Recursos</div>
-              {}
             </div>
             <div className="grid grid-cols-3 gap-2">
               <div className="bg-ordem-black/40 border border-ordem-border rounded p-2">

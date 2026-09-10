@@ -26,7 +26,6 @@ export const ConditionBadge: React.FC<ConditionBadgeProps> = ({
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            {}
             <div className={`
         inline-flex items-center gap-1.5
         ${compact ? 'px-1.5 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'}
@@ -46,10 +45,8 @@ export const ConditionBadge: React.FC<ConditionBadgeProps> = ({
                 )}
             </div>
 
-            {}
             {showTooltip && isHovered && cond && (
                 <div className="absolute z-50 left-0 top-full mt-2 w-72 p-3 bg-ordem-black-deep border border-ordem-border rounded-lg shadow-xl animate-in fade-in-0 slide-in-from-top-1 duration-150">
-                    {}
                     <div className="flex items-center gap-2 mb-2 pb-2 border-b border-ordem-border/50">
                         <span className="text-lg">{icon}</span>
                         <div>
@@ -62,12 +59,10 @@ export const ConditionBadge: React.FC<ConditionBadgeProps> = ({
                         </div>
                     </div>
 
-                    {}
                     <p className="text-xs text-ordem-text-secondary leading-relaxed mb-2">
                         {cond.descricao}
                     </p>
 
-                    {}
                     {cond.efeito && (
                         <div className="bg-ordem-ooze/50 rounded p-2 mb-2 space-y-1">
                             <div className="text-[10px] font-mono uppercase tracking-wider text-ordem-text-muted mb-1">
@@ -124,7 +119,6 @@ export const ConditionBadge: React.FC<ConditionBadgeProps> = ({
                         </div>
                     )}
 
-                    {}
                     {cond.especial && (
                         <div className="text-[11px] text-cyan-400 italic mb-1">
                             <span className="font-bold not-italic">Especial:</span> {cond.especial}

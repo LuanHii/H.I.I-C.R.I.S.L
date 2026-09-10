@@ -96,7 +96,6 @@ describe('promoção de perícia exige perícia já treinada', () => {
 
     expect(comGraus({ Luta: 'Treinado' }, 'Luta')?.elegivel).toBe(true);
     expect(comGraus({ Luta: 'Veterano' }, 'Luta')?.elegivel).toBe(true);
-    // Expert é o teto: não há grau acima para promover.
     const noTeto = comGraus({ Luta: 'Expert' }, 'Luta');
     expect(noTeto?.elegivel).toBe(false);
     expect(noTeto?.motivos[0]).toMatch(/grau máximo/i);
@@ -147,13 +146,6 @@ describe('registrarEscolha é overwrite, não append', () => {
   });
 
   it('trocar a trilha refaz as habilidades derivadas sem editar o log delas', () => {
-    /*
-     * Habilidade de trilha é CONCEDIDA, não escolhida ("recebe o primeiro poder
-     * da trilha escolhida", Cap. 1), então o que muda ao trocar de trilha são os
-     * PODERES derivados — e o log continua com uma única entrada, a da trilha.
-     * No motor antigo a mesma operação exigia caçar e remover poderes por regex
-     * na descrição.
-     */
     const habilidades = (f: FichaPersistida) => buildFicha({ ficha: f })
       .poderes.filter((p) => p.provenancia.kind === 'trilha').map((p) => p.nome);
 
@@ -215,7 +207,6 @@ describe('limpar escolha derruba a cascata', () => {
   it('remover o pai remove os filhos', () => {
     let ficha = fichaBase({ progressao: { nex: 15 } });
     ficha = registrarEscolha(ficha, ID_PODER, { tipo: 'poder', poder: 'Transcender' }).ficha;
-    // Filho inserido à mão: a cascata de Transcender é do próximo commit.
     ficha = {
       ...ficha,
       escolhas: [...ficha.escolhas, {

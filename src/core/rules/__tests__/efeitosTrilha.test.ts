@@ -11,38 +11,28 @@ const stats = (trilha: string, nex: number, classe: 'Combatente' | 'Especialista
 const semTrilha = (nex: number, classe: 'Combatente' | 'Especialista' | 'Ocultista' = 'Combatente') =>
   calculateDerivedStats({ classe, atributos: ATRIB, nex, estagio: 1, qtdTranscender: 0 });
 
-/**
- * O switch de trilha anterior concedia bônus que não existem em nenhum dos dois
- * livros. Cada caso aqui cita a habilidade real e prova que o número inventado
- * sumiu. Se alguém reintroduzir, quebra.
- */
 describe('bônus de trilha que o motor inventava', () => {
   it('Caçador NEX 65 não dá +10 em Furtividade nem Percepção', () => {
-    // "Atacar das Sombras" só REMOVE penalidades de Furtividade.
     const comTrilha = stats('Caçador', 65);
     expect(comTrilha.periciaBonus?.Furtividade ?? 0).toBe(0);
     expect(comTrilha.periciaBonus?.Percepção ?? 0).toBe(0);
   });
 
   it('Infiltrador NEX 10 não dá +5 em Enganação nem Diplomacia', () => {
-    // "Ataque Furtivo" é dano extra, não bônus social.
     const comTrilha = stats('Infiltrador', 10, 'Especialista');
     expect(comTrilha.periciaBonus?.Enganação ?? 0).toBe(0);
     expect(comTrilha.periciaBonus?.Diplomacia ?? 0).toBe(0);
   });
 
   it('Médico de Campo NEX 99 não dá +5 em Fortitude', () => {
-    // "Reanimação" ressuscita um personagem; não mexe em perícia.
     expect(stats('Médico de Campo', 99, 'Especialista').periciaBonus?.Fortitude ?? 0).toBe(0);
   });
 
   it('Técnico NEX 10 não dá +2 de Defesa', () => {
-    // "Inventário Otimizado" é sobre capacidade de carga.
     expect(stats('Técnico', 10, 'Especialista').defesa).toBe(semTrilha(10, 'Especialista').defesa);
   });
 
   it('Monstruoso NEX 10 não soma Força aos PV incondicionalmente', () => {
-    // Somar Força aos PV é efeito exclusivo do elemento Morte.
     expect(stats('Monstruoso', 10).pvMax).toBe(semTrilha(10).pvMax);
   });
 });
@@ -101,7 +91,6 @@ describe('cobertura de efeitos nas trilhas', () => {
   });
 
   it('as trilhas que o motor implementava continuam todas cobertas', () => {
-    // Nenhuma pode ter regredido para "sem efeito declarado" na migração.
     const antes = [
       'Monstruoso', 'Tropa de Choque', 'Caçador', 'Operações Especiais',
       'Infiltrador', 'Técnico', 'Médico de Campo', 'Intuitivo', 'Durão',

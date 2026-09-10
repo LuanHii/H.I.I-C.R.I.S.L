@@ -176,13 +176,6 @@ export const TRILHAS: Trilha[] = [
         nome: 'Mascate',
         descricao: 'Recebe treinamento em Profissão (armeiro, engenheiro ou químico, à escolha) e +5 na capacidade de carga. Ao fabricar item improvisado, DT é reduzida em –10.',
         efeitos: [
-          /*
-           * "+5 na capacidade de carga" — permanente.
-           *
-           * Isto vivia como `if (nome === 'Mascate') cargaMaxima += 5` dentro de
-           * `calcularCarga`. Ao trocar o `if` pelo interpretador, o bônus PRECISA
-           * estar declarado aqui — e foi o teste do Mascate que pegou a perda.
-           */
           { tipo: 'cargaEspacos', valor: 5 },
           { tipo: 'narrativo', nota: 'Treinamento em Profissão à escolha (ver `escolha`). Ao fabricar item improvisado, a DT cai em –10.' },
         ],

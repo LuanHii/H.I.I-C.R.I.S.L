@@ -14,9 +14,6 @@ import { observar } from './ficha/sombra';
 export const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 export function normalizePersonagem(personagem: Personagem, autoPatente: boolean): Personagem {
-  // Fichas anteriores ao commit de Patente/PP não têm `pp`: a patente gravada
-  // era derivada do NEX. Semear o PP com o mínimo da patente atual preserva a
-  // patente que o mestre já via — sem esse backfill toda ficha viraria Recruta.
   const pp = personagem.pp ?? getPatenteConfig(personagem.patente ?? 'Recruta').ppMin;
   const patente = (autoPatente ? getPatentePorPP(pp) : personagem.patente) || 'Recruta';
   const recursos = calcularRecursosClasse({
@@ -36,14 +33,6 @@ export function normalizePersonagem(personagem: Personagem, autoPatente: boolean
       .map(([nome]) => nome),
   });
 
-  /*
-   * As perícias saem do MESMO cálculo que os recursos.
-   *
-   * Antes, `periciasDetalhadas` era reconstruída aqui lendo só
-   * `overrides.periciaFixos`, então todo bônus de origem, trilha ou poder era
-   * apagado no primeiro save — o split-brain. Agora vem de `calcularRecursosClasse`,
-   * que passa pelo interpretador de efeitos.
-   */
   const somarPorPericia = (
     base: Partial<Record<PericiaName, number>> | undefined,
     extra: Partial<Record<PericiaName, number>>,
@@ -124,16 +113,6 @@ export function normalizePersonagem(personagem: Personagem, autoPatente: boolean
     carga: cargaCalculada,
   } satisfies Personagem;
 
-  /*
-   * SHADOW MODE — desligado por padrão.
-   *
-   * Ligado com NEXT_PUBLIC_FICHA_SOMBRA=1, roda o motor novo sobre esta mesma
-   * ficha, compara, descarta o resultado e loga divergências. O motor antigo
-   * segue autoritativo: `observar` não devolve nada e não pode lançar.
-   *
-   * Está aqui, e não nos componentes, porque `normalizePersonagem` é o funil por
-   * onde TODA ficha passa a cada save. Um call site cobre o app inteiro.
-   */
   observar(normalizado);
 
   return normalizado;

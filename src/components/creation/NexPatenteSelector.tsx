@@ -4,11 +4,6 @@ import React, { useMemo } from 'react';
 import { getPatenteConfig, listarPatentes } from '@/logic/rulesEngine';
 import type { LimiteItens } from '@/core/types';
 
-/**
- * Texto do limite de itens derivado da Tabela 3.1, nunca escrito à mão.
- * Havia aqui um mapa fixo que divergia da tabela do motor — e ambos divergiam
- * do livro. Uma fonte só evita a terceira versão.
- */
 function descreverLimite(limite: LimiteItens): string {
   const partes = (['I', 'II', 'III', 'IV'] as const)
     .filter((cat) => limite[cat] > 0)

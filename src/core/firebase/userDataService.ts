@@ -18,23 +18,9 @@ export interface FichaRegistroCloud {
   personagem: Personagem;
   atualizadoEm: string;
   campanha?: string;
-  /**
-   * Documento v2. DUAL-WRITE: gravado ao migrar, mas a LEITURA continua vindo de
-   * `personagem`. Ausente = ficha não migrada; apagar o campo é rollback
-   * completo, sem perda de nada.
-   *
-   * CUIDADO — `saveFichaToCloud` é `setDoc` SEM merge, e `removeUndefinedFields`
-   * tira `undefined` do payload. Somando os dois: gravar um registro sem este
-   * campo APAGA o documento v2 que estava lá. Não é hipótese — os quatro
-   * caminhos de escrita montavam literais de 4 campos, então mover uma ficha de
-   * campanha teria destruído a conversão. Ver `paraNuvem` em `useCloudFichas.ts`.
-   */
   ficha?: FichaPersistida;
-  /** `atualizadoEm` do v0 no momento da conversão — detecta v2 obsoleto. */
   fichaMigradaDe?: string;
-  /** O mestre confirmou a conversão mesmo com round trip vermelho? */
   fichaConfirmada?: boolean;
-  /** O v0 no instante da conversão, nunca reescrito. Torna o rollback exato. */
   personagemOriginal?: Personagem;
 }
 
@@ -307,7 +293,6 @@ export async function migrateLocalDataToCloud(
   const result = { fichas: 0, campanhas: 0, monstros: 0, items: 0 };
 
   try {
-
     const [existingFichas, existingCampanhas, existingMonstros] = await Promise.all([
       getAllFichasFromCloud(userId),
       getAllCampanhasFromCloud(userId),
@@ -320,7 +305,6 @@ export async function migrateLocalDataToCloud(
 
     const newFichas = data.fichas.filter(f => !existingFichaIds.has(f.id));
     for (const ficha of newFichas) {
-      // Spread, não literal de campos: um literal descartaria o documento v2.
       await saveFichaToCloud(userId, { ...ficha });
       result.fichas++;
     }
@@ -379,7 +363,6 @@ export async function deleteAllUserData(userId: string): Promise<{ success: bool
   let deleted = 0;
 
   try {
-
     const fichas = await getAllFichasFromCloud(userId);
     for (const ficha of fichas) {
       await deleteFichaFromCloud(userId, ficha.id);
@@ -402,14 +385,12 @@ export async function deleteAllUserData(userId: string): Promise<{ success: bool
       await deleteDoc(getCustomItemsDocRef(userId));
       deleted++;
     } catch {
-
     }
 
     try {
       await deleteDoc(getUserDocRef(userId));
       deleted++;
     } catch {
-
     }
 
     return { success: true, deleted };

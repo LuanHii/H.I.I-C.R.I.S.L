@@ -35,8 +35,6 @@ const TABELA: [string, Requisito[]][] = [
   ['Int 2', [{ tipo: 'atributo', atributo: 'INT', minimo: 2 }]],
   ['Pre 1', [{ tipo: 'atributo', atributo: 'PRE', minimo: 1 }]],
   ['Pre 2', [{ tipo: 'atributo', atributo: 'PRE', minimo: 2 }]],
-  // Tanque de Guerra exige o PODER Proteção Pesada (que concede a proficiência),
-  // e não a proficiência em si — conferido no Livro de Regras.
   ['Proteção Pesada', [{ tipo: 'poder', poder: 'Proteção Pesada' }]],
   ['Agi 2', [{ tipo: 'atributo', atributo: 'AGI', minimo: 2 }]],
   ['Vig 2', [{ tipo: 'atributo', atributo: 'VIG', minimo: 2 }]],

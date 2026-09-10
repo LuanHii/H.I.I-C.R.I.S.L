@@ -46,7 +46,6 @@ export function ConditionPicker({ selectedConditions, onAdd, onRemove, compact =
 
     return (
         <div className="relative" ref={dropdownRef}>
-            {}
             <div className="flex flex-wrap gap-1.5 mb-2">
                 {selectedConditions.map(condId => {
                     const condition = getConditionById(condId);
@@ -74,7 +73,6 @@ export function ConditionPicker({ selectedConditions, onAdd, onRemove, compact =
                                 </button>
                             </span>
 
-                            {}
                             {hoveredCondition?.id === condId && (
                                 <motion.div
                                     initial={{ opacity: 0, y: 5 }}
@@ -93,7 +91,6 @@ export function ConditionPicker({ selectedConditions, onAdd, onRemove, compact =
                 })}
             </div>
 
-            {}
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={cn(
@@ -106,7 +103,6 @@ export function ConditionPicker({ selectedConditions, onAdd, onRemove, compact =
                 <ChevronDown size={14} className={cn('transition-transform', isOpen && 'rotate-180')} />
             </button>
 
-            {}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -115,7 +111,6 @@ export function ConditionPicker({ selectedConditions, onAdd, onRemove, compact =
                         exit={{ opacity: 0, y: -10 }}
                         className="absolute z-50 top-full left-0 mt-1 w-72 bg-ordem-black border border-ordem-border rounded-lg shadow-xl overflow-hidden"
                     >
-                        {}
                         <div className="p-2 border-b border-ordem-border">
                             <div className="relative">
                                 <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-ordem-text-muted" />
@@ -130,7 +125,6 @@ export function ConditionPicker({ selectedConditions, onAdd, onRemove, compact =
                             </div>
                         </div>
 
-                        {}
                         <div className="max-h-64 overflow-y-auto custom-scrollbar">
                             {filteredConditions.length === 0 ? (
                                 <p className="p-3 text-sm text-ordem-text-muted text-center">Nenhuma condição encontrada</p>
@@ -214,7 +208,6 @@ export function ConditionBadges({
                             )}
                         </span>
 
-                        {}
                         {showTooltip && hoveredCondition?.id === condId && (
                             <motion.div
                                 initial={{ opacity: 0, y: 5 }}

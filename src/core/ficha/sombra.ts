@@ -3,22 +3,6 @@ import { buildFicha } from './buildFicha';
 import { inferirFicha } from './inferirFicha';
 import type { Problema } from './tipos';
 
-/**
- * SHADOW MODE — roda os dois motores lado a lado.
- *
- * O motor ANTIGO permanece autoritativo. O novo roda, o resultado é comparado e
- * descartado. A saída é um relatório de divergências.
- *
- * Por que isso importa mais que os testes: a falha do conversor é SILENCIOSA e o
- * dado é irrecuperável. Uma semana de uso real gera o corpus de divergências que
- * nenhuma fixture sintética produziria.
- *
- * Nada aqui muta a ficha. `comparar` clona em profundidade antes de olhar —
- * detalhe que não é paranoia: o app muta o personagem através de `{...agent}`
- * raso em vários pontos, então um differ que guardasse a referência compararia o
- * "depois" consigo mesmo e passaria sempre.
- */
-
 export interface Divergencia {
   campo: string;
   v0: unknown;
@@ -26,17 +10,13 @@ export interface Divergencia {
 }
 
 export interface RelatorioSombra {
-  /** Nome do personagem, para achar a ficha depois. */
   personagem: string;
   divergencias: Divergencia[];
-  /** Problemas que o motor novo reportou ao construir. */
   problemas: Problema[];
-  /** Escolhas que a inferência não conseguiu atribuir com confiança alta. */
   inferenciasIncertas: { id: string; confianca: string; nota: string }[];
   ok: boolean;
 }
 
-/** Clone profundo sem depender de structuredClone (não existe em todo runtime). */
 function clonar<T>(valor: T): T {
   return JSON.parse(JSON.stringify(valor)) as T;
 }
@@ -51,16 +31,7 @@ function comparaNumero(
   if (v0 !== v2) divergencias.push({ campo, v0, v2 });
 }
 
-/**
- * Compara um `Personagem` do motor antigo com o build do motor novo sobre a
- * mesma ficha.
- *
- * Só compara o que AMBOS os motores deveriam concordar. Campos que o motor novo
- * ainda não deriva (equipamento, condições) ficam de fora — reportá-los como
- * divergência afogaria o sinal em ruído.
- */
 export function comparar(personagemOriginal: Personagem): RelatorioSombra {
-  // Clone ANTES de qualquer leitura. Ver comentário no topo.
   const v0 = clonar(personagemOriginal);
 
   const inferencia = inferirFicha(v0);
@@ -86,17 +57,6 @@ export function comparar(personagemOriginal: Personagem): RelatorioSombra {
     divergencias.push({ campo: 'patente', v0: v0.patente, v2: v2.patente });
   }
 
-  /*
-   * Poderes, separados nas DUAS direções — porque elas não têm a mesma gravidade.
-   *
-   * `poderes.faltando` é perda: a ficha tem um poder que o motor novo não
-   * reproduz. É o modo de falha que este plano existe para impedir, e nenhum
-   * número derivado o denuncia (o poder pode não ter efeito mecânico nenhum).
-   *
-   * `poderes.extra` costuma ser CORREÇÃO: o motor antigo não concede "Perito" ao
-   * especialista, que a Tabela 1.4 imprime em NEX 5%. Misturar as duas numa
-   * lista só faria toda ficha de especialista parecer divergente.
-   */
   const listaV0 = (v0.poderes ?? []).map((p) => p.nome);
   const listaV2 = v2.poderes.map((p) => p.nome);
   const nomesV0 = new Set(listaV0);
@@ -119,10 +79,6 @@ export function comparar(personagemOriginal: Personagem): RelatorioSombra {
   };
 }
 
-/**
- * Está ligado? Lê a env var, e nunca lança se `process` não existir (o mesmo
- * módulo roda no browser).
- */
 export function sombraAtiva(): boolean {
   try {
     return process.env.NEXT_PUBLIC_FICHA_SOMBRA === '1';
@@ -131,24 +87,12 @@ export function sombraAtiva(): boolean {
   }
 }
 
-/**
- * Ponto de entrada para o app. Só faz trabalho se a flag estiver ligada, e
- * NUNCA propaga exceção — shadow mode que derruba a sessão do mestre é pior que
- * shadow mode nenhum.
- */
 export function observar(
   personagem: Personagem,
   registrar: (relatorio: RelatorioSombra) => void = registroPadrao,
 ): void {
   if (!sombraAtiva()) return;
   try {
-    /*
-     * Registra SEMPRE, inclusive quando não há divergência.
-     *
-     * Na primeira versão só o caso divergente logava, e isso tornou o silêncio
-     * indistinguível de três coisas diferentes: flag desligada, motor não
-     * alcançado, ou concordância perfeita. Uma linha por ficha resolve.
-     */
     registrar(comparar(personagem));
   } catch (erro) {
     registrar({
@@ -165,7 +109,6 @@ let anunciado = false;
 let comparadas = 0;
 
 function registroPadrao(relatorio: RelatorioSombra): void {
-  /* eslint-disable no-console */
   if (!anunciado) {
     anunciado = true;
     console.info('[ficha-sombra] ativo. Uma linha por ficha comparada; divergências saem como warning.');
@@ -177,11 +120,6 @@ function registroPadrao(relatorio: RelatorioSombra): void {
     return;
   }
 
-  /*
-   * Um relatório cujas únicas divergências são poderes A MAIS não é alarme: é o
-   * motor novo aplicando uma regra que o antigo esquecia. Rebaixar para info
-   * mantém o console legível — se tudo grita, nada é lido, e é o mestre quem lê.
-   */
   const soGanhos = relatorio.problemas.length === 0
     && relatorio.divergencias.length > 0
     && relatorio.divergencias.every((d) => d.campo === 'poderes.extra');
@@ -200,5 +138,4 @@ function registroPadrao(relatorio: RelatorioSombra): void {
     `${relatorio.divergencias.length} divergência(s), ${relatorio.problemas.length} problema(s)`,
     relatorio,
   );
-  /* eslint-enable no-console */
 }

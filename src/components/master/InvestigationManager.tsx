@@ -119,7 +119,6 @@ export const InvestigationManager: React.FC = () => {
                 )}
             </div>
 
-            {}
             <AnimatePresence>
                 {isCreating && (
                     <motion.div
@@ -143,7 +142,6 @@ export const InvestigationManager: React.FC = () => {
                 )}
             </AnimatePresence>
 
-            {}
             <div className="space-y-4">
                 {cenas.length === 0 ? (
                     <div className="text-center py-10 text-ordem-text-muted italic border-2 border-dashed border-ordem-border/50 rounded-lg">
@@ -186,7 +184,6 @@ export const InvestigationManager: React.FC = () => {
                                         className="border-t border-ordem-border-light"
                                     >
                                         <div className="p-4 space-y-4">
-                                            {}
                                             <div className="flex justify-between items-center">
                                                 <h4 className="text-sm font-bold uppercase tracking-wider text-ordem-text-muted">Pistas</h4>
                                                 <Button
@@ -199,7 +196,6 @@ export const InvestigationManager: React.FC = () => {
                                                 </Button>
                                             </div>
 
-                                            {}
                                             {adicionandoPistaEm === cena.id && (
                                                 <div className="p-3 bg-ordem-ooze rounded-lg border border-ordem-border space-y-3 animate-in fade-in slide-in-from-top-2">
                                                     <Input
@@ -236,7 +232,6 @@ export const InvestigationManager: React.FC = () => {
                                                 </div>
                                             )}
 
-                                            {}
                                             <div className="space-y-2">
                                                 {cena.pistas.map(pista => (
                                                     <div

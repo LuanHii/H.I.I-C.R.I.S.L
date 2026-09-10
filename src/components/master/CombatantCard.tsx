@@ -159,7 +159,6 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                     </button>
                 )}
 
-                { }
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                         {getTypeIcon()}
@@ -193,7 +192,6 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                         )}
                     </div>
 
-                    { }
                     {combatant.conditions.length > 0 && (
                         <div className="mt-1">
                             <ConditionBadges
@@ -207,7 +205,6 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                 </div>
 
                 <div className="flex items-center gap-4 shrink-0">
-                    { }
                     <div className="text-center">
                         <div className="flex items-center justify-center gap-1 text-red-400">
                             <Heart size={12} />
@@ -237,7 +234,6 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                                 </button>
                             )}
                         </div>
-                        { }
                         <div className="w-20 h-1.5 bg-ordem-black rounded-full overflow-hidden mt-0.5">
                             <motion.div
                                 className={cn('h-full', getHpColor())}
@@ -248,7 +244,6 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                         </div>
                     </div>
 
-                    { }
                     <div className="text-center">
                         <div className="flex items-center gap-1 text-blue-400">
                             <Shield size={12} />
@@ -258,7 +253,6 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                     </div>
                 </div>
 
-                { }
                 <button
                     onClick={() => setIsExpanded(!isExpanded)}
                     className="p-1.5 text-ordem-text-secondary hover:text-white transition-colors"
@@ -267,7 +261,6 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                 </button>
             </div>
 
-            { }
             {isExpanded && (
                 <motion.div
                     initial={{ height: 0 }}
@@ -275,7 +268,6 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                     exit={{ height: 0 }}
                     className="border-t border-ordem-border bg-ordem-black/50 p-3 space-y-3"
                 >
-                    { }
                     <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs text-ordem-text-secondary">Dano:</span>
                         <div className="flex items-center gap-1">
@@ -303,7 +295,6 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                         <button onClick={() => applyHealing(10)} className="px-2 py-1 text-xs bg-green-600/20 hover:bg-green-600/40 text-green-400 rounded">+10</button>
                     </div>
 
-                    { }
                     {(combatant.pe || combatant.san) && (
                         <div className="flex items-center gap-4">
                             {combatant.pe && (
@@ -343,7 +334,6 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                         </div>
                     )}
 
-                    { }
                     <div>
                         <span className="text-xs text-ordem-text-secondary mb-1 block">Condições:</span>
                         <ConditionPicker
@@ -354,7 +344,6 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                         />
                     </div>
 
-                    { }
                     <div>
                         <div className="flex items-center gap-1 mb-1">
                             <StickyNote size={12} className="text-ordem-text-muted" />
@@ -459,7 +448,6 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                         </div>
                     )}
 
-                    { }
                     <div className="flex items-center gap-2 pt-2 border-t border-ordem-border/50">
                         <button
                             onClick={onDuplicate}
