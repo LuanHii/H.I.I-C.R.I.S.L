@@ -4,6 +4,7 @@ import { TRILHAS } from '../../data/character/tracks';
 import { ORIGENS } from '../../data/character/origins';
 import { RITUAIS } from '../../data/magic/rituals';
 import { getPatenteConfig, calcularCarga, listarEventosNex } from '../../logic/rulesEngine';
+import { desduplicarEfeitosDeOrigem } from '../rules/efeitosDeOrigem';
 import { buildFicha, type BuildResultado } from './buildFicha';
 import type { FichaPersistida, PoderDerivado } from './tipos';
 
@@ -137,6 +138,7 @@ export function paraPersonagem({ ficha, carregarDe, build }: RenderInput): Perso
     pendenciasNex: [],
 
     eventosNex: listarEventosNex(identidade.classe === 'Sobrevivente' ? 0 : progressao.nex),
+    efeitosAtivos: desduplicarEfeitosDeOrigem(carregarDe.efeitosAtivos),
     marcas: sessao.marcas ?? carregarDe.marcas,
   };
 }

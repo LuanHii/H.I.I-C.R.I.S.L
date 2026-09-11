@@ -307,7 +307,7 @@ export function gerarFicha(input: CriacaoInput): Personagem {
     origem,
     classe: input.classe,
     sobreviventeBeneficioOrigem: input.sobreviventeBeneficioOrigem,
-    trilhaEfeitos: [...trilhaEfeito.efeitos, ...bonusOrigem.efeitos],
+    trilhaEfeitos: trilhaEfeito.efeitos,
     afinidade: afinidadeFinal,
   });
 

@@ -46,7 +46,6 @@ exports[`gerarFicha — forma da ficha inicial > Combatente / Desgarrado em NEX 
   "deslocamento": 9,
   "efeitosAtivos": [
     "Calejado: Você recebe +1 PV para cada 5% de NEX.",
-    "Calejado: +1 PV (5% NEX ÷ 5)",
   ],
   "equipamentos": [],
   "estagio": undefined,
@@ -512,7 +511,6 @@ exports[`gerarFicha — forma da ficha inicial > Combatente / Policial em NEX 5%
   "deslocamento": 9,
   "efeitosAtivos": [
     "Patrulha: Você recebe +2 em Defesa.",
-    "Patrulha: +2 Defesa",
   ],
   "equipamentos": [],
   "estagio": undefined,
@@ -978,7 +976,6 @@ exports[`gerarFicha — forma da ficha inicial > Combatente / Universitário em 
   "deslocamento": 9,
   "efeitosAtivos": [
     "Dedicação: Você recebe +1 PE, e mais 1 PE adicional a cada NEX ímpar. Seu limite de PE por turno aumenta em 1.",
-    "Dedicação: +2 PE (1 base + 1 por NEX ímpar)",
   ],
   "equipamentos": [],
   "estagio": undefined,
@@ -1444,7 +1441,6 @@ exports[`gerarFicha — forma da ficha inicial > Especialista / Desgarrado em NE
   "deslocamento": 9,
   "efeitosAtivos": [
     "Calejado: Você recebe +1 PV para cada 5% de NEX.",
-    "Calejado: +1 PV (5% NEX ÷ 5)",
   ],
   "equipamentos": [],
   "estagio": undefined,
@@ -1909,7 +1905,6 @@ exports[`gerarFicha — forma da ficha inicial > Especialista / Policial em NEX 
   "deslocamento": 9,
   "efeitosAtivos": [
     "Patrulha: Você recebe +2 em Defesa.",
-    "Patrulha: +2 Defesa",
   ],
   "equipamentos": [],
   "estagio": undefined,
@@ -2374,7 +2369,6 @@ exports[`gerarFicha — forma da ficha inicial > Especialista / Universitário e
   "deslocamento": 9,
   "efeitosAtivos": [
     "Dedicação: Você recebe +1 PE, e mais 1 PE adicional a cada NEX ímpar. Seu limite de PE por turno aumenta em 1.",
-    "Dedicação: +2 PE (1 base + 1 por NEX ímpar)",
   ],
   "equipamentos": [],
   "estagio": undefined,
@@ -2839,7 +2833,6 @@ exports[`gerarFicha — forma da ficha inicial > Ocultista / Desgarrado em NEX 5
   "deslocamento": 9,
   "efeitosAtivos": [
     "Calejado: Você recebe +1 PV para cada 5% de NEX.",
-    "Calejado: +1 PV (5% NEX ÷ 5)",
   ],
   "equipamentos": [],
   "estagio": undefined,
@@ -3303,7 +3296,6 @@ exports[`gerarFicha — forma da ficha inicial > Ocultista / Policial em NEX 5% 
   "deslocamento": 9,
   "efeitosAtivos": [
     "Patrulha: Você recebe +2 em Defesa.",
-    "Patrulha: +2 Defesa",
   ],
   "equipamentos": [],
   "estagio": undefined,
@@ -3767,7 +3759,6 @@ exports[`gerarFicha — forma da ficha inicial > Ocultista / Universitário em N
   "deslocamento": 9,
   "efeitosAtivos": [
     "Dedicação: Você recebe +1 PE, e mais 1 PE adicional a cada NEX ímpar. Seu limite de PE por turno aumenta em 1.",
-    "Dedicação: +2 PE (1 base + 1 por NEX ímpar)",
   ],
   "equipamentos": [],
   "estagio": undefined,
@@ -4231,7 +4222,6 @@ exports[`gerarFicha — forma da ficha inicial > Sobrevivente no estagio 1 1`] =
   "deslocamento": 9,
   "efeitosAtivos": [
     "Calejado: Você recebe +1 PV para cada 5% de NEX.",
-    "Calejado: +0 PV (0% NEX ÷ 5)",
   ],
   "equipamentos": [],
   "estagio": 1,
