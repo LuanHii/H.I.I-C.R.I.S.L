@@ -11,7 +11,8 @@ export const CLASSES: Record<ClasseName, ClasseStats> = {
     pdInicial: 6,
     pdPorNivel: 3,
     periciasIniciais: 1,
-    periciasObrigatorias: ['Luta', 'Pontaria', 'Fortitude', 'Reflexos'],
+    periciasObrigatorias: [],
+    periciasEmPar: [['Luta', 'Pontaria'], ['Fortitude', 'Reflexos']],
     proficiencias: ['Armas Simples', 'Armas Táticas', 'Proteções Leves']
   },
   'Especialista': {

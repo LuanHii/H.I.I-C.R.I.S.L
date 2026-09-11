@@ -1,4 +1,5 @@
 import type { Personagem } from '../types';
+import { CLASSES } from '../../data/character/classes';
 import { buildFicha } from './buildFicha';
 import { paraPersonagem } from './paraPersonagem';
 import { replayParaFrente } from './migracao/replay';
@@ -20,6 +21,20 @@ export interface Resolucao {
   motivo: string;
 }
 
+export function conversaoDesatualizada(ficha: FichaPersistida): string | null {
+  const pares = CLASSES[ficha.identidade.classe].periciasEmPar ?? [];
+  if (pares.length === 0) return null;
+
+  const livres = new Set(ficha.identidade.periciasLivres);
+  const nenhumLado = pares.every(([a, b]) => !livres.has(a) && !livres.has(b));
+  if (!nenhumLado) return null;
+
+  return (
+    `A regra de perícias do ${ficha.identidade.classe} foi corrigida (${pares.map(([a, b]) => `${a} ou ${b}`).join(', ')} — Ordem:705) `
+    + 'e esta conversão é anterior à correção. Converta de novo e confira as perícias treinadas.'
+  );
+}
+
 export function resolverPersonagem(registro: RegistroLegivel): Resolucao {
   const v0 = registro.personagem;
 
@@ -36,6 +51,11 @@ export function resolverPersonagem(registro: RegistroLegivel): Resolucao {
   }
 
   try {
+    const desatualizada = conversaoDesatualizada(registro.ficha);
+    if (desatualizada) {
+      return { personagem: v0, fonte: 'v0', motivo: desatualizada };
+    }
+
     const replay = replayParaFrente(registro.ficha);
     if (!replay.ok && !registro.fichaConfirmada) {
       return {
