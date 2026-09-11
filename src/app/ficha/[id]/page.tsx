@@ -108,8 +108,8 @@ function PlayerAgentContent() {
     return (
       <div className="min-h-screen bg-ordem-black text-white flex items-center justify-center font-mono">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-ordem-red border-t-transparent rounded-full animate-spin"></div>
-          <div className="animate-pulse tracking-widest">CARREGANDO DADOS DA ORDEM...</div>
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/10 border-t-ordem-red"></div>
+          <div className="animate-pulse font-carimbo text-[11px] uppercase tracking-[0.3em] text-ordem-text-muted">Carregando dados da Ordem</div>
         </div>
       </div>
     );
@@ -133,10 +133,11 @@ function PlayerAgentContent() {
   return (
     <div className="min-h-screen bg-ordem-black">
       {!isFoundryEmbed && (
-        <div className="sticky top-0 z-50 bg-ordem-black/95 backdrop-blur border-b border-ordem-border">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="text-xs font-mono tracking-widest text-ordem-text-muted uppercase">Ficha Compartilhada</div>
+        <div className="sticky top-0 z-50 border-b border-white/10 bg-ordem-black/95 backdrop-blur">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-2.5">
+          <div className="flex min-w-0 items-baseline gap-3">
+            <span className="font-display text-lg uppercase tracking-[0.1em] text-ordem-red">C.R.I.S.</span>
+            <span className="font-carimbo text-[10px] uppercase tracking-[0.3em] text-ordem-text-muted">Ordo Realitas</span>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
@@ -144,10 +145,10 @@ function PlayerAgentContent() {
               <button
                 onClick={handleToggleWatch}
                 disabled={watchLoading}
-                className={`flex items-center gap-2 px-3 py-2 text-xs font-mono tracking-wider rounded-lg border transition-colors ${
+                className={`flex items-center gap-2 border px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] transition-colors ${
                   isCurrentlyWatching
-                    ? 'border-ordem-gold text-ordem-gold bg-ordem-gold/10 hover:bg-ordem-gold/20'
-                    : 'border-ordem-green text-ordem-green hover:bg-ordem-green/10'
+                    ? 'border-ordem-gold/60 bg-ordem-gold/10 text-ordem-gold hover:bg-ordem-gold/20'
+                    : 'border-white/10 text-ordem-text-secondary hover:border-white/30 hover:text-white'
                 } disabled:opacity-50`}
               >
                 {watchLoading ? (
@@ -158,7 +159,7 @@ function PlayerAgentContent() {
                   <Eye size={16} />
                 )}
                 <span className="hidden sm:inline">
-                  {isCurrentlyWatching ? 'OBSERVANDO' : 'ACOMPANHAR'}
+                  {isCurrentlyWatching ? 'Observando' : 'Acompanhar'}
                 </span>
               </button>
             ) : (
@@ -166,7 +167,7 @@ function PlayerAgentContent() {
                 type="button"
                 onClick={() => auth?.signInWithGoogle()}
                 disabled={auth?.loading}
-                className="flex items-center gap-2 px-3 py-2 text-xs font-mono tracking-wider rounded-lg border border-ordem-border-light text-ordem-white/80 hover:border-ordem-green hover:text-ordem-green disabled:opacity-50 transition-colors touch-target-sm"
+                className="flex items-center gap-2 border border-white/10 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary transition-colors hover:border-white/30 hover:text-white disabled:opacity-50 touch-target-sm"
               >
                 <LogIn size={14} />
                 <span>Entrar</span>

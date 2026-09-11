@@ -98,7 +98,7 @@ export function CustomDiceRoller() {
   const formula = `${diceCount}d${sides}${bonus === 0 ? '' : bonus > 0 ? ` + ${bonus}` : ` - ${Math.abs(bonus)}`}`;
 
   return (
-    <section className="rounded-2xl border border-ordem-gold/25 bg-black/40 shadow-xl backdrop-blur-sm">
+    <section className=" border border-ordem-gold/25 bg-black/40 shadow-xl backdrop-blur-sm">
       <button
         type="button"
         onClick={() => setExpanded((value) => !value)}
@@ -106,7 +106,7 @@ export function CustomDiceRoller() {
         aria-expanded={expanded}
       >
         <span className="flex min-w-0 items-center gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-ordem-gold/30 bg-ordem-gold/10 text-ordem-gold">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-ordem-gold/30 bg-ordem-gold/10 text-ordem-gold">
             <Dices size={18} />
           </span>
           <span className="min-w-0">
@@ -127,7 +127,7 @@ export function CustomDiceRoller() {
             <legend className="mb-2 text-[10px] font-mono uppercase tracking-[0.2em] text-ordem-text-muted">
               Resultado
             </legend>
-            <div className="grid grid-cols-2 gap-2 rounded-lg border border-white/10 bg-black/45 p-1">
+            <div className="grid grid-cols-2 gap-2 border border-white/10 bg-black/45 p-1">
               {([
                 ['sum', 'Somar dados'],
                 ['highest', 'Maior dado'],
@@ -139,7 +139,7 @@ export function CustomDiceRoller() {
                     setMode(value);
                     setLastRoll(null);
                   }}
-                  className={`min-h-10 rounded-md px-3 text-xs font-bold transition-colors ${
+                  className={`min-h-10 px-3 text-xs font-bold transition-colors ${
                     mode === value
                       ? 'bg-ordem-gold text-black'
                       : 'text-ordem-text-secondary hover:bg-white/5 hover:text-white'
@@ -162,7 +162,7 @@ export function CustomDiceRoller() {
                   key={count}
                   type="button"
                   onClick={() => updateDiceCount(count)}
-                  className={`min-h-10 rounded-lg border text-sm font-bold transition-colors ${
+                  className={`min-h-10 border text-sm font-bold transition-colors ${
                     diceCount === count
                       ? 'border-ordem-gold bg-ordem-gold/15 text-ordem-gold'
                       : 'border-white/10 bg-black/35 text-zinc-300 hover:border-white/25'
@@ -177,7 +177,7 @@ export function CustomDiceRoller() {
                 max={100}
                 value={diceCount}
                 onChange={(event) => updateDiceCount(Number(event.target.value))}
-                className="min-w-0 rounded-lg border border-white/10 bg-black/60 px-2 text-center font-mono text-sm text-white outline-none focus:border-ordem-gold"
+                className="min-w-0 border border-white/10 bg-black/60 px-2 text-center font-mono text-sm text-white outline-none focus:border-ordem-gold"
                 aria-label="Quantidade personalizada de dados"
               />
             </div>
@@ -193,7 +193,7 @@ export function CustomDiceRoller() {
                   key={sideCount}
                   type="button"
                   onClick={() => updateSides(sideCount)}
-                  className={`min-h-10 rounded-lg border font-mono text-xs font-bold transition-colors ${
+                  className={`min-h-10 border font-mono text-xs font-bold transition-colors ${
                     sides === sideCount
                       ? 'border-ordem-gold bg-ordem-gold/15 text-ordem-gold'
                       : 'border-white/10 bg-black/35 text-zinc-300 hover:border-white/25'
@@ -212,7 +212,7 @@ export function CustomDiceRoller() {
                   max={1000}
                   value={sides}
                   onChange={(event) => updateSides(Number(event.target.value))}
-                  className="h-10 w-full min-w-0 rounded-lg border border-white/10 bg-black/60 pl-5 pr-1 text-center font-mono text-xs text-white outline-none focus:border-ordem-gold"
+                  className="h-10 w-full min-w-0 border border-white/10 bg-black/60 pl-5 pr-1 text-center font-mono text-xs text-white outline-none focus:border-ordem-gold"
                   aria-label="Número personalizado de faces"
                 />
               </label>
@@ -227,7 +227,7 @@ export function CustomDiceRoller() {
               <button
                 type="button"
                 onClick={() => updateBonus(bonus - 5)}
-                className="flex min-h-10 items-center justify-center rounded-lg border border-white/10 bg-black/35 text-zinc-300 hover:border-red-400/40 hover:text-red-300"
+                className="flex min-h-10 items-center justify-center border border-white/10 bg-black/35 text-zinc-300 hover:border-red-400/40 hover:text-red-300"
                 title="Remover 5 do bônus"
               >
                 <Minus size={16} />
@@ -239,13 +239,13 @@ export function CustomDiceRoller() {
                 max={9999}
                 value={bonus}
                 onChange={(event) => updateBonus(Number(event.target.value))}
-                className="min-w-0 rounded-lg border border-white/10 bg-black/60 px-3 text-center font-mono text-sm text-white outline-none focus:border-ordem-gold"
+                className="min-w-0 border border-white/10 bg-black/60 px-3 text-center font-mono text-sm text-white outline-none focus:border-ordem-gold"
                 aria-label="Bônus da rolagem"
               />
               <button
                 type="button"
                 onClick={() => updateBonus(bonus + 5)}
-                className="flex min-h-10 items-center justify-center rounded-lg border border-white/10 bg-black/35 text-zinc-300 hover:border-green-400/40 hover:text-green-300"
+                className="flex min-h-10 items-center justify-center border border-white/10 bg-black/35 text-zinc-300 hover:border-green-400/40 hover:text-green-300"
                 title="Adicionar 5 ao bônus"
               >
                 <Plus size={16} />
@@ -258,7 +258,7 @@ export function CustomDiceRoller() {
             <button
               type="button"
               onClick={reset}
-              className="flex min-h-11 items-center justify-center rounded-lg border border-white/10 bg-black/35 text-ordem-text-muted hover:border-white/25 hover:text-white"
+              className="flex min-h-11 items-center justify-center border border-white/10 bg-black/35 text-ordem-text-muted hover:border-white/25 hover:text-white"
               title="Restaurar configuração"
             >
               <RotateCcw size={17} />
@@ -266,7 +266,7 @@ export function CustomDiceRoller() {
             <button
               type="button"
               onClick={roll}
-              className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-ordem-gold px-4 text-sm font-black uppercase tracking-[0.15em] text-black transition-colors hover:bg-yellow-300 active:scale-[0.99]"
+              className="flex min-h-11 items-center justify-center gap-2 bg-ordem-gold px-4 text-sm font-black uppercase tracking-[0.15em] text-black transition-colors hover:bg-yellow-300 active:scale-[0.99]"
             >
               <Dices size={18} />
               Rolar {formula}
@@ -276,7 +276,7 @@ export function CustomDiceRoller() {
           {lastRoll && (
             <div className="border-t border-white/10 pt-4" aria-live="polite">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-ordem-gold/35 bg-ordem-gold/10 text-3xl font-black text-ordem-gold">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center border border-ordem-gold/35 bg-ordem-gold/10 text-3xl font-black text-ordem-gold">
                   {lastRoll.total}
                 </div>
                 <div className="min-w-0">

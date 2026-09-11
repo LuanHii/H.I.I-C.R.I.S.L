@@ -11,7 +11,9 @@
 | Novo (`core/ficha`) | `components/master/ficha/FichaMestre.tsx` | `registro.fonte === 'v2' && registro.ficha` |
 | Antigo (`logic/levelUp`) | `components/master/AgentDetailView.tsx` | qualquer outro caso (ficha v0) |
 
-A decisão vive em `FichasManager.tsx` e em `app/mestre/fichas/[id]/page.tsx`. O legado está congelado: não recebe funcionalidade nova e não conhece `core/ficha`. Quando não existir mais ficha v0, `AgentDetailView` e os modais antigos podem ser apagados.
+A decisão vive em `FichasManager.tsx` e em `app/mestre/fichas/[id]/page.tsx`.
+
+A ficha que o **jogador** vê (`/ficha/[id]`, `components/RemoteAgentView.tsx`) é só leitura, lê o `personagem` projetado e usa a mesma linguagem visual: cabeçalho com fitas, barras, atributos, e perícias agrupadas por atributo (Agilidade, Força, Intelecto, Presença, Vigor). O legado está congelado: não recebe funcionalidade nova e não conhece `core/ficha`. Quando não existir mais ficha v0, `AgentDetailView` e os modais antigos podem ser apagados.
 
 ---
 
