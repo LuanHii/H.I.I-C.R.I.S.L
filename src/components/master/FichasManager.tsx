@@ -14,6 +14,7 @@ import { downloadJSON, exportarFichaIndividual, exportarFichasPorCampanha } from
 import { CampanhaSection, NovaCampanhaForm } from './CampanhaSection';
 import { recalcularRecursosPersonagem } from '../../logic/progression';
 import { observar } from '../../core/ficha/sombra';
+import { descreverSinal, sinalDaFicha } from '../../core/ficha/sinal';
 import { MigracaoWizard } from './MigracaoWizard';
 import { Cloud, CloudOff, ChevronLeft, Menu, Plus, Download, Eye, PanelLeftClose, PanelLeft, RefreshCw, MoreHorizontal } from 'lucide-react';
 import { WeaponModsButton } from './WeaponModsModal';
@@ -266,14 +267,19 @@ export function FichasManager() {
   };
 
   const renderFichaCard = (registro: FichaRegistro) => {
-    const issues = auditPersonagem(registro.personagem);
-    const summary = summarizeIssues(issues);
-    const title =
-      summary.total === 0
+    const sinal = registro.fonte === 'v2' && registro.ficha ? sinalDaFicha(registro.ficha) : null;
+    const issues = sinal ? [] : auditPersonagem(registro.personagem);
+    const summary = sinal
+      ? { total: sinal.pendentes + sinal.erros.length + sinal.avisos.length, errors: sinal.erros.length, warns: sinal.pendentes + sinal.avisos.length }
+      : summarizeIssues(issues);
+    const title = sinal
+      ? descreverSinal(sinal)
+      : summary.total === 0
         ? ''
         : `Problemas detectados (${summary.errors} erro(s), ${summary.warns} aviso(s)):\n${issues
           .map((i) => `- [${i.severity.toUpperCase()}] ${i.message}`)
           .join('\n')}`;
+    const rotuloDoSinal = summary.errors > 0 ? 'ERRO' : sinal ? `${sinal.pendentes} PEND.` : 'AVISO';
 
     if (viewMode === 'compact') {
       return (
@@ -309,7 +315,7 @@ export function FichasManager() {
                     : 'border-ordem-gold text-ordem-gold bg-ordem-gold/10'
                     }`}
                 >
-                  {summary.errors > 0 ? 'ERRO' : 'AVISO'}
+                  {rotuloDoSinal}
                 </span>
               )}
               {registro.sincronizadaNaNuvem && <Cloud size={14} className="text-ordem-green" />}

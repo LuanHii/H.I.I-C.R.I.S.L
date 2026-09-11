@@ -3,15 +3,15 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Personagem } from '../core/types';
-import { condicoes, getCategoriaCor, getCategoriaIcon, type CondicaoCompleta, type ConditionCategory } from '../data/combat/conditions';
+import { condicoes, getCategoriaCor, type CondicaoCompleta, type ConditionCategory } from '../data/combat/conditions';
 import { ConditionBadge, ConditionsSummary } from './ConditionBadge';
 import { Button } from './ui/Button';
-import { Card, CardHeader, CardContent } from './ui/Card';
 import { Input } from './ui/Input';
 import { Badge } from './ui/Badge';
 import { Collapsible } from './ui/Collapsible';
 import { listContainer, listItem, slideUp, scaleIn } from '@/lib/motion';
-import { Plus, X, Search, Shield } from 'lucide-react';
+import { Plus, X, Search } from 'lucide-react';
+import { RotuloSecao } from './master/ui/Pecas';
 
 interface ConditionsManagerProps {
   personagem: Personagem;
@@ -80,45 +80,39 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
     return grouped;
   }, [filteredConditions]);
 
-  const categories: Array<{ value: ConditionCategory | 'todas'; label: string; icon: string }> = [
-    { value: 'todas', label: 'Todas', icon: '📋' },
-    { value: 'medo', label: 'Medo', icon: '😱' },
-    { value: 'mental', label: 'Mental', icon: '🧠' },
-    { value: 'paralisia', label: 'Paralisia', icon: '⛓️' },
-    { value: 'sentidos', label: 'Sentidos', icon: '👁️' },
-    { value: 'fadiga', label: 'Fadiga', icon: '😴' },
-    { value: 'outros' as ConditionCategory, label: 'Outros', icon: '⚠️' }
+  const categories: Array<{ value: ConditionCategory | 'todas'; label: string }> = [
+    { value: 'todas', label: 'Todas' },
+    { value: 'medo', label: 'Medo' },
+    { value: 'mental', label: 'Mental' },
+    { value: 'paralisia', label: 'Paralisia' },
+    { value: 'sentidos', label: 'Sentidos' },
+    { value: 'fadiga', label: 'Fadiga' },
+    { value: 'outros' as ConditionCategory, label: 'Outros' }
   ];
 
   return (
-    <Card variant="default" className="overflow-visible">
-      <CardHeader className="pb-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-ordem-border-light rounded-lg">
-              <Shield className="w-5 h-5 text-ordem-white-muted" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-zinc-100">Condições Ativas</h3>
-              <p className="text-xs text-ordem-text-muted">
-                {activeConditions.length} condição(ões)
-              </p>
-            </div>
-          </div>
-          {!readOnly && (
-            <Button
-              variant={isAdding ? 'ghost' : 'danger'}
-              size="sm"
-              onClick={() => setIsAdding(!isAdding)}
-              icon={isAdding ? <X size={14} /> : <Plus size={14} />}
-            >
-              {isAdding ? 'Cancelar' : 'Adicionar'}
-            </Button>
-          )}
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-baseline gap-2">
+          <RotuloSecao className="text-[var(--mestre-primary,#DC2626)]">Condições ativas</RotuloSecao>
+          <span className="font-mono text-xs text-ordem-text-muted">{activeConditions.length}</span>
         </div>
-      </CardHeader>
+        {!readOnly && (
+          <button
+            type="button"
+            onClick={() => setIsAdding(!isAdding)}
+            className={`flex items-center gap-1.5 border px-3 py-1.5 font-carimbo text-[10px] uppercase tracking-[0.16em] transition ${isAdding
+              ? 'border-white/10 text-ordem-text-secondary hover:text-white'
+              : 'border-[var(--mestre-primary,#DC2626)] bg-[var(--mestre-primary,#DC2626)]/15 text-white hover:bg-[var(--mestre-primary,#DC2626)]/30'
+              }`}
+          >
+            {isAdding ? <X size={12} /> : <Plus size={12} />}
+            {isAdding ? 'Cancelar' : 'Aplicar condição'}
+          </button>
+        )}
+      </div>
 
-      <CardContent className="pt-0">
+      <div>
         <AnimatePresence>
           {activeConditions.length > 0 && (
             <motion.div
@@ -126,11 +120,10 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
               initial="initial"
               animate="animate"
               exit="exit"
-              className="mb-4 p-3 bg-ordem-black-deep/50 rounded-lg border border-ordem-border/50"
+              className="mb-4 border border-white/10 bg-white/[0.02] p-3"
             >
-              <div className="text-[10px] font-mono uppercase tracking-wider text-ordem-text-muted mb-2">
-                Penalidades Totais
-              </div>
+              <RotuloSecao>Penalidades somadas</RotuloSecao>
+              <div className="mt-2" />
               <ConditionsSummary efeitosAtivos={activeConditions} />
             </motion.div>
           )}
@@ -143,7 +136,7 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
               initial="initial"
               animate="animate"
               exit="exit"
-              className="mb-4 p-4 bg-ordem-black-deep rounded-lg border border-ordem-border"
+              className="mb-4 border border-white/10 bg-black/30 p-4"
             >
               <Input
                 placeholder="Buscar condição..."
@@ -160,12 +153,12 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setCategoryFilter(cat.value)}
-                    className={`px-2 py-1 text-[10px] rounded border transition-colors ${categoryFilter === cat.value
-                        ? 'bg-ordem-red/20 border-ordem-red text-ordem-red'
-                        : 'bg-ordem-ooze border-ordem-border text-ordem-text-muted hover:border-ordem-text-muted hover:text-white'
+                    className={`border px-2 py-1 font-carimbo text-[10px] uppercase tracking-[0.14em] transition-colors ${categoryFilter === cat.value
+                        ? 'border-[var(--mestre-primary,#DC2626)] bg-[var(--mestre-primary,#DC2626)]/15 text-white'
+                        : 'border-white/10 text-ordem-text-muted hover:border-white/30 hover:text-white'
                       }`}
                   >
-                    {cat.icon} {cat.label}
+                    {cat.label}
                   </motion.button>
                 ))}
               </div>
@@ -178,8 +171,8 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
               >
                 {Object.entries(conditionsByCategory).map(([category, conds]) => (
                   <div key={category}>
-                    <div className="text-[10px] font-mono uppercase tracking-wider text-ordem-text-muted px-2 py-1 sticky top-0 bg-ordem-black-deep z-10">
-                      {getCategoriaIcon(category as ConditionCategory)} {category}
+                    <div className="sticky top-0 z-10 bg-ordem-black-deep px-2 py-1 font-carimbo text-[10px] uppercase tracking-[0.18em] text-ordem-text-muted">
+                      {category}
                     </div>
                     {conds.map(cond => (
                       <motion.button
@@ -187,7 +180,7 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
                         variants={listItem}
                         whileHover={{ x: 4, backgroundColor: 'rgba(58, 58, 58, 0.5)' }}
                         onClick={() => handleAddCondition(cond.nome)}
-                        className="w-full text-left px-3 py-2.5 rounded flex flex-col gap-0.5 group border-l-2 border-transparent hover:border-l-2"
+                        className="w-full text-left px-3 py-2.5 flex flex-col gap-0.5 group border-l-2 border-transparent hover:border-l-2"
                       >
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-ordem-white group-hover:text-red-400 text-sm transition-colors">
@@ -259,8 +252,8 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
             </AnimatePresence>
           )}
         </motion.div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
@@ -275,7 +268,7 @@ const ConditionCardActive: React.FC<ConditionCardActiveProps> = ({ nome, onRemov
 
   if (!cond) {
     return (
-      <div className="bg-ordem-black-deep border border-red-900/30 rounded-lg p-3 flex justify-between items-center">
+      <div className="bg-ordem-black-deep border border-red-900/30 p-3 flex justify-between items-center">
         <span className="font-bold text-red-400">{nome}</span>
         {onRemove && (
           <Button variant="ghost" size="sm" onClick={onRemove}>
@@ -287,12 +280,11 @@ const ConditionCardActive: React.FC<ConditionCardActiveProps> = ({ nome, onRemov
   }
 
   const categoriaClasses = getCategoriaCor(cond.categoria);
-  const icon = getCategoriaIcon(cond.categoria);
 
   return (
     <motion.div
       layout
-      className={`border rounded-lg overflow-hidden transition-all ${categoriaClasses}`}
+      className={`border overflow-hidden transition-all ${categoriaClasses}`}
     >
       <motion.button
         type="button"
@@ -302,10 +294,9 @@ const ConditionCardActive: React.FC<ConditionCardActiveProps> = ({ nome, onRemov
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-lg">{icon}</span>
             <h4 className="font-bold text-sm">{cond.nome}</h4>
             {cond.categoria && (
-              <span className="text-[9px] uppercase tracking-wider opacity-70 px-1.5 py-0.5 rounded bg-black/20">
+              <span className="font-carimbo text-[9px] uppercase tracking-[0.14em] opacity-70 px-1.5 py-0.5 bg-black/20">
                 {cond.categoria}
               </span>
             )}
@@ -316,12 +307,12 @@ const ConditionCardActive: React.FC<ConditionCardActiveProps> = ({ nome, onRemov
             )}
             {cond.efeito?.deslocamento && (
               <Badge variant="warning" size="sm">
-                {cond.efeito.deslocamento === 'zero' ? '🚫 Imóvel' : '🐢 Lento'}
+                {cond.efeito.deslocamento === 'zero' ? 'Imóvel' : 'Lento'}
               </Badge>
             )}
             {cond.efeito?.acoes === 'nenhuma' && (
               <Badge variant="danger" size="sm" pulse>
-                ⛔ Sem Ações
+                Sem ações
               </Badge>
             )}
           </div>
@@ -353,7 +344,7 @@ const ConditionCardActive: React.FC<ConditionCardActiveProps> = ({ nome, onRemov
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={(e) => { e.stopPropagation(); onRemove(); }}
-              className="p-1 hover:bg-red-900/50 rounded text-current hover:text-red-300 transition-colors"
+              className="p-1 hover:bg-red-900/50 text-current hover:text-red-300 transition-colors"
               title="Remover condição"
             >
               <X size={14} />
@@ -373,7 +364,7 @@ const ConditionCardActive: React.FC<ConditionCardActiveProps> = ({ nome, onRemov
           >
             <div className="px-3 pb-3 pt-0 border-t border-current/20">
               {cond.efeito && (
-                <div className="mt-2 p-2 bg-black/20 rounded space-y-1">
+                <div className="mt-2 p-2 bg-black/20 space-y-1">
                   <div className="text-[10px] font-mono uppercase tracking-wider opacity-60 mb-1">
                     Efeitos Mecânicos
                   </div>

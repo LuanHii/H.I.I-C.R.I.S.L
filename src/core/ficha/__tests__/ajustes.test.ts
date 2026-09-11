@@ -5,6 +5,7 @@ import {
   ajustarAtributoBase,
   definirBonusPericia,
   definirDelta,
+  definirIdentidade,
   definirNota,
   removerPericiaLivre,
   removerPoderManual,
@@ -133,6 +134,19 @@ describe('ajustes do mestre entram pelo documento v2, nunca pelo personagem', ()
     const tentativa = removerPericiaLivre(ocultista, 'Ocultismo');
     expect(tentativa).toBe(ocultista);
     expect(buildFicha({ ficha: tentativa }).derivados.graus['Ocultismo']).toBe('Treinado');
+  });
+
+  it('nome e conceito são identidade: aparados, conceito vazio some, nome vazio é ignorado', () => {
+    const ficha = definirIdentidade(fichaBase(), { nome: '  Ana Meirelles ', conceito: ' médica do turno da noite ' });
+    expect(ficha.identidade.nome).toBe('Ana Meirelles');
+    expect(ficha.identidade.conceito).toBe('médica do turno da noite');
+    expect(buildFicha({ ficha }).derivados.pv.max).toBe(buildFicha({ ficha: fichaBase() }).derivados.pv.max);
+
+    const semConceito = definirIdentidade(ficha, { conceito: '   ' });
+    expect('conceito' in semConceito.identidade).toBe(false);
+
+    expect(definirIdentidade(ficha, { nome: '  ' })).toBe(ficha);
+    expect(definirIdentidade(ficha, { nome: 'Ana Meirelles' })).toBe(ficha);
   });
 
   it('temAjustes ignora ruído (zeros, listas vazias, nota em branco)', () => {

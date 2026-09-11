@@ -35,6 +35,7 @@ import { RitualsTabContent } from '../character/RitualsTabContent';
 import { RotuloSecao } from '../ui/Pecas';
 import { CabecalhoFicha, type ModoDaFicha } from './CabecalhoFicha';
 import { AtributosFicha } from './AtributosFicha';
+import { IdentidadeFicha } from './IdentidadeFicha';
 import { PoderesPorProveniencia } from './PoderesPorProveniencia';
 
 export interface FichaMestreProps {
@@ -248,7 +249,7 @@ export function FichaMestre({
   const abasConstrucao: Aba<AbaConstrucao>[] = [
     { id: 'progressao', rotulo: 'Progressão', icone: <ClipboardList size={15} />, badge: build.pendencias.length > 0 ? <span className="font-mono text-[10px] text-ordem-gold">{build.pendencias.length}</span> : undefined },
     { id: 'ajustes', rotulo: 'Recursos & ajustes', icone: <Sparkles size={15} /> },
-    { id: 'atributos', rotulo: 'Atributos & perícias', icone: <Dumbbell size={15} /> },
+    { id: 'atributos', rotulo: 'Identidade', icone: <Dumbbell size={15} /> },
     { id: 'poderes', rotulo: 'Poderes & rituais', icone: <Star size={15} />, badge: <span className="font-mono text-[10px]">{build.poderes.length}</span> },
   ];
 
@@ -336,6 +337,9 @@ export function FichaMestre({
 
               {abaConstrucao === 'atributos' && (
                 <>
+                  <Secao titulo="Quem é">
+                    <IdentidadeFicha ficha={ficha} onEditar={onEditar} />
+                  </Secao>
                   <Secao titulo="Atributos — base de criação; os marcos de nível somam sozinhos">
                     <AtributosFicha ficha={ficha} build={build} modo="construcao" readOnly={false} onAjustarBase={(a, d) => onEditar((f) => ajustarAtributoBase(f, a, d))} onResponderMarco={responderMarcoDeAtributo} />
                   </Secao>

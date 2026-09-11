@@ -99,6 +99,21 @@ export function removerPericiaLivre(ficha: FichaPersistida, pericia: PericiaName
   };
 }
 
+export function definirIdentidade(
+  ficha: FichaPersistida,
+  campos: { nome?: string; conceito?: string },
+): FichaPersistida {
+  const nome = campos.nome === undefined ? ficha.identidade.nome : campos.nome.trim();
+  const conceito = campos.conceito === undefined ? ficha.identidade.conceito : (campos.conceito.trim() || undefined);
+  if (!nome) return ficha;
+  if (nome === ficha.identidade.nome && conceito === ficha.identidade.conceito) return ficha;
+
+  const identidade = { ...ficha.identidade, nome };
+  if (conceito === undefined) delete identidade.conceito;
+  else identidade.conceito = conceito;
+  return { ...ficha, identidade };
+}
+
 export function temAjustes(ajustes: AjustesGm): boolean {
   return Object.keys(enxugar(ajustes)).length > 0;
 }

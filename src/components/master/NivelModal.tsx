@@ -218,7 +218,7 @@ export function NivelModal({ ficha, aberto, direcao, etapaInicial = 'preview', o
                   <button
                     type="button"
                     onClick={onFechar}
-                    className="border border-white/10 px-4 py-2 font-carimbo text-[11px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
+                    className="border border-white/10 px-4 py-2 whitespace-nowrap font-carimbo text-[11px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
                   >
                     Cancelar
                   </button>
@@ -226,7 +226,7 @@ export function NivelModal({ ficha, aberto, direcao, etapaInicial = 'preview', o
                     type="button"
                     disabled={alvo === null || ocupado}
                     onClick={confirmar}
-                    className="border border-[var(--mestre-primary,#DC2626)] bg-[var(--mestre-primary,#DC2626)]/15 px-5 py-2 font-carimbo text-[11px] uppercase tracking-[0.16em] text-white transition hover:bg-[var(--mestre-primary,#DC2626)]/30 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="border border-[var(--mestre-primary,#DC2626)] bg-[var(--mestre-primary,#DC2626)]/15 px-5 py-2 whitespace-nowrap font-carimbo text-[11px] uppercase tracking-[0.16em] text-white transition hover:bg-[var(--mestre-primary,#DC2626)]/30 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     {ocupado ? 'Aplicando…' : alvo === null ? '—' : `Confirmar ${rotuloNivel(alvo)}`}
                   </button>
@@ -242,7 +242,7 @@ export function NivelModal({ ficha, aberto, direcao, etapaInicial = 'preview', o
                 <button
                   type="button"
                   onClick={onFechar}
-                  className={`border px-5 py-2 font-carimbo text-[11px] uppercase tracking-[0.16em] transition ${pendencias.length === 0
+                  className={`border px-5 py-2 whitespace-nowrap font-carimbo text-[11px] uppercase tracking-[0.16em] transition ${pendencias.length === 0
                     ? 'border-ordem-green bg-ordem-green/15 text-white hover:bg-ordem-green/25'
                     : 'border-white/10 text-ordem-text-secondary hover:border-white/30 hover:text-white'
                     }`}

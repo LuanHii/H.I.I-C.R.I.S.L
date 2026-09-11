@@ -81,6 +81,13 @@ describe('na FichaMestre, cada canal escreve só o que lhe cabe', () => {
     expect(dentroDeEditar.length, `${nome} tem chamada fora de onEditar`).toBe(chamadas.length);
   });
 
+  it('nome e conceito só mudam pela identidade do documento', () => {
+    const identidade = fonte('components/master/ficha/IdentidadeFicha.tsx');
+    expect(identidade).toMatch(/onEditar\(\(f\) => definirIdentidade\(f, \{ nome \}\)\)/);
+    expect(identidade).toMatch(/onEditar\(\(f\) => definirIdentidade\(f, \{ conceito \}\)\)/);
+    expect(identidade).not.toContain('onSessao');
+  });
+
   it('ritual que vem de marco não é removido pelo canal de sessão', () => {
     expect(fichaMestre).toContain('if (ritualDerivado(index)) return;');
     expect(fichaMestre).toContain('podeRemover={(i) => !ritualDerivado(i)}');

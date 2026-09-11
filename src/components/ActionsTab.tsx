@@ -125,8 +125,8 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
         transition={{ ...springTransition, delay: idx * 0.02 }}
         whileHover={{ scale: 1.005 }}
         className={`
-          relative rounded-xl overflow-hidden transition-all duration-300 cursor-pointer
-          border border-white/[0.06] backdrop-blur-sm
+          relative overflow-hidden transition-all duration-300 cursor-pointer
+          border border-white/[0.06] 
           bg-gradient-to-r ${gradientBg || 'from-white/[0.02] to-transparent'}
           ${hoverGlow}
           ${isOpen ? 'ring-1 ring-white/10 shadow-lg' : 'hover:border-white/[0.12]'}
@@ -137,19 +137,19 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
 
         <div className="relative p-3.5 sm:p-4 flex items-start gap-3">
           {isActionDef && tipoAcao && (
-            <div className={`shrink-0 mt-0.5 w-7 h-7 rounded-lg flex items-center justify-center ${badge?.bg} border ${badge?.border}`}>
+            <div className={`shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center ${badge?.bg} border ${badge?.border}`}>
               <span className={badge?.color}>{TIPO_ICON[tipoAcao]}</span>
             </div>
           )}
 
           {isRitual && (
-            <div className={`shrink-0 mt-0.5 w-7 h-7 rounded-lg flex items-center justify-center bg-purple-500/10 border border-purple-500/20`}>
+            <div className={`shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center bg-purple-500/10 border border-purple-500/20`}>
               <Sparkles size={13} className="text-purple-400" />
             </div>
           )}
 
           {!isActionDef && !isRitual && (
-            <div className="shrink-0 mt-0.5 w-7 h-7 rounded-lg flex items-center justify-center bg-white/5 border border-white/10">
+            <div className="shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center bg-white/5 border border-white/10">
               <Zap size={13} className="text-ordem-text-muted" />
             </div>
           )}
@@ -159,13 +159,13 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
               <span className="font-semibold text-white text-[13px] leading-tight">{action.nome}</span>
 
               {isActionDef && badge && (
-                <span className={`inline-flex items-center gap-1 text-[9px] font-medium px-1.5 py-[2px] rounded-full ${badge.bg} ${badge.color} border ${badge.border}`}>
+                <span className={`inline-flex items-center gap-1 text-[9px] font-medium px-1.5 py-[2px] ${badge.bg} ${badge.color} border ${badge.border}`}>
                   {badge.label}
                 </span>
               )}
 
               {source && (
-                <span className="text-[9px] px-1.5 py-[2px] rounded-full bg-white/5 text-white/40 border border-white/5 uppercase tracking-wider">
+                <span className="text-[9px] px-1.5 py-[2px] bg-white/5 text-white/40 border border-white/5 uppercase tracking-wider">
                   {source}
                 </span>
               )}
@@ -174,7 +174,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
                 const el = (action as Ritual).elemento;
                 const s = ELEMENT_STYLES[el];
                 return s ? (
-                  <span className={`text-[9px] px-1.5 py-[2px] rounded-full bg-gradient-to-r ${s.gradient} ${s.text} border border-white/5 font-medium`}>
+                  <span className={`text-[9px] px-1.5 py-[2px] bg-gradient-to-r ${s.gradient} ${s.text} border border-white/5 font-medium`}>
                     {el} {(action as Ritual).circulo}
                   </span>
                 ) : null;
@@ -185,12 +185,12 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
 
           <div className="flex items-center gap-1.5 shrink-0 ml-1">
             {dtText && (
-              <span className="text-[10px] font-mono px-2 py-1 rounded-lg bg-white/[0.04] text-emerald-400/80 border border-emerald-500/10">
+              <span className="text-[10px] font-mono px-2 py-1 bg-white/[0.04] text-emerald-400/80 border border-emerald-500/10">
                 {dtText}
               </span>
             )}
             {displayCost && (
-              <span className={`text-[10px] font-mono px-2 py-1 rounded-lg border ${overLimit ? 'bg-red-500/10 text-red-400/80 border-red-500/10' : 'bg-white/[0.04] text-amber-400/80 border-amber-500/10'}`}>
+              <span className={`text-[10px] font-mono px-2 py-1 border ${overLimit ? 'bg-red-500/10 text-red-400/80 border-red-500/10' : 'bg-white/[0.04] text-amber-400/80 border-amber-500/10'}`}>
                 {displayCost}
               </span>
             )}
@@ -214,13 +214,13 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
               className="overflow-hidden"
             >
               <div className="px-4 pb-4 space-y-3 border-t border-white/[0.04]" onClick={e => e.stopPropagation()}>
-                <div className="mt-3 p-3.5 rounded-lg bg-black/30 backdrop-blur-sm border border-white/[0.04]">
+                <div className="mt-3 p-3.5 bg-black/30  border border-white/[0.04]">
                   <p className="text-[13px] text-white/60 leading-[1.7] whitespace-pre-line">{action.descricao}</p>
                 </div>
 
                 {isActionDef && (action as ActionDefinition).requisito && (
-                  <div className="p-3 rounded-lg bg-amber-500/[0.06] border border-amber-500/10 flex items-start gap-2.5">
-                    <div className="w-5 h-5 rounded-md bg-amber-500/15 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="p-3 bg-amber-500/[0.06] border border-amber-500/10 flex items-start gap-2.5">
+                    <div className="w-5 h-5 bg-amber-500/15 flex items-center justify-center shrink-0 mt-0.5">
                       <Shield size={11} className="text-amber-400" />
                     </div>
                     <div>
@@ -233,7 +233,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
                 {isActionDef && (action as ActionDefinition).pericia && (
                   <div className="flex items-center gap-2.5">
                     <span className="text-[10px] text-white/25 uppercase tracking-wider font-medium">Perícia</span>
-                    <span className="text-xs font-mono text-emerald-400/70 bg-emerald-500/[0.06] px-2.5 py-1 rounded-lg border border-emerald-500/10">
+                    <span className="text-xs font-mono text-emerald-400/70 bg-emerald-500/[0.06] px-2.5 py-1 border border-emerald-500/10">
                       {(action as ActionDefinition).pericia}
                     </span>
                   </div>
@@ -242,15 +242,15 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
                 {'teste' in action && (action as any).teste && (
                   <div className="flex items-center gap-2.5">
                     <span className="text-[10px] text-white/25 uppercase tracking-wider font-medium">Teste</span>
-                    <span className="text-xs font-mono text-emerald-400/70 bg-emerald-500/[0.06] px-2.5 py-1 rounded-lg border border-emerald-500/10">
+                    <span className="text-xs font-mono text-emerald-400/70 bg-emerald-500/[0.06] px-2.5 py-1 border border-emerald-500/10">
                       {(action as any).teste}
                     </span>
                   </div>
                 )}
 
                 {overLimit && (
-                  <div className="p-3 rounded-lg bg-red-500/[0.06] border border-red-500/10 flex items-start gap-2.5">
-                    <div className="w-5 h-5 rounded-md bg-red-500/15 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="p-3 bg-red-500/[0.06] border border-red-500/10 flex items-start gap-2.5">
+                    <div className="w-5 h-5 bg-red-500/15 flex items-center justify-center shrink-0 mt-0.5">
                       <Flame size={11} className="text-red-400" />
                     </div>
                     <p className="text-xs text-red-300/70">Custo acima do limite de PE por turno. Ainda permite 1 uso no custo mínimo.</p>
@@ -266,7 +266,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
                         { label: 'Alvo', value: (action as Ritual).alvo, icon: <Crosshair size={10} /> },
                         { label: 'Duração', value: (action as Ritual).duracao, icon: <Wind size={10} /> },
                       ].map(({ label, value, icon }) => (
-                        <div key={label} className="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                        <div key={label} className="p-2.5 bg-white/[0.02] border border-white/[0.04]">
                           <div className="flex items-center gap-1.5 mb-1">
                             <span className="text-white/20">{icon}</span>
                             <span className="text-[9px] text-white/25 uppercase tracking-wider font-medium">{label}</span>
@@ -277,7 +277,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
                     </div>
 
                     {(action as Ritual).resistencia && (
-                      <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                      <div className="p-2.5 bg-white/[0.02] border border-white/[0.04]">
                         <span className="text-[9px] text-white/25 uppercase tracking-wider font-medium block mb-1">Resistência</span>
                         <span className="text-xs text-white/50">{(action as Ritual).resistencia}</span>
                       </div>
@@ -289,7 +289,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
                         { key: 'discente', label: 'Discente', text: (action as Ritual).efeito.discente, color: 'amber-400/30', labelColor: 'text-amber-400/70' },
                         { key: 'verdadeiro', label: 'Verdadeiro', text: (action as Ritual).efeito.verdadeiro, color: 'red-400/30', labelColor: 'text-red-400/70' },
                       ].filter(t => t.text).map(tier => (
-                        <div key={tier.key} className={`p-3 rounded-lg bg-black/20 border-l-2 border-${tier.color}`}>
+                        <div key={tier.key} className={`p-3 bg-black/20 border-l-2 border-${tier.color}`}>
                           <span className={`text-[10px] ${tier.labelColor} font-semibold uppercase tracking-widest block mb-1.5`}>{tier.label}</span>
                           <p className="text-xs text-white/45 leading-relaxed">{tier.text}</p>
                         </div>
@@ -299,10 +299,10 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
                 )}
 
                 <div className="flex flex-wrap gap-1.5 pt-1">
-                  {isActionDef && <span className="text-[8px] px-2 py-0.5 rounded-full bg-white/[0.03] text-white/20 border border-white/[0.04]">#{(action as ActionDefinition).tipoAcao.toLowerCase()}</span>}
-                  {isActionDef && (action as ActionDefinition).pericia && <span className="text-[8px] px-2 py-0.5 rounded-full bg-white/[0.03] text-white/20 border border-white/[0.04]">#{(action as ActionDefinition).pericia?.toLowerCase()}</span>}
-                  {isRitual && <span className="text-[8px] px-2 py-0.5 rounded-full bg-white/[0.03] text-white/20 border border-white/[0.04]">#{(action as Ritual).elemento.toLowerCase()}</span>}
-                  {source && <span className="text-[8px] px-2 py-0.5 rounded-full bg-white/[0.03] text-white/20 border border-white/[0.04]">#{source.toLowerCase().replace(/[\s()%]+/g, '-')}</span>}
+                  {isActionDef && <span className="text-[8px] px-2 py-0.5 bg-white/[0.03] text-white/20 border border-white/[0.04]">#{(action as ActionDefinition).tipoAcao.toLowerCase()}</span>}
+                  {isActionDef && (action as ActionDefinition).pericia && <span className="text-[8px] px-2 py-0.5 bg-white/[0.03] text-white/20 border border-white/[0.04]">#{(action as ActionDefinition).pericia?.toLowerCase()}</span>}
+                  {isRitual && <span className="text-[8px] px-2 py-0.5 bg-white/[0.03] text-white/20 border border-white/[0.04]">#{(action as Ritual).elemento.toLowerCase()}</span>}
+                  {source && <span className="text-[8px] px-2 py-0.5 bg-white/[0.03] text-white/20 border border-white/[0.04]">#{source.toLowerCase().replace(/[\s()%]+/g, '-')}</span>}
                 </div>
               </div>
             </motion.div>
@@ -325,8 +325,8 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
         transition={{ ...springTransition, delay: idx * 0.02 }}
         whileHover={{ scale: 1.005 }}
         className={`
-          relative rounded-xl overflow-hidden transition-all duration-300 cursor-pointer
-          border border-white/[0.06] backdrop-blur-sm
+          relative overflow-hidden transition-all duration-300 cursor-pointer
+          border border-white/[0.06] 
           bg-gradient-to-r from-red-500/[0.06] via-transparent to-transparent
           hover:shadow-[0_0_20px_rgba(239,68,68,0.06)]
           ${isOpen ? 'ring-1 ring-white/10 shadow-lg' : 'hover:border-white/[0.12]'}
@@ -336,7 +336,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
         <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
 
         <div className="relative p-3.5 sm:p-4 flex items-start gap-3">
-          <div className="shrink-0 mt-0.5 w-7 h-7 rounded-lg flex items-center justify-center bg-red-500/10 border border-red-500/20">
+          <div className="shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center bg-red-500/10 border border-red-500/20">
             <Crosshair size={13} className="text-red-400" />
           </div>
 
@@ -344,11 +344,11 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-semibold text-white text-[13px]">{a.nome}</span>
               {a.statsModificados && (
-                <span className="text-[9px] px-1.5 py-[2px] rounded-full bg-emerald-500/10 text-emerald-400/80 border border-emerald-500/15 font-medium">
+                <span className="text-[9px] px-1.5 py-[2px] bg-emerald-500/10 text-emerald-400/80 border border-emerald-500/15 font-medium">
                   +{a.itemOriginal.modificacoes.length} mod
                 </span>
               )}
-              <span className="text-[9px] px-1.5 py-[2px] rounded-full bg-red-500/10 text-red-400/80 border border-red-500/15 font-medium">
+              <span className="text-[9px] px-1.5 py-[2px] bg-red-500/10 text-red-400/80 border border-red-500/15 font-medium">
                 Ataque
               </span>
             </div>
@@ -356,7 +356,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0 ml-1">
-            <span className="text-[10px] font-mono px-2 py-1 rounded-lg bg-white/[0.04] text-emerald-400/80 border border-emerald-500/10">
+            <span className="text-[10px] font-mono px-2 py-1 bg-white/[0.04] text-emerald-400/80 border border-emerald-500/10">
               {a.teste}
             </span>
             <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.25 }}>
@@ -375,17 +375,17 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
               className="overflow-hidden"
             >
               <div className="px-4 pb-4 space-y-3 border-t border-white/[0.04]" onClick={e => e.stopPropagation()}>
-                <div className="mt-3 p-3.5 rounded-lg bg-black/30 border border-white/[0.04]">
+                <div className="mt-3 p-3.5 bg-black/30 border border-white/[0.04]">
                   <p className="text-[13px] text-white/60 leading-[1.7] whitespace-pre-line">{a.descricao}</p>
                 </div>
 
                 <div className="flex items-center gap-2.5 flex-wrap">
                   <span className="text-[10px] text-white/25 uppercase tracking-wider font-medium">Teste</span>
-                  <span className="text-xs font-mono text-emerald-400/70 bg-emerald-500/[0.06] px-2.5 py-1 rounded-lg border border-emerald-500/10">
+                  <span className="text-xs font-mono text-emerald-400/70 bg-emerald-500/[0.06] px-2.5 py-1 border border-emerald-500/10">
                     {a.teste}
                   </span>
                   {a.ataqueBonus > 0 && (
-                    <span className="text-xs font-mono text-amber-400/70 bg-amber-500/[0.06] px-2.5 py-1 rounded-lg border border-amber-500/10">
+                    <span className="text-xs font-mono text-amber-400/70 bg-amber-500/[0.06] px-2.5 py-1 border border-amber-500/10">
                       MOD +{a.ataqueBonus}
                     </span>
                   )}
@@ -399,12 +399,12 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
                         const mod = MODIFICACOES_ARMAS.find(m => m.nome === modNome);
                         return (
                           <div key={modNome} className="group/mod relative">
-                            <span className="text-[9px] px-2 py-1 bg-amber-500/[0.06] text-amber-400/70 border border-amber-500/10 rounded-lg font-mono cursor-help transition-colors hover:bg-amber-500/10">
+                            <span className="text-[9px] px-2 py-1 bg-amber-500/[0.06] text-amber-400/70 border border-amber-500/10 font-mono cursor-help transition-colors hover:bg-amber-500/10">
                               {modNome}
                             </span>
                             {mod && (
                               <div className="absolute bottom-full left-0 mb-2 hidden group-hover/mod:block z-50 pointer-events-none">
-                                <div className="bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-2xl max-w-xs">
+                                <div className="bg-black/90  border border-white/10 p-3 shadow-2xl max-w-xs">
                                   <div className="text-[11px] font-semibold text-white mb-1">{mod.nome}</div>
                                   <div className="text-[10px] text-white/50 leading-relaxed">{mod.efeito}</div>
                                 </div>
@@ -470,8 +470,8 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
   }, [filteredUniversal]);
 
   const SectionHeader = ({ icon, title, count, color }: { icon: React.ReactNode; title: string; count: number; color: string }) => (
-    <div className="flex items-center gap-3 mb-4 sticky top-0 z-10 py-2.5 -mx-1 px-1 bg-gradient-to-b from-[#0d0d0d] via-[#0d0d0d]/95 to-transparent backdrop-blur-sm">
-      <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br ${color}`}>
+    <div className="flex items-center gap-3 mb-4 sticky top-0 z-10 py-2.5 -mx-1 px-1 bg-gradient-to-b from-[#0d0d0d] via-[#0d0d0d]/95 to-transparent ">
+      <div className={`w-8 h-8 flex items-center justify-center bg-gradient-to-br ${color}`}>
         {icon}
       </div>
       <div>
@@ -509,13 +509,13 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
         className="mb-5 shrink-0 space-y-4"
       >
         <div className="relative group">
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-red-500/10 via-purple-500/5 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity -m-px" />
+          <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 via-purple-500/5 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity -m-px" />
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-white/40 transition-colors" />
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Buscar ações, rituais, poderes..."
-            className="relative w-full bg-white/[0.03] border border-white/[0.06] rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/15 transition-all backdrop-blur-sm"
+            className="relative w-full bg-white/[0.03] border border-white/[0.06] pl-10 pr-10 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/15 transition-all "
           />
           {query && (
             <button onClick={() => setQuery('')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/20 hover:text-white/60 transition-colors text-sm">
@@ -531,7 +531,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => setFilter(fb.key)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium border transition-all duration-200 ${filter === fb.key
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium border transition-all duration-200 ${filter === fb.key
                   ? `bg-gradient-to-r ${fb.activeGradient}`
                   : 'bg-white/[0.02] border-white/[0.05] text-white/30 hover:bg-white/[0.04] hover:text-white/50 hover:border-white/[0.08]'
                 }`}
