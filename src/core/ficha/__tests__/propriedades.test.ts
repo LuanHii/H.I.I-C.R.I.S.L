@@ -458,6 +458,8 @@ describe('o motor novo não é autoritativo', () => {
     'components/master/MigracaoWizard.tsx',
     'components/master/PendenciasPanel.tsx',
     'components/master/NivelPanel.tsx',
+    'components/master/NivelModal.tsx',
+    'components/master/AgentDetailView.tsx',
     'core/storage/useCloudFichas.ts',
     'core/storage/useStoredFichas.ts',
     'core/storage/carimboDeSincronizacao.ts',

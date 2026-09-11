@@ -14,6 +14,8 @@ import { TrackSelectorModal } from '../TrackSelectorModal';
 import { PowerChoiceModal } from '../PowerChoiceModal';
 import { RitualChoiceModal } from '../RitualChoiceModal';
 import { LevelUpModal } from '../LevelUpModal';
+import { NivelModal } from './NivelModal';
+import type { FichaPersistida, Problema, ValorEscolha } from '../../core/ficha/tipos';
 import { calculateDerivedStats } from '../../core/rules/derivedStats';
 import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPersonagem';
 import { grauRequeridoParaAlvo } from '../../core/rules/progressao';
@@ -35,10 +37,19 @@ interface AgentDetailViewProps {
     onUpdate: (updated: Personagem) => void;
     readOnly?: boolean;
     disableInteractionModals?: boolean;
-    progressaoNoMotorNovo?: boolean;
+    progressao?: ProgressaoNoMotorNovo;
 }
 
-export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdate, readOnly, disableInteractionModals, progressaoNoMotorNovo }) => {
+export interface ProgressaoNoMotorNovo {
+    ficha: FichaPersistida;
+    onDefinirNivel: (nivel: number) => Promise<void> | void;
+    onResponder: (escolhaId: string, valor: ValorEscolha) => Promise<Problema[]> | void;
+    onDesfazer?: (escolhaId: string) => void;
+}
+
+export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdate, readOnly, disableInteractionModals, progressao }) => {
+    const progressaoNoMotorNovo = Boolean(progressao);
+    const [nivelModal, setNivelModal] = useState<{ aberto: boolean; direcao: 'subir' | 'descer' }>({ aberto: false, direcao: 'subir' });
     type TabId = 'skills' | 'inventory' | 'powers' | 'rituals' | 'actions' | 'progression' | 'conditions';
     const [activeTab, setActiveTab] = useState<TabId>(readOnly ? 'actions' : 'skills');
 
@@ -110,12 +121,18 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     const escolhasPeloMotorAntigo = !disableInteractionModals && !progressaoNoMotorNovo;
 
     const handleLevelUp = () => {
-        if (progressaoNoMotorNovo) return;
+        if (progressaoNoMotorNovo) {
+            setNivelModal({ aberto: true, direcao: 'subir' });
+            return;
+        }
         setIsLevelUpModalOpen({ open: true, resume: false });
     };
 
     const handleLevelDown = () => {
-        if (progressaoNoMotorNovo) return;
+        if (progressaoNoMotorNovo) {
+            setNivelModal({ aberto: true, direcao: 'descer' });
+            return;
+        }
         const decrement = agent.classe === 'Sobrevivente' ? 1 : (agent.nex === 99 ? 4 : 5);
         const alvo = agent.classe === 'Sobrevivente' ? Math.max(1, (agent.estagio || 1) - 1) : Math.max(5, agent.nex - decrement);
         const updated = rebaixarNex(agent, alvo);
@@ -508,7 +525,6 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                     warnings={warnings}
                     onLevelUp={handleLevelUp}
                     onLevelDown={handleLevelDown}
-                    progressaoExterna={progressaoNoMotorNovo}
                     acaoDeFicha={!readOnly ? (
                         <button
                             type="button"
@@ -643,6 +659,17 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
             <AbilitySelectorModal isOpen={isAbilityModalOpen} onClose={() => setIsAbilityModalOpen(false)} onSelect={handleAddAbility} />
             <PatenteSelectorModal isOpen={isPatenteModalOpen} currentPatente={agent.patente || 'Recruta'} onSelect={handlePatenteChange} onClose={() => setIsPatenteModalOpen(false)} />
             {isRitualModalOpen && <RitualChoiceModal agent={agent} onSelect={handleAddRitual} onClose={() => setIsRitualModalOpen(false)} circuloMaximo={4} />}
+            {progressao && (
+                <NivelModal
+                    ficha={progressao.ficha}
+                    aberto={nivelModal.aberto}
+                    direcao={nivelModal.direcao}
+                    onFechar={() => setNivelModal((m) => ({ ...m, aberto: false }))}
+                    onDefinirNivel={progressao.onDefinirNivel}
+                    onResponder={progressao.onResponder}
+                    onDesfazer={progressao.onDesfazer}
+                />
+            )}
             {isLevelUpModalOpen.open && !progressaoNoMotorNovo && (
                 <LevelUpModal agent={agent} isResume={isLevelUpModalOpen.resume} onConfirm={(updatedAgent) => { onUpdate(updatedAgent); setIsLevelUpModalOpen({ open: false, resume: false }); }} onClose={() => setIsLevelUpModalOpen({ open: false, resume: false })} />
             )}

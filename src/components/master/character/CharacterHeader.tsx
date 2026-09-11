@@ -19,7 +19,6 @@ interface CharacterHeaderProps {
   warnings: string[];
   onLevelUp: () => void;
   onLevelDown: () => void;
-  progressaoExterna?: boolean;
   acaoDeFicha?: React.ReactNode;
   onPatenteClick: () => void;
   onTogglePd: () => void;
@@ -34,7 +33,6 @@ export function CharacterHeader({
   warnings,
   onLevelUp,
   onLevelDown,
-  progressaoExterna,
   acaoDeFicha,
   onPatenteClick,
   onTogglePd,
@@ -53,13 +51,13 @@ export function CharacterHeader({
           <div className="flex flex-wrap items-center gap-1.5 mt-1.5 text-ordem-white-muted font-mono text-[10px] sm:text-xs">
             <span className="bg-ordem-black-deep/50 px-2 py-1 rounded border border-ordem-text-muted">{agent.classe}</span>
             <div className="flex items-center bg-ordem-black-deep/50 rounded border border-ordem-text-muted overflow-hidden">
-              {!readOnly && !progressaoExterna && (
+              {!readOnly && (
                 <button type="button" onClick={onLevelDown} className="px-2 py-1 hover:bg-ordem-border-light text-ordem-text-secondary hover:text-white transition-colors border-r border-ordem-text-muted touch-target-sm" title="Diminuir Nível">-</button>
               )}
               <span className="px-2 py-1 text-zinc-100">
                 {agent.classe === 'Sobrevivente' ? `Est. ${agent.estagio || 1}` : `${agent.nex}%`}
               </span>
-              {!readOnly && !progressaoExterna && (
+              {!readOnly && (
                 <button type="button" onClick={onLevelUp} className="px-2 py-1 hover:bg-ordem-border-light text-ordem-text-secondary hover:text-white transition-colors border-l border-ordem-text-muted touch-target-sm" title="Aumentar Nível">+</button>
               )}
             </div>

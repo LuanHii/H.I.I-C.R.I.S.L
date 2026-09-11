@@ -14,8 +14,6 @@ import { CampanhaSection, NovaCampanhaForm } from './CampanhaSection';
 import { recalcularRecursosPersonagem } from '../../logic/progression';
 import { observar } from '../../core/ficha/sombra';
 import { MigracaoWizard } from './MigracaoWizard';
-import { PendenciasPanel } from './PendenciasPanel';
-import { NivelPanel } from './NivelPanel';
 import { Cloud, CloudOff, ChevronLeft, Menu, Plus, Download, Eye, PanelLeftClose, PanelLeft, RefreshCw, MoreHorizontal } from 'lucide-react';
 import { WeaponModsButton } from './WeaponModsModal';
 import { WatchedFichasSection } from './WatchedFichasSection';
@@ -43,7 +41,6 @@ export function FichasManager() {
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
   const [migrando, setMigrando] = useState<{ id: string; personagem: Personagem }[]>([]);
-  const [pendenciasAbertas, setPendenciasAbertas] = useState(false);
   const [acoesAbertas, setAcoesAbertas] = useState<Set<string>>(new Set());
 
   const alternarAcoes = (id: string) => {
@@ -875,35 +872,16 @@ export function FichasManager() {
                     </button>
                   </div>
                 )}
-                {registroAtual?.fonte === 'v2' && registroAtual.ficha && (
-                  <div className="mb-3">
-                    <button
-                      type="button"
-                      onClick={() => setPendenciasAbertas((v) => !v)}
-                      className="touch-target w-full text-left text-xs uppercase tracking-widest px-3 py-2 rounded border border-ordem-gold/60 text-ordem-gold hover:bg-ordem-gold/10"
-                    >
-                      {pendenciasAbertas ? '▾' : '▸'} Progressão e escolhas pendentes
-                    </button>
-                    {pendenciasAbertas && (
-                      <div className="mt-2 space-y-4">
-                        <NivelPanel
-                          ficha={registroAtual.ficha}
-                          onDefinirNivel={(nivel) => definirNivelDaFicha(registroAtual.id, nivel)}
-                        />
-                        <PendenciasPanel
-                          ficha={registroAtual.ficha}
-                          onResponder={(escolhaId, valor) => responderEscolha(registroAtual.id, escolhaId, valor)}
-                          onDesfazer={(escolhaId) => desfazerEscolha(registroAtual.id, escolhaId)}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
                 <AgentDetailView
                   agent={fichaAtual}
                   onUpdate={handleUpdate}
                   readOnly={false}
-                  progressaoNoMotorNovo={registroAtual?.fonte === 'v2' && !!registroAtual.ficha}
+                  progressao={registroAtual?.fonte === 'v2' && registroAtual.ficha ? {
+                    ficha: registroAtual.ficha,
+                    onDefinirNivel: (nivel) => definirNivelDaFicha(registroAtual.id, nivel),
+                    onResponder: (escolhaId, valor) => responderEscolha(registroAtual.id, escolhaId, valor),
+                    onDesfazer: (escolhaId) => desfazerEscolha(registroAtual.id, escolhaId),
+                  } : undefined}
                 />
               </div>
             </div>

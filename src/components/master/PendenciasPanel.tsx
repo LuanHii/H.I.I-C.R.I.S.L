@@ -102,8 +102,9 @@ export function PendenciasPanel({ ficha, onResponder, onDesfazer }: PendenciasPa
 
   if (pendencias.length === 0) {
     return (
-      <div className="border border-ordem-green/50 rounded p-3 text-sm text-ordem-green">
-        Nenhuma pendência: todas as obrigações deste nível estão respondidas.
+      <div className="flex items-center gap-2 border border-ordem-green/40 bg-ordem-green/10 px-3 py-2.5 text-sm text-ordem-green">
+        <span aria-hidden>✓</span>
+        Nenhuma pendência — todas as obrigações deste nível estão respondidas.
       </div>
     );
   }
@@ -120,12 +121,12 @@ export function PendenciasPanel({ ficha, onResponder, onDesfazer }: PendenciasPa
 
   return (
     <div className="space-y-3">
-      <header className="flex items-baseline justify-between gap-2">
-        <h3 className="text-xs uppercase tracking-widest text-ordem-gold">
-          {pendencias.length} pendência(s)
+      <header className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h3 className="font-carimbo text-[11px] uppercase tracking-[0.2em] text-[var(--mestre-primary,#DC2626)]">
+          {pendencias.length} {pendencias.length === 1 ? 'escolha pendente' : 'escolhas pendentes'}
         </h3>
         <span className="text-[11px] text-ordem-text-muted">
-          Em ordem de nível — responder um marco muda o que fica disponível nos seguintes.
+          em ordem de nível — responder um marco muda o que os seguintes oferecem
         </span>
       </header>
 
@@ -136,7 +137,7 @@ export function PendenciasPanel({ ficha, onResponder, onDesfazer }: PendenciasPa
         const multi = quantidade > 1;
 
         return (
-          <section key={slot.id} className="border border-ordem-border rounded p-3 space-y-2">
+          <section key={slot.id} className="space-y-2 border border-white/10 bg-white/[0.02] p-3 shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset]">
             <div className="flex items-baseline justify-between gap-2 flex-wrap">
               <h4 className="text-sm text-ordem-text-primary font-bold">
                 {tituloDoSlot(slot)}

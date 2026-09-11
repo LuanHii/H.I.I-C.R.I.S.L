@@ -51,47 +51,63 @@ describe('numa ficha v2, a progressão antiga não é alcançável', () => {
     );
   });
 
-  it('subir e descer nível saem pela porta antiga só se ela estiver aberta', () => {
-    const subir = /const handleLevelUp = \(\) => \{[\s\S]*?\};/.exec(agentDetail);
+  it('em ficha v2, subir e descer nível abrem o NivelModal — nunca o fluxo antigo', () => {
+    const subir = /const handleLevelUp = \(\) => \{[\s\S]*?\n    \};/.exec(agentDetail);
     const descer = /const handleLevelDown = \(\) => \{[\s\S]*?\n    \};/.exec(agentDetail);
 
     expect(subir, 'handleLevelUp sumiu').not.toBeNull();
     expect(descer, 'handleLevelDown sumiu').not.toBeNull();
-    expect(subir![0], 'handleLevelUp mutaria a ficha v2').toContain('if (progressaoNoMotorNovo) return;');
-    expect(descer![0], 'handleLevelDown rebaixa direto, sem preview').toContain('if (progressaoNoMotorNovo) return;');
+    for (const [nome, bloco, direcao] of [['handleLevelUp', subir![0], 'subir'], ['handleLevelDown', descer![0], 'descer']] as const) {
+      expect(bloco, `${nome} não abre o modal novo em ficha v2`).toContain(`direcao: '${direcao}'`);
+      const antesDoReturn = bloco.slice(0, bloco.indexOf('return;'));
+      expect(antesDoReturn, `${nome}: o caminho novo precisa vir ANTES do antigo e ser guardado`)
+        .toContain('if (progressaoNoMotorNovo) {');
+    }
   });
 
-  it('o controle de +/- do cabeçalho some quando a progressão é externa', () => {
-    const botoes = characterHeader.match(/\{!readOnly && !progressaoExterna && \(/g) ?? [];
+  it('o +/- do cabeçalho fica visível em ficha v2 — é ele que abre o modal', () => {
     expect(
-      botoes.length,
-      'os botões de subir/descer nível do cabeçalho não estão guardados',
-    ).toBe(2);
+      characterHeader.includes('progressaoExterna'),
+      'o cabeçalho voltou a esconder +/- em ficha v2; sem eles não há como subir de nível',
+    ).toBe(false);
+    const botoes = characterHeader.match(/\{!readOnly && \(/g) ?? [];
+    expect(botoes.length, 'os botões de nível sumiram do cabeçalho').toBeGreaterThanOrEqual(2);
   });
 
-  it('FichasManager liga a flag exatamente para ficha v2 com documento', () => {
-    const uso = /progressaoNoMotorNovo=\{[^}]*\}/.exec(fichasManager);
-    expect(uso, 'FichasManager não passa a flag').not.toBeNull();
-    expect(uso![0]).toContain("registroAtual?.fonte === 'v2'");
-    expect(uso![0], 'v2 sem documento ainda cairia no motor antigo sem isto')
-      .toContain('!!registroAtual.ficha');
+  it('o NivelModal só existe quando a ficha tem progressão no motor novo', () => {
+    const render = /\{progressao && \(\s*<NivelModal/.exec(agentDetail);
+    expect(render, 'NivelModal não está guardado por `progressao`').not.toBeNull();
+    expect(agentDetail, 'o modal antigo voltou a abrir em ficha v2')
+      .toContain('{isLevelUpModalOpen.open && !progressaoNoMotorNovo && (');
   });
 
-  it('TODA tela que renderiza AgentDetailView editável decide sobre a flag', () => {
+  it('FichasManager passa progressão exatamente para ficha v2 com documento', () => {
+    const uso = /progressao=\{registroAtual\?\.fonte === 'v2' && registroAtual\.ficha \? \{[\s\S]*?\} : undefined\}/.exec(fichasManager);
+    expect(uso, 'FichasManager não passa progressão condicionada a v2 + documento').not.toBeNull();
+    for (const handler of ['onDefinirNivel', 'onResponder', 'onDesfazer']) {
+      expect(uso![0], `FichasManager não liga ${handler}`).toContain(handler);
+    }
+  });
+
+  it('TODA tela que renderiza AgentDetailView editável liga a progressão ao motor novo', () => {
     const rota = readFileSync(
       join(process.cwd(), 'src', 'app', 'mestre', 'fichas', '[id]', 'page.tsx'),
       'utf8',
     );
     expect(rota.length, 'fonte da rota não lido').toBeGreaterThan(1000);
-    expect(rota, 'a rota [id] renderiza AgentDetailView sem decidir sobre o motor novo')
-      .toContain('progressaoNoMotorNovo=');
-    expect(rota).toContain("registro?.fonte === 'v2'");
+    const uso = /progressao=\{registro\?\.fonte === 'v2' && registro\.ficha \? \{[\s\S]*?\} : undefined\}/.exec(rota);
+    expect(uso, 'a rota [id] renderiza AgentDetailView sem progressão condicionada a v2 + documento').not.toBeNull();
+    for (const [prop, hook] of [['onDefinirNivel', 'definirNivelDaFicha'], ['onResponder', 'responderEscolha'], ['onDesfazer', 'desfazerEscolha']]) {
+      const linha = uso![0].split('\n').find((l) => l.trim().startsWith(`${prop}:`));
+      expect(linha, `a rota [id] não liga ${prop}`).toBeDefined();
+      expect(linha, `a rota [id] liga ${prop} a outra coisa que não ${hook}`).toContain(`${hook}(registro.id`);
+    }
   });
 
-  it('e o painel novo aparece sob a mesma condição da flag', () => {
-    expect(
-      fichasManager,
-      'o painel novo e a flag deixaram de concordar sobre o que é ficha v2',
-    ).toContain("registroAtual?.fonte === 'v2' && registroAtual.ficha && (");
+  it('a barra amarela de pendências morreu — o modal é o único caminho', () => {
+    expect(fichasManager, 'a barra "Progressão e escolhas pendentes" voltou')
+      .not.toContain('Progressão e escolhas pendentes');
+    expect(fichasManager, 'FichasManager voltou a montar o NivelPanel fora do modal')
+      .not.toContain('<NivelPanel');
   });
 });
