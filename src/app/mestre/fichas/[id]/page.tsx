@@ -104,7 +104,7 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
             <span className="text-ordem-white truncate max-w-[200px]">{personagemAtual.nome}</span>
           </nav>
 
-          <div className="flex-1 overflow-y-auto bg-ordem-ooze/50 border border-ordem-border rounded-xl">
+          <div className="flex-1 overflow-y-auto border border-white/10 bg-ordem-ooze/50">
             {registro?.fonte === 'v2' && registro.ficha ? (
               <FichaMestre
                 ficha={registro.ficha}

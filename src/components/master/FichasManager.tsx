@@ -16,7 +16,7 @@ import { recalcularRecursosPersonagem } from '../../logic/progression';
 import { observar } from '../../core/ficha/sombra';
 import { descreverSinal, sinalDaFicha } from '../../core/ficha/sinal';
 import { MigracaoWizard } from './MigracaoWizard';
-import { Cloud, CloudOff, ChevronLeft, Menu, Plus, Download, Eye, PanelLeftClose, PanelLeft, RefreshCw, MoreHorizontal } from 'lucide-react';
+import { Cloud, CloudOff, ChevronLeft, Plus, Download, Eye, PanelLeftClose, PanelLeft, RefreshCw, MoreHorizontal } from 'lucide-react';
 import { WeaponModsButton } from './WeaponModsModal';
 import { WatchedFichasSection } from './WatchedFichasSection';
 import { Cantos, Fita, Recurso, iniciaisDoNome } from './ui/Pecas';
@@ -769,10 +769,10 @@ export function FichasManager() {
                   </p>
                   <Link
                     href="/agente/novo"
-                    className="inline-flex items-center gap-2 px-4 py-3 bg-ordem-green/10 border border-ordem-green text-ordem-green rounded-lg touch-target"
+                    className="inline-flex items-center gap-2 border border-ordem-red bg-ordem-red/15 px-4 py-2.5 font-carimbo text-[11px] uppercase tracking-[0.16em] text-white transition hover:bg-ordem-red/30 touch-target"
                   >
-                    <Plus size={18} />
-                    Criar primeiro agente
+                    <Plus size={14} />
+                    Criar o primeiro agente
                   </Link>
                 </div>
               )}
@@ -784,7 +784,7 @@ export function FichasManager() {
                   <button
                     type="button"
                     onClick={() => setBusca('')}
-                    className="inline-flex items-center gap-2 px-4 py-3 border border-ordem-border text-ordem-text-muted rounded-lg"
+                    className="inline-flex items-center gap-2 border border-white/10 px-4 py-2.5 font-carimbo text-[11px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
                   >
                     Limpar busca
                   </button>
@@ -897,12 +897,13 @@ export function FichasManager() {
             </div>
           </div>
         ) : (
-          <div className="h-full flex flex-col items-center justify-center text-center text-ordem-white/60 p-6">
-            <div className="w-16 h-16 rounded-full bg-ordem-ooze/50 flex items-center justify-center mb-4">
-              <Menu size={24} className="text-ordem-text-muted" />
+          <div className="flex h-full flex-col items-center justify-center p-6 text-center">
+            <div className="relative border border-white/10 px-10 py-8">
+              <Cantos />
+              <p className="font-carimbo text-[10px] uppercase tracking-[0.3em] text-ordem-text-muted">Arquivo</p>
+              <p className="mt-2 font-display text-2xl uppercase tracking-[0.06em] text-white">Nenhuma ficha aberta</p>
+              <p className="mt-2 text-sm text-ordem-text-muted">Escolha uma ficha na lista ao lado.</p>
             </div>
-            <p className="text-lg mb-2">Nenhuma ficha selecionada</p>
-            <p className="text-sm text-ordem-text-muted">Selecione uma ficha na lista para visualizar ou editar.</p>
           </div>
         )}
       </section>

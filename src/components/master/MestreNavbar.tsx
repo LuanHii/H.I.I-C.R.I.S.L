@@ -107,8 +107,7 @@ export function MestreNavbar({
             <span className="text-[9px] sm:text-[10px] text-ordem-text-secondary font-mono tracking-[0.15em] sm:tracking-[0.2em]">{subtitle}</span>
           </motion.div>
 
-          <div className="flex sm:hidden items-center gap-2">
-            {rightSlot}
+          <div className="flex sm:hidden items-center gap-2 pr-[108px]">
             <Link
               href="/"
               className="p-2 text-ordem-text-secondary hover:text-white active:text-ordem-red transition-colors touch-target-sm"
@@ -118,6 +117,12 @@ export function MestreNavbar({
             </Link>
           </div>
         </div>
+
+        {rightSlot && (
+          <div className="flex flex-wrap items-center gap-2 sm:hidden">
+            {rightSlot}
+          </div>
+        )}
 
         <nav className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto touch-scroll custom-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 no-select">
           {onTabSelect && inMestreRoot ? (
