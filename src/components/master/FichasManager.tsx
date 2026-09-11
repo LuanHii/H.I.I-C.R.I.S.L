@@ -22,7 +22,7 @@ import { Cantos, Fita, Recurso, iniciaisDoNome } from './ui/Pecas';
 type FichasViewMode = 'minhas' | 'observadas';
 
 export function FichasManager() {
-  const { fichas, fichasBrutas, remover, duplicar, salvar, moverParaCampanha, marcarComoSincronizada, sincronizarFicha, migrar, reverterMigracao, responderEscolha, desfazerEscolha, definirNivelDaFicha, isCloudMode, loading: fichasLoading } = useCloudFichas();
+  const { fichas, fichasBrutas, remover, duplicar, salvar, moverParaCampanha, marcarComoSincronizada, sincronizarFicha, migrar, reverterMigracao, responderEscolha, desfazerEscolha, definirNivelDaFicha, editarFicha, isCloudMode, loading: fichasLoading } = useCloudFichas();
   const { campanhas, criarCampanha, renomearCampanha, removerCampanha, moverCampanha, priorizarCampanha, loading: campanhasLoading } = useCloudCampanhas();
   const { watchedFichas, isAuthenticated: isLoggedIn } = useWatchedFichas();
   const [selecionada, setSelecionada] = useState<string | null>(null);
@@ -881,6 +881,7 @@ export function FichasManager() {
                     onDefinirNivel: (nivel) => definirNivelDaFicha(registroAtual.id, nivel),
                     onResponder: (escolhaId, valor) => responderEscolha(registroAtual.id, escolhaId, valor),
                     onDesfazer: (escolhaId) => desfazerEscolha(registroAtual.id, escolhaId),
+                    onEditar: (transformar) => editarFicha(registroAtual.id, transformar),
                   } : undefined}
                 />
               </div>

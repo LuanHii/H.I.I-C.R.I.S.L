@@ -14,6 +14,8 @@ import {
   finalizarCriacao,
 } from '../logic/creationWorkflow';
 import { useCloudFichas } from '../core/storage';
+import { criacaoValida, criarFicha, type DadosDeCriacao } from '../core/ficha/criacao';
+import type { FichaPersistida } from '../core/ficha/tipos';
 import { calcularPericiasIniciais, TODAS_PERICIAS } from '../logic/characterUtils';
 import { ORIGENS } from '../data/character/origins';
 import { RITUAIS } from '../data/magic/rituals';
@@ -44,13 +46,14 @@ export default function CharacterCreator({
 }: {
   initialDraft?: RecreateDraft;
   initialStep?: number;
-  onCreated?: (created: Personagem) => void;
+  onCreated?: (created: Personagem, ficha?: FichaPersistida) => void;
 }) {
-  const { salvar: salvarFicha, isCloudMode } = useCloudFichas();
+  const { salvar: salvarFicha, criar: criarFichaNova, isCloudMode } = useCloudFichas();
   const [state, setState] = useState<CreationState>(INITIAL_STATE);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [resultado, setResultado] = useState<Personagem | null>(null);
+  const [fichaV2, setFichaV2] = useState<FichaPersistida | null>(null);
 
   const [tipoSelecionado, setTipoSelecionado] = useState<'Agente' | 'Sobrevivente' | ''>('');
 
@@ -79,6 +82,7 @@ export default function CharacterCreator({
     setError(null);
     setSuccess(false);
     setResultado(null);
+    setFichaV2(null);
 
     setTipoSelecionado(initialDraft.tipo);
     setNome(initialDraft.nome);
@@ -193,14 +197,39 @@ export default function CharacterCreator({
 
     const saveToStorage = async () => {
       try {
-        await salvarFicha(resultado);
+        if (fichaV2) await criarFichaNova(resultado, fichaV2);
+        else await salvarFicha(resultado);
       } catch (err) {
         console.error('Falha ao salvar ficha:', err);
       }
     };
 
     saveToStorage();
-  }, [resultado, onCreated, salvarFicha]);
+  }, [resultado, fichaV2, onCreated, salvarFicha, criarFichaNova]);
+
+  const nascerNoMotorNovo = (st: CreationState, trilha?: string): FichaPersistida | null => {
+    const d = st.data;
+    if (!d.tipo || !d.nome || !d.classe || !d.origem) return null;
+    const dados: DadosDeCriacao = {
+      tipo: d.tipo,
+      nome: d.nome,
+      conceito: d.conceito,
+      classe: d.classe,
+      origem: d.origem.nome,
+      atributos: d.atributos,
+      periciasTreinadas: d.periciasTreinadas,
+      nex: d.nex,
+      estagio: d.estagio,
+      usarPd: d.usarPd,
+      rituais: (d.rituais ?? []).map((r) => r.nome),
+      trilha,
+      patente: d.tipo === 'Agente' ? patenteSelecionada : undefined,
+    };
+    const r = criarFicha(dados);
+    if (criacaoValida(r)) return r.ficha;
+    console.warn('Ficha nasceu no motor antigo: a criação v2 apontou problemas.', r.problemas);
+    return null;
+  };
 
   const handleReset = () => {
     setState(INITIAL_STATE);
@@ -335,9 +364,11 @@ export default function CharacterCreator({
           if (tipoSelecionado === 'Agente') {
             personagem.patente = patenteSelecionada;
           }
+          const nascida = nascerNoMotorNovo(newState);
+          setFichaV2(nascida);
           setResultado(personagem);
           setSuccess(true);
-          if (onCreated) onCreated(personagem);
+          if (onCreated) onCreated(personagem, nascida ?? undefined);
         }
       } else if (state.step === 7) {
 
@@ -434,9 +465,11 @@ export default function CharacterCreator({
           personagem.patente = patenteSelecionada;
         }
 
+        const nascida = nascerNoMotorNovo(state, trilhaSelecionada?.nome);
+        setFichaV2(nascida);
         setResultado(personagem);
         setSuccess(true);
-        if (onCreated) onCreated(personagem);
+        if (onCreated) onCreated(personagem, nascida ?? undefined);
       }
 
       setState(newState);

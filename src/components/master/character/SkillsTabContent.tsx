@@ -18,6 +18,7 @@ interface SkillsTabContentProps {
   onToggleSkillGrade: (skill: PericiaName) => void;
   onManualSkillBonusChange: (skill: PericiaName, value: number) => void;
   onStartEditingSkill: (skill: PericiaName, currentBonus: number) => void;
+  dicaDeGrau?: (skill: PericiaName) => string;
 }
 
 export function SkillsTabContent({
@@ -31,6 +32,7 @@ export function SkillsTabContent({
   onToggleSkillGrade,
   onManualSkillBonusChange,
   onStartEditingSkill,
+  dicaDeGrau,
 }: SkillsTabContentProps) {
   return (
     <div className="animate-in fade-in-0 slide-in-from-bottom-2 duration-200">
@@ -61,7 +63,7 @@ export function SkillsTabContent({
                   <div key={nome} className={`group flex items-center justify-between gap-3 border px-2.5 py-2 transition-colors ${(detalhe.grau || 'Destreinado') === 'Destreinado'
                     ? 'border-white/[0.06] bg-transparent hover:border-white/15'
                     : 'border-white/12 bg-white/[0.03] hover:border-[var(--mestre-primary,#DC2626)]/40'}`}>
-                    <div className={`min-w-0 flex-1 ${isEditingMode ? 'cursor-pointer hover:text-white' : ''}`} onClick={() => isEditingMode && onToggleSkillGrade(nome as PericiaName)} title={isEditingMode ? "Clique para alterar o grau" : ""}>
+                    <div className={`min-w-0 flex-1 ${isEditingMode ? 'cursor-pointer hover:text-white' : ''}`} onClick={() => isEditingMode && onToggleSkillGrade(nome as PericiaName)} title={isEditingMode ? (dicaDeGrau ? dicaDeGrau(nome as PericiaName) : 'Clique para alterar o grau') : ''}>
                       <span className={`block truncate text-sm ${(detalhe.grau || 'Destreinado') === 'Destreinado' ? 'text-ordem-text-muted' : 'font-medium text-white'}`}>{nome}</span>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">

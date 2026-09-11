@@ -13,6 +13,7 @@ export interface NivelModalProps {
   ficha: FichaPersistida;
   aberto: boolean;
   direcao: 'subir' | 'descer';
+  etapaInicial?: 'preview' | 'escolhas';
   onFechar: () => void;
   onDefinirNivel: (nivel: number) => Promise<void> | void;
   onResponder: (escolhaId: string, valor: ValorEscolha) => Promise<Problema[]> | void;
@@ -118,7 +119,7 @@ function Preview({ p, rotuloNivel }: { p: Previsao; rotuloNivel: (n: number) => 
   );
 }
 
-export function NivelModal({ ficha, aberto, direcao, onFechar, onDefinirNivel, onResponder, onDesfazer }: NivelModalProps) {
+export function NivelModal({ ficha, aberto, direcao, etapaInicial = 'preview', onFechar, onDefinirNivel, onResponder, onDesfazer }: NivelModalProps) {
   const [etapa, setEtapa] = useState<'preview' | 'escolhas'>('preview');
   const [ocupado, setOcupado] = useState(false);
 
@@ -134,8 +135,8 @@ export function NivelModal({ ficha, aberto, direcao, onFechar, onDefinirNivel, o
   const pendencias = useMemo(() => pendenciasResolviveis(ficha), [ficha]);
 
   useEffect(() => {
-    if (aberto) setEtapa('preview');
-  }, [aberto, direcao]);
+    if (aberto) setEtapa(etapaInicial);
+  }, [aberto, direcao, etapaInicial]);
 
   const confirmar = async () => {
     if (alvo === null) return;

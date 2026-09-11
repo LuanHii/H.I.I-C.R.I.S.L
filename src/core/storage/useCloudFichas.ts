@@ -440,6 +440,58 @@ export function useCloudFichas() {
     [fichas, persistir],
   );
 
+  const editarFicha = useCallback(
+    async (id: string, transformar: (ficha: FichaPersistida) => FichaPersistida) => {
+      const alvo = fichas.find((f) => f.id === id);
+      if (!alvo?.ficha) return;
+
+      const ficha = transformar(alvo.ficha);
+      if (ficha === alvo.ficha) return;
+
+      const now = new Date().toISOString();
+      await persistir({
+        ...alvo,
+        ficha,
+        personagem: paraPersonagem({ ficha, carregarDe: alvo.personagem }),
+        atualizadoEm: now,
+        fichaMigradaDe: now,
+      });
+    },
+    [fichas, persistir],
+  );
+
+  const criar = useCallback(
+    async (personagem: Personagem, ficha: FichaPersistida, opcoes?: { id?: string; campanha?: string }) => {
+      const id = opcoes?.id ?? crypto.randomUUID();
+      const now = new Date().toISOString();
+      const registro: FichaRegistroCloudType = {
+        id,
+        ficha,
+        personagem: paraPersonagem({ ficha, carregarDe: personagem }),
+        atualizadoEm: now,
+        fichaMigradaDe: now,
+        fichaConfirmada: true,
+        campanha: opcoes?.campanha,
+      };
+
+      if (isAuthenticated && userId) {
+        const naNuvem = { ...registro, sincronizadaNaNuvem: true as const };
+        await saveFichaToCloud(userId, paraNuvem(naNuvem));
+        await saveAgentToCloud(id, naNuvem.personagem);
+        setFichas((prev) => [naNuvem, ...prev.filter((f) => f.id !== id)]);
+      } else {
+        setFichas((prev) => {
+          const atualizadas = [registro, ...prev.filter((f) => f.id !== id)];
+          gravarFichasLocal(atualizadas);
+          return atualizadas;
+        });
+      }
+
+      return id;
+    },
+    [isAuthenticated, userId],
+  );
+
   const reverterMigracao = useCallback(
     async (id: string) => {
       const alvo = fichas.find((f) => f.id === id);
@@ -516,8 +568,10 @@ export function useCloudFichas() {
       responderEscolha,
       desfazerEscolha,
       definirNivelDaFicha,
+      editarFicha,
+      criar,
       isCloudMode: isAuthenticated,
     }),
-    [fichas, fichasResolvidas, loading, salvar, remover, duplicar, moverParaCampanha, marcarComoSincronizada, sincronizarFicha, migrar, reverterMigracao, responderEscolha, desfazerEscolha, definirNivelDaFicha, isAuthenticated]
+    [fichas, fichasResolvidas, loading, salvar, remover, duplicar, moverParaCampanha, marcarComoSincronizada, sincronizarFicha, migrar, reverterMigracao, responderEscolha, desfazerEscolha, definirNivelDaFicha, editarFicha, criar, isAuthenticated]
   );
 }

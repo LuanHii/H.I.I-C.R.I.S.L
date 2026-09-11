@@ -40,12 +40,16 @@ export function atualizarSessao(
     }
   }
 
+  const usaPd = Boolean(personagem.usarPd && personagem.pd);
+  const sessaoSemPd: FichaPersistida['sessao'] = { ...ficha.sessao };
+  delete sessaoSemPd.pdGasto;
+
   const sessao: FichaPersistida['sessao'] = {
-    ...ficha.sessao,
+    ...sessaoSemPd,
     pvDano: Math.max(0, personagem.pv.max - personagem.pv.atual),
     peGasto: Math.max(0, personagem.pe.max - personagem.pe.atual),
     sanPerdida: Math.max(0, personagem.san.max - personagem.san.atual),
-    ...(personagem.pd ? { pdGasto: Math.max(0, personagem.pd.max - personagem.pd.atual) } : {}),
+    ...(usaPd ? { pdGasto: Math.max(0, personagem.pd!.max - personagem.pd!.atual) } : {}),
     ...(personagem.pp !== undefined ? { pontosPrestigio: personagem.pp } : {}),
     ...(personagem.marcas ? { marcas: personagem.marcas } : {}),
   };

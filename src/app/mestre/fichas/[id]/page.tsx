@@ -11,7 +11,7 @@ import { WeaponModsButton } from '../../../../components/master/WeaponModsModal'
 
 export default function FichaDetalhePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = usePromise(params);
-  const { fichas, salvar, definirNivelDaFicha, responderEscolha, desfazerEscolha } = useCloudFichas();
+  const { fichas, salvar, definirNivelDaFicha, responderEscolha, desfazerEscolha, editarFicha } = useCloudFichas();
   const registro = fichas.find((ficha) => ficha.id === resolvedParams.id);
   const [personagemView, setPersonagemView] = useState<Personagem | null>(
     registro ? registro.personagem : null,
@@ -113,6 +113,7 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
                 onDefinirNivel: (nivel) => definirNivelDaFicha(registro.id, nivel),
                 onResponder: (escolhaId, valor) => responderEscolha(registro.id, escolhaId, valor),
                 onDesfazer: (escolhaId) => desfazerEscolha(registro.id, escolhaId),
+                onEditar: (transformar) => editarFicha(registro.id, transformar),
               } : undefined}
             />
           </div>

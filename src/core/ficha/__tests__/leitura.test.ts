@@ -233,6 +233,20 @@ describe('atualizarSessao: o que mantém o v2 vivo durante o jogo', () => {
     expect(r.divergiu.length).toBeGreaterThan(0);
   });
 
+  it('ligar e desligar o modo PD segue o personagem, não o que sobrou na sessão', () => {
+    const { ficha, view } = preparar();
+
+    const ligado = atualizarSessao(ficha, { ...view, usarPd: true, pd: { atual: 4, max: 9 } });
+    expect(ligado.estrutural, ligado.divergiu.join(', ')).toBe(false);
+    expect(ligado.ficha.sessao.pdGasto).toBe(5);
+    expect(buildFicha({ ficha: ligado.ficha }).derivados.pd, 'com PD ligado o motor deriva PD').toBeDefined();
+
+    const desligado = atualizarSessao(ligado.ficha, { ...view, usarPd: false, pd: { atual: 4, max: 9 } });
+    expect(desligado.estrutural).toBe(false);
+    expect(desligado.ficha.sessao.pdGasto, 'desligar o modo PD precisa apagar o gasto').toBeUndefined();
+    expect(buildFicha({ ficha: desligado.ficha }).derivados.pd, 'com PD desligado o motor volta a SAN/PE').toBeUndefined();
+  });
+
   it('a ficha continua legível do v2 depois de um save de sessão', () => {
     const { v0, ficha, view } = preparar();
     const ferido = { ...view, pv: { ...view.pv, atual: view.pv.max - 5 } };
