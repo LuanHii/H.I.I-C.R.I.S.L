@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ChevronDown, Swords, Zap, Crosshair, Sparkles, BookOpen, Flame, Shield, Wind, Clock, ArrowRight } from 'lucide-react';
+import { Search, X, ChevronDown, Swords, Zap, Crosshair, Sparkles, BookOpen, Flame, Shield, Wind, Clock, ArrowRight } from 'lucide-react';
 import { Personagem, Poder, Ritual } from '../core/types';
 import { UNIVERSAL_ACTIONS, INVESTIGATION_ACTIONS, CHASE_ACTIONS, STEALTH_ACTIONS, MANEUVER_ACTIONS, ACAO_BADGE, ActionDefinition, TipoAcao } from '../data/combat/actions';
 import { ORIGENS } from '../data/character/origins';
@@ -469,24 +469,20 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
     return groups;
   }, [filteredUniversal]);
 
-  const SectionHeader = ({ icon, title, count, color }: { icon: React.ReactNode; title: string; count: number; color: string }) => (
-    <div className="flex items-center gap-3 mb-4 sticky top-0 z-10 py-2.5 -mx-1 px-1 bg-gradient-to-b from-[#0d0d0d] via-[#0d0d0d]/95 to-transparent ">
-      <div className={`w-8 h-8 flex items-center justify-center bg-gradient-to-br ${color}`}>
-        {icon}
-      </div>
-      <div>
-        <h3 className="text-sm font-semibold text-white tracking-wide">{title}</h3>
-        <span className="text-[10px] text-white/25 font-mono">{count} {count === 1 ? 'item' : 'itens'}</span>
-      </div>
-      <div className="flex-1 h-px bg-gradient-to-r from-white/[0.06] to-transparent ml-2" />
+  const SectionHeader = ({ icon, title, count }: { icon: React.ReactNode; title: string; count: number; color: string }) => (
+    <div className="sticky top-0 z-10 mb-3 flex items-baseline gap-2 bg-ordem-ooze/95 py-2 backdrop-blur-sm">
+      <span className="text-[var(--mestre-primary,#DC2626)]">{icon}</span>
+      <h3 className="font-carimbo text-[10px] uppercase tracking-[0.22em] text-[var(--mestre-primary,#DC2626)]">{title}</h3>
+      <span className="font-mono text-[10px] text-ordem-text-muted">{count}</span>
+      <div className="ml-2 h-px flex-1 bg-white/[0.06]" />
     </div>
   );
 
   const SubHeader = ({ icon, title, color }: { icon: React.ReactNode; title: string; color: string }) => (
-    <div className="flex items-center gap-2 mb-2 mt-3">
+    <div className="mb-2 mt-3 flex items-center gap-2">
       <span className={color}>{icon}</span>
-      <span className={`text-[11px] font-semibold uppercase tracking-widest ${color}`}>{title}</span>
-      <div className="flex-1 h-px bg-white/[0.04] ml-2" />
+      <span className={`font-carimbo text-[10px] uppercase tracking-[0.18em] ${color}`}>{title}</span>
+      <div className="ml-2 h-px flex-1 bg-white/[0.04]" />
     </div>
   );
 
@@ -508,21 +504,20 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
         transition={springTransition}
         className="mb-5 shrink-0 space-y-4"
       >
-        <div className="relative group">
-          <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 via-purple-500/5 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity -m-px" />
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-white/40 transition-colors" />
+        <label className="flex items-center gap-2 border border-white/10 bg-black/30 px-2.5 focus-within:border-[var(--mestre-primary,#DC2626)]/60">
+          <Search size={13} className="shrink-0 text-ordem-text-muted" />
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Buscar ações, rituais, poderes..."
-            className="relative w-full bg-white/[0.03] border border-white/[0.06] pl-10 pr-10 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/15 transition-all "
+            placeholder="Buscar ações, rituais, poderes…"
+            className="w-full bg-transparent py-2 text-sm text-white placeholder:text-ordem-text-muted focus:outline-none"
           />
           {query && (
-            <button onClick={() => setQuery('')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/20 hover:text-white/60 transition-colors text-sm">
-              ✕
+            <button type="button" onClick={() => setQuery('')} aria-label="Limpar busca" className="text-ordem-text-muted transition-colors hover:text-white">
+              <X size={13} />
             </button>
           )}
-        </div>
+        </label>
 
         <div className="flex flex-wrap gap-1.5">
           {filterButtons.map(fb => (
@@ -531,9 +526,9 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => setFilter(fb.key)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium border transition-all duration-200 ${filter === fb.key
-                  ? `bg-gradient-to-r ${fb.activeGradient}`
-                  : 'bg-white/[0.02] border-white/[0.05] text-white/30 hover:bg-white/[0.04] hover:text-white/50 hover:border-white/[0.08]'
+              className={`inline-flex items-center gap-1.5 border px-2.5 py-1 font-carimbo text-[10px] uppercase tracking-[0.14em] transition ${filter === fb.key
+                  ? 'border-[var(--mestre-primary,#DC2626)] bg-[var(--mestre-primary,#DC2626)]/15 text-white'
+                  : 'border-white/10 text-ordem-text-muted hover:border-white/30 hover:text-white'
                 }`}
             >
               {fb.icon}

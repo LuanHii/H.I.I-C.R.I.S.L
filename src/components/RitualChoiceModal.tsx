@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Search, BookOpen, Check } from 'lucide-react';
 import { Personagem, Ritual, Elemento } from '../core/types';
 import { RITUAIS } from '../data/magic/rituals';
 import { ELEMENTO_CONFIG } from '../data/magic/elementColors';
-import { cn } from '../lib/utils';
+import { Fita } from './master/ui/Pecas';
+import { CHIP_DO_SELETOR, OpcaoDoSeletor, SeletorModal } from './master/ui/SeletorModal';
 
 interface RitualChoiceModalProps {
     agent: Personagem;
@@ -15,6 +14,8 @@ interface RitualChoiceModalProps {
 
     circuloMaximo?: number;
 }
+
+const ELEMENTOS: Elemento[] = ['Sangue', 'Morte', 'Conhecimento', 'Energia', 'Medo'];
 
 function calcularCirculoMaximo(nex: number): number {
     if (nex >= 75) return 3;
@@ -34,6 +35,7 @@ export function RitualChoiceModal({
     const [ritualSelecionado, setRitualSelecionado] = useState<string | null>(null);
     const circuloMaximo = circuloMaximoProp ?? calcularCirculoMaximo(agent.nex);
     const rituaisConhecidos = useMemo(() => new Set(agent.rituais.map(r => r.nome)), [agent.rituais]);
+
     const rituaisFiltrados = useMemo(() => {
         let lista = RITUAIS.filter(r => {
             if (r.circulo > circuloMaximo) return false;
@@ -59,217 +61,103 @@ export function RitualChoiceModal({
             if (a.circulo !== b.circulo) return a.circulo - b.circulo;
             return a.nome.localeCompare(b.nome);
         });
-    }, [circuloMaximo, rituaisConhecidos, filtroElemento, filtroCirculo, busca]);
+    }, [busca, filtroElemento, filtroCirculo, circuloMaximo, rituaisConhecidos]);
 
     const ritualId = (r: Ritual) => `${r.nome}|${r.elemento}`;
 
     const handleConfirm = () => {
         if (!ritualSelecionado) return;
         const ritual = rituaisFiltrados.find(r => ritualId(r) === ritualSelecionado);
-        if (ritual) {
-            onSelect(ritual);
-        }
+        if (ritual) onSelect(ritual);
     };
 
-    const renderElementoIcon = (elemento: Elemento) => {
-        const config = ELEMENTO_CONFIG[elemento];
-        const Icon = config.icon;
-        return <Icon size={14} className={config.color} />;
-    };
+    const circulosDisponiveis = Array.from({ length: Math.min(circuloMaximo, 3) }, (_, i) => i + 1);
 
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
-            onClick={onClose}
-        >
-            <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="relative w-full max-w-3xl max-h-[90vh] bg-ordem-ooze border border-ordem-border rounded-xl overflow-hidden flex flex-col"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div className="p-4 border-b border-ordem-border bg-gradient-to-r from-blue-900/30 to-ordem-ooze">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                            <BookOpen className="text-blue-400" size={24} />
-                            <div>
-                                <h2 className="text-lg font-bold text-ordem-text">Aprender Ritual</h2>
-                                <p className="text-sm text-ordem-text-muted">
-                                    Escolha um ritual de até {circuloMaximo}º círculo
-                                </p>
-                            </div>
-                        </div>
-                        {onClose && (
-                            <button
-                                onClick={onClose}
-                                className="p-2 hover:bg-ordem-border/50 rounded-lg transition-colors"
-                            >
-                                <X size={20} className="text-ordem-text-muted" />
+        <SeletorModal
+            aberto
+            onFechar={() => onClose?.()}
+            rotulo={`Até ${circuloMaximo}º círculo`}
+            titulo="Aprender ritual"
+            classe={agent.classe}
+            busca={{ valor: busca, aoMudar: setBusca, placeholder: 'Buscar ritual…' }}
+            filtros={(
+                <>
+                    <button type="button" onClick={() => setFiltroElemento('todos')} className={CHIP_DO_SELETOR(filtroElemento === 'todos')}>Todos</button>
+                    {ELEMENTOS.map((elem) => {
+                        const Icon = ELEMENTO_CONFIG[elem].icon;
+                        return (
+                            <button key={elem} type="button" onClick={() => setFiltroElemento(elem)} className={`${CHIP_DO_SELETOR(filtroElemento === elem)} flex items-center gap-1`}>
+                                <Icon size={11} className={ELEMENTO_CONFIG[elem].color} /> {elem}
                             </button>
-                        )}
-                    </div>
-
-                    <div className="flex gap-2 flex-wrap">
-                        <div className="flex-1 min-w-[200px] relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-ordem-text-muted" size={16} />
-                            <input
-                                type="text"
-                                value={busca}
-                                onChange={(e) => setBusca(e.target.value)}
-                                placeholder="Buscar ritual..."
-                                className="w-full pl-10 pr-4 py-2 bg-ordem-bg border border-ordem-border rounded-lg text-ordem-text placeholder:text-ordem-text-muted focus:outline-none focus:border-blue-500/50"
-                            />
-                        </div>
-
-                        <div className="flex gap-1">
-                            <button
-                                onClick={() => setFiltroCirculo('todos')}
-                                className={cn(
-                                    'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                                    filtroCirculo === 'todos'
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-ordem-bg border border-ordem-border text-ordem-text-muted hover:text-ordem-text'
-                                )}
-                            >
-                                Todos
-                            </button>
-                            {[1, 2, 3].filter(c => c <= circuloMaximo).map(circulo => (
-                                <button
-                                    key={circulo}
-                                    onClick={() => setFiltroCirculo(circulo)}
-                                    className={cn(
-                                        'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                                        filtroCirculo === circulo
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-ordem-bg border border-ordem-border text-ordem-text-muted hover:text-ordem-text'
-                                    )}
-                                >
-                                    {circulo}º
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="flex gap-1 mt-2 flex-wrap">
+                        );
+                    })}
+                    <span className="mx-1 h-4 w-px bg-white/10" aria-hidden />
+                    <button type="button" onClick={() => setFiltroCirculo('todos')} className={CHIP_DO_SELETOR(filtroCirculo === 'todos')}>Qualquer círculo</button>
+                    {circulosDisponiveis.map((c) => (
+                        <button key={c} type="button" onClick={() => setFiltroCirculo(c)} className={CHIP_DO_SELETOR(filtroCirculo === c)}>{c}º</button>
+                    ))}
+                    <span className="ml-auto font-mono text-[11px] text-ordem-text-muted">{rituaisFiltrados.length}</span>
+                </>
+            )}
+            rodape={(
+                <>
+                    <span className="text-xs text-ordem-text-muted">
+                        {ritualSelecionado ? 'Ritual marcado — confirme para aprender.' : 'Marque um ritual da lista.'}
+                    </span>
+                    <div className="flex shrink-0 gap-2">
                         <button
-                            onClick={() => setFiltroElemento('todos')}
-                            className={cn(
-                                'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                                filtroElemento === 'todos'
-                                    ? 'bg-ordem-border text-ordem-text'
-                                    : 'bg-ordem-bg border border-ordem-border text-ordem-text-muted hover:text-ordem-text'
-                            )}
-                        >
-                            Todos
-                        </button>
-                        {(['Sangue', 'Morte', 'Conhecimento', 'Energia', 'Medo'] as Elemento[]).map(elem => {
-                            const config = ELEMENTO_CONFIG[elem];
-                            const Icon = config.icon;
-                            return (
-                                <button
-                                    key={elem}
-                                    onClick={() => setFiltroElemento(elem)}
-                                    className={cn(
-                                        'px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5',
-                                        filtroElemento === elem
-                                            ? `${config.bg} ${config.color} border border-current`
-                                            : 'bg-ordem-bg border border-ordem-border text-ordem-text-muted hover:text-ordem-text'
-                                    )}
-                                >
-                                    <Icon size={14} />
-                                    {elem}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                    <AnimatePresence mode="popLayout">
-                        {rituaisFiltrados.length === 0 ? (
-                            <div className="text-center py-8 text-ordem-text-muted">
-                                Nenhum ritual encontrado.
-                            </div>
-                        ) : (
-                            rituaisFiltrados.map((ritual) => (
-                                <motion.div
-                                    key={ritualId(ritual)}
-                                    layout
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    onClick={() => setRitualSelecionado(ritualId(ritual))}
-                                    className={cn(
-                                        'p-3 rounded-lg border cursor-pointer transition-all',
-                                        ritualSelecionado === ritualId(ritual)
-                                            ? 'border-blue-500 bg-blue-500/10'
-                                            : 'border-ordem-border hover:border-ordem-border-light bg-ordem-bg/50'
-                                    )}
-                                >
-                                    <div className="flex items-start justify-between gap-2">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2">
-                                                {renderElementoIcon(ritual.elemento)}
-                                                <h3 className="font-semibold text-ordem-text">{ritual.nome}</h3>
-                                                <span className="text-xs px-1.5 py-0.5 bg-ordem-border rounded">
-                                                    {ritual.circulo}º círculo
-                                                </span>
-                                                {ritualSelecionado === ritualId(ritual) && (
-                                                    <Check size={16} className="text-blue-400" />
-                                                )}
-                                            </div>
-                                            <p className="text-sm text-ordem-text-muted mt-1 line-clamp-2">
-                                                {ritual.descricao}
-                                            </p>
-                                            <div className="flex gap-4 mt-2 text-xs text-ordem-text-muted">
-                                                <span>Execução: {ritual.execucao}</span>
-                                                <span>Alcance: {ritual.alcance}</span>
-                                                <span>Duração: {ritual.duracao}</span>
-                                            </div>
-                                        </div>
-                                        <span className={cn(
-                                            'px-2 py-0.5 text-xs rounded font-medium flex-shrink-0',
-                                            ELEMENTO_CONFIG[ritual.elemento].bg,
-                                            ELEMENTO_CONFIG[ritual.elemento].color
-                                        )}>
-                                            {ritual.elemento}
-                                        </span>
-                                    </div>
-                                </motion.div>
-                            ))
-                        )}
-                    </AnimatePresence>
-                </div>
-
-                <div className="p-4 border-t border-ordem-border bg-ordem-ooze/80 flex justify-end gap-2">
-                    {onClose && (
-                        <button
-                            onClick={onClose}
-                            className="px-4 py-2 rounded-lg border border-ordem-border text-ordem-text-muted hover:text-ordem-text transition-colors"
+                            type="button"
+                            onClick={() => onClose?.()}
+                            className="border border-white/10 px-4 py-2 whitespace-nowrap font-carimbo text-[11px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
                         >
                             Cancelar
                         </button>
-                    )}
-                    <button
-                        onClick={handleConfirm}
-                        disabled={!ritualSelecionado}
-                        className={cn(
-                            'px-4 py-2 rounded-lg font-medium transition-colors',
-                            ritualSelecionado
-                                ? 'bg-blue-600 text-white hover:bg-blue-500'
-                                : 'bg-ordem-border text-ordem-text-muted cursor-not-allowed'
-                        )}
-                    >
-                        Aprender Ritual
-                    </button>
-                </div>
-            </motion.div>
-        </motion.div>
+                        <button
+                            type="button"
+                            onClick={handleConfirm}
+                            disabled={!ritualSelecionado}
+                            className="border border-[var(--mestre-primary,#DC2626)] bg-[var(--mestre-primary,#DC2626)]/15 px-5 py-2 whitespace-nowrap font-carimbo text-[11px] uppercase tracking-[0.16em] text-white transition hover:bg-[var(--mestre-primary,#DC2626)]/30 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                            Aprender
+                        </button>
+                    </div>
+                </>
+            )}
+        >
+            {rituaisFiltrados.length === 0 ? (
+                <p className="py-8 text-center text-sm italic text-ordem-text-muted">Nenhum ritual disponível com esses filtros.</p>
+            ) : (
+                <ul className="grid gap-2 sm:grid-cols-2">
+                    {rituaisFiltrados.map((ritual) => {
+                        const config = ELEMENTO_CONFIG[ritual.elemento];
+                        const Icon = config.icon;
+                        return (
+                            <li key={ritualId(ritual)}>
+                                <OpcaoDoSeletor
+                                    titulo={(
+                                        <span className="flex items-center gap-2">
+                                            <Icon size={13} className={config.color} />
+                                            {ritual.nome}
+                                        </span>
+                                    )}
+                                    meta={<Fita variante="neutra">{ritual.circulo}º · {ritual.elemento}</Fita>}
+                                    descricao={ritual.descricao}
+                                    rodape={(
+                                        <span className="flex flex-wrap gap-3 font-mono text-[11px] text-ordem-text-muted">
+                                            {ritual.execucao && <span>{ritual.execucao}</span>}
+                                            {ritual.alcance && <span>{ritual.alcance}</span>}
+                                            {ritual.duracao && <span>{ritual.duracao}</span>}
+                                        </span>
+                                    )}
+                                    selecionada={ritualSelecionado === ritualId(ritual)}
+                                    onClick={() => setRitualSelecionado(ritualId(ritual))}
+                                />
+                            </li>
+                        );
+                    })}
+                </ul>
+            )}
+        </SeletorModal>
     );
 }
-
-export default RitualChoiceModal;

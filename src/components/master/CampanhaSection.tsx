@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { ChevronRight, Download, FolderInput, Plus } from 'lucide-react';
+import { Fita } from './ui/Pecas';
 import type { FichaRegistro, Campanha } from '../../core/storage/useStoredFichas';
 
 interface CampanhaSectionProps {
@@ -75,7 +77,7 @@ export function CampanhaSection({
     return (
         <div className="mb-4">
             <div
-                className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition hover:bg-ordem-ooze/50"
+                className="flex cursor-pointer items-center gap-2 px-3 py-2 transition hover:bg-white/[0.03]"
                 style={{ borderLeft: `3px solid ${cor}` }}
                 onClick={() => setExpandida(!expandida)}
                 aria-expanded={expandida}
@@ -88,12 +90,11 @@ export function CampanhaSection({
                     }
                 }}
             >
-                <span
-                    className="text-lg transition-transform"
+                <ChevronRight
+                    size={14}
+                    className="shrink-0 text-ordem-text-muted transition-transform"
                     style={{ transform: expandida ? 'rotate(90deg)' : 'rotate(0deg)' }}
-                >
-                    ▶
-                </span>
+                />
 
                 {editando && id ? (
                     <input
@@ -105,7 +106,7 @@ export function CampanhaSection({
                             if (e.key === 'Escape') setEditando(false);
                         }}
                         onClick={(e) => e.stopPropagation()}
-                        className="bg-ordem-ooze border border-ordem-text-muted text-white px-2 py-1 rounded text-sm font-semibold"
+                        className="border border-white/20 bg-black/40 px-2 py-1 text-sm font-semibold text-white focus:outline-none"
                         autoFocus
                     />
                 ) : (
@@ -123,13 +124,11 @@ export function CampanhaSection({
                     </span>
                 )}
 
-                <span className="text-xs text-ordem-text-secondary font-mono">
-                    {fichas.length} ficha{fichas.length !== 1 ? 's' : ''}
+                <span className="font-mono text-xs text-ordem-text-muted">
+                    {fichas.length}
                 </span>
                 {hasSelected && !expandida && (
-                    <span className="text-[10px] px-2 py-0.5 rounded border border-ordem-green text-ordem-green">
-                        selecionada
-                    </span>
+                    <Fita variante="contorno">aberta aqui</Fita>
                 )}
 
                 {onPriorizarCampanha && campanha && (
@@ -178,10 +177,11 @@ export function CampanhaSection({
                             e.stopPropagation();
                             onExportarCampanha(fichas, nome, id);
                         }}
-                        className="text-ordem-text-muted hover:text-ordem-gold transition text-xs px-2"
+                        className="px-1.5 text-ordem-text-muted transition hover:text-ordem-gold"
                         title={`Exportar fichas da campanha "${nome}"`}
+                        aria-label={`Exportar fichas da campanha "${nome}"`}
                     >
-                        📤
+                        <Download size={13} />
                     </button>
                 )}
 
@@ -228,14 +228,15 @@ export function CampanhaSection({
                                         e.stopPropagation();
                                         setMenuAberto(menuAberto === registro.id ? null : registro.id);
                                     }}
-                                    className="text-xs px-2 py-1 bg-ordem-ooze border border-ordem-border-light rounded hover:border-ordem-text-muted text-ordem-text-secondary"
+                                    className="border border-white/10 bg-black/60 p-1 text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
                                     title="Mover para campanha"
+                                    aria-label="Mover para campanha"
                                 >
-                                    📁
+                                    <FolderInput size={13} />
                                 </button>
 
                                 {menuAberto === registro.id && (
-                                    <div className="absolute right-0 top-full mt-1 bg-ordem-ooze border border-ordem-border-light rounded-lg shadow-xl z-50 min-w-[150px]">
+                                    <div className="absolute right-0 top-full z-50 mt-1 min-w-[150px] border border-white/10 bg-[var(--mestre-superficie,#16161a)] shadow-xl">
                                         <div className="py-1">
                                             <button
                                                 onClick={(e) => {
@@ -315,20 +316,20 @@ export function NovaCampanhaForm({ onCriar }: NovaCampanhaFormProps) {
         return (
             <button
                 onClick={() => setAberto(true)}
-                className="w-full px-3 py-2 text-xs font-mono border border-dashed border-ordem-border-light text-ordem-text-muted hover:border-ordem-text-muted hover:text-ordem-white-muted rounded-lg transition"
+                className="flex w-full items-center justify-center gap-2 border border-dashed border-white/15 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-muted transition hover:border-white/40 hover:text-white"
             >
-                + NOVA CAMPANHA
+                <Plus size={13} /> Nova campanha
             </button>
         );
     }
 
     return (
-        <div className="border border-ordem-border-light rounded-lg p-3 space-y-3 bg-ordem-ooze/50">
+        <div className="space-y-3 border border-white/10 bg-white/[0.02] p-3">
             <input
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 placeholder="Nome da campanha..."
-                className="w-full bg-ordem-black/40 border border-ordem-border text-white px-3 py-2 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-sm"
+                className="w-full border border-white/10 bg-black/30 px-3 py-2 font-mono text-sm text-white placeholder:text-ordem-text-muted focus:border-ordem-red/60 focus:outline-none"
                 autoFocus
                 onKeyDown={(e) => {
                     if (e.key === 'Enter') handleCriar();
@@ -341,8 +342,9 @@ export function NovaCampanhaForm({ onCriar }: NovaCampanhaFormProps) {
                     <button
                         key={c}
                         onClick={() => setCor(c)}
-                        className={`w-6 h-6 rounded-full border-2 transition ${cor === c ? 'border-white scale-110' : 'border-transparent'
+                        className={`h-6 w-6 border-2 transition ${cor === c ? 'scale-110 border-white' : 'border-transparent'
                             }`}
+                        aria-label={`Cor ${c}`}
                         style={{ backgroundColor: c }}
                     />
                 ))}
@@ -352,15 +354,15 @@ export function NovaCampanhaForm({ onCriar }: NovaCampanhaFormProps) {
                 <button
                     onClick={handleCriar}
                     disabled={!nome.trim()}
-                    className="flex-1 px-3 py-2 text-xs font-mono border border-ordem-green text-ordem-green hover:bg-ordem-green/10 rounded-lg transition disabled:opacity-50"
+                    className="flex-1 border border-ordem-red bg-ordem-red/15 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-white transition hover:bg-ordem-red/30 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                    CRIAR
+                    Criar
                 </button>
                 <button
                     onClick={() => setAberto(false)}
-                    className="px-3 py-2 text-xs font-mono border border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted rounded-lg transition"
+                    className="border border-white/10 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
                 >
-                    CANCELAR
+                    Cancelar
                 </button>
             </div>
         </div>

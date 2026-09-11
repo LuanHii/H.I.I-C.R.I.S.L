@@ -522,7 +522,7 @@ export function FichasManager() {
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <div className="text-xs font-mono tracking-[0.35em] text-ordem-text-muted uppercase">Arquivo</div>
+              <div className="font-carimbo text-[10px] uppercase tracking-[0.35em] text-ordem-text-muted">Arquivo</div>
               {isCloudMode ? (
                 <span className="flex items-center gap-1 text-[10px] text-ordem-green" title="Sincronizado na nuvem">
                   <Cloud size={12} />
@@ -535,7 +535,7 @@ export function FichasManager() {
                 </span>
               )}
             </div>
-            <h2 className="text-xl lg:text-2xl font-serif text-white truncate">Fichas</h2>
+            <h2 className="truncate font-display text-2xl uppercase leading-none tracking-[0.06em] text-white lg:text-3xl">Fichas</h2>
             <div className="text-xs font-mono text-ordem-text-muted mt-1">
               {fichasLoading ? 'Carregando...' : ''}
             </div>
@@ -547,7 +547,7 @@ export function FichasManager() {
                   setSelecionada(lastSelectedId);
                   setMobileDetailOpen(true);
                 }}
-                className="px-3 py-2.5 text-[10px] font-mono tracking-[0.15em] border border-ordem-border text-ordem-text-muted hover:border-ordem-text-secondary hover:text-white rounded-lg transition touch-target-sm"
+                className="border border-white/10 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white touch-target-sm"
                 aria-label="Abrir última ficha selecionada"
               >
                 ÚLTIMA
@@ -555,7 +555,7 @@ export function FichasManager() {
             )}
             <button
               onClick={() => setModalAberto(true)}
-              className="px-3 py-2.5 text-[10px] font-mono tracking-[0.15em] border border-ordem-gold text-ordem-gold hover:bg-ordem-gold/10 active:bg-ordem-gold/20 rounded-lg transition touch-target-sm"
+              className="border border-white/10 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white touch-target-sm"
               aria-label="Exportar ou Importar fichas"
             >
               <span className="hidden sm:inline">EXP/IMP</span>
@@ -563,20 +563,20 @@ export function FichasManager() {
             </button>
             <Link
               href="/agente/novo"
-              className="px-3 py-2.5 text-[10px] font-mono tracking-[0.15em] border border-ordem-green text-ordem-green hover:bg-ordem-green/10 active:bg-ordem-green/20 rounded-lg transition touch-target-sm flex items-center gap-1"
+              className="flex items-center gap-1.5 border border-ordem-red bg-ordem-red/15 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-white transition hover:bg-ordem-red/30 touch-target-sm"
             >
-              <Plus size={16} />
+              <Plus size={14} />
               <span className="hidden sm:inline">NOVA</span>
             </Link>
           </div>
         </div>
 
         {isLoggedIn && (
-          <div className="flex gap-1 p-1 bg-ordem-ooze/30 rounded-lg">
+          <div className="flex border border-white/10 p-0.5">
             <button
               onClick={() => setFichasViewMode('minhas')}
-              className={`flex-1 px-3 py-2 text-[10px] font-mono tracking-widest rounded-md transition-colors ${fichasViewMode === 'minhas'
-                ? 'bg-ordem-green/20 text-ordem-green border border-ordem-green/50'
+              className={`flex-1 px-3 py-1.5 font-carimbo text-[10px] uppercase tracking-[0.16em] transition-colors ${fichasViewMode === 'minhas'
+                ? 'bg-ordem-red text-black'
                 : 'text-ordem-text-muted hover:text-white'
                 }`}
             >
@@ -584,15 +584,15 @@ export function FichasManager() {
             </button>
             <button
               onClick={() => setFichasViewMode('observadas')}
-              className={`flex-1 px-3 py-2 text-[10px] font-mono tracking-widest rounded-md transition-colors flex items-center justify-center gap-1 ${fichasViewMode === 'observadas'
-                ? 'bg-ordem-gold/20 text-ordem-gold border border-ordem-gold/50'
+              className={`flex flex-1 items-center justify-center gap-1 px-3 py-1.5 font-carimbo text-[10px] uppercase tracking-[0.16em] transition-colors ${fichasViewMode === 'observadas'
+                ? 'bg-ordem-gold text-black'
                 : 'text-ordem-text-muted hover:text-white'
                 }`}
             >
               <Eye size={12} />
               OBSERVADAS
               {watchedFichas.length > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 bg-ordem-gold/30 rounded text-[9px]">
+                <span className="ml-1 bg-black/20 px-1.5 py-0.5 font-mono text-[9px]">
                   {watchedFichas.length}
                 </span>
               )}
@@ -614,14 +614,14 @@ export function FichasManager() {
                 onKeyDown={(e) => {
                   if (e.key === 'Escape') setBusca('');
                 }}
-                className="w-full bg-ordem-black/40 border border-ordem-border text-white px-4 py-3 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-sm touch-target"
+                className="w-full border border-white/10 bg-black/30 px-3 py-2.5 font-mono text-sm text-white placeholder:text-ordem-text-muted focus:border-ordem-red/60 focus:outline-none touch-target"
                 aria-label="Buscar por nome, classe, NEX ou patente"
               />
               <div className="flex flex-wrap items-center gap-2">
                 <select
                   value={filtroClasse}
                   onChange={(e) => setFiltroClasse(e.target.value as any)}
-                  className="bg-ordem-black/40 border border-ordem-border text-white px-3 py-2 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-[10px]"
+                  className="border border-white/10 bg-black/30 px-2.5 py-2 font-carimbo text-[10px] uppercase tracking-[0.12em] text-ordem-text-secondary focus:border-ordem-red/60 focus:outline-none"
                   aria-label="Filtrar por classe"
                 >
                   <option value="Todas">Todas as classes</option>
@@ -633,7 +633,7 @@ export function FichasManager() {
                 <select
                   value={filtroPatente}
                   onChange={(e) => setFiltroPatente(e.target.value as any)}
-                  className="bg-ordem-black/40 border border-ordem-border text-white px-3 py-2 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-[10px]"
+                  className="border border-white/10 bg-black/30 px-2.5 py-2 font-carimbo text-[10px] uppercase tracking-[0.12em] text-ordem-text-secondary focus:border-ordem-red/60 focus:outline-none"
                   aria-label="Filtrar por patente"
                 >
                   <option value="Todas">Todas as patentes</option>
@@ -650,7 +650,7 @@ export function FichasManager() {
                       setFiltroClasse('Todas');
                       setFiltroPatente('Todas');
                     }}
-                    className="px-3 py-2 rounded-lg border border-ordem-border text-ordem-text-muted text-[10px] font-mono uppercase tracking-widest"
+                    className="font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-muted transition hover:text-white"
                   >
                     Limpar filtros
                   </button>
@@ -661,63 +661,57 @@ export function FichasManager() {
                 <select
                   value={ordem}
                   onChange={(e) => setOrdem(e.target.value as any)}
-                  className="bg-ordem-black/40 border border-ordem-border text-white px-3 py-2 rounded-lg focus:border-ordem-red focus:outline-none font-mono text-xs touch-target-sm"
+                  className="border border-white/10 bg-black/30 px-2.5 py-2 font-carimbo text-[10px] uppercase tracking-[0.12em] text-ordem-text-secondary focus:border-ordem-red/60 focus:outline-none touch-target-sm"
                   aria-label="Ordenar fichas"
                 >
                   <option value="atualizado">Mais recente</option>
                   <option value="nome">Nome (A→Z)</option>
                   <option value="nex">NEX (↓)</option>
                 </select>
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setViewMode('compact')}
-                    className={`px-2 py-2 rounded-lg border text-[10px] font-mono uppercase tracking-widest ${viewMode === 'compact'
-                      ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
-                      : 'border-ordem-border text-ordem-text-muted'
-                      }`}
-                  >
-                    Compacto
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setViewMode('full')}
-                    className={`px-2 py-2 rounded-lg border text-[10px] font-mono uppercase tracking-widest ${viewMode === 'full'
-                      ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
-                      : 'border-ordem-border text-ordem-text-muted'
-                      }`}
-                  >
-                    Detalhado
-                  </button>
+                <div className="ml-auto flex border border-white/10 p-0.5" role="group" aria-label="Densidade da lista">
+                  {([['compact', 'Compacto'], ['full', 'Detalhado']] as const).map(([modo, rotulo]) => (
+                    <button
+                      key={modo}
+                      type="button"
+                      aria-pressed={viewMode === modo}
+                      onClick={() => setViewMode(modo)}
+                      className={`px-2.5 py-1 font-carimbo text-[10px] uppercase tracking-[0.14em] transition ${viewMode === modo
+                        ? 'bg-white/10 text-white'
+                        : 'text-ordem-text-muted hover:text-white'
+                        }`}
+                    >
+                      {rotulo}
+                    </button>
+                  ))}
                 </div>
                 {busca.trim().length > 0 && (
                   <button
                     type="button"
                     onClick={() => setBusca('')}
-                    className="px-3 py-2 rounded-lg border border-ordem-border text-ordem-text-muted text-[10px] font-mono uppercase tracking-widest"
+                    className="font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-muted transition hover:text-white"
                   >
                     Limpar busca
                   </button>
                 )}
               </div>
-              <div className="flex items-center justify-between gap-2">
-                <div className="text-[10px] font-mono text-ordem-text-muted uppercase tracking-widest">
+              <div className="flex items-center justify-between gap-2 border-t border-white/[0.06] pt-2">
+                <div className="font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-muted">
                   {fichasFiltradas.length === fichas.length
                     ? `${fichas.length} fichas`
                     : `${fichasFiltradas.length} de ${fichas.length}`}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => setExpandAll(true)}
-                    className="px-3 py-2 rounded-lg border border-ordem-border text-ordem-text-muted text-[10px] font-mono uppercase tracking-widest"
+                    className="font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-muted transition hover:text-white"
                   >
                     Expandir tudo
                   </button>
                   <button
                     type="button"
                     onClick={() => setExpandAll(false)}
-                    className="px-3 py-2 rounded-lg border border-ordem-border text-ordem-text-muted text-[10px] font-mono uppercase tracking-widest"
+                    className="font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-muted transition hover:text-white"
                   >
                     Colapsar tudo
                   </button>
@@ -825,7 +819,7 @@ export function FichasManager() {
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                  className="p-2 -ml-2 rounded-lg text-ordem-text-muted hover:text-white hover:bg-ordem-ooze/50 active:bg-ordem-ooze transition-colors flex items-center justify-center bg-ordem-ooze/10 border border-ordem-border/50"
+                  className="-ml-2 flex items-center justify-center border border-white/10 p-2 text-ordem-text-muted transition-colors hover:border-white/30 hover:text-white"
                   title={isSidebarCollapsed ? "Expandir Menu" : "Recolher Menu"}
                 >
                   {isSidebarCollapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
@@ -841,7 +835,7 @@ export function FichasManager() {
                   <button
                     onClick={() => handleSincronizar(selecionada!)}
                     disabled={isSyncing}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-mono tracking-widest border transition-all ${registroAtual?.sincronizadaNaNuvem
+                    className={`flex items-center gap-2 border px-4 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] transition-all ${registroAtual?.sincronizadaNaNuvem
                       ? 'border-ordem-green/30 text-ordem-green hover:bg-ordem-green/10'
                       : 'border-ordem-gold/50 text-ordem-gold bg-ordem-gold/10 hover:bg-ordem-gold/20'
                       } ${isSyncing ? 'opacity-50 cursor-not-allowed' : ''}`}

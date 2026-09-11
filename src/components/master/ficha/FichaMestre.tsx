@@ -386,9 +386,9 @@ export function FichaMestre({
         onResponder={onResponder}
         onDesfazer={onDesfazer}
       />
-      <PatenteSelectorModal isOpen={patenteAberta} currentPatente={personagem.patente || 'Recruta'} onSelect={handlePatente} onClose={() => setPatenteAberta(false)} />
-      <ItemSelectorModal isOpen={itemAberto} onClose={() => setItemAberto(false)} onSelect={handleAddItem} />
-      <AbilitySelectorModal isOpen={poderAberto} onClose={() => setPoderAberto(false)} onSelect={handleAddPoder} />
+      <PatenteSelectorModal isOpen={patenteAberta} currentPatente={personagem.patente || 'Recruta'} onSelect={handlePatente} onClose={() => setPatenteAberta(false)} classe={ficha.identidade.classe} />
+      <ItemSelectorModal isOpen={itemAberto} onClose={() => setItemAberto(false)} onSelect={handleAddItem} classe={ficha.identidade.classe} />
+      <AbilitySelectorModal isOpen={poderAberto} onClose={() => setPoderAberto(false)} onSelect={handleAddPoder} classe={ficha.identidade.classe} />
       {ritualAberto && <RitualChoiceModal agent={personagem} onSelect={handleAddRitual} onClose={() => setRitualAberto(false)} circuloMaximo={4} />}
     </div>
   );
