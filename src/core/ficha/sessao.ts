@@ -1,6 +1,7 @@
 import type { Personagem } from '../types';
 import { buildFicha } from './buildFicha';
 import type { FichaPersistida } from './tipos';
+import { apenasCondicoes } from '../rules/condicoes';
 
 export interface ResultadoSessao {
   ficha: FichaPersistida;
@@ -50,6 +51,7 @@ export function atualizarSessao(
     peGasto: Math.max(0, personagem.pe.max - personagem.pe.atual),
     sanPerdida: Math.max(0, personagem.san.max - personagem.san.atual),
     ...(usaPd ? { pdGasto: Math.max(0, personagem.pd!.max - personagem.pd!.atual) } : {}),
+    condicoes: apenasCondicoes(personagem.efeitosAtivos),
     ...(personagem.pp !== undefined ? { pontosPrestigio: personagem.pp } : {}),
     ...(personagem.marcas ? { marcas: personagem.marcas } : {}),
   };

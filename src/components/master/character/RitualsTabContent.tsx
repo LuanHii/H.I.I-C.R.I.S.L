@@ -8,9 +8,10 @@ interface RitualsTabContentProps {
   isEditingMode: boolean;
   onAddRitual: () => void;
   onRemoveRitual: (index: number) => void;
+  podeRemover?: (index: number) => boolean;
 }
 
-export function RitualsTabContent({ agent, isEditingMode, onAddRitual, onRemoveRitual }: RitualsTabContentProps) {
+export function RitualsTabContent({ agent, isEditingMode, onAddRitual, onRemoveRitual, podeRemover }: RitualsTabContentProps) {
   return (
     <div className="animate-in fade-in-0 slide-in-from-bottom-2 duration-200 space-y-3">
       {agent.rituais.map((ritual, idx) => (
@@ -23,7 +24,7 @@ export function RitualsTabContent({ agent, isEditingMode, onAddRitual, onRemoveR
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ordem-text-muted transition-transform group-open:rotate-180"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </summary>
           <div className="px-3 pb-3"><p className="text-sm text-ordem-white-muted pt-2 border-t border-ordem-border/50">{ritual.descricao}</p></div>
-          {isEditingMode && (
+          {isEditingMode && (podeRemover ? podeRemover(idx) : true) && (
             <button type="button" onClick={(e) => { e.preventDefault(); onRemoveRitual(idx); }} className="absolute top-2 right-8 p-1 opacity-0 group-hover:opacity-100 hover:bg-red-900/30 rounded text-ordem-text-secondary hover:text-red-400 transition-all z-10" title="Remover">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
             </button>

@@ -247,6 +247,28 @@ describe('atualizarSessao: o que mantém o v2 vivo durante o jogo', () => {
     expect(buildFicha({ ficha: desligado.ficha }).derivados.pd, 'com PD desligado o motor volta a SAN/PE').toBeUndefined();
   });
 
+  it('condições de verdade vão para sessao.condicoes; texto passivo de origem não é condição', () => {
+    const { ficha, view } = preparar();
+    const passivo = 'Patrulha: Você recebe +2 em Defesa.';
+    const r = atualizarSessao(ficha, { ...view, efeitosAtivos: ['Caído', passivo, 'Atordoado'] });
+
+    expect(r.estrutural, r.divergiu.join(', ')).toBe(false);
+    expect(r.ficha.sessao.condicoes).toEqual(['Caído', 'Atordoado']);
+
+    const projetado = paraPersonagem({ ficha: r.ficha, carregarDe: { ...view, efeitosAtivos: [passivo, 'Caído', 'Atordoado'] } });
+    expect(projetado.efeitosAtivos, 'a projeção v2 mostra só condições').toEqual(['Caído', 'Atordoado']);
+  });
+
+  it('ficha convertida antes de sessao.condicoes existir ainda mostra as condições reais do v0', () => {
+    const { ficha, view } = preparar();
+    const semCondicoes: typeof ficha = { ...ficha, sessao: { ...ficha.sessao, condicoes: undefined } };
+    const projetado = paraPersonagem({
+      ficha: semCondicoes,
+      carregarDe: { ...view, efeitosAtivos: ['Patrulha: Você recebe +2 em Defesa.', 'Cego'] },
+    });
+    expect(projetado.efeitosAtivos).toEqual(['Cego']);
+  });
+
   it('a ficha continua legível do v2 depois de um save de sessão', () => {
     const { v0, ficha, view } = preparar();
     const ferido = { ...view, pv: { ...view.pv, atual: view.pv.max - 5 } };

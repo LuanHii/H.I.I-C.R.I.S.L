@@ -14,20 +14,6 @@ import { TrackSelectorModal } from '../TrackSelectorModal';
 import { PowerChoiceModal } from '../PowerChoiceModal';
 import { RitualChoiceModal } from '../RitualChoiceModal';
 import { LevelUpModal } from '../LevelUpModal';
-import { NivelModal } from './NivelModal';
-import { AjustesPanel } from './AjustesPanel';
-import { HistoricoEscolhas } from './HistoricoEscolhas';
-import type { FichaPersistida, Problema, ValorEscolha } from '../../core/ficha/tipos';
-import { buildFicha } from '../../core/ficha/buildFicha';
-import {
-    adicionarPericiaLivre,
-    adicionarPoderManual,
-    ajustarAtributoBase,
-    definirBonusPericia,
-    definirDelta,
-    removerPericiaLivre,
-    removerPoderManual,
-} from '../../core/ficha/ajustes';
 import { calculateDerivedStats } from '../../core/rules/derivedStats';
 import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPersonagem';
 import { grauRequeridoParaAlvo } from '../../core/rules/progressao';
@@ -49,23 +35,9 @@ interface AgentDetailViewProps {
     onUpdate: (updated: Personagem) => void;
     readOnly?: boolean;
     disableInteractionModals?: boolean;
-    progressao?: ProgressaoNoMotorNovo;
 }
 
-export interface ProgressaoNoMotorNovo {
-    ficha: FichaPersistida;
-    onDefinirNivel: (nivel: number) => Promise<void> | void;
-    onResponder: (escolhaId: string, valor: ValorEscolha) => Promise<Problema[]> | void;
-    onDesfazer?: (escolhaId: string) => void;
-    onEditar: (transformar: (ficha: FichaPersistida) => FichaPersistida) => Promise<void> | void;
-}
-
-export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdate, readOnly, disableInteractionModals, progressao }) => {
-    const progressaoNoMotorNovo = Boolean(progressao);
-    const [nivelModal, setNivelModal] = useState<{ aberto: boolean; direcao: 'subir' | 'descer'; etapa: 'preview' | 'escolhas' }>({ aberto: false, direcao: 'subir', etapa: 'preview' });
-    const fichaV2 = progressao?.ficha;
-    const buildV2 = useMemo(() => (fichaV2 ? buildFicha({ ficha: fichaV2 }) : null), [fichaV2]);
-    const abrirPendencias = () => setNivelModal({ aberto: true, direcao: 'subir', etapa: 'escolhas' });
+export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdate, readOnly, disableInteractionModals }) => {
     type TabId = 'skills' | 'inventory' | 'powers' | 'rituals' | 'actions' | 'progression' | 'conditions';
     const [activeTab, setActiveTab] = useState<TabId>(readOnly ? 'actions' : 'skills');
 
@@ -94,12 +66,6 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     };
 
     const toggleSkillGrade = (skillName: PericiaName) => {
-        if (progressao) {
-            const grau = agent.pericias[skillName] || 'Destreinado';
-            if (grau === 'Destreinado') progressao.onEditar((f) => adicionarPericiaLivre(f, skillName));
-            else if (grau === 'Treinado') progressao.onEditar((f) => removerPericiaLivre(f, skillName));
-            return;
-        }
         const currentSkills = { ...agent.pericias };
         const currentGrade = currentSkills[skillName] || 'Destreinado';
 
@@ -118,13 +84,6 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     };
 
     const handleManualSkillBonusChange = (skillName: PericiaName, newValue: number) => {
-        if (progressao) {
-            const ajusteAtual = progressao.ficha.ajustes.periciaFixos?.[skillName] ?? 0;
-            const semAjuste = (agent.periciasDetalhadas[skillName]?.bonusFixo ?? 0) - ajusteAtual;
-            progressao.onEditar((f) => definirBonusPericia(f, skillName, newValue - semAjuste));
-            setEditingSkill(null);
-            return;
-        }
         const updated = { ...agent };
 
         const baseBonus = calcularPericiasDetalhadas(updated.atributos, updated.pericias)[skillName]?.bonusFixo ?? 0;
@@ -147,32 +106,13 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     };
 
 
-    const escolhasPeloMotorAntigo = !disableInteractionModals && !progressaoNoMotorNovo;
-
-    const dicaDeGrauV2 = (skillName: PericiaName) => {
-        const grau = agent.pericias[skillName] || 'Destreinado';
-        if (grau === 'Destreinado') return 'Clique para treinar (perícia de criação)';
-        if (grau === 'Treinado') {
-            return fichaV2?.identidade.periciasLivres.includes(skillName)
-                ? 'Clique para destreinar (perícia de criação)'
-                : 'Treinada pela classe — não pode ser removida';
-        }
-        return `${grau} vem de um marco de nível — mude pelo histórico de escolhas`;
-    };
+    const escolhasPeloMotorAntigo = !disableInteractionModals;
 
     const handleLevelUp = () => {
-        if (progressaoNoMotorNovo) {
-            setNivelModal({ aberto: true, direcao: 'subir', etapa: 'preview' });
-            return;
-        }
         setIsLevelUpModalOpen({ open: true, resume: false });
     };
 
     const handleLevelDown = () => {
-        if (progressaoNoMotorNovo) {
-            setNivelModal({ aberto: true, direcao: 'descer', etapa: 'preview' });
-            return;
-        }
         const decrement = agent.classe === 'Sobrevivente' ? 1 : (agent.nex === 99 ? 4 : 5);
         const alvo = agent.classe === 'Sobrevivente' ? Math.max(1, (agent.estagio || 1) - 1) : Math.max(5, agent.nex - decrement);
         const updated = rebaixarNex(agent, alvo);
@@ -180,18 +120,6 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     };
 
     const handleAttributeChange = (attr: AtributoKey, increase: boolean) => {
-        if (progressao) {
-            if (isEditingMode) {
-                progressao.onEditar((f) => ajustarAtributoBase(f, attr, increase ? 1 : -1));
-                return;
-            }
-            const vaga = buildV2?.pendencias.find((p) => p.slot.kind === 'atributo');
-            if (!increase || !vaga) return;
-            Promise.resolve(progressao.onResponder(vaga.slot.id, { tipo: 'atributo', atributo: attr })).then((problemas) => {
-                if ((problemas ?? []).some((p) => p.gravidade === 'erro')) abrirPendencias();
-            });
-            return;
-        }
         if (isEditingMode) {
 
             const updated = { ...agent };
@@ -307,11 +235,6 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
         if (stat === 'pe') updated.pe = { ...updated.pe, max: newMax };
         if (stat === 'san') updated.san = { ...updated.san, max: newMax };
         if (stat === 'pd') {
-            if (progressao) {
-                const atual = agent.pd?.max ?? newMax;
-                progressao.onEditar((f) => definirDelta(f, 'pdMaxDelta', (f.ajustes.pdMaxDelta ?? 0) + (newMax - atual)));
-                return;
-            }
             if (!updated.pd) updated.pd = { atual: newMax, max: newMax };
             else updated.pd = { ...updated.pd, max: newMax };
         }
@@ -368,25 +291,13 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
     };
 
     const handleAddAbility = (ability: Poder) => {
-        if (progressao) {
-            progressao.onEditar((f) => adicionarPoderManual(f, ability.nome));
-            setIsAbilityModalOpen(false);
-            return;
-        }
         const updated = { ...agent };
         updated.poderes = [...updated.poderes, ability];
         onUpdate(updated);
         setIsAbilityModalOpen(false);
     };
 
-    const poderRemovivel = (index: number) => !buildV2 || buildV2.poderes[index]?.provenancia.kind === 'manual';
-
     const handleRemoveAbility = (index: number) => {
-        if (progressao) {
-            const derivado = buildV2?.poderes[index];
-            if (derivado?.provenancia.kind === 'manual') progressao.onEditar((f) => removerPoderManual(f, derivado.nome));
-            return;
-        }
         const updated = { ...agent };
         updated.poderes = updated.poderes.filter((_, i) => i !== index);
         onUpdate(updated);
@@ -439,7 +350,6 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
             ...agent,
             patente: newPatente,
             limiteItens: config.limiteItens,
-            ...(progressao ? { pp: config.ppMin } : {}),
         };
         onUpdate(updated);
     };
@@ -482,13 +392,11 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
         if (!agent.pd) warnings.push('Regra de Determinação ativa, mas PD está ausente na ficha.');
         if (agent.pd && agent.pd.atual > agent.pd.max) warnings.push('PD atual está acima do PD máximo.');
     }
-    if (!progressao) {
-        if (agent.pv.max !== expectedPvMax) warnings.push('PV máximo diverge do valor esperado pela regra (ou override).');
-        if (agent.pe.max !== expectedPeMax) warnings.push('PE máximo diverge do valor esperado pela regra (ou override).');
-        if (agent.san.max !== expectedSanMax) warnings.push('SAN máximo diverge do valor esperado pela regra (ou override).');
-        if (agent.usarPd && agent.pd && agent.pd.max !== expectedPdMax) warnings.push('PD máximo diverge do valor esperado pela regra (ou override).');
-        if (agent.pe.rodada !== derivedPreview.peRodada) warnings.push('Limite de PE por turno diverge da Tabela 1.2 (NEX).');
-    }
+    if (agent.pv.max !== expectedPvMax) warnings.push('PV máximo diverge do valor esperado pela regra (ou override).');
+    if (agent.pe.max !== expectedPeMax) warnings.push('PE máximo diverge do valor esperado pela regra (ou override).');
+    if (agent.san.max !== expectedSanMax) warnings.push('SAN máximo diverge do valor esperado pela regra (ou override).');
+    if (agent.usarPd && agent.pd && agent.pd.max !== expectedPdMax) warnings.push('PD máximo diverge do valor esperado pela regra (ou override).');
+    if (agent.pe.rodada !== derivedPreview.peRodada) warnings.push('Limite de PE por turno diverge da Tabela 1.2 (NEX).');
 
     const fixInconsistencies = () => {
         const updated = { ...agent };
@@ -628,9 +536,6 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                     isEditingMode={isEditingMode}
                     onAttributeChange={handleAttributeChange}
                 />
-                {progressao && isEditingMode && (
-                    <AjustesPanel ficha={progressao.ficha} onEditar={progressao.onEditar} />
-                )}
             </div>
 
             
@@ -680,7 +585,6 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                             onToggleSkillGrade={toggleSkillGrade}
                             onManualSkillBonusChange={handleManualSkillBonusChange}
                             onStartEditingSkill={startEditingSkill}
-                            dicaDeGrau={progressao ? dicaDeGrauV2 : undefined}
                         />
                     )}
 
@@ -699,7 +603,6 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                             isEditingMode={isEditingMode}
                             onAddAbility={() => setIsAbilityModalOpen(true)}
                             onRemoveAbility={handleRemoveAbility}
-                            podeRemover={poderRemovivel}
                         />
                     )}
 
@@ -719,17 +622,8 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
                     )}
 
                     {activeTab === 'progression' && (
-                        <div className="animate-in fade-in-0 slide-in-from-bottom-2 duration-200 space-y-4">
-                            {progressao && (
-                                <HistoricoEscolhas
-                                    ficha={progressao.ficha}
-                                    onDesfazer={readOnly ? undefined : progressao.onDesfazer}
-                                    onResponderPendencias={readOnly ? undefined : abrirPendencias}
-                                />
-                            )}
-                            <div className="h-[500px]">
-                                <ProgressionTab character={agent} />
-                            </div>
+                        <div className="animate-in fade-in-0 slide-in-from-bottom-2 duration-200 h-[500px]">
+                            <ProgressionTab character={agent} />
                         </div>
                     )}
 
@@ -745,19 +639,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({ agent, onUpdat
             <AbilitySelectorModal isOpen={isAbilityModalOpen} onClose={() => setIsAbilityModalOpen(false)} onSelect={handleAddAbility} />
             <PatenteSelectorModal isOpen={isPatenteModalOpen} currentPatente={agent.patente || 'Recruta'} onSelect={handlePatenteChange} onClose={() => setIsPatenteModalOpen(false)} />
             {isRitualModalOpen && <RitualChoiceModal agent={agent} onSelect={handleAddRitual} onClose={() => setIsRitualModalOpen(false)} circuloMaximo={4} />}
-            {progressao && (
-                <NivelModal
-                    ficha={progressao.ficha}
-                    aberto={nivelModal.aberto}
-                    direcao={nivelModal.direcao}
-                    etapaInicial={nivelModal.etapa}
-                    onFechar={() => setNivelModal((m) => ({ ...m, aberto: false }))}
-                    onDefinirNivel={progressao.onDefinirNivel}
-                    onResponder={progressao.onResponder}
-                    onDesfazer={progressao.onDesfazer}
-                />
-            )}
-            {isLevelUpModalOpen.open && !progressaoNoMotorNovo && (
+            {isLevelUpModalOpen.open && (
                 <LevelUpModal agent={agent} isResume={isLevelUpModalOpen.resume} onConfirm={(updatedAgent) => { onUpdate(updatedAgent); setIsLevelUpModalOpen({ open: false, resume: false }); }} onClose={() => setIsLevelUpModalOpen({ open: false, resume: false })} />
             )}
         </div>

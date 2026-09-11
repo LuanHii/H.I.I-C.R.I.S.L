@@ -459,7 +459,10 @@ describe('o motor novo não é autoritativo', () => {
     'components/master/PendenciasPanel.tsx',
     'components/master/NivelPanel.tsx',
     'components/master/NivelModal.tsx',
-    'components/master/AgentDetailView.tsx',
+    'components/master/ficha/FichaMestre.tsx',
+    'components/master/ficha/CabecalhoFicha.tsx',
+    'components/master/ficha/AtributosFicha.tsx',
+    'components/master/ficha/PoderesPorProveniencia.tsx',
     'components/master/AjustesPanel.tsx',
     'components/master/HistoricoEscolhas.tsx',
     'components/CharacterCreator.tsx',
@@ -486,7 +489,7 @@ describe('o motor novo não é autoritativo', () => {
         if (/\.test\.tsx?$/.test(entrada)) continue;
         if (caminho.includes(join('core', 'ficha'))) continue;
         const texto = readFileSync(caminho, 'utf8');
-        if (!/from ['"][^'"]*(?:core\/)?ficha\/[^'"]*['"]/.test(texto)) continue;
+        if (!/from ['"][^'"]*(?:core\/|\.\.\/)ficha\/[^'"]*['"]/.test(texto)) continue;
         const relativo = caminho.slice(raiz.length + 1).split(/[\\/]/).join('/');
         if (PONTE_PERMITIDA.includes(relativo)) continue;
         importadores.push(relativo);

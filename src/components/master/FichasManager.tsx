@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useCloudFichas, useCloudCampanhas, useWatchedFichas, type FichaRegistro } from '../../core/storage';
 import type { Personagem } from '../../core/types';
 import { AgentDetailView } from './AgentDetailView';
+import { FichaMestre } from './ficha/FichaMestre';
 import { normalizePersonagem } from '../../core/personagemUtils';
 import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPersonagem';
 import { saveAgentToCloud } from '../../core/firebase/firestore';
@@ -872,18 +873,23 @@ export function FichasManager() {
                     </button>
                   </div>
                 )}
-                <AgentDetailView
-                  agent={fichaAtual}
-                  onUpdate={handleUpdate}
-                  readOnly={false}
-                  progressao={registroAtual?.fonte === 'v2' && registroAtual.ficha ? {
-                    ficha: registroAtual.ficha,
-                    onDefinirNivel: (nivel) => definirNivelDaFicha(registroAtual.id, nivel),
-                    onResponder: (escolhaId, valor) => responderEscolha(registroAtual.id, escolhaId, valor),
-                    onDesfazer: (escolhaId) => desfazerEscolha(registroAtual.id, escolhaId),
-                    onEditar: (transformar) => editarFicha(registroAtual.id, transformar),
-                  } : undefined}
-                />
+                {registroAtual?.fonte === 'v2' && registroAtual.ficha ? (
+                  <FichaMestre
+                    ficha={registroAtual.ficha}
+                    personagem={fichaAtual}
+                    onSessao={handleUpdate}
+                    onDefinirNivel={(nivel) => definirNivelDaFicha(registroAtual.id, nivel)}
+                    onResponder={(escolhaId, valor) => responderEscolha(registroAtual.id, escolhaId, valor)}
+                    onDesfazer={(escolhaId) => desfazerEscolha(registroAtual.id, escolhaId)}
+                    onEditar={(transformar) => editarFicha(registroAtual.id, transformar)}
+                  />
+                ) : (
+                  <AgentDetailView
+                    agent={fichaAtual}
+                    onUpdate={handleUpdate}
+                    readOnly={false}
+                  />
+                )}
               </div>
             </div>
           </div>

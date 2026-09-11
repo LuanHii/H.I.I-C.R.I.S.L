@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { use as usePromise, useState, useEffect, useCallback } from 'react';
 import { AgentDetailView } from '../../../../components/master/AgentDetailView';
+import { FichaMestre } from '../../../../components/master/ficha/FichaMestre';
 import { useCloudFichas } from '../../../../core/storage';
 import { Personagem } from '../../../../core/types';
 import { normalizePersonagem } from '../../../../core/personagemUtils';
@@ -103,19 +104,24 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
           </nav>
 
           <div className="flex-1 overflow-y-auto bg-ordem-ooze/50 border border-ordem-border rounded-xl">
-            <AgentDetailView
-              agent={personagemAtual}
-              onUpdate={atualizarPersonagem}
-              readOnly={false}
-              disableInteractionModals={true}
-              progressao={registro?.fonte === 'v2' && registro.ficha ? {
-                ficha: registro.ficha,
-                onDefinirNivel: (nivel) => definirNivelDaFicha(registro.id, nivel),
-                onResponder: (escolhaId, valor) => responderEscolha(registro.id, escolhaId, valor),
-                onDesfazer: (escolhaId) => desfazerEscolha(registro.id, escolhaId),
-                onEditar: (transformar) => editarFicha(registro.id, transformar),
-              } : undefined}
-            />
+            {registro?.fonte === 'v2' && registro.ficha ? (
+              <FichaMestre
+                ficha={registro.ficha}
+                personagem={personagemAtual}
+                onSessao={atualizarPersonagem}
+                onDefinirNivel={(nivel) => definirNivelDaFicha(registro.id, nivel)}
+                onResponder={(escolhaId, valor) => responderEscolha(registro.id, escolhaId, valor)}
+                onDesfazer={(escolhaId) => desfazerEscolha(registro.id, escolhaId)}
+                onEditar={(transformar) => editarFicha(registro.id, transformar)}
+              />
+            ) : (
+              <AgentDetailView
+                agent={personagemAtual}
+                onUpdate={atualizarPersonagem}
+                readOnly={false}
+                disableInteractionModals={true}
+              />
+            )}
           </div>
         </div>
       </main>

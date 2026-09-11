@@ -66,7 +66,9 @@ export function HistoricoEscolhas({ ficha, onDesfazer, onResponderPendencias }: 
       <Cantos />
       <div className="flex flex-wrap items-center justify-between gap-2">
         <RotuloSecao className="text-[var(--mestre-primary,#DC2626)]">Escolhas registradas</RotuloSecao>
-        {pendentes > 0 ? (
+        {pendentes === 0 ? (
+          <span className="text-[11px] text-ordem-green">✓ nada pendente</span>
+        ) : onResponderPendencias ? (
           <button
             type="button"
             onClick={onResponderPendencias}
@@ -75,7 +77,7 @@ export function HistoricoEscolhas({ ficha, onDesfazer, onResponderPendencias }: 
             {pendentes} pendente{pendentes === 1 ? '' : 's'} — responder
           </button>
         ) : (
-          <span className="text-[11px] text-ordem-green">✓ nada pendente</span>
+          <span className="font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-gold">{pendentes} pendente{pendentes === 1 ? '' : 's'}</span>
         )}
       </div>
 
