@@ -37,14 +37,18 @@ export function SkillsTabContent({
   return (
     <div className="animate-in fade-in-0 slide-in-from-bottom-2 duration-200">
       {lastRoll && (
-        <div className="bg-ordem-black/30 border border-ordem-border rounded-lg p-3 mb-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="text-xs font-mono text-ordem-text-secondary">ÚLTIMA ROLAGEM: <span className="text-white font-bold">{lastRoll.pericia}</span></div>
-            <div className="text-xs font-mono text-ordem-text-muted">{lastRoll.result.diceCount}d20 ({lastRoll.result.criterio}) {lastRoll.result.bonusFixo >= 0 ? '+' : ''}{lastRoll.result.bonusFixo}</div>
+        <div className="relative mb-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border border-[var(--mestre-primary,#DC2626)]/40 bg-[var(--mestre-primary,#DC2626)]/[0.06] px-4 py-3">
+          <div className="min-w-0">
+            <span className="font-carimbo text-[10px] uppercase tracking-[0.22em] text-ordem-text-muted">Última rolagem</span>
+            <p className="text-sm font-semibold text-white">
+              {lastRoll.pericia}
+              <span className="ml-2 font-mono text-xs font-normal text-ordem-text-muted">{lastRoll.result.diceCount}d20 ({lastRoll.result.criterio}) {lastRoll.result.bonusFixo >= 0 ? '+' : ''}{lastRoll.result.bonusFixo}</span>
+            </p>
+            <p className="font-mono text-xs text-ordem-text-secondary">
+              [{lastRoll.result.dice.join(', ')}] → {lastRoll.result.chosen}
+            </p>
           </div>
-          <div className="mt-2 text-sm text-ordem-white font-mono">
-            Dados: [{lastRoll.result.dice.join(', ')}] • Escolhido: {lastRoll.result.chosen} • Total: <span className="text-ordem-green font-bold">{lastRoll.result.total}</span>
-          </div>
+          <span className="font-display text-4xl font-bold leading-none text-white">{lastRoll.result.total}</span>
         </div>
       )}
       <div className="space-y-5">
@@ -76,7 +80,7 @@ export function SkillsTabContent({
                         </span>
                       )}
                       {isEditingMode && editingSkill === nome ? (
-                        <input type="number" value={tempSkillBonus} onChange={(e) => onTempSkillBonusChange(e.target.value)} onBlur={() => onManualSkillBonusChange(nome as PericiaName, parseInt(tempSkillBonus) || 0)} onKeyDown={(e) => e.key === 'Enter' && onManualSkillBonusChange(nome as PericiaName, parseInt(tempSkillBonus) || 0)} autoFocus className="w-12 bg-ordem-ooze text-white text-center font-mono text-xs border border-ordem-red rounded focus:outline-none" />
+                        <input type="number" value={tempSkillBonus} onChange={(e) => onTempSkillBonusChange(e.target.value)} onBlur={() => onManualSkillBonusChange(nome as PericiaName, parseInt(tempSkillBonus) || 0)} onKeyDown={(e) => e.key === 'Enter' && onManualSkillBonusChange(nome as PericiaName, parseInt(tempSkillBonus) || 0)} autoFocus className="w-12 border border-[var(--mestre-primary,#DC2626)] bg-black/40 text-center font-mono text-xs text-white focus:outline-none" />
                       ) : (
                         <span onClick={() => isEditingMode && onStartEditingSkill(nome as PericiaName, detalhe.bonusFixo)} className={`w-8 text-right font-mono text-base font-bold tabular-nums ${(detalhe.grau || 'Destreinado') === 'Destreinado' ? 'text-ordem-text-muted' : 'text-white'} ${isEditingMode ? 'cursor-pointer underline decoration-dashed underline-offset-4 hover:text-ordem-red' : ''}`} title={isEditingMode ? "Editar bônus" : ""}>
                           +{detalhe.bonusFixo || 0}

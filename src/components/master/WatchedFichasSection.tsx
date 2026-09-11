@@ -57,7 +57,7 @@ export function WatchedFichasSection() {
         <Link
           key={ficha.agentId}
           href={`/ficha/${ficha.agentId}`}
-          className="flex items-center justify-between gap-3 border border-ordem-border rounded-lg p-3 bg-ordem-black/40 hover:border-ordem-gold/50 hover:bg-ordem-gold/5 transition-colors group"
+          className="flex items-center justify-between gap-3 border border-white/10 p-3 bg-white/[0.02] hover:border-ordem-gold/50 hover:bg-ordem-gold/5 transition-colors group"
         >
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-white truncate group-hover:text-ordem-gold transition-colors">
@@ -76,7 +76,7 @@ export function WatchedFichasSection() {
                 e.stopPropagation();
                 handleRemove(ficha.agentId);
               }}
-              className="p-1.5 text-ordem-red/50 hover:text-ordem-red hover:bg-ordem-red/10 rounded transition-colors"
+              className="p-1.5 text-ordem-red/50 hover:text-ordem-red hover:bg-ordem-red/10 transition-colors"
               title="Remover"
             >
               <Trash2 size={14} />

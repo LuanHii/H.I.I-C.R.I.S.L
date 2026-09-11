@@ -294,10 +294,11 @@ export function FichasManager() {
               handleSelectFicha(registro.id);
             }
           }}
-          className={`w-full text-left border rounded-lg px-3 py-2 transition relative overflow-hidden touch-active ${selecionada === registro.id
-            ? 'border-ordem-red bg-ordem-red/10'
-            : 'border-ordem-border bg-ordem-black/40 hover:border-ordem-text-muted active:bg-ordem-ooze/50'
+          className={`relative w-full overflow-hidden border px-3 py-2 text-left transition touch-active ${selecionada === registro.id
+            ? 'border-[var(--mestre-primary,#DC2626)] bg-white/[0.04]'
+            : 'border-white/10 bg-white/[0.02] hover:border-white/30'
             }`}
+          data-classe={registro.personagem.classe}
           title={title}
         >
           <div className="flex items-center justify-between gap-2">
@@ -310,9 +311,9 @@ export function FichasManager() {
             <div className="flex items-center gap-2 text-[10px] text-ordem-text-muted">
               {summary.total > 0 && (
                 <span
-                  className={`px-2 py-0.5 rounded border font-mono tracking-widest ${summary.errors > 0
-                    ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
-                    : 'border-ordem-gold text-ordem-gold bg-ordem-gold/10'
+                  className={`border px-1.5 py-0.5 font-carimbo text-[9px] uppercase tracking-[0.14em] ${summary.errors > 0
+                    ? 'border-ordem-red/60 text-ordem-red'
+                    : 'border-ordem-gold/60 text-ordem-gold'
                     }`}
                 >
                   {rotuloDoSinal}
@@ -388,7 +389,7 @@ export function FichasManager() {
                 event.stopPropagation();
                 alternarAcoes(registro.id);
               }}
-              className={`grid h-7 w-7 place-items-center rounded transition ${acoesAbertas.has(registro.id)
+              className={`grid h-7 w-7 place-items-center transition ${acoesAbertas.has(registro.id)
                 ? 'bg-ordem-ooze text-white'
                 : 'text-ordem-text-muted hover:bg-ordem-ooze/60 hover:text-white'
                 }`}
@@ -405,18 +406,17 @@ export function FichasManager() {
         </div>
 
         {acoesAbertas.has(registro.id) && (
-        <div className="relative mt-3 grid grid-cols-2 gap-1.5 border-t border-ordem-border/60 pt-3 sm:grid-cols-3">
+        <div className="relative mt-3 grid grid-cols-2 gap-1.5 border-t border-white/[0.06] pt-3 sm:grid-cols-3">
           <button
             type="button"
             onClick={(event) => {
               event.stopPropagation();
               void handleShare(registro.id);
             }}
-            className="text-xs px-3 py-2.5 border border-ordem-green text-ordem-green hover:bg-ordem-green/10 active:bg-ordem-green/20 rounded-lg touch-target-sm flex items-center justify-center gap-1"
+            className="flex items-center justify-center gap-1.5 border border-white/10 px-2.5 py-2 font-carimbo text-[10px] uppercase tracking-[0.14em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white touch-target-sm"
           >
-            <Cloud size={14} />
-            <span className="hidden sm:inline">COMPARTILHAR</span>
-            <span className="sm:hidden">SHARE</span>
+            <Cloud size={13} />
+            Compartilhar
           </button>
           <button
             type="button"
@@ -424,30 +424,33 @@ export function FichasManager() {
               event.stopPropagation();
               handleExportarFicha(registro.id);
             }}
-            className="text-xs px-3 py-2.5 border border-ordem-gold text-ordem-gold hover:bg-ordem-gold/10 active:bg-ordem-gold/20 rounded-lg touch-target-sm flex items-center justify-center gap-1"
+            className="flex items-center justify-center gap-1.5 border border-white/10 px-2.5 py-2 font-carimbo text-[10px] uppercase tracking-[0.14em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white touch-target-sm"
             title="Exportar esta ficha"
           >
-            <Download size={14} />
-            <span>EXPORT</span>
+            <Download size={13} />
+            Exportar
           </button>
-          <div onClick={(e) => e.stopPropagation()}>
+          <div className="contents" onClick={(e) => e.stopPropagation()}>
             <WeaponModsButton
               personagem={registro.personagem}
               onUpdate={(updated) => salvar(updated, registro.id)}
-              className="text-xs px-3 py-2.5"
+              className="w-full justify-center border-white/10 px-2.5 py-2 text-[10px] tracking-[0.14em] text-ordem-text-secondary hover:border-white/30 hover:bg-transparent hover:text-white"
             />
           </div>
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              handleRecalcular(registro.id);
-            }}
-            className="text-xs px-3 py-2.5 border border-cyan-500 text-cyan-500 hover:bg-cyan-500/10 active:bg-cyan-500/20 rounded-lg touch-target-sm flex items-center justify-center"
-            title="Recalcular PV, PE, SAN, Defesa"
-          >
-            ♻ RECALC
-          </button>
+          {registro.fonte !== 'v2' && (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                handleRecalcular(registro.id);
+              }}
+              className="flex items-center justify-center gap-1.5 border border-white/10 px-2.5 py-2 font-carimbo text-[10px] uppercase tracking-[0.14em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white touch-target-sm"
+              title="Recalcular PV, PE, SAN, Defesa pelo motor antigo"
+            >
+              <RefreshCw size={13} />
+              Recalcular
+            </button>
+          )}
           <button
             type="button"
             onClick={(event) => {
@@ -455,23 +458,23 @@ export function FichasManager() {
               const bruto = fichasBrutas.find((f) => f.id === registro.id);
               setMigrando([{ id: registro.id, personagem: bruto?.personagem ?? registro.personagem }]);
             }}
-            className={`text-xs px-3 py-2.5 border rounded-lg touch-target-sm flex items-center justify-center ${
+            className={`flex items-center justify-center gap-1.5 border border-white/10 px-2.5 py-2 font-carimbo text-[10px] uppercase tracking-[0.14em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white touch-target-sm ${
               registro.fonte === 'v2'
-                ? 'border-ordem-green text-ordem-green hover:bg-ordem-green/10'
+                ? 'text-ordem-green'
                 : registro.ficha
-                  ? 'border-ordem-gold text-ordem-gold hover:bg-ordem-gold/10'
-                  : 'border-ordem-purple text-ordem-purple hover:bg-ordem-purple/10'
+                  ? 'border-ordem-gold/60 text-ordem-gold'
+                  : 'border-ordem-purple/60 text-ordem-purple'
             }`}
             title={registro.motivoDaFonte ?? 'Comparar com o motor novo e converter (a ficha atual não é alterada)'}
           >
-            {registro.fonte === 'v2' ? '✓ v2' : registro.ficha ? '⚠ v0' : 'MIGRAR'}
+            {registro.fonte === 'v2' ? 'Conversão' : registro.ficha ? 'Reconverter' : 'Converter'}
           </button>
           <Link
             href={`/agente/recriar/${registro.id}`}
             onClick={(event) => event.stopPropagation()}
-            className="text-xs px-3 py-2.5 border border-ordem-border-light text-ordem-white-muted hover:border-ordem-text-secondary hover:text-white active:bg-ordem-ooze/50 rounded-lg touch-target-sm flex items-center justify-center"
+            className="flex items-center justify-center gap-1.5 border border-white/10 px-2.5 py-2 font-carimbo text-[10px] uppercase tracking-[0.14em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white touch-target-sm"
           >
-            RECRIAR
+            Recriar
           </Link>
           <button
             type="button"
@@ -479,9 +482,9 @@ export function FichasManager() {
               event.stopPropagation();
               duplicar(registro.id);
             }}
-            className="text-xs px-3 py-2.5 border border-ordem-border-light hover:border-ordem-text-secondary active:bg-ordem-ooze/50 rounded-lg touch-target-sm flex items-center justify-center"
+            className="flex items-center justify-center gap-1.5 border border-white/10 px-2.5 py-2 font-carimbo text-[10px] uppercase tracking-[0.14em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white touch-target-sm"
           >
-            DUPLICAR
+            Duplicar
           </button>
           <button
             type="button"
@@ -499,9 +502,9 @@ export function FichasManager() {
                 }
               }
             }}
-            className="text-xs px-3 py-2.5 border border-ordem-red text-ordem-red hover:bg-ordem-red/10 active:bg-ordem-red/20 rounded-lg touch-target-sm flex items-center justify-center"
+            className="flex items-center justify-center gap-1.5 border border-white/10 px-2.5 py-2 font-carimbo text-[10px] uppercase tracking-[0.14em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white touch-target-sm border-ordem-red/40 text-ordem-red hover:border-ordem-red hover:text-ordem-red"
           >
-            REMOVER
+            Remover
           </button>
         </div>
         )}
@@ -849,9 +852,9 @@ export function FichasManager() {
             </div>
 
             <div className="flex-1 overflow-y-auto touch-scroll p-4 lg:p-6 safe-bottom">
-              <div className="rounded-xl border border-ordem-border overflow-hidden">
+              <div className="overflow-hidden border border-white/10">
                 {registroAtual?.ficha && registroAtual.fonte !== 'v2' && (
-                  <div className="mb-3 flex items-start justify-between gap-3 rounded border border-ordem-gold/60 px-3 py-2 text-xs text-ordem-gold">
+                  <div className="mb-3 flex items-start justify-between gap-3 border border-ordem-gold/60 bg-ordem-gold/[0.06] px-3 py-2 text-xs text-ordem-gold">
                     <span>
                       <strong>Lendo a ficha antiga</strong>
                       {' — '}

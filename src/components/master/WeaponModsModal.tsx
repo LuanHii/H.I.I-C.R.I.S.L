@@ -483,7 +483,7 @@ export function WeaponModsButton({ personagem, onUpdate, className = '' }: Weapo
                 onClick={handleOpenModal}
                 onMouseDown={(e) => e.stopPropagation()}
                 className={cn(
-                    "px-3 py-2 text-[10px] font-mono tracking-[0.15em] border border-ordem-gold text-ordem-gold hover:bg-ordem-gold/10 rounded-lg transition flex items-center gap-1.5",
+                    "flex items-center gap-1.5 border border-ordem-gold/60 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-gold transition hover:bg-ordem-gold/10",
                     className
                 )}
                 title="Modificar armas"

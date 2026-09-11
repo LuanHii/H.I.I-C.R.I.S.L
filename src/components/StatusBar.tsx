@@ -146,7 +146,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
                 onBlur={handleMaxSubmit}
                 onKeyDown={(e) => e.key === 'Enter' && handleMaxSubmit()}
                 autoFocus
-                className="w-14 bg-ordem-ooze border border-ordem-text-muted rounded px-1 text-sm text-center text-white focus:outline-none focus:border-ordem-red"
+                className="w-14 border border-white/20 bg-black/40 px-1 text-center text-sm text-white focus:border-[var(--mestre-primary,#DC2626)] focus:outline-none"
               />
             ) : (
               <motion.span

@@ -31,7 +31,7 @@ const ROTULO_CONFIANCA: Record<Confianca, string> = {
 
 function Selo({ confianca }: { confianca: Confianca }) {
   return (
-    <span className={`text-[10px] uppercase tracking-wide border px-1.5 py-0.5 rounded ${CORES_CONFIANCA[confianca]}`}>
+    <span className={`text-[10px] uppercase tracking-wide border px-1.5 py-0.5 ${CORES_CONFIANCA[confianca]}`}>
       {ROTULO_CONFIANCA[confianca]}
     </span>
   );
@@ -39,7 +39,7 @@ function Selo({ confianca }: { confianca: Confianca }) {
 
 function Painel({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
-    <section className="flex-1 min-w-0 border border-ordem-border rounded bg-ordem-black-deep">
+    <section className="flex-1 min-w-0 border border-ordem-border bg-ordem-black-deep">
       <h3 className="text-xs uppercase tracking-widest text-ordem-text-secondary px-3 py-2 border-b border-ordem-border">
         {titulo}
       </h3>
@@ -154,7 +154,7 @@ export function MigracaoWizard({ isOpen, onClose, fichas, onConverter, titulo }:
                       key={f.id}
                       type="button"
                       onClick={() => setIndice(i)}
-                      className={`touch-target text-xs px-2 py-1 rounded border ${
+                      className={`touch-target text-xs px-2 py-1 border ${
                         i === indice
                           ? 'border-ordem-cyan text-ordem-cyan'
                           : pronta
@@ -171,7 +171,7 @@ export function MigracaoWizard({ isOpen, onClose, fichas, onConverter, titulo }:
           )}
 
           <div className="flex items-center gap-3 flex-wrap text-xs">
-            <span className={`uppercase tracking-widest border px-2 py-1 rounded ${CORES_CONFIANCA[confianca]}`}>
+            <span className={`uppercase tracking-widest border px-2 py-1 ${CORES_CONFIANCA[confianca]}`}>
               confiança {confianca}
             </span>
             <span className={roundTrip.ok ? 'text-ordem-green' : 'text-ordem-red'}>
@@ -213,7 +213,7 @@ export function MigracaoWizard({ isOpen, onClose, fichas, onConverter, titulo }:
                 return (
                   <div
                     key={escolha.id}
-                    className={`border rounded p-2 ${rejeitada ? 'border-ordem-red opacity-60' : 'border-ordem-border'}`}
+                    className={`border p-2 ${rejeitada ? 'border-ordem-red opacity-60' : 'border-ordem-border'}`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <span className={rejeitada ? 'line-through text-ordem-text-muted' : 'text-ordem-text-primary'}>
@@ -234,7 +234,7 @@ export function MigracaoWizard({ isOpen, onClose, fichas, onConverter, titulo }:
               })}
 
               {resultado.naoInferido.length > 0 && (
-                <div className="mt-3 border border-ordem-gold rounded p-2">
+                <div className="mt-3 border border-ordem-gold p-2">
                   <h4 className="text-xs uppercase text-ordem-gold">Não inferido</h4>
                   {resultado.naoInferido.map((lacuna) => (
                     <div key={lacuna.campo} className="mt-1">
@@ -316,7 +316,7 @@ export function MigracaoWizard({ isOpen, onClose, fichas, onConverter, titulo }:
           </div>
 
           {!roundTrip.ok && (
-            <div className="border border-ordem-red rounded p-3 text-xs space-y-1">
+            <div className="border border-ordem-red p-3 text-xs space-y-1">
               <h4 className="uppercase text-ordem-red tracking-widest">Relatório do round trip</h4>
               {roundTrip.divergencias.map((d) => (
                 <p key={d} className="text-ordem-text-primary">Números: {d}</p>
@@ -338,7 +338,7 @@ export function MigracaoWizard({ isOpen, onClose, fichas, onConverter, titulo }:
           <button
             type="button"
             onClick={onClose}
-            className="touch-target px-4 py-2 border border-ordem-border text-ordem-text-primary rounded hover:border-ordem-border-light"
+            className="touch-target border border-white/10 px-4 py-2 font-carimbo text-[11px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
           >
             {fichas.length > 1 ? 'Fechar' : 'Manter v0'}
           </button>
@@ -346,7 +346,7 @@ export function MigracaoWizard({ isOpen, onClose, fichas, onConverter, titulo }:
             <button
               type="button"
               onClick={() => setIndice(indice + 1)}
-              className="touch-target px-4 py-2 border border-ordem-border text-ordem-text-secondary rounded hover:text-ordem-text-primary"
+              className="touch-target border border-white/10 px-4 py-2 font-carimbo text-[11px] uppercase tracking-[0.16em] text-ordem-text-muted transition hover:text-white"
             >
               Pular esta
             </button>
@@ -355,10 +355,10 @@ export function MigracaoWizard({ isOpen, onClose, fichas, onConverter, titulo }:
             type="button"
             onClick={converter}
             disabled={convertendo}
-            className={`touch-target px-4 py-2 rounded border font-bold disabled:opacity-50 ${
+            className={`touch-target border px-5 py-2 font-carimbo text-[11px] uppercase tracking-[0.16em] text-white transition disabled:cursor-not-allowed disabled:opacity-40 ${
               roundTrip.ok
-                ? 'border-ordem-green text-ordem-green hover:bg-ordem-ooze'
-                : 'border-ordem-red text-ordem-red hover:bg-ordem-ooze'
+                ? 'border-ordem-green bg-ordem-green/15 hover:bg-ordem-green/25'
+                : 'border-ordem-red bg-ordem-red/15 hover:bg-ordem-red/30'
             }`}
           >
             {convertendo ? 'Convertendo…' : roundTrip.ok ? 'Converter' : 'Converter assim mesmo'}

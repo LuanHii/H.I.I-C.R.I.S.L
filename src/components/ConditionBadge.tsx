@@ -29,7 +29,7 @@ export const ConditionBadge: React.FC<ConditionBadgeProps> = ({
             <div className={`
         inline-flex items-center gap-1.5
         ${compact ? 'px-1.5 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'}
-        rounded border transition-colors cursor-help
+        border transition-colors cursor-help
         ${categoriaClasses}
       `}>
                 {!compact && <span className="text-xs">{icon}</span>}
@@ -46,7 +46,7 @@ export const ConditionBadge: React.FC<ConditionBadgeProps> = ({
             </div>
 
             {showTooltip && isHovered && cond && (
-                <div className="absolute z-50 left-0 top-full mt-2 w-72 p-3 bg-ordem-black-deep border border-ordem-border rounded-lg shadow-xl animate-in fade-in-0 slide-in-from-top-1 duration-150">
+                <div className="absolute z-50 left-0 top-full mt-2 w-72 p-3 bg-ordem-black-deep border border-white/10 shadow-xl animate-in fade-in-0 slide-in-from-top-1 duration-150">
                     <div className="flex items-center gap-2 mb-2 pb-2 border-b border-ordem-border/50">
                         <span className="text-lg">{icon}</span>
                         <div>
@@ -64,7 +64,7 @@ export const ConditionBadge: React.FC<ConditionBadgeProps> = ({
                     </p>
 
                     {cond.efeito && (
-                        <div className="bg-ordem-ooze/50 rounded p-2 mb-2 space-y-1">
+                        <div className="bg-ordem-ooze/50 p-2 mb-2 space-y-1">
                             <div className="text-[10px] font-mono uppercase tracking-wider text-ordem-text-muted mb-1">
                                 Efeitos Mecânicos
                             </div>
@@ -210,27 +210,27 @@ export const ConditionsSummary: React.FC<ConditionsSummaryProps> = ({ efeitosAti
     return (
         <div className="flex flex-wrap gap-3 text-xs font-mono">
             {defesaTotal !== 0 && (
-                <div className={`px-2 py-1 rounded border ${defesaTotal < 0 ? 'border-red-800 bg-red-900/20 text-red-400' : 'border-green-800 bg-green-900/20 text-green-400'}`}>
+                <div className={`px-2 py-1 border ${defesaTotal < 0 ? 'border-red-800 bg-red-900/20 text-red-400' : 'border-green-800 bg-green-900/20 text-green-400'}`}>
                     DEF {defesaTotal > 0 ? '+' : ''}{defesaTotal}
                 </div>
             )}
             {dadosGeral !== 0 && (
-                <div className={`px-2 py-1 rounded border ${dadosGeral < 0 ? 'border-red-800 bg-red-900/20 text-red-400' : 'border-green-800 bg-green-900/20 text-green-400'}`}>
+                <div className={`px-2 py-1 border ${dadosGeral < 0 ? 'border-red-800 bg-red-900/20 text-red-400' : 'border-green-800 bg-green-900/20 text-green-400'}`}>
                     {dadosGeral > 0 ? '+' : ''}{dadosGeral}d20
                 </div>
             )}
             {valorGeral !== 0 && (
-                <div className={`px-2 py-1 rounded border ${valorGeral < 0 ? 'border-red-800 bg-red-900/20 text-red-400' : 'border-green-800 bg-green-900/20 text-green-400'}`}>
+                <div className={`px-2 py-1 border ${valorGeral < 0 ? 'border-red-800 bg-red-900/20 text-red-400' : 'border-green-800 bg-green-900/20 text-green-400'}`}>
                     TESTE {valorGeral > 0 ? '+' : ''}{valorGeral}
                 </div>
             )}
             {deslocamentoStatus !== 'normal' && (
-                <div className="px-2 py-1 rounded border border-amber-800 bg-amber-900/20 text-amber-400">
+                <div className="px-2 py-1 border border-amber-800 bg-amber-900/20 text-amber-400">
                     {deslocamentoStatus === 'zero' ? '🚫 IMÓVEL' : '🐢 LENTO'}
                 </div>
             )}
             {acoesBloqueadas && (
-                <div className="px-2 py-1 rounded border border-red-800 bg-red-900/20 text-red-400 animate-pulse">
+                <div className="px-2 py-1 border border-red-800 bg-red-900/20 text-red-400 animate-pulse">
                     ⛔ SEM AÇÕES
                 </div>
             )}

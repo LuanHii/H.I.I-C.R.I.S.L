@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef } from 'react';
+import { X } from 'lucide-react';
+import { Cantos, RotuloSecao } from './ui/Pecas';
 import {
   exportarFichas,
   exportarTudo,
@@ -158,48 +160,43 @@ export function ImportExportModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ordem-black/80 backdrop-blur-sm">
-      <div className="bg-ordem-ooze border border-ordem-border rounded-xl p-6 max-w-lg w-full mx-4 shadow-2xl">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-serif text-white">
-            {modo === 'exportar' ? 'EXPORTAR DADOS' : modo === 'importar' ? 'IMPORTAR DADOS' : 'IMPORTAR FICHA'}
-          </h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ordem-black/80 p-4 backdrop-blur-sm">
+      <div className="relative w-full max-w-lg border border-white/10 bg-[var(--mestre-superficie,#16161a)] p-6 shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_40px_80px_-30px_rgba(0,0,0,1)]">
+        <Cantos />
+        <div className="mb-5 flex items-start justify-between gap-4">
+          <div>
+            <RotuloSecao>Arquivo</RotuloSecao>
+            <h2 className="mt-1 font-display text-2xl uppercase leading-none tracking-[0.06em] text-white">
+              {modo === 'exportar' ? 'Exportar dados' : modo === 'importar' ? 'Importar dados' : 'Importar ficha'}
+            </h2>
+          </div>
           <button
             onClick={onClose}
-            className="text-ordem-text-secondary hover:text-white transition"
+            className="grid h-9 w-9 shrink-0 place-items-center border border-white/10 text-ordem-text-muted transition hover:border-white/30 hover:text-white"
             aria-label="Fechar"
           >
-            ✕
+            <X size={16} />
           </button>
         </div>
 
-        <div className="flex gap-2 mb-6">
+        <div className="mb-5 flex gap-1.5">
           <button
             onClick={() => { setModo('exportar'); setResultadoImportacao(null); }}
-            className={`flex-1 px-3 py-2 text-sm font-mono border rounded-lg transition ${modo === 'exportar'
-                ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
-                : 'border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted'
-              }`}
+            className={`flex-1 border px-3 py-1.5 font-carimbo text-[10px] uppercase tracking-[0.16em] transition ${modo === 'exportar' ? 'border-[var(--mestre-primary,#DC2626)] bg-[var(--mestre-primary,#DC2626)]/15 text-white' : 'border-white/10 text-ordem-text-muted hover:border-white/30 hover:text-white'}`}
           >
-            EXPORTAR
+            Exportar
           </button>
           <button
             onClick={() => { setModo('importar'); setResultadoImportacao(null); }}
-            className={`flex-1 px-3 py-2 text-sm font-mono border rounded-lg transition ${modo === 'importar'
-                ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
-                : 'border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted'
-              }`}
+            className={`flex-1 border px-3 py-1.5 font-carimbo text-[10px] uppercase tracking-[0.16em] transition ${modo === 'importar' ? 'border-[var(--mestre-primary,#DC2626)] bg-[var(--mestre-primary,#DC2626)]/15 text-white' : 'border-white/10 text-ordem-text-muted hover:border-white/30 hover:text-white'}`}
           >
-            IMPORTAR
+            Importar
           </button>
           <button
             onClick={() => { setModo('importar-ficha'); setResultadoImportacao(null); }}
-            className={`flex-1 px-3 py-2 text-sm font-mono border rounded-lg transition ${modo === 'importar-ficha'
-                ? 'border-amber-500 text-amber-500 bg-amber-500/10'
-                : 'border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted'
-              }`}
+            className={`flex-1 border px-3 py-1.5 font-carimbo text-[10px] uppercase tracking-[0.16em] transition ${modo === 'importar-ficha' ? 'border-[var(--mestre-primary,#DC2626)] bg-[var(--mestre-primary,#DC2626)]/15 text-white' : 'border-white/10 text-ordem-text-muted hover:border-white/30 hover:text-white'}`}
           >
-            + FICHA
+            Uma ficha
           </button>
         </div>
 
@@ -210,18 +207,18 @@ export function ImportExportModal({
             </div>
             <button
               onClick={handleExportarFichas}
-              className="w-full px-4 py-3 border border-ordem-red text-ordem-red hover:bg-ordem-red/10 rounded-lg transition text-left"
+              className="w-full border border-white/10 bg-white/[0.02] px-4 py-3 text-left transition hover:border-[var(--mestre-primary,#DC2626)]/70 hover:bg-white/[0.04]"
             >
-              <div className="font-semibold">Exportar Fichas</div>
+              <div className="text-sm font-semibold text-white">Exportar Fichas</div>
               <div className="text-xs text-ordem-text-secondary mt-1">
                 Exporta apenas as fichas de personagens
               </div>
             </button>
             <button
               onClick={handleExportarTudo}
-              className="w-full px-4 py-3 border border-ordem-green text-ordem-green hover:bg-ordem-green/10 rounded-lg transition text-left"
+              className="w-full border border-white/10 bg-white/[0.02] px-4 py-3 text-left transition hover:border-[var(--mestre-primary,#DC2626)]/70 hover:bg-white/[0.04]"
             >
-              <div className="font-semibold">Exportar Tudo</div>
+              <div className="text-sm font-semibold text-white">Exportar Tudo</div>
               <div className="text-xs text-ordem-text-secondary mt-1">
                 Exporta fichas, itens customizados, armas e monstros
               </div>
@@ -236,25 +233,19 @@ export function ImportExportModal({
             </div>
 
             <div className="space-y-2">
-              <label className="block text-xs font-mono text-ordem-text-muted uppercase tracking-widest">
+              <label className="block font-carimbo text-[10px] uppercase tracking-[0.18em] text-ordem-text-muted">
                 Opção de Importação
               </label>
               <div className="flex gap-2">
                 <button
                   onClick={() => setOpcaoImportacao('mesclar')}
-                  className={`flex-1 px-3 py-2 text-sm border rounded-lg transition ${opcaoImportacao === 'mesclar'
-                      ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
-                      : 'border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted'
-                    }`}
+                  className={`flex-1 border px-3 py-2 text-sm transition ${opcaoImportacao === 'mesclar' ? 'border-[var(--mestre-primary,#DC2626)] bg-[var(--mestre-primary,#DC2626)]/10 text-white' : 'border-white/10 text-ordem-text-secondary hover:border-white/30'}`}
                 >
                   Mesclar
                 </button>
                 <button
                   onClick={() => setOpcaoImportacao('substituir')}
-                  className={`flex-1 px-3 py-2 text-sm border rounded-lg transition ${opcaoImportacao === 'substituir'
-                      ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
-                      : 'border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted'
-                    }`}
+                  className={`flex-1 border px-3 py-2 text-sm transition ${opcaoImportacao === 'substituir' ? 'border-[var(--mestre-primary,#DC2626)] bg-[var(--mestre-primary,#DC2626)]/10 text-white' : 'border-white/10 text-ordem-text-secondary hover:border-white/30'}`}
                 >
                   Substituir
                 </button>
@@ -277,14 +268,14 @@ export function ImportExportModal({
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={importando}
-              className="w-full px-4 py-3 border border-ordem-green text-ordem-green hover:bg-ordem-green/10 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full border border-[var(--mestre-primary,#DC2626)] bg-[var(--mestre-primary,#DC2626)]/15 px-4 py-2.5 font-carimbo text-[11px] uppercase tracking-[0.16em] text-white transition hover:bg-[var(--mestre-primary,#DC2626)]/30 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {importando ? 'Importando...' : 'Selecionar Arquivo JSON'}
             </button>
 
             {resultadoImportacao && (
               <div
-                className={`p-3 rounded-lg border text-sm whitespace-pre-line ${resultadoImportacao.startsWith('Erro')
+                className={`border p-3 text-sm whitespace-pre-line ${resultadoImportacao.startsWith('Erro')
                     ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
                     : 'border-ordem-green text-ordem-green bg-ordem-green/10'
                   }`}
@@ -297,7 +288,7 @@ export function ImportExportModal({
 
         {modo === 'importar-ficha' && (
           <div className="space-y-4">
-            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
+            <div className="border border-ordem-gold/40 bg-ordem-gold/10 p-3">
               <div className="text-sm text-amber-400 font-semibold mb-1">
                 📋 Importar Ficha de Jogador
               </div>
@@ -308,25 +299,19 @@ export function ImportExportModal({
             </div>
 
             <div className="space-y-2">
-              <label className="block text-xs font-mono text-ordem-text-muted uppercase tracking-widest">
+              <label className="block font-carimbo text-[10px] uppercase tracking-[0.18em] text-ordem-text-muted">
                 Se a ficha já existir
               </label>
               <div className="flex gap-2">
                 <button
                   onClick={() => setOpcaoFichaIndividual('mesclar')}
-                  className={`flex-1 px-3 py-2 text-sm border rounded-lg transition ${opcaoFichaIndividual === 'mesclar'
-                      ? 'border-ordem-green text-ordem-green bg-ordem-green/10'
-                      : 'border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted'
-                    }`}
+                  className={`flex-1 border px-3 py-2 text-sm transition ${opcaoFichaIndividual === 'mesclar' ? 'border-[var(--mestre-primary,#DC2626)] bg-[var(--mestre-primary,#DC2626)]/10 text-white' : 'border-white/10 text-ordem-text-secondary hover:border-white/30'}`}
                 >
                   Criar Nova
                 </button>
                 <button
                   onClick={() => setOpcaoFichaIndividual('substituir-se-existir')}
-                  className={`flex-1 px-3 py-2 text-sm border rounded-lg transition ${opcaoFichaIndividual === 'substituir-se-existir'
-                      ? 'border-amber-500 text-amber-500 bg-amber-500/10'
-                      : 'border-ordem-border-light text-ordem-text-secondary hover:border-ordem-text-muted'
-                    }`}
+                  className={`flex-1 border px-3 py-2 text-sm transition ${opcaoFichaIndividual === 'substituir-se-existir' ? 'border-[var(--mestre-primary,#DC2626)] bg-[var(--mestre-primary,#DC2626)]/10 text-white' : 'border-white/10 text-ordem-text-secondary hover:border-white/30'}`}
                 >
                   Atualizar
                 </button>
@@ -349,14 +334,14 @@ export function ImportExportModal({
             <button
               onClick={() => fichaInputRef.current?.click()}
               disabled={importando}
-              className="w-full px-4 py-3 border border-amber-500 text-amber-500 hover:bg-amber-500/10 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full border border-[var(--mestre-primary,#DC2626)] bg-[var(--mestre-primary,#DC2626)]/15 px-4 py-2.5 font-carimbo text-[11px] uppercase tracking-[0.16em] text-white transition hover:bg-[var(--mestre-primary,#DC2626)]/30 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {importando ? 'Importando Ficha...' : '📁 Selecionar Ficha do Jogador'}
             </button>
 
             {resultadoImportacao && (
               <div
-                className={`p-3 rounded-lg border text-sm whitespace-pre-line ${resultadoImportacao.startsWith('Erro')
+                className={`border p-3 text-sm whitespace-pre-line ${resultadoImportacao.startsWith('Erro')
                     ? 'border-ordem-red text-ordem-red bg-ordem-red/10'
                     : 'border-ordem-green text-ordem-green bg-ordem-green/10'
                   }`}
@@ -370,7 +355,7 @@ export function ImportExportModal({
         <div className="mt-6 pt-4 border-t border-ordem-border">
           <button
             onClick={onClose}
-            className="w-full px-4 py-2 border border-ordem-border-light text-ordem-white-muted hover:border-ordem-text-muted hover:text-white rounded-lg transition"
+            className="w-full border border-white/10 px-4 py-2 font-carimbo text-[11px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
           >
             Fechar
           </button>

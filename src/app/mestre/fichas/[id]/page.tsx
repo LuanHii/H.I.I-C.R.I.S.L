@@ -8,6 +8,7 @@ import { useCloudFichas } from '../../../../core/storage';
 import { Personagem } from '../../../../core/types';
 import { normalizePersonagem } from '../../../../core/personagemUtils';
 import { MestreNavbar } from '../../../../components/master/MestreNavbar';
+import { ArrowLeft, Download } from 'lucide-react';
 import { WeaponModsButton } from '../../../../components/master/WeaponModsModal';
 
 export default function FichaDetalhePage({ params }: { params: Promise<{ id: string }> }) {
@@ -79,15 +80,15 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
             />
             <button
               onClick={handleExportarFicha}
-              className="px-3 py-2 text-[10px] font-mono tracking-[0.15em] border border-ordem-green text-ordem-green hover:bg-ordem-green/10 rounded-lg transition"
+              className="flex items-center gap-1.5 border border-white/10 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
             >
-              ↓ EXPORTAR
+              <Download size={13} /> Exportar
             </button>
             <Link
               href="/mestre/fichas"
-              className="px-3 py-2 text-[10px] font-mono tracking-[0.25em] border border-ordem-border-light text-ordem-white-muted hover:border-ordem-border hover:text-white rounded-lg transition"
+              className="flex items-center gap-1.5 border border-white/10 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
             >
-              VOLTAR
+              <ArrowLeft size={13} /> Voltar
             </Link>
           </div>
         }
