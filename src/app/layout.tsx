@@ -66,7 +66,7 @@ export default function RootLayout({
         className="bg-ordem-black text-ordem-white min-h-screen relative selection:bg-ordem-green selection:text-ordem-black antialiased"
       >
         <ScanlineOverlay />
-        <div className="fixed inset-0 pointer-events-none z-40 bg-[radial-gradient(circle_at_center,_transparent_0%,_rgba(0,0,0,0.4)_100%)]"></div>
+        <div className="vinheta fixed inset-0 pointer-events-none z-40 bg-[radial-gradient(circle_at_center,_transparent_0%,_rgba(0,0,0,0.4)_100%)]"></div>
         <AuthWrapper showUserMenu>
           {children}
         </AuthWrapper>

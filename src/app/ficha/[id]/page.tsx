@@ -6,6 +6,8 @@ import { subscribeToAgent } from '../../../core/firebase/firestore';
 import { Personagem } from '../../../core/types';
 import { RemoteAgentView } from '../../../components/RemoteAgentView';
 import { OverlayView } from './OverlayView';
+import { ValorView } from './ValorView';
+import { ehCampoDeOverlay, ehFormatoDeOverlay } from '../../../core/overlay/valores';
 import { useWatchedFichas } from '../../../core/storage';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { useAuthOptional } from '../../../core/firebase/auth';
@@ -17,7 +19,9 @@ function PlayerAgentContent() {
   const id = params.id as string;
   const isOverlay = searchParams.get('overlay') === 'true';
   const isFoundryEmbed = searchParams.get('embed') === 'foundry';
-  const overlayMode = (searchParams.get('overlayMode') as 'mini' | 'full' | null) ?? 'mini';
+  const overlayMode = (searchParams.get('overlayMode') as 'mini' | 'full' | 'valor' | null) ?? 'mini';
+  const campoDoValor = searchParams.get('campo');
+  const formatoDoValor = searchParams.get('formato');
   const overlayFundo = searchParams.get('fundo') === 'verde' ? 'verde' : 'transparente';
 
   const auth = useAuthOptional();
@@ -86,7 +90,7 @@ function PlayerAgentContent() {
         ficha={op2.documento}
         atualizadoEm={op2.documento.updatedAt}
         overlay={isOverlay}
-        modoDoOverlay={overlayMode}
+        modoDoOverlay={overlayMode === 'valor' ? 'mini' : overlayMode}
         fundoDoOverlay={overlayFundo}
         embutida={isFoundryEmbed}
         aoAbrirOverlay={isFoundryEmbed ? undefined : (modo) => {
@@ -127,6 +131,16 @@ function PlayerAgentContent() {
   }
 
   if (isOverlay) {
+    if (overlayMode === 'valor') {
+      return (
+        <ValorView
+          agent={agent}
+          campo={ehCampoDeOverlay(campoDoValor) ? campoDoValor : 'pv'}
+          formato={ehFormatoDeOverlay(formatoDoValor) ? formatoDoValor : 'atual'}
+          fundo={overlayFundo}
+        />
+      );
+    }
     return <OverlayView agent={agent} mode={overlayMode} />;
   }
 

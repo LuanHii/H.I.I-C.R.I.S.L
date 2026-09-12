@@ -367,3 +367,14 @@ body {
 .mestre-aura {
   background: radial-gradient(ellipse 75% 55% at 50% -15%, var(--mestre-glow, transparent), transparent 70%);
 }
+
+html[data-overlay='valor'],
+html[data-overlay='valor'] body {
+  background: transparent !important;
+  overflow: hidden;
+}
+
+html[data-overlay='valor'] .scanline,
+html[data-overlay='valor'] .vinheta {
+  display: none !important;
+}
