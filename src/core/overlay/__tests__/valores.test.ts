@@ -29,7 +29,7 @@ describe('valores do overlay: só o que a live precisa, no formato pedido', () =
   it('formatos: máximo, atual/máximo e percentual', () => {
     const v = valoresDeOverlay(personagem());
     expect(textoDoValor(v, 'pv', 'max')).toBe('38');
-    expect(textoDoValor(v, 'pv', 'atual-max')).toBe('29/38');
+    expect(textoDoValor(v, 'pv', 'atual-max')).toBe('29 / 38');
     expect(textoDoValor(v, 'pv', 'percentual')).toBe('76%');
     expect(textoDoValor(v, 'san', 'percentual')).toBe('5%');
   });
@@ -40,7 +40,7 @@ describe('valores do overlay: só o que a live precisa, no formato pedido', () =
     expect(textoDoValor(semPd, 'pd')).toBe('');
 
     const comPd = valoresDeOverlay({ ...personagem(), usarPd: true, pd: { atual: 4, max: 9 } });
-    expect(textoDoValor(comPd, 'pd', 'atual-max')).toBe('4/9');
+    expect(textoDoValor(comPd, 'pd', 'atual-max')).toBe('4 / 9');
 
     const sobrevivente = valoresDeOverlay({ ...personagem(), classe: 'Sobrevivente', nex: 0, estagio: 2 });
     expect(textoDoValor(sobrevivente, 'nex')).toBe('Estágio 2');

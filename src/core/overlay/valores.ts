@@ -60,7 +60,7 @@ export function textoDoValor(v: ValoresDeOverlay, campo: CampoDeOverlay, formato
   if (recurso) {
     switch (formato) {
       case 'max': return String(recurso.max);
-      case 'atual-max': return `${recurso.atual}/${recurso.max}`;
+      case 'atual-max': return `${recurso.atual} / ${recurso.max}`;
       case 'percentual': return recurso.max > 0 ? `${Math.round((recurso.atual / recurso.max) * 100)}%` : '0%';
       default: return String(recurso.atual);
     }

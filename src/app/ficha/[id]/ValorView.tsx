@@ -36,7 +36,13 @@ export function ValorView({ agent, campo, formato, fundo }: ValorViewProps) {
         className="valor font-display font-bold leading-none text-white"
         style={{ fontSize: '96px', textShadow: '0 2px 12px rgba(0,0,0,0.9)' }}
       >
-        {texto}
+        {formato === 'atual-max' && recurso ? (
+          <>
+            <span className="atual">{recurso.atual}</span>
+            <span className="separador" style={{ opacity: 0.6, margin: '0 0.15em' }}>/</span>
+            <span className="max" style={{ fontSize: '0.55em', opacity: 0.8 }}>{recurso.max}</span>
+          </>
+        ) : texto}
       </span>
     </div>
   );

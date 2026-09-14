@@ -136,7 +136,7 @@ function PlayerAgentContent() {
         <ValorView
           agent={agent}
           campo={ehCampoDeOverlay(campoDoValor) ? campoDoValor : 'pv'}
-          formato={ehFormatoDeOverlay(formatoDoValor) ? formatoDoValor : 'atual'}
+          formato={ehFormatoDeOverlay(formatoDoValor) ? formatoDoValor : 'atual-max'}
           fundo={overlayFundo}
         />
       );
