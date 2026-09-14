@@ -4,16 +4,13 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useCloudFichas, useCloudCampanhas, useWatchedFichas, type FichaRegistro } from '../../core/storage';
 import type { Personagem } from '../../core/types';
-import { AgentDetailView } from './AgentDetailView';
 import { FichaMestre } from './ficha/FichaMestre';
+import { FichaAntiga } from './ficha/FichaAntiga';
 import { normalizePersonagem } from '../../core/personagemUtils';
-import { auditPersonagem, summarizeIssues } from '../../core/validation/auditPersonagem';
 import { saveAgentToCloud } from '../../core/firebase/firestore';
 import { ImportExportModal } from './ImportExportModal';
 import { downloadJSON, exportarFichaIndividual, exportarFichasPorCampanha } from '../../core/storage/exportImportUtils';
 import { CampanhaSection, NovaCampanhaForm } from './CampanhaSection';
-import { recalcularRecursosPersonagem } from '../../logic/progression';
-import { observar } from '../../core/ficha/sombra';
 import { descreverSinal, sinalDaFicha } from '../../core/ficha/sinal';
 import { MigracaoWizard } from './MigracaoWizard';
 import { Cloud, CloudOff, ChevronLeft, Plus, Download, Eye, PanelLeftClose, PanelLeft, RefreshCw, MoreHorizontal } from 'lucide-react';
@@ -24,7 +21,7 @@ import { Cantos, Fita, Recurso, iniciaisDoNome } from './ui/Pecas';
 type FichasViewMode = 'minhas' | 'observadas';
 
 export function FichasManager() {
-  const { fichas, fichasBrutas, remover, duplicar, salvar, moverParaCampanha, marcarComoSincronizada, sincronizarFicha, migrar, reverterMigracao, responderEscolha, desfazerEscolha, definirNivelDaFicha, editarFicha, isCloudMode, loading: fichasLoading } = useCloudFichas();
+  const { fichas, fichasBrutas, remover, duplicar, salvar, moverParaCampanha, marcarComoSincronizada, sincronizarFicha, migrar, responderEscolha, desfazerEscolha, definirNivelDaFicha, editarFicha, isCloudMode, loading: fichasLoading } = useCloudFichas();
   const { campanhas, criarCampanha, renomearCampanha, removerCampanha, moverCampanha, priorizarCampanha, loading: campanhasLoading } = useCloudCampanhas();
   const { watchedFichas, isAuthenticated: isLoggedIn } = useWatchedFichas();
   const [selecionada, setSelecionada] = useState<string | null>(null);
@@ -165,19 +162,6 @@ export function FichasManager() {
     salvar(final, registroAtual.id);
   };
 
-  const handleRecalcular = (id: string) => {
-    const registro = fichas.find((f) => f.id === id);
-    if (!registro) return;
-    try {
-      const recalculado = recalcularRecursosPersonagem(registro.personagem);
-      salvar(recalculado, id);
-      alert(`Recursos de "${registro.personagem.nome}" recalculados com sucesso!`);
-    } catch (error) {
-      console.error('Erro ao recalcular:', error);
-      alert('Erro ao recalcular recursos.');
-    }
-  };
-
   const handleShare = async (id: string) => {
     const registro = fichas.find((f) => f.id === id);
     if (!registro) return;
@@ -245,7 +229,6 @@ export function FichasManager() {
   };
 
   useEffect(() => {
-    if (registroAtual?.personagem) observar(registroAtual.personagem);
   }, [registroAtual?.id, registroAtual?.personagem]);
 
   const handleSelectFicha = (id: string) => {
@@ -268,18 +251,11 @@ export function FichasManager() {
 
   const renderFichaCard = (registro: FichaRegistro) => {
     const sinal = registro.fonte === 'v2' && registro.ficha ? sinalDaFicha(registro.ficha) : null;
-    const issues = sinal ? [] : auditPersonagem(registro.personagem);
     const summary = sinal
       ? { total: sinal.pendentes + sinal.erros.length + sinal.avisos.length, errors: sinal.erros.length, warns: sinal.pendentes + sinal.avisos.length }
-      : summarizeIssues(issues);
-    const title = sinal
-      ? descreverSinal(sinal)
-      : summary.total === 0
-        ? ''
-        : `Problemas detectados (${summary.errors} erro(s), ${summary.warns} aviso(s)):\n${issues
-          .map((i) => `- [${i.severity.toUpperCase()}] ${i.message}`)
-          .join('\n')}`;
-    const rotuloDoSinal = summary.errors > 0 ? 'ERRO' : sinal ? `${sinal.pendentes} PEND.` : 'AVISO';
+      : { total: 1, errors: 0, warns: 1 };
+    const title = sinal ? descreverSinal(sinal) : `Formato antigo — converter para abrir.${registro.motivoDaFonte ? `\n${registro.motivoDaFonte}` : ''}`;
+    const rotuloDoSinal = summary.errors > 0 ? 'ERRO' : sinal ? `${sinal.pendentes} PEND.` : 'CONVERTER';
 
     if (viewMode === 'compact') {
       return (
@@ -437,20 +413,6 @@ export function FichasManager() {
               className="w-full justify-center border-white/10 px-2.5 py-2 text-[10px] tracking-[0.14em] text-ordem-text-secondary hover:border-white/30 hover:bg-transparent hover:text-white"
             />
           </div>
-          {registro.fonte !== 'v2' && (
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
-                handleRecalcular(registro.id);
-              }}
-              className="flex items-center justify-center gap-1.5 border border-white/10 px-2.5 py-2 font-carimbo text-[10px] uppercase tracking-[0.14em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white touch-target-sm"
-              title="Recalcular PV, PE, SAN, Defesa pelo motor antigo"
-            >
-              <RefreshCw size={13} />
-              Recalcular
-            </button>
-          )}
           <button
             type="button"
             onClick={(event) => {
@@ -853,29 +815,6 @@ export function FichasManager() {
 
             <div className="flex-1 overflow-y-auto touch-scroll p-4 lg:p-6 safe-bottom">
               <div className="overflow-hidden border border-white/10">
-                {registroAtual?.ficha && registroAtual.fonte !== 'v2' && (
-                  <div className="mb-3 flex items-start justify-between gap-3 border border-ordem-gold/60 bg-ordem-gold/[0.06] px-3 py-2 text-xs text-ordem-gold">
-                    <span>
-                      <strong>Lendo a ficha antiga</strong>
-                      {' — '}
-                      {registroAtual.motivoDaFonte}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const ok = window.confirm(
-                          'Reverter a conversão desta ficha?\n\n' +
-                          'A ficha volta exatamente como estava antes de converter. ' +
-                          'O documento novo é apagado; nada mais é alterado.',
-                        );
-                        if (ok) reverterMigracao(registroAtual.id);
-                      }}
-                      className="touch-target shrink-0 underline hover:text-ordem-text-primary"
-                    >
-                      Reverter
-                    </button>
-                  </div>
-                )}
                 {registroAtual?.fonte === 'v2' && registroAtual.ficha ? (
                   <FichaMestre
                     ficha={registroAtual.ficha}
@@ -886,13 +825,16 @@ export function FichasManager() {
                     onDesfazer={(escolhaId) => desfazerEscolha(registroAtual.id, escolhaId)}
                     onEditar={(transformar) => editarFicha(registroAtual.id, transformar)}
                   />
-                ) : (
-                  <AgentDetailView
-                    agent={fichaAtual}
-                    onUpdate={handleUpdate}
-                    readOnly={false}
+                ) : registroAtual ? (
+                  <FichaAntiga
+                    personagem={fichaAtual}
+                    motivo={registroAtual.ficha ? registroAtual.motivoDaFonte : undefined}
+                    onConverter={() => {
+                      const bruto = fichasBrutas.find((f) => f.id === registroAtual.id);
+                      setMigrando([{ id: registroAtual.id, personagem: bruto?.personagem ?? registroAtual.personagem }]);
+                    }}
                   />
-                )}
+                ) : null}
               </div>
             </div>
           </div>

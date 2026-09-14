@@ -1,11 +1,10 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import type { Personagem } from '@/core/types';
 import { normalizePersonagem } from '@/core/personagemUtils';
 import { criarFicha } from '@/testUtils/fixtures';
 import { buildFicha } from '../buildFicha';
 import { inferirFicha } from '../inferirFicha';
-import { comparar, observar, sombraAtiva } from '../sombra';
-import { recalcularRecursosPersonagem } from '@/logic/progression';
+import { comparar } from '../sombra';
 
 const salvar = (p: Personagem) => normalizePersonagem(p, false);
 
@@ -120,25 +119,6 @@ describe('shadow mode', () => {
     expect(relatorio.inferenciasIncertas.every((i) => i.nota.length > 0)).toBe(true);
   });
 
-  it('observar não faz nada com a flag desligada', () => {
-    const registrar = vi.fn();
-    observar(salvar(criarFicha({ classe: 'Combatente', nex: 20 })), registrar);
-    expect(sombraAtiva()).toBe(false);
-    expect(registrar).not.toHaveBeenCalled();
-  });
-
-  it('observar nunca propaga exceção, mesmo com ficha corrompida', () => {
-    const original = process.env.NEXT_PUBLIC_FICHA_SOMBRA;
-    process.env.NEXT_PUBLIC_FICHA_SOMBRA = '1';
-    try {
-      const registrar = vi.fn();
-      expect(() => observar({ nome: 'Quebrada' } as unknown as Personagem, registrar)).not.toThrow();
-      expect(registrar).toHaveBeenCalled();
-      expect(registrar.mock.calls[0][0].ok).toBe(false);
-    } finally {
-      process.env.NEXT_PUBLIC_FICHA_SOMBRA = original;
-    }
-  });
 });
 
 describe('round-trip sobre as quatro classes', () => {
@@ -176,40 +156,6 @@ describe('round-trip sobre as quatro classes', () => {
     const estourado = { ...base, atributos: { ...base.atributos, FOR: base.atributos.FOR + 5 } };
     const relatorio = comparar(estourado);
     expect(relatorio.divergencias.some((d) => d.campo === 'atributos.FOR')).toBe(true);
-  });
-});
-
-describe('os dois funis de recálculo disparam o shadow mode', () => {
-  const comFlag = (fn: () => void) => {
-    const antes = process.env.NEXT_PUBLIC_FICHA_SOMBRA;
-    process.env.NEXT_PUBLIC_FICHA_SOMBRA = '1';
-    const info = vi.spyOn(console, 'info').mockImplementation(() => {});
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    try {
-      fn();
-      return info.mock.calls.length + warn.mock.calls.length;
-    } finally {
-      info.mockRestore();
-      warn.mockRestore();
-      process.env.NEXT_PUBLIC_FICHA_SOMBRA = antes;
-    }
-  };
-
-  it('normalizePersonagem loga', () => {
-    const f = criarFicha({ classe: 'Combatente', nex: 20 });
-    expect(comFlag(() => { normalizePersonagem(f, false); })).toBeGreaterThan(0);
-  });
-
-  it('recalcularRecursosPersonagem loga — era o funil que faltava', () => {
-    const f = salvar(criarFicha({ classe: 'Combatente', nex: 20 }));
-    expect(comFlag(() => { recalcularRecursosPersonagem(f); })).toBeGreaterThan(0);
-  });
-
-  it('ficha sem divergência TAMBÉM loga, para o silêncio não ser ambíguo', () => {
-    const f = salvar(criarFicha({ classe: 'Combatente', nex: 20 }));
-    const relatorio = comparar(f);
-    expect(relatorio.ok, 'este teste pressupõe concordância').toBe(true);
-    expect(comFlag(() => { recalcularRecursosPersonagem(f); })).toBeGreaterThan(0);
   });
 });
 
@@ -322,19 +268,4 @@ describe('o differ compara PODERES nas duas direções', () => {
     expect(relatorio.divergencias.some((d) => d.campo === 'poderes.faltando')).toBe(false);
   });
 
-  it('relatório só com ganhos loga como info, não como warning', () => {
-    const antes = process.env.NEXT_PUBLIC_FICHA_SOMBRA;
-    process.env.NEXT_PUBLIC_FICHA_SOMBRA = '1';
-    const info = vi.spyOn(console, 'info').mockImplementation(() => {});
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    try {
-      observar(salvar(criarFicha({ classe: 'Especialista', nex: 50 })));
-      expect(warn, 'ganho de poder não é alarme').not.toHaveBeenCalled();
-      expect(info).toHaveBeenCalled();
-    } finally {
-      info.mockRestore();
-      warn.mockRestore();
-      process.env.NEXT_PUBLIC_FICHA_SOMBRA = antes;
-    }
-  });
 });

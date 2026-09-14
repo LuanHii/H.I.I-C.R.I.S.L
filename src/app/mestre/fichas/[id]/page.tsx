@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { use as usePromise, useState, useEffect, useCallback } from 'react';
-import { AgentDetailView } from '../../../../components/master/AgentDetailView';
 import { FichaMestre } from '../../../../components/master/ficha/FichaMestre';
+import { FichaAntiga } from '../../../../components/master/ficha/FichaAntiga';
+import { MigracaoWizard } from '../../../../components/master/MigracaoWizard';
 import { useCloudFichas } from '../../../../core/storage';
 import { Personagem } from '../../../../core/types';
 import { normalizePersonagem } from '../../../../core/personagemUtils';
@@ -13,7 +14,8 @@ import { WeaponModsButton } from '../../../../components/master/WeaponModsModal'
 
 export default function FichaDetalhePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = usePromise(params);
-  const { fichas, salvar, definirNivelDaFicha, responderEscolha, desfazerEscolha, editarFicha } = useCloudFichas();
+  const { fichas, fichasBrutas, salvar, migrar, definirNivelDaFicha, responderEscolha, desfazerEscolha, editarFicha } = useCloudFichas();
+  const [convertendo, setConvertendo] = useState(false);
   const registro = fichas.find((ficha) => ficha.id === resolvedParams.id);
   const [personagemView, setPersonagemView] = useState<Personagem | null>(
     registro ? registro.personagem : null,
@@ -116,13 +118,18 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
                 onEditar={(transformar) => editarFicha(registro.id, transformar)}
               />
             ) : (
-              <AgentDetailView
-                agent={personagemAtual}
-                onUpdate={atualizarPersonagem}
-                readOnly={false}
-                disableInteractionModals={true}
+              <FichaAntiga
+                personagem={personagemAtual}
+                motivo={registro.ficha ? registro.motivoDaFonte : undefined}
+                onConverter={() => setConvertendo(true)}
               />
             )}
+            <MigracaoWizard
+              isOpen={convertendo}
+              fichas={[{ id: registro.id, personagem: fichasBrutas.find((f) => f.id === registro.id)?.personagem ?? registro.personagem }]}
+              onClose={() => setConvertendo(false)}
+              onConverter={(id, ficha, opcoes) => migrar(id, ficha, opcoes)}
+            />
           </div>
         </div>
       </main>

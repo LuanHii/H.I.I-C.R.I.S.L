@@ -10,7 +10,7 @@ import { ORIGENS } from '../../../data/character/origins';
 import { TODAS_PERICIAS } from '../../rules/pericias';
 import { grauAlvoPromocao } from '../../rules/progressao';
 import { calcularPericiasDetalhadas } from '../../../logic/rulesEngine';
-import { calcularRecursosClasse } from '../../../logic/progression';
+import { calcularRecursosClasse } from '../../rules/recursos';
 import type { EstadoParcial } from '../slots';
 import type { AjustesGm, EstadoSessao, FichaIdentidade, Escolha, PoderDerivado } from '../tipos';
 

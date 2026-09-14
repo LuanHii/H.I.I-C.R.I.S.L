@@ -9,7 +9,8 @@ import {
   ppParaProximaPatente,
 } from '@/logic/rulesEngine';
 import { normalizePersonagem } from '@/core/personagemUtils';
-import { subirNex } from '@/logic/levelUp';
+import { buildFicha, definirNivel } from '@/core/ficha/buildFicha';
+import type { FichaPersistida } from '@/core/ficha/tipos';
 import { criarFicha } from '@/testUtils/fixtures';
 
 const TABELA_3_1: ReadonlyArray<{
@@ -83,19 +84,35 @@ describe('derivação de patente a partir de PP', () => {
 });
 
 describe('patente é independente do NEX', () => {
-  it('subir de NEX não promove nem altera o limite de itens', () => {
-    const inicial = normalizePersonagem(
-      { ...criarFicha({ classe: 'Combatente', nex: 5 }), patente: 'Recruta', pp: 0 },
-      false,
-    );
-    expect(inicial.patente).toBe('Recruta');
+  const fichaV2 = (pontosPrestigio: number): FichaPersistida => ({
+    versao: 2,
+    identidade: {
+      nome: 'Recruta Eterno',
+      classe: 'Combatente',
+      origem: 'Policial',
+      atributosBase: { AGI: 2, FOR: 3, INT: 1, PRE: 1, VIG: 2 },
+      periciasLivres: ['Luta', 'Fortitude'],
+    },
+    progressao: { nex: 5 },
+    escolhas: [],
+    sessao: { pvDano: 0, peGasto: 0, sanPerdida: 0, pontosPrestigio },
+    ajustes: {},
+  });
 
-    let atual = inicial;
-    for (const nex of [10, 20, 35, 50, 70, 99]) atual = subirNex(atual, nex).personagem;
+  it('subir de NEX não promove: a patente vem dos pontos de prestígio', () => {
+    let ficha = fichaV2(0);
+    expect(buildFicha({ ficha }).patente).toBe('Recruta');
 
-    expect(atual.nex, 'o NEX precisa ter subido para o teste valer').toBeGreaterThan(5);
-    expect(atual.patente, 'NEX promoveu indevidamente').toBe('Recruta');
-    expect(atual.limiteItens).toEqual(getPatenteConfig('Recruta').limiteItens);
+    for (const nex of [10, 20, 35, 50, 70, 99]) ficha = definirNivel(ficha, nex);
+
+    const build = buildFicha({ ficha });
+    expect(build.nivel, 'o NEX precisa ter subido para o teste valer').toBe(99);
+    expect(build.patente, 'NEX promoveu indevidamente').toBe('Recruta');
+  });
+
+  it('pontos de prestígio promovem mesmo em NEX 5%', () => {
+    expect(buildFicha({ ficha: fichaV2(50) }).patente).toBe('Agente Especial');
+    expect(buildFicha({ ficha: fichaV2(200) }).patente).toBe('Agente de Elite');
   });
 
   it('um recruta de NEX alto continua recruta', () => {

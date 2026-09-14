@@ -4,18 +4,20 @@
 
 ---
 
-## 1. Duas fichas, uma por motor
+## 1. Um motor só
 
-| Motor | Componente | Quando |
-|---|---|---|
-| Novo (`core/ficha`) | `components/master/ficha/FichaMestre.tsx` | `registro.fonte === 'v2' && registro.ficha` |
-| Antigo (`logic/levelUp`) | `components/master/AgentDetailView.tsx` | qualquer outro caso (ficha v0) |
+O motor antigo (`logic/levelUp`, `logic/progression`, `AgentDetailView`, os seis modais de escolha e o `auditPersonagem`) foi apagado. Toda ficha aberta no painel passa por `components/master/ficha/FichaMestre.tsx`, que só aceita documento v2.
 
-A decisão vive em `FichasManager.tsx` e em `app/mestre/fichas/[id]/page.tsx`.
+| Registro | O que aparece |
+|---|---|
+| `fonte === 'v2'` e `ficha` presente | `FichaMestre` |
+| qualquer outro caso (ficha antiga, conversão anterior a uma correção de regra) | `FichaAntiga` — nome, motivo e o botão "Converter agora", que abre o `MigracaoWizard` |
+
+A decisão vive em `FichasManager.tsx` e em `app/mestre/fichas/[id]/page.tsx`. A leitura (`core/ficha/leitura.ts`) continua devolvendo a ficha antiga para os cards da lista, mas ela não é editável até ser convertida. O `MigracaoWizard` e a inferência (`inferirFicha`) ficam: são o caminho de entrada de JSON antigo e de reconversão.
 
 A ficha que o **jogador** vê (`/ficha/[id]`, `components/RemoteAgentView.tsx`) é só leitura, lê o `personagem` projetado e usa a mesma linguagem visual: cabeçalho com fitas, barras, atributos, e perícias agrupadas por atributo (Agilidade, Força, Intelecto, Presença, Vigor).
 
-O legado está congelado: não recebe funcionalidade nova e não conhece `core/ficha`. Quando não existir mais ficha v0, `AgentDetailView` e os modais antigos podem ser apagados.
+A matemática de recursos por classe (`calcularRecursosClasse`) vive em `core/rules/recursos.ts` e é a única coisa que a criação antiga (`gerarFicha`, usada só para montar o esqueleto de itens/rituais que a projeção carrega) e o motor novo compartilham. O shadow mode (`observar`) foi desligado; `core/ficha/sombra.ts` guarda apenas o differ `comparar`, usado em testes.
 
 ---
 

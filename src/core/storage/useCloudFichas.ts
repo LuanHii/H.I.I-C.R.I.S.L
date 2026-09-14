@@ -492,34 +492,6 @@ export function useCloudFichas() {
     [isAuthenticated, userId],
   );
 
-  const reverterMigracao = useCallback(
-    async (id: string) => {
-      const alvo = fichas.find((f) => f.id === id);
-      if (!alvo) return;
-
-      const limpo: FichaRegistroCloudType = {
-        ...alvo,
-        personagem: alvo.personagemOriginal ?? alvo.personagem,
-      };
-      delete limpo.ficha;
-      delete limpo.fichaMigradaDe;
-      delete limpo.fichaConfirmada;
-      delete limpo.personagemOriginal;
-
-      if (isAuthenticated && userId) {
-        await saveFichaToCloud(userId, paraNuvem(limpo));
-        setFichas((prev) => prev.map((f) => (f.id === id ? limpo : f)));
-      } else {
-        setFichas((prev) => {
-          const atualizadas = prev.map((f) => (f.id === id ? limpo : f));
-          gravarFichasLocal(atualizadas);
-          return atualizadas;
-        });
-      }
-    },
-    [fichas, isAuthenticated, userId],
-  );
-
   const moverParaCampanha = useCallback(
     async (fichaId: string, campanhaId: string | undefined) => {
       setFichas((prev) => {
@@ -564,7 +536,6 @@ export function useCloudFichas() {
       marcarComoSincronizada,
       sincronizarFicha,
       migrar,
-      reverterMigracao,
       responderEscolha,
       desfazerEscolha,
       definirNivelDaFicha,
@@ -572,6 +543,6 @@ export function useCloudFichas() {
       criar,
       isCloudMode: isAuthenticated,
     }),
-    [fichas, fichasResolvidas, loading, salvar, remover, duplicar, moverParaCampanha, marcarComoSincronizada, sincronizarFicha, migrar, reverterMigracao, responderEscolha, desfazerEscolha, definirNivelDaFicha, editarFicha, criar, isAuthenticated]
+    [fichas, fichasResolvidas, loading, salvar, remover, duplicar, moverParaCampanha, marcarComoSincronizada, sincronizarFicha, migrar, responderEscolha, desfazerEscolha, definirNivelDaFicha, editarFicha, criar, isAuthenticated]
   );
 }

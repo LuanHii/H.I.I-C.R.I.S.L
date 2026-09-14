@@ -11,7 +11,7 @@ import { normalizePersonagem } from '../../../../../core/personagemUtils';
 
 export default function RecriarFichaPage({ params }: { params: Promise<{ id: string }> }) {
   const resolved = usePromise(params);
-  const { fichas, salvar, criar } = useCloudFichas();
+  const { fichas, criar } = useCloudFichas();
   const registro = fichas.find((f) => f.id === resolved.id);
 
   const draft = useMemo(() => {
@@ -19,7 +19,7 @@ export default function RecriarFichaPage({ params }: { params: Promise<{ id: str
     return buildRecreateDraftFromPersonagem(registro.personagem);
   }, [registro]);
 
-  const onCreated = (created: Personagem, ficha?: FichaPersistida) => {
+  const onCreated = (created: Personagem, ficha: FichaPersistida) => {
 
     const cleaned: Personagem = {
       ...created,
@@ -39,8 +39,7 @@ export default function RecriarFichaPage({ params }: { params: Promise<{ id: str
     }
 
     const final = normalizePersonagem(cleaned, true);
-    if (ficha) criar(final, ficha, { campanha: registro?.campanha });
-    else salvar(final, crypto.randomUUID(), registro?.campanha);
+    criar(final, ficha, { campanha: registro?.campanha });
   };
 
   if (!registro || !draft) {

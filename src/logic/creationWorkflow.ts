@@ -6,7 +6,6 @@ import {
 } from './characterUtils';
 import type { ClassePreferencias } from './rulesEngine';
 import { ORIGENS } from '../data/character/origins';
-import { subirNex } from './levelUp';
 
 export interface CreationState {
   step: number;
@@ -148,36 +147,21 @@ export function finalizarCriacao(state: CreationState): Personagem {
 
   if (!nome || !classe || !origem) throw new Error("Dados incompletos para finalizar.");
 
-  const nexBase = state.data.tipo === 'Sobrevivente' ? 0 : 5;
-  const estagioBase = state.data.tipo === 'Sobrevivente' ? 1 : undefined;
+  const sobrevivente = state.data.tipo === 'Sobrevivente';
+  const nexAlvo = sobrevivente ? 0 : Math.min(99, Math.max(5, nex || 5));
+  const estagioAlvo = sobrevivente ? Math.max(1, estagio || 1) : undefined;
 
-  let personagem = gerarFicha({
+  return gerarFicha({
     nome,
     conceito,
     classe,
     origem,
     atributos,
     periciasLivres: periciasSelecionadas ?? [],
-    nex: nexBase,
-    estagio: estagioBase,
+    nex: nexAlvo,
+    estagio: estagioAlvo,
     preferenciasClasse,
     rituais,
     equipamentos
   });
-
-  const targetNex = nex || 5;
-  const targetEstagio = estagio || 1;
-
-  if (personagem.classe === 'Sobrevivente') {
-    const { personagem: upado } = subirNex(personagem, targetEstagio, false);
-    personagem = upado;
-  } else {
-    const safeTarget = Math.min(99, Math.max(5, targetNex));
-    if (personagem.nex < safeTarget) {
-      const { personagem: upado } = subirNex(personagem, safeTarget, false);
-      personagem = upado;
-    }
-  }
-
-  return personagem;
 }

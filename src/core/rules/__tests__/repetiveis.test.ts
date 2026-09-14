@@ -7,8 +7,10 @@ import {
   getPoderesElegiveis,
   getPoderesParanormaisElegiveis,
 } from '@/data/character/powers';
-import { choosePower } from '@/logic/progression';
-import { rebaixarNex, subirNex } from '@/logic/levelUp';
+import { buildFicha, definirNivel } from '@/core/ficha/buildFicha';
+import { registrarEscolha } from '@/core/ficha/registrarEscolha';
+import { chaveNex, montarId } from '@/core/ficha/ids';
+import type { FichaPersistida } from '@/core/ficha/tipos';
 import { criarFicha } from '@/testUtils/fixtures';
 
 const poder = (nome: string) => {
@@ -109,40 +111,71 @@ describe('as quatro portas de repetição concordam', () => {
     expect(entrada?.elegivel).toBe(false);
   });
 
-  it('choosePower aceita repetir um repetível', () => {
-    const base = criarFicha({ classe: 'Combatente', nex: 30 });
-    const comUm = { ...base, poderes: [...base.poderes, poder('Treinamento em Perícia')], poderesClassePendentes: 1 };
-    expect(() => choosePower(comUm, 'Treinamento em Perícia')).not.toThrow();
+  const combatenteV2 = (nex: number): FichaPersistida => ({
+    versao: 2,
+    identidade: {
+      nome: 'Repetidor',
+      classe: 'Combatente',
+      origem: 'Policial',
+      atributosBase: { AGI: 2, FOR: 3, INT: 1, PRE: 1, VIG: 2 },
+      periciasLivres: ['Luta', 'Fortitude'],
+    },
+    progressao: { nex },
+    escolhas: [],
+    sessao: { pvDano: 0, peGasto: 0, sanPerdida: 0 },
+    ajustes: {},
+  });
+  const escolherPoder = (ficha: FichaPersistida, nex: number, nome: string) =>
+    registrarEscolha(ficha, montarId('poderClasse', chaveNex(nex)), { tipo: 'poder', poder: nome });
+
+  it('o motor novo aceita repetir um repetível em marcos diferentes', () => {
+    const em15 = escolherPoder(combatenteV2(30), 15, 'Treinamento em Perícia');
+    expect(em15.aplicada).toBe(true);
+    const em30 = escolherPoder(em15.ficha, 30, 'Treinamento em Perícia');
+    expect(em30.aplicada, em30.problemas.map((p) => p.mensagem).join('; ')).toBe(true);
+    expect(buildFicha({ ficha: em30.ficha }).poderes.filter((p) => p.nome === 'Treinamento em Perícia')).toHaveLength(2);
   });
 
-  it('choosePower continua recusando repetir um não repetível', () => {
-    const base = criarFicha({ classe: 'Combatente', nex: 30 });
-    const comUm = { ...base, poderes: [...base.poderes, poder('Reflexos Defensivos')], poderesClassePendentes: 1 };
-    expect(() => choosePower(comUm, 'Reflexos Defensivos')).toThrow(/já possui/i);
+  it('o motor novo recusa repetir um não repetível', () => {
+    const em15 = escolherPoder(combatenteV2(30), 15, 'Reflexos Defensivos');
+    expect(em15.aplicada).toBe(true);
+    const em30 = escolherPoder(em15.ficha, 30, 'Reflexos Defensivos');
+    expect(em30.aplicada).toBe(false);
+    expect(em30.problemas.map((p) => p.mensagem).join(' ')).toMatch(/já possui/i);
   });
 });
 
-describe('rebaixar NEX remove uma cópia, não todas', () => {
-  it('três cópias de um repetível não desaparecem juntas', () => {
-    const base = criarFicha({ classe: 'Combatente', nex: 30 });
-    const tres = {
-      ...base,
-      poderes: [...base.poderes, poder('Transcender'), poder('Transcender'), poder('Transcender')],
-    };
-
-    const contar = (p: Personagem) => p.poderes.filter((x) => x.nome === 'Transcender').length;
-    expect(contar(tres)).toBe(3);
-
-    const rebaixado = rebaixarNex(tres, 25);
-    expect(contar(rebaixado), 'o rebaixamento apagou todas as cópias').toBeGreaterThan(0);
+describe('rebaixar NEX guarda uma cópia por marco, não apaga todas', () => {
+  const combatenteV2 = (nex: number): FichaPersistida => ({
+    versao: 2,
+    identidade: {
+      nome: 'Repetidor',
+      classe: 'Combatente',
+      origem: 'Policial',
+      atributosBase: { AGI: 2, FOR: 3, INT: 1, PRE: 1, VIG: 2 },
+      periciasLivres: ['Luta', 'Fortitude'],
+    },
+    progressao: { nex },
+    escolhas: [],
+    sessao: { pvDano: 0, peGasto: 0, sanPerdida: 0 },
+    ajustes: {},
   });
+  const contar = (ficha: FichaPersistida) => buildFicha({ ficha }).poderes.filter((p) => p.nome === 'Treinamento em Perícia').length;
 
-  it('subir e rebaixar de volta não zera um repetível pré-existente', () => {
-    const base = criarFicha({ classe: 'Combatente', nex: 15 });
-    const com = { ...base, poderes: [...base.poderes, poder('Transcender'), poder('Transcender')] };
-    const subido = subirNex(com, 30).personagem;
-    const voltou = rebaixarNex(subido, 15);
-    expect(voltou.poderes.filter((p) => p.nome === 'Transcender').length).toBeGreaterThan(0);
+  it('três cópias em três marcos: descer um marco tira só a dele, subir devolve', () => {
+    let ficha = combatenteV2(45);
+    for (const nex of [15, 30, 45]) {
+      const r = registrarEscolha(ficha, montarId('poderClasse', chaveNex(nex)), { tipo: 'poder', poder: 'Treinamento em Perícia' });
+      expect(r.aplicada, r.problemas.map((p) => p.mensagem).join('; ')).toBe(true);
+      ficha = r.ficha;
+    }
+    expect(contar(ficha)).toBe(3);
+
+    const rebaixada = definirNivel(ficha, 40);
+    expect(contar(rebaixada), 'o rebaixamento apagou todas as cópias').toBe(2);
+    expect(rebaixada.escolhas, 'a escolha do marco acima fica guardada, não apagada').toHaveLength(3);
+
+    expect(contar(definirNivel(rebaixada, 45))).toBe(3);
   });
 });
 

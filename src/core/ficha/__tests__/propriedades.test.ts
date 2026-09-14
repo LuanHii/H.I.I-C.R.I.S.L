@@ -453,7 +453,6 @@ describe('escolha órfã vira problema, não exceção', () => {
 describe('o motor novo não é autoritativo', () => {
   const PONTE_PERMITIDA = [
     'core/personagemUtils.ts',
-    'logic/progression.ts',
     'components/master/FichasManager.tsx',
     'components/master/MigracaoWizard.tsx',
     'components/master/PendenciasPanel.tsx',
@@ -463,6 +462,7 @@ describe('o motor novo não é autoritativo', () => {
     'components/master/ficha/AtributosFicha.tsx',
     'components/master/ficha/IdentidadeFicha.tsx',
     'components/master/ficha/PoderesPorProveniencia.tsx',
+    'components/master/ficha/FichaAntiga.tsx',
     'components/master/AjustesPanel.tsx',
     'components/master/HistoricoEscolhas.tsx',
     'components/CharacterCreator.tsx',
@@ -499,15 +499,15 @@ describe('o motor novo não é autoritativo', () => {
     expect(importadores, 'o motor novo só deve ser alcançado pelo shadow mode').toEqual([]);
   });
 
-  it('a ponte do shadow mode continua read-only', () => {
+  it('o shadow mode foi desligado: sombra.ts só exporta o differ e ninguém o observa', () => {
+    const sombra = readFileSync(join(process.cwd(), 'src', 'core', 'ficha', 'sombra.ts'), 'utf8');
+    expect(sombra).not.toContain('export function observar');
     for (const arquivo of [
       join(process.cwd(), 'src', 'core', 'personagemUtils.ts'),
-      join(process.cwd(), 'src', 'logic', 'progression.ts'),
       join(process.cwd(), 'src', 'components', 'master', 'FichasManager.tsx'),
     ]) {
       const texto = readFileSync(arquivo, 'utf8');
-      expect(/=\s*observar\(/.test(texto), `${arquivo}: o retorno de observar está sendo usado`).toBe(false);
-      expect(/buildFicha|inferirFicha/.test(texto), `${arquivo}: chamando o motor novo direto`).toBe(false);
+      expect(texto, `${arquivo}: ainda observa/compara os dois motores`).not.toMatch(/observar\(|comparar\(/);
     }
   });
 

@@ -6,11 +6,10 @@ import {
   listarEventosNex,
   calcularCarga,
 } from '../logic/rulesEngine';
-import { calcularRecursosClasse } from '../logic/progression';
+import { calcularRecursosClasse } from './rules/recursos';
 import { estaPerturbado, limiarMachucado, limitePeRodada } from './rules/progressao';
 import { migrarNomesDePoder } from './rules/catalogo';
 import { desduplicarEfeitosDeOrigem } from './rules/efeitosDeOrigem';
-import { observar } from './ficha/sombra';
 
 export const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
@@ -114,8 +113,6 @@ export function normalizePersonagem(personagem: Personagem, autoPatente: boolean
     limiteItens,
     carga: cargaCalculada,
   } satisfies Personagem;
-
-  observar(normalizado);
 
   return normalizado;
 }
