@@ -1,5 +1,4 @@
-import { FichaRegistro } from './useStoredFichas';
-import { MonsterRegistro } from './useStoredMonsters';
+import type { FichaRegistro, MonsterRegistro } from './registros';
 import { Item, Weapow } from '../types';
 
 export interface ExportData {

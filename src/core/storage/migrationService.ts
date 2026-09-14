@@ -1,7 +1,6 @@
 "use client";
 
-import { FichaRegistro, Campanha } from './useStoredFichas';
-import { MonsterRegistro } from './useStoredMonsters';
+import type { FichaRegistro, Campanha, MonsterRegistro } from './registros';
 import { Item, Weapow } from '../types';
 import { migrateLocalDataToCloud, FichaRegistroCloud, CampanhaCloud, MonsterRegistroCloud } from '../firebase/userDataService';
 

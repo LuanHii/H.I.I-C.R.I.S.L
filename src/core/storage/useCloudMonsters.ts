@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Ameaca } from '../types';
+import type { MonsterRegistro } from './registros';
 import { useAuthOptional } from '../firebase/auth';
 import {
   saveMonstroToCloud,
@@ -10,11 +11,7 @@ import {
   MonsterRegistroCloud,
 } from '../firebase/userDataService';
 
-export interface MonsterRegistroCloudType {
-  id: string;
-  ameaca: Ameaca;
-  atualizadoEm: string;
-}
+export type MonsterRegistroCloudType = MonsterRegistro;
 
 const STORAGE_KEY = 'monstros-customizados';
 const LIMITE_MONSTROS = 50;

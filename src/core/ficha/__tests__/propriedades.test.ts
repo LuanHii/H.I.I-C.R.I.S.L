@@ -468,7 +468,7 @@ describe('o motor novo não é autoritativo', () => {
     'components/CharacterCreator.tsx',
     'app/(main)/agente/recriar/[id]/page.tsx',
     'core/storage/useCloudFichas.ts',
-    'core/storage/useStoredFichas.ts',
+    'core/storage/registros.ts',
     'core/storage/carimboDeSincronizacao.ts',
     'core/storage/gravacaoDeSessao.ts',
     'core/storage/__tests__/carimboDeSincronizacao.test.ts',
@@ -515,7 +515,6 @@ describe('o motor novo não é autoritativo', () => {
   it('o store NUNCA converte uma ficha por conta própria', () => {
     for (const arquivo of [
       join(process.cwd(), 'src', 'core', 'storage', 'useCloudFichas.ts'),
-      join(process.cwd(), 'src', 'core', 'storage', 'useStoredFichas.ts'),
       join(process.cwd(), 'src', 'core', 'firebase', 'userDataService.ts'),
     ]) {
       const texto = readFileSync(arquivo, 'utf8')

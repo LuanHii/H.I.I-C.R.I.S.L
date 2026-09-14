@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { InvestigationManager } from './InvestigationManager';
 import { InterludeManager } from './InterludeManager';
 import { Personagem } from '../../core/types';
-import { FichaRegistro } from '../../core/storage/useStoredFichas';
+import type { FichaRegistro } from '../../core/storage/registros';
 
 interface GuiaMestreProps {
     fichas: FichaRegistro[];

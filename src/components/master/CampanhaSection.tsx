@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ChevronRight, Download, FolderInput, Plus } from 'lucide-react';
 import { Fita } from './ui/Pecas';
-import type { FichaRegistro, Campanha } from '../../core/storage/useStoredFichas';
+import type { FichaRegistro, Campanha } from '../../core/storage/registros';
 
 interface CampanhaSectionProps {
     campanha: Campanha | null;

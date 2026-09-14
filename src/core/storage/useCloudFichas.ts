@@ -12,26 +12,15 @@ import {
 } from '../firebase/userDataService';
 import { saveAgentToCloud } from '../firebase/firestore';
 import type { FichaPersistida } from '../ficha/tipos';
-import { resolverPersonagem, type FonteDaFicha } from '../ficha/leitura';
+import type { FichaRegistro } from './registros';
+import { resolverPersonagem } from '../ficha/leitura';
 import { prepararGravacao } from './gravacaoDeSessao';
 import { registrarEscolha, limparEscolha } from '../ficha/registrarEscolha';
 import { definirNivel } from '../ficha/buildFicha';
 import { paraPersonagem } from '../ficha/paraPersonagem';
 import type { EscolhaId, Problema, ValorEscolha } from '../ficha/tipos';
 
-export interface FichaRegistroCloudType {
-  id: string;
-  personagem: Personagem;
-  atualizadoEm: string;
-  campanha?: string;
-  sincronizadaNaNuvem?: boolean;
-  ficha?: FichaPersistida;
-  fichaMigradaDe?: string;
-  fichaConfirmada?: boolean;
-  personagemOriginal?: Personagem;
-  fonte?: FonteDaFicha;
-  motivoDaFonte?: string;
-}
+export type FichaRegistroCloudType = FichaRegistro;
 
 export function paraNuvem(registro: FichaRegistroCloudType): FichaRegistroCloud {
   return {

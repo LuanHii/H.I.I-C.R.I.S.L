@@ -1,6 +1,4 @@
-export * from './useStoredFichas';
-export * from './useStoredMonsters';
-export * from './useStoredItems';
+export * from './registros';
 export * from './useCloudFichas';
 export * from './useCloudMonsters';
 export * from './useCloudItems';

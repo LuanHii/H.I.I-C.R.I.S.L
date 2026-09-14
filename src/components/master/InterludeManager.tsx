@@ -1,208 +1,209 @@
 'use client';
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Moon, Coffee, Wrench, Activity, Heart, Shield } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Moon, Coffee, Wrench } from 'lucide-react';
 import { Button } from '../ui/Button';
-import { Badge } from '../ui/Badge';
-import { Personagem } from '../../core/types';
-import { FichaRegistro } from '../../core/storage/useStoredFichas';
+import type { Personagem } from '../../core/types';
+import type { FichaRegistro } from '../../core/storage/registros';
+import {
+  CONDICOES_DE_DESCANSO,
+  aplicarInterludio,
+  recuperacaoDeDescanso,
+  type AcaoDeInterludio,
+  type CondicaoDeDescanso,
+} from '../../core/rules/interludio';
+import { Painel, Recurso, RotuloSecao, iniciaisDoNome } from './ui/Pecas';
 import { cn } from '@/lib/utils';
 
 export interface InterludeManagerProps {
-    fichas: FichaRegistro[];
-    onUpdate: (id: string, personagem: Personagem) => void;
+  fichas: FichaRegistro[];
+  onUpdate: (id: string, personagem: Personagem) => void;
 }
 
-type InterludeAction = 'Dormir' | 'Relaxar' | 'Manutenção';
+interface Selecao {
+  id: string;
+  selecionado: boolean;
+  acao?: AcaoDeInterludio;
+}
 
-interface AgentSelection {
-    id: string;
-    nome: string;
-    selected: boolean;
-    action?: InterludeAction;
+const ACOES: { id: AcaoDeInterludio; rotulo: string; resumo: string; Icone: typeof Moon; tom: string }[] = [
+  { id: 'dormir', rotulo: 'Dormir', resumo: 'PV e PE iguais ao limite de PE, conforme a condição.', Icone: Moon, tom: 'text-ordem-blue' },
+  { id: 'relaxar', rotulo: 'Relaxar', resumo: 'Sanidade (ou PD) como dormir, +1 por agente relaxando junto.', Icone: Coffee, tom: 'text-ordem-purple' },
+  { id: 'manutencao', rotulo: 'Manutenção', resumo: 'Conserta um item quebrado. Não mexe em recursos.', Icone: Wrench, tom: 'text-ordem-gold' },
+];
+
+function previa(p: Personagem, acao: AcaoDeInterludio | undefined, condicao: CondicaoDeDescanso, relaxando: number): string | null {
+  if (!acao) return null;
+  const base = recuperacaoDeDescanso(p.pe.rodada, condicao);
+  const usaPd = Boolean(p.usarPd && p.pd);
+  if (acao === 'dormir') return usaPd ? `+${base} PV` : `+${base} PV · +${base} PE`;
+  if (acao === 'relaxar') return `+${base + relaxando} ${usaPd ? 'PD' : 'SAN'}`;
+  return 'itens';
 }
 
 export const InterludeManager: React.FC<InterludeManagerProps> = ({ fichas, onUpdate }) => {
-    const [selections, setSelections] = useState<AgentSelection[]>(() =>
-        fichas.map(f => ({ id: f.id, nome: f.personagem.nome, selected: true, action: undefined }))
-    );
+  const [selecoes, setSelecoes] = useState<Selecao[]>(() => fichas.map((f) => ({ id: f.id, selecionado: true })));
+  const [condicao, setCondicao] = useState<CondicaoDeDescanso>('normal');
+  const [relato, setRelato] = useState<string[]>([]);
 
-    const toggleSelection = (id: string) => {
-        setSelections(prev => prev.map(s => s.id === id ? { ...s, selected: !s.selected } : s));
-    };
+  const relaxando = useMemo(() => selecoes.filter((s) => s.selecionado && s.acao === 'relaxar').length, [selecoes]);
+  const prontos = selecoes.some((s) => s.selecionado && s.acao);
 
-    const setActionForSelected = (action: InterludeAction) => {
-        setSelections(prev => prev.map(s => s.selected ? { ...s, action } : s));
-    };
+  const alternar = (id: string) =>
+    setSelecoes((prev) => prev.map((s) => (s.id === id ? { ...s, selecionado: !s.selecionado } : s)));
 
-    const aplicarEfeitos = () => {
-        let log: string[] = [];
+  const definirAcao = (acao: AcaoDeInterludio) =>
+    setSelecoes((prev) => prev.map((s) => (s.selecionado ? { ...s, acao } : s)));
 
-        selections.forEach(sel => {
-            if (!sel.selected || !sel.action) return;
+  const aplicar = () => {
+    const linhas: string[] = [];
+    for (const sel of selecoes) {
+      if (!sel.selecionado || !sel.acao) continue;
+      const ficha = fichas.find((f) => f.id === sel.id);
+      if (!ficha) continue;
+      const r = aplicarInterludio(ficha.personagem, { acao: sel.acao, condicao, quantosRelaxaram: relaxando });
+      if (r.personagem !== ficha.personagem) onUpdate(ficha.id, r.personagem);
+      linhas.push(r.relato);
+    }
+    setRelato(linhas);
+    setSelecoes((prev) => prev.map((s) => ({ ...s, acao: undefined })));
+  };
 
-            const ficha = fichas.find(f => f.id === sel.id);
-            if (!ficha) return;
-            const agent = ficha.personagem;
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="flex items-center gap-2 font-serif text-xl tracking-wide text-white">
+          <Moon className="h-5 w-5 text-ordem-blue" />
+          Interlúdio
+        </h2>
+        <p className="text-sm text-ordem-text-secondary">
+          Recuperação entre missões. As contas seguem o livro: dormir recupera o limite de PE em PV e PE, relaxar recupera o mesmo em Sanidade.
+        </p>
+      </div>
 
-            let updated = { ...agent };
-
-            if (sel.action === 'Dormir') {
-                updated.pv = { ...agent.pv, atual: agent.pv.max };
-                updated.pe = { ...agent.pe, atual: agent.pe.max };
-                log.push(`${agent.nome} dormiu e recuperou PV e PE.`);
-            } else if (sel.action === 'Relaxar') {
-                const recover = 5;
-                updated.san = {
-                    ...agent.san,
-                    atual: Math.min(agent.san.max, agent.san.atual + recover)
-                };
-                log.push(`${agent.nome} relaxou e recuperou ${recover} SAN.`);
-            }
-
-            if (sel.action !== 'Manutenção') {
-                onUpdate(ficha.id, updated);
-            }
-        });
-
-        if (log.length > 0) {
-            alert(`Ações Aplicadas:\n${log.join('\n')}`);
-        } else {
-            alert('Nenhuma ação mecânica aplicada (apenas narrativa ou nenhum agente selecionado).');
-        }
-    };
-
-    return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-start">
-                <div>
-                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                        <Moon className="w-6 h-6 text-blue-400" />
-                        Interlúdio
-                    </h2>
-                    <p className="text-sm text-ordem-text-secondary">Gerencie ações de descanso e recuperação entre missões.</p>
-                </div>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="space-y-4">
+          <Painel cantos className="p-4">
+            <RotuloSecao>Condição de descanso</RotuloSecao>
+            <div className="mt-3 space-y-1.5">
+              {CONDICOES_DE_DESCANSO.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setCondicao(c.id)}
+                  className={cn(
+                    'w-full border px-3 py-2 text-left transition',
+                    condicao === c.id
+                      ? 'border-[var(--mestre-primary,#DC2626)]/70 bg-white/[0.04]'
+                      : 'border-white/10 hover:border-white/25',
+                  )}
+                >
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="font-carimbo text-[11px] uppercase tracking-[0.16em] text-white">{c.rotulo}</span>
+                    <span className="font-mono text-[11px] text-ordem-text-muted">×{c.multiplicador}</span>
+                  </div>
+                  <p className="mt-0.5 text-[11px] leading-snug text-ordem-text-secondary">{c.exemplo}</p>
+                </button>
+              ))}
             </div>
+          </Painel>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-ordem-ooze/30 border border-ordem-border rounded-xl p-4 space-y-3 h-fit">
-                    <h3 className="font-bold text-white mb-2 text-sm uppercase tracking-wider">Ações de Interlúdio</h3>
-
-                    <button
-                        onClick={() => setActionForSelected('Dormir')}
-                        className="w-full text-left p-3 rounded-lg border border-ordem-border-light bg-ordem-black/40 hover:bg-blue-900/20 hover:border-blue-500/50 transition group"
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-blue-500/20 rounded text-blue-400 group-hover:text-blue-300">
-                                <Moon size={20} />
-                            </div>
-                            <div>
-                                <div className="font-bold text-white group-hover:text-blue-200">Dormir</div>
-                                <div className="text-xs text-ordem-text-secondary">Recupera PV e PE.</div>
-                            </div>
-                        </div>
-                    </button>
-
-                    <button
-                        onClick={() => setActionForSelected('Relaxar')}
-                        className="w-full text-left p-3 rounded-lg border border-ordem-border-light bg-ordem-black/40 hover:bg-purple-900/20 hover:border-purple-500/50 transition group"
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-purple-500/20 rounded text-purple-400 group-hover:text-purple-300">
-                                <Coffee size={20} />
-                            </div>
-                            <div>
-                                <div className="font-bold text-white group-hover:text-purple-200">Relaxar</div>
-                                <div className="text-xs text-ordem-text-secondary">Recupera Sanidade.</div>
-                            </div>
-                        </div>
-                    </button>
-
-                    <button
-                        onClick={() => setActionForSelected('Manutenção')}
-                        className="w-full text-left p-3 rounded-lg border border-ordem-border-light bg-ordem-black/40 hover:bg-yellow-900/20 hover:border-yellow-500/50 transition group"
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-yellow-500/20 rounded text-yellow-400 group-hover:text-yellow-300">
-                                <Wrench size={20} />
-                            </div>
-                            <div>
-                                <div className="font-bold text-white group-hover:text-yellow-200">Manutenção</div>
-                                <div className="text-xs text-ordem-text-secondary">Repara equipamentos.</div>
-                            </div>
-                        </div>
-                    </button>
-                </div>
-
-                <div className="md:col-span-2 bg-ordem-ooze/20 border border-ordem-border rounded-xl p-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-bold text-white text-sm uppercase tracking-wider">Agentes no Grupo</h3>
-                        <Button size="sm" variant="ghost" onClick={() => setSelections(selections.map(s => ({ ...s, selected: !s.selected })))}>
-                            Alternar Seleção
-                        </Button>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {selections.map((sel, idx) => {
-                            const ficha = fichas.find(f => f.id === sel.id);
-                            if (!ficha) return null;
-                            const agent = ficha.personagem;
-
-                            return (
-                                <div
-                                    key={idx}
-                                    onClick={() => toggleSelection(sel.id)}
-                                    className={cn(
-                                        "relative p-3 rounded-lg border cursor-pointer transition-all overflow-hidden",
-                                        sel.selected ? "bg-ordem-ooze border-ordem-text-muted/50" : "bg-ordem-black/40 border-ordem-border opacity-60"
-                                    )}
-                                >
-                                    <div className="flex justify-between items-start z-10 relative">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-8 h-8 rounded-full bg-ordem-border flex items-center justify-center font-bold text-xs">
-                                                {agent.classe.substring(0, 3).toUpperCase()}
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-white text-sm">{agent.nome}</div>
-                                                <div className="flex gap-2 text-[10px] text-ordem-text-muted mt-0.5">
-                                                    <span className="flex items-center gap-0.5"><Heart size={10} className="text-red-500" /> {agent.pv.atual}/{agent.pv.max}</span>
-                                                    <span className="flex items-center gap-0.5"><Activity size={10} className="text-yellow-500" /> {agent.pe.atual}/{agent.pe.max}</span>
-                                                    <span className="flex items-center gap-0.5"><Shield size={10} className="text-blue-500" /> {agent.san.atual}/{agent.san.max}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {sel.action && (
-                                            <Badge variant="default" className="text-xs bg-black/50">
-                                                {sel.action}
-                                            </Badge>
-                                        )}
-                                    </div>
-                                    {sel.selected && (
-                                        <div className="absolute inset-0 border-2 border-ordem-gold/20 rounded-lg pointer-events-none" />
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    {fichas.length === 0 && (
-                        <div className="text-center py-8 text-ordem-text-muted italic">
-                            Nenhuma ficha salva para aplicar interlúdio.
-                        </div>
-                    )}
-
-                    <div className="mt-6 flex justify-end">
-                        <Button
-                            onClick={aplicarEfeitos}
-                            disabled={!selections.some(s => s.selected && s.action)}
-                            className="w-full sm:w-auto"
-                        >
-                            Aplicar Efeitos do Interlúdio
-                        </Button>
-                    </div>
-                </div>
+          <Painel cantos className="p-4">
+            <RotuloSecao>Ação para os selecionados</RotuloSecao>
+            <div className="mt-3 space-y-1.5">
+              {ACOES.map(({ id, rotulo, resumo, Icone, tom }) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => definirAcao(id)}
+                  className="group flex w-full items-start gap-3 border border-white/10 px-3 py-2.5 text-left transition hover:border-white/30"
+                >
+                  <Icone size={16} className={cn('mt-0.5 shrink-0', tom)} />
+                  <span>
+                    <span className="block font-carimbo text-[11px] uppercase tracking-[0.16em] text-white">{rotulo}</span>
+                    <span className="block text-[11px] leading-snug text-ordem-text-secondary">{resumo}</span>
+                  </span>
+                </button>
+              ))}
             </div>
+          </Painel>
         </div>
-    );
+
+        <Painel cantos className="p-4 md:col-span-2">
+          <div className="mb-4 flex items-center justify-between">
+            <RotuloSecao>Agentes no grupo</RotuloSecao>
+            <Button size="sm" variant="ghost" onClick={() => setSelecoes((prev) => prev.map((s) => ({ ...s, selecionado: !s.selecionado })))}>
+              Inverter seleção
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {selecoes.map((sel) => {
+              const ficha = fichas.find((f) => f.id === sel.id);
+              if (!ficha) return null;
+              const p = ficha.personagem;
+              const estimativa = previa(p, sel.acao, condicao, relaxando);
+
+              return (
+                <button
+                  key={sel.id}
+                  type="button"
+                  onClick={() => alternar(sel.id)}
+                  className={cn(
+                    'relative border p-3 text-left transition',
+                    sel.selecionado ? 'border-white/25 bg-white/[0.03]' : 'border-white/10 opacity-50',
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-white/15 font-carimbo text-[11px] text-white">
+                        {iniciaisDoNome(p.nome)}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-semibold text-white">{p.nome}</div>
+                        <div className="font-mono text-[10px] text-ordem-text-muted">limite de PE {p.pe.rodada}</div>
+                      </div>
+                    </div>
+                    {sel.acao && (
+                      <span className="shrink-0 font-carimbo text-[10px] uppercase tracking-[0.14em] text-[var(--mestre-primary,#DC2626)]">
+                        {ACOES.find((a) => a.id === sel.acao)?.rotulo}
+                        {estimativa && <span className="ml-1 normal-case tracking-normal text-ordem-text-secondary">{estimativa}</span>}
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-3 grid grid-cols-3 gap-2">
+                    <Recurso tom="pv" compacto atual={p.pv.atual} max={p.pv.max} segmentos={6} />
+                    {p.usarPd && p.pd ? (
+                      <Recurso tom="pd" compacto atual={p.pd.atual} max={p.pd.max} segmentos={6} />
+                    ) : (
+                      <Recurso tom="pe" compacto atual={p.pe.atual} max={p.pe.max} segmentos={6} />
+                    )}
+                    {!(p.usarPd && p.pd) && <Recurso tom="san" compacto atual={p.san.atual} max={p.san.max} segmentos={6} />}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {fichas.length === 0 && (
+            <div className="py-8 text-center text-sm italic text-ordem-text-muted">Nenhuma ficha salva para aplicar interlúdio.</div>
+          )}
+
+          {relato.length > 0 && (
+            <ul className="mt-4 space-y-1 border-t border-white/[0.06] pt-3 font-mono text-[11px] text-ordem-text-secondary">
+              {relato.map((linha, i) => (
+                <li key={i}>{linha}</li>
+              ))}
+            </ul>
+          )}
+
+          <div className="mt-6 flex justify-end">
+            <Button onClick={aplicar} disabled={!prontos} className="w-full sm:w-auto">
+              Aplicar interlúdio
+            </Button>
+          </div>
+        </Painel>
+      </div>
+    </div>
+  );
 };

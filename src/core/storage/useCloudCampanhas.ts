@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { apenasAsQueMudaram, moverNaOrdem, priorizarNaOrdem } from './ordemCampanhas';
 import { useAuthOptional } from '../firebase/auth';
+import type { Campanha } from './registros';
 import {
   saveCampanhaToCloud,
   deleteCampanhaFromCloud,
@@ -10,12 +11,7 @@ import {
   CampanhaCloud,
 } from '../firebase/userDataService';
 
-export interface CampanhaCloudType {
-  id: string;
-  nome: string;
-  cor?: string;
-  ordem: number;
-}
+export type CampanhaCloudType = Campanha;
 
 const CAMPANHAS_KEY = 'campanhas';
 
