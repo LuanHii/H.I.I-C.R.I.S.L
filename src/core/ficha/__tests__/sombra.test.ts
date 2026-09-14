@@ -261,8 +261,9 @@ describe('o differ compara PODERES nas duas direções', () => {
     }
   });
 
-  it('"Perito" do especialista sai como GANHO, não como divergência de perda', () => {
-    const v0 = salvar(criarFicha({ classe: 'Especialista', nex: 50 }));
+  it('"Perito" ausente numa ficha antiga sai como GANHO, não como divergência de perda', () => {
+    const base = salvar(criarFicha({ classe: 'Especialista', nex: 50 }));
+    const v0: Personagem = { ...base, poderes: base.poderes.filter((p) => p.nome !== 'Perito') };
     const relatorio = comparar(v0);
     expect(relatorio.divergencias.find((d) => d.campo === 'poderes.extra')?.v2).toContain('Perito');
     expect(relatorio.divergencias.some((d) => d.campo === 'poderes.faltando')).toBe(false);

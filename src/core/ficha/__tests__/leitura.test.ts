@@ -197,6 +197,24 @@ describe('paraPersonagem: a fronteira do que cada motor possui', () => {
     const manual = saida.poderes.find((p) => p.nome === 'Invenção do Mestre');
     expect(manual, 'poder sem entrada no catálogo sumiu da view').toBeTruthy();
   });
+
+  it('habilidades automáticas de classe chegam com descrição, custo e livro — não como nome pelado', () => {
+    for (const classe of ['Combatente', 'Especialista', 'Ocultista', 'Sobrevivente'] as const) {
+      const v0 = salvar(classe === 'Sobrevivente' ? criarFicha({ classe, estagio: 1 }) : criarFicha({ classe, nex: 5 }));
+      const ficha = migrarFicha(v0).ficha;
+      const saida = paraPersonagem({ ficha, carregarDe: v0 });
+      const automaticas = buildFicha({ ficha }).poderes.filter((p) => p.provenancia.kind === 'classeAutomatica').map((p) => p.nome);
+      expect(automaticas.length, classe).toBeGreaterThan(0);
+      for (const nome of automaticas) {
+        const poder = saida.poderes.find((p) => p.nome === nome);
+        expect(poder, `${classe}: ${nome}`).toBeTruthy();
+        expect(poder!.descricao.length, `${classe}: ${nome} sem descrição`).toBeGreaterThan(10);
+        expect(['Classe', 'Sobrevivente']).toContain(poder!.tipo);
+        expect(poder!.livro).toBe(classe === 'Sobrevivente' ? 'Sobrevivendo ao Horror' : 'Regras Básicas');
+      }
+      expect(saida.poderes.find((p) => p.nome === 'Ataque Especial')?.custo ?? 'n/a').not.toBe('');
+    }
+  });
 });
 
 describe('atualizarSessao: o que mantém o v2 vivo durante o jogo', () => {

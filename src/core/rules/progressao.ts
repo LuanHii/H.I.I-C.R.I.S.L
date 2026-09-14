@@ -1,4 +1,5 @@
 import type { ClasseName, GrauTreinamento } from '../types';
+import { CLASSES } from '../../data/character/classes';
 
 export const NIVEL_MINIMO = 1;
 export const NIVEL_MAXIMO = 20;
@@ -83,16 +84,5 @@ export function grauRequeridoParaAlvo(
 }
 
 export function periciasIniciaisPorClasse(classe: ClasseName, intelecto: number): number {
-  switch (classe) {
-    case 'Combatente':
-      return Math.max(1, 1 + intelecto);
-    case 'Especialista':
-      return Math.max(1, 7 + intelecto);
-    case 'Ocultista':
-      return Math.max(1, 3 + intelecto);
-    case 'Sobrevivente':
-      return Math.max(1, 1 + intelecto);
-    default:
-      return 1;
-  }
+  return Math.max(1, CLASSES[classe].periciasIniciais + intelecto);
 }

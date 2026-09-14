@@ -6,6 +6,7 @@ import { RITUAIS } from '../../data/magic/rituals';
 import { getPatenteConfig, calcularCarga, listarEventosNex } from '../../logic/rulesEngine';
 import { apenasCondicoes } from '../rules/condicoes';
 import { buildFicha, type BuildResultado } from './buildFicha';
+import { descricaoAutomatica } from './automaticos';
 import type { FichaPersistida, PoderDerivado } from './tipos';
 
 function materializar(derivado: PoderDerivado): Poder {
@@ -17,6 +18,20 @@ function materializar(derivado: PoderDerivado): Poder {
   }
 
   const proc = derivado.provenancia;
+
+  if (proc.kind === 'classeAutomatica') {
+    const d = descricaoAutomatica(derivado.nome);
+    if (d) {
+      return {
+        nome: derivado.nome,
+        descricao: d.descricao,
+        ...(d.custo ? { custo: d.custo } : {}),
+        ...(d.acao ? { acao: d.acao } : {}),
+        tipo: 'Classe',
+        livro: d.livro,
+      } as Poder;
+    }
+  }
 
   if (proc.kind === 'trilha') {
     const trilha = TRILHAS.find((t) => t.nome === proc.trilha);

@@ -22,6 +22,8 @@ import { validateAttributes } from '../core/rules/attributes';
 import { calculateDerivedStats, calcularBonusPoderes } from '../core/rules/derivedStats';
 import { NEX_EVENTOS } from '../core/rules/nexEventos';
 import { limiarMachucado, periciasIniciaisPorClasse } from '../core/rules/progressao';
+import { periciasFixasDaClasse } from '../core/rules/periciasDeClasse';
+import { descricaoAutomatica, habilidadesAutomaticas } from '../core/rules/habilidadesDeClasse';
 import { TODAS_PERICIAS } from '../core/rules/pericias';
 import { CLASSES } from '../data/character/classes';
 import { ORIGENS } from '../data/character/origins';
@@ -202,24 +204,9 @@ export function calcularPericiasDisponiveis(
   const origemPericias = (origem as any)?.pericias ?? [];
   const origemExtras = origem?.periciasExtras ?? 0;
   origemPericias.forEach((p: PericiaName) => obrigatorias.add(p));
+  periciasFixasDaClasse(classe, preferenciasClasse).forEach((p) => obrigatorias.add(p));
 
-  switch (classe) {
-    case 'Combatente':
-
-      obrigatorias.add(preferenciasClasse?.ofensiva ?? 'Luta');
-      obrigatorias.add(preferenciasClasse?.defensiva ?? 'Fortitude');
-      return { qtdEscolhaLivre: periciasIniciaisPorClasse(classe, intelecto), qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
-    case 'Especialista':
-      return { qtdEscolhaLivre: periciasIniciaisPorClasse(classe, intelecto), qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
-    case 'Ocultista':
-      obrigatorias.add('Ocultismo');
-      obrigatorias.add('Vontade');
-      return { qtdEscolhaLivre: periciasIniciaisPorClasse(classe, intelecto), qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
-    case 'Sobrevivente':
-      return { qtdEscolhaLivre: periciasIniciaisPorClasse(classe, intelecto), qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
-    default:
-      return { qtdEscolhaLivre: 1, qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
-  }
+  return { qtdEscolhaLivre: periciasIniciaisPorClasse(classe, intelecto), qtdEscolhaOrigem: origemExtras, obrigatorias: Array.from(obrigatorias) };
 }
 
 export function gerarFicha(input: CriacaoInput): Personagem {
@@ -285,7 +272,7 @@ export function gerarFicha(input: CriacaoInput): Personagem {
   const defesa = derived.defesa + (input.bonus?.defesa ?? 0);
   const deslocamento = derived.deslocamento + (input.bonus?.deslocamento ?? 0);
 
-  const poderes = coletarPoderes(origem, input.classe, input.sobreviventeBeneficioOrigem);
+  const poderes = coletarPoderes(origem, input.classe, estagio ?? nexBase, input.sobreviventeBeneficioOrigem);
   const carga = calcularCarga({
     atributos,
     itens: input.equipamentos ?? [],
@@ -417,21 +404,7 @@ function construirPericias(params: {
     origem.pericias.forEach((pericia) => adicionaPericia(pericia, true));
   }
 
-  switch (classe) {
-    case 'Combatente': {
-      const ofensiva = params.preferenciasClasse?.ofensiva ?? 'Luta';
-      const defensiva = params.preferenciasClasse?.defensiva ?? 'Fortitude';
-      adicionaPericia(ofensiva, false);
-      adicionaPericia(defensiva, false);
-      break;
-    }
-    case 'Ocultista':
-      adicionaPericia('Ocultismo', false);
-      adicionaPericia('Vontade', false);
-      break;
-    default:
-      break;
-  }
+  periciasFixasDaClasse(classe, params.preferenciasClasse).forEach((pericia) => adicionaPericia(pericia, false));
 
   periciasLivres.forEach((pericia) => {
     if (slotsLivres <= 0) {
@@ -532,6 +505,7 @@ function construirEfeitosAtivos(params: {
 function coletarPoderes(
   origem: Origem,
   classe: ClasseName,
+  nivel: number,
   sobreviventeBeneficioOrigem?: 'pericias' | 'poder' | 'ambos',
 ): Poder[] {
   const poderes: Poder[] = [];
@@ -550,34 +524,15 @@ function coletarPoderes(
     });
   }
 
-  if (classe === 'Combatente') {
+  for (const hab of habilidadesAutomaticas(classe, nivel)) {
+    const d = descricaoAutomatica(hab.nome);
     poderes.push({
-      nome: 'Ataque Especial',
-      descricao: 'Quando faz um ataque, você pode gastar 2 PE para receber +5 no teste de ataque ou na rolagem de dano.',
+      nome: hab.nome,
+      descricao: d?.descricao ?? '',
+      ...(d?.custo ? { custo: d.custo } : {}),
+      ...(d?.acao ? { acao: d.acao } : {}),
       tipo: 'Classe',
-      livro: 'Regras Básicas'
-    });
-  } else if (classe === 'Especialista') {
-    poderes.push({
-      nome: 'Eclético',
-      descricao: 'Quando faz um teste de uma perícia, você pode gastar 2 PE para receber treinamento na perícia para aquele teste.',
-      tipo: 'Classe',
-      livro: 'Regras Básicas'
-    });
-  } else if (classe === 'Ocultista') {
-    poderes.push({
-      nome: 'Escolhido pelo Outro Lado',
-      descricao: 'Você pode lançar rituais de 1º círculo.',
-      tipo: 'Classe',
-      livro: 'Regras Básicas'
-    });
-  } else if (classe === 'Sobrevivente') {
-    poderes.push({
-      nome: 'Empenho',
-      descricao: 'Quando faz um teste de perícia, você pode gastar 1 PE para receber +2 nesse teste.',
-      custo: '1 PE',
-      tipo: 'Classe',
-      livro: 'Sobrevivendo ao Horror'
+      livro: d?.livro ?? 'Regras Básicas',
     });
   }
 

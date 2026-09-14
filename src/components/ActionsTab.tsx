@@ -427,7 +427,8 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
   const activePowers = character.poderes.filter(p => p.custo || p.acao || p.tipo === 'Paranormal');
   const originData = ORIGENS.find(o => o.nome === character.origem);
   const originPower = originData?.poder;
-  const classAbilities = CLASS_ABILITIES[character.classe]?.filter(a => a.nex <= character.nex) || [];
+  const nivelDoPersonagem = character.classe === 'Sobrevivente' ? (character.estagio ?? 1) : character.nex;
+  const classAbilities = CLASS_ABILITIES[character.classe]?.filter(a => a.nex <= nivelDoPersonagem) || [];
   const trackData = TRILHAS.find(t => t.nome === character.trilha);
   const trackAbilities = trackData?.habilidades.filter(h => h.nex <= character.nex) || [];
 
