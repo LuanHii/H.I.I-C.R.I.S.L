@@ -210,7 +210,7 @@ function pendencias(p: Personagem): string[] {
   return itens.length > 0 ? ['## Pendências', `A ficha ainda não escolheu: ${itens.join(', ')}.`] : [];
 }
 
-export function dossieParaIA(p: Personagem): string {
+export function resumoDoPersonagem(p: Personagem): string {
   const blocos = [
     cabecalho(p),
     recursos(p),
@@ -226,7 +226,7 @@ export function dossieParaIA(p: Personagem): string {
   return blocos.map((b) => b.join('\n')).join('\n\n') + '\n';
 }
 
-export function nomeDoArquivoDoDossie(p: Personagem): string {
+export function nomeDoArquivoDoResumo(p: Personagem): string {
   const base = semAcento(p.nome).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'ficha';
-  return `${base}-dossie.md`;
+  return `${base}-resumo.md`;
 }

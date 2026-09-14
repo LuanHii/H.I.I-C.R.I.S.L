@@ -10,11 +10,11 @@ import { normalizePersonagem } from '../../core/personagemUtils';
 import { saveAgentToCloud } from '../../core/firebase/firestore';
 import { ImportExportModal } from './ImportExportModal';
 import { downloadJSON, downloadMarkdown, exportarFichaIndividual, exportarFichasPorCampanha } from '../../core/storage/exportImportUtils';
-import { dossieParaIA, nomeDoArquivoDoDossie } from '../../core/export/dossie';
+import { resumoDoPersonagem, nomeDoArquivoDoResumo } from '../../core/export/resumo';
 import { CampanhaSection, NovaCampanhaForm } from './CampanhaSection';
 import { descreverSinal, sinalDaFicha } from '../../core/ficha/sinal';
 import { MigracaoWizard } from './MigracaoWizard';
-import { Cloud, CloudOff, ChevronLeft, Plus, Download, Eye, PanelLeftClose, PanelLeft, RefreshCw, MoreHorizontal, Bot } from 'lucide-react';
+import { Cloud, CloudOff, ChevronLeft, Plus, Download, Eye, PanelLeftClose, PanelLeft, RefreshCw, MoreHorizontal, FileText } from 'lucide-react';
 import { WeaponModsButton } from './WeaponModsModal';
 import { WatchedFichasSection } from './WatchedFichasSection';
 import { Cantos, Fita, Recurso, iniciaisDoNome } from './ui/Pecas';
@@ -209,10 +209,10 @@ export function FichasManager() {
     }
   };
 
-  const handleDossie = (id: string) => {
+  const handleResumo = (id: string) => {
     const registro = fichas.find((f) => f.id === id);
     if (!registro) return;
-    downloadMarkdown(dossieParaIA(registro.personagem), nomeDoArquivoDoDossie(registro.personagem));
+    downloadMarkdown(resumoDoPersonagem(registro.personagem), nomeDoArquivoDoResumo(registro.personagem));
   };
 
   const handleRemoverCampanha = (campanhaId: string) => {
@@ -417,13 +417,13 @@ export function FichasManager() {
             type="button"
             onClick={(event) => {
               event.stopPropagation();
-              handleDossie(registro.id);
+              handleResumo(registro.id);
             }}
             className="flex items-center justify-center gap-1.5 border border-white/10 px-2.5 py-2 font-carimbo text-[10px] uppercase tracking-[0.14em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white touch-target-sm"
-            title="Dossiê em Markdown: só o que o personagem tem, para colar numa IA"
+            title="Resumo em Markdown: só o que o personagem tem, pronto para colar numa IA"
           >
-            <Bot size={13} />
-            Dossiê IA
+            <FileText size={13} />
+            Resumo
           </button>
           <div className="contents" onClick={(e) => e.stopPropagation()}>
             <WeaponModsButton

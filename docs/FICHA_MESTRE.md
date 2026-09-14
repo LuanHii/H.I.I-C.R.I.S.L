@@ -71,9 +71,9 @@ FichaPersistida
 
 Dormir recupera PV e PE iguais ao **limite de PE** (`pe.rodada`), multiplicado pela condição de descanso — precária ½ (arredonda para baixo, Ordem:12175), normal ×1, confortável ×2, luxuosa ×3 (Ordem:3694-3713). Relaxar faz o mesmo em Sanidade, **+1 por agente que relaxou no mesmo interlúdio** (Ordem:3726). Com a regra de PD, dormir só recupera PV e relaxar recupera PD (SOH:3006). Sobrevivente tem limite 1 (SOH:765). Nunca ultrapassa o máximo (Ordem:1321). A tela (`InterludeManager`) só escolhe condição e ação; a conta é da função pura.
 
-### Dossiê para IA (`core/export/dossie.ts`)
+### Resumo do personagem (`core/export/resumo.ts`)
 
-`dossieParaIA(personagem)` gera Markdown com **só o que o personagem tem**: recursos (com limite de PE, condições, marcas), atributos, perícias treinadas com dados e bônus (as destreinadas viram uma linha por atributo), ataques com o teste certo (Luta corpo a corpo, Pontaria à distância, os dois para arma arremessável) e modificações aplicadas, proteções, poderes agrupados por proveniência com descrição, rituais com DT, custo por círculo (Ordem:4368-4376) e os três efeitos, proficiências e pendências. Seção vazia não existe no texto; nada interno (log, overrides, ids) vaza. É um artefato separado do JSON de exportação — o JSON continua sendo o registro inteiro (com o documento v2) e o único formato que importa de volta.
+`resumoDoPersonagem(personagem)` gera Markdown com **só o que o personagem tem**: recursos (com limite de PE, condições, marcas), atributos, perícias treinadas com dados e bônus (as destreinadas viram uma linha por atributo), ataques com o teste certo (Luta corpo a corpo, Pontaria à distância, os dois para arma arremessável) e modificações aplicadas, proteções, poderes agrupados por proveniência com descrição, rituais com DT, custo por círculo (Ordem:4368-4376) e os três efeitos, proficiências e pendências. Seção vazia não existe no texto; nada interno (log, overrides, ids) vaza. É um artefato separado do JSON de exportação — o JSON continua sendo o registro inteiro (com o documento v2) e o único formato que importa de volta.
 
 ---
 
@@ -111,6 +111,6 @@ Regras de forma:
 | `core/storage/__tests__/gravacaoDeSessao.test.ts` + `dualWrite.test.ts` | o que vai para o Firestore numa ficha v2 é a projeção do motor; `salvar` não chama `atualizarSessao` direto |
 | `core/rules/__tests__/interludio.test.ts` | dormir/relaxar com o exemplo do livro, condições, PD, Sobrevivente, custo de ritual |
 | `core/rules/__tests__/periciasDeClasse.test.ts` | perícias fixas e habilidades automáticas vêm dos dados; `rulesEngine` sem literais de classe |
-| `core/export/__tests__/dossie.test.ts` | o dossiê nunca lista o que o personagem não tem |
+| `core/export/__tests__/resumo.test.ts` | o resumo nunca lista o que o personagem não tem |
 
 Ao mexer na ficha: rodar `npm test`, `npx tsc --noEmit` e, com nenhum `next dev` de pé, `npm run build`.

@@ -9,9 +9,9 @@ import { useCloudFichas } from '../../../../core/storage';
 import { Personagem } from '../../../../core/types';
 import { normalizePersonagem } from '../../../../core/personagemUtils';
 import { MestreNavbar } from '../../../../components/master/MestreNavbar';
-import { ArrowLeft, Download, Bot, Copy, Check } from 'lucide-react';
+import { ArrowLeft, Download, FileText, Copy, Check } from 'lucide-react';
 import { downloadJSON, downloadMarkdown, exportarFichaIndividual } from '../../../../core/storage/exportImportUtils';
-import { dossieParaIA, nomeDoArquivoDoDossie } from '../../../../core/export/dossie';
+import { resumoDoPersonagem, nomeDoArquivoDoResumo } from '../../../../core/export/resumo';
 import { WeaponModsButton } from '../../../../components/master/WeaponModsModal';
 
 export default function FichaDetalhePage({ params }: { params: Promise<{ id: string }> }) {
@@ -50,19 +50,19 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
     );
   };
 
-  const handleDossie = () => {
+  const handleResumo = () => {
     if (!personagemAtual) return;
-    downloadMarkdown(dossieParaIA(personagemAtual), nomeDoArquivoDoDossie(personagemAtual));
+    downloadMarkdown(resumoDoPersonagem(personagemAtual), nomeDoArquivoDoResumo(personagemAtual));
   };
 
-  const handleCopiarDossie = async () => {
+  const handleCopiarResumo = async () => {
     if (!personagemAtual) return;
     try {
-      await navigator.clipboard.writeText(dossieParaIA(personagemAtual));
+      await navigator.clipboard.writeText(resumoDoPersonagem(personagemAtual));
       setCopiado(true);
       window.setTimeout(() => setCopiado(false), 2000);
     } catch {
-      handleDossie();
+      handleResumo();
     }
   };
 
@@ -100,16 +100,16 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
               <Download size={13} /> Exportar
             </button>
             <button
-              onClick={handleDossie}
+              onClick={handleResumo}
               className="flex items-center gap-1.5 border border-white/10 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
-              title="Dossiê em Markdown: só o que o personagem tem, para colar numa IA"
+              title="Resumo em Markdown: só o que o personagem tem, pronto para colar numa IA"
             >
-              <Bot size={13} /> Dossiê IA
+              <FileText size={13} /> Resumo
             </button>
             <button
-              onClick={() => void handleCopiarDossie()}
+              onClick={() => void handleCopiarResumo()}
               className="flex items-center gap-1.5 border border-white/10 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
-              title="Copiar o dossiê para a área de transferência"
+              title="Copiar o resumo do personagem"
             >
               {copiado ? <Check size={13} className="text-ordem-green" /> : <Copy size={13} />} {copiado ? 'Copiado' : 'Copiar'}
             </button>
