@@ -12,34 +12,25 @@ export interface ExportData {
 
 const EXPORT_VERSION = '1.0.0';
 
-export function exportarFichas(): string {
-  if (typeof window === 'undefined') {
-    throw new Error('Exportação só pode ser feita no navegador');
-  }
-
-  const raw = window.localStorage.getItem('fichas-origem');
-  const fichas: FichaRegistro[] = raw ? JSON.parse(raw) : [];
-
+export function exportarRegistros(fichas: readonly FichaRegistro[]): string {
   const data: ExportData = {
     version: EXPORT_VERSION,
     exportadoEm: new Date().toISOString(),
-    fichas,
+    fichas: [...fichas],
   };
 
   return JSON.stringify(data, null, 2);
 }
 
-export function exportarTudo(): string {
+export function exportarTudo(fichas: readonly FichaRegistro[]): string {
   if (typeof window === 'undefined') {
     throw new Error('Exportação só pode ser feita no navegador');
   }
 
-  const fichasRaw = window.localStorage.getItem('fichas-origem');
   const itensRaw = window.localStorage.getItem('custom-items');
   const armasRaw = window.localStorage.getItem('custom-weapons');
   const monstrosRaw = window.localStorage.getItem('monstros-customizados');
 
-  const fichas: FichaRegistro[] = fichasRaw ? JSON.parse(fichasRaw) : [];
   const itens: Item[] = itensRaw ? JSON.parse(itensRaw) : [];
   const armas: Weapow[] = armasRaw ? JSON.parse(armasRaw) : [];
   const monstros: MonsterRegistro[] = monstrosRaw ? JSON.parse(monstrosRaw) : [];
@@ -47,7 +38,7 @@ export function exportarTudo(): string {
   const data: ExportData = {
     version: EXPORT_VERSION,
     exportadoEm: new Date().toISOString(),
-    fichas,
+    fichas: [...fichas],
     itens,
     armas,
     monstros,
@@ -116,7 +107,6 @@ export function importarDados(
   data: ExportData,
   opcao: 'mesclar' | 'substituir' = 'mesclar'
 ): {
-  fichas: { importadas: number; total: number };
   itens: { importados: number; total: number };
   armas: { importadas: number; total: number };
   monstros: { importados: number; total: number };
@@ -126,36 +116,10 @@ export function importarDados(
   }
 
   const resultado = {
-    fichas: { importadas: 0, total: 0 },
     itens: { importados: 0, total: 0 },
     armas: { importadas: 0, total: 0 },
     monstros: { importados: 0, total: 0 },
   };
-
-  if (data.fichas && data.fichas.length > 0) {
-    resultado.fichas.total = data.fichas.length;
-
-    if (opcao === 'substituir') {
-      window.localStorage.setItem('fichas-origem', JSON.stringify(data.fichas));
-      resultado.fichas.importadas = data.fichas.length;
-    } else {
-
-      const raw = window.localStorage.getItem('fichas-origem');
-      const existentes: FichaRegistro[] = raw ? JSON.parse(raw) : [];
-      const idsExistentes = new Set(existentes.map((f) => f.id));
-
-      const novas = data.fichas.filter((f) => !idsExistentes.has(f.id));
-      const atualizadas = data.fichas.filter((f) => idsExistentes.has(f.id));
-
-      const semAtualizadas = existentes.filter(
-        (f) => !atualizadas.some((a) => a.id === f.id)
-      );
-
-      const mescladas = [...atualizadas, ...semAtualizadas, ...novas];
-      window.localStorage.setItem('fichas-origem', JSON.stringify(mescladas));
-      resultado.fichas.importadas = novas.length + atualizadas.length;
-    }
-  }
 
   if (data.itens && data.itens.length > 0) {
     resultado.itens.total = data.itens.length;
@@ -315,98 +279,5 @@ export function validarFichaIndividual(jsonString: string): ExportFichaIndividua
   } catch (error) {
     console.error('Erro ao validar ficha individual:', error);
     return null;
-  }
-}
-
-export function importarFichaIndividual(
-  fichaData: ExportFichaIndividual,
-  opcao: 'mesclar' | 'substituir-se-existir' = 'mesclar'
-): {
-  sucesso: boolean;
-  mensagem: string;
-  fichaId?: string;
-  acao: 'adicionada' | 'atualizada' | 'renomeada' | 'erro';
-} {
-  if (typeof window === 'undefined') {
-    return { sucesso: false, mensagem: 'Importação só pode ser feita no navegador', acao: 'erro' };
-  }
-
-  try {
-    const raw = window.localStorage.getItem('fichas-origem');
-    const existentes: FichaRegistro[] = raw ? JSON.parse(raw) : [];
-
-    let fichaParaImportar = { ...fichaData.ficha };
-
-    const fichaExistenteIndex = existentes.findIndex(f => f.id === fichaParaImportar.id);
-
-    if (fichaExistenteIndex >= 0) {
-      if (opcao === 'substituir-se-existir') {
-
-        existentes[fichaExistenteIndex] = fichaParaImportar;
-        window.localStorage.setItem('fichas-origem', JSON.stringify(existentes));
-        return {
-          sucesso: true,
-          mensagem: `Ficha "${fichaParaImportar.personagem.nome}" atualizada com sucesso!`,
-          fichaId: fichaParaImportar.id,
-          acao: 'atualizada',
-        };
-      } else {
-
-        const novoId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        const nomeOriginal = fichaParaImportar.personagem.nome;
-
-        const nomeExiste = existentes.some(
-          f => f.personagem.nome === nomeOriginal && f.id !== fichaParaImportar.id
-        );
-
-        fichaParaImportar = {
-          ...fichaParaImportar,
-          id: novoId,
-          personagem: {
-            ...fichaParaImportar.personagem,
-            nome: nomeExiste ? `${nomeOriginal} (importado)` : nomeOriginal,
-          },
-        };
-
-        existentes.push(fichaParaImportar);
-        window.localStorage.setItem('fichas-origem', JSON.stringify(existentes));
-        return {
-          sucesso: true,
-          mensagem: `Ficha "${fichaParaImportar.personagem.nome}" importada como nova (ID original já existia).`,
-          fichaId: fichaParaImportar.id,
-          acao: 'renomeada',
-        };
-      }
-    }
-
-    const nomeExiste = existentes.some(f => f.personagem.nome === fichaParaImportar.personagem.nome);
-
-    if (nomeExiste) {
-
-      fichaParaImportar = {
-        ...fichaParaImportar,
-        personagem: {
-          ...fichaParaImportar.personagem,
-          nome: `${fichaParaImportar.personagem.nome} (${new Date().toLocaleDateString('pt-BR')})`,
-        },
-      };
-    }
-
-    existentes.push(fichaParaImportar);
-    window.localStorage.setItem('fichas-origem', JSON.stringify(existentes));
-
-    return {
-      sucesso: true,
-      mensagem: `Ficha "${fichaParaImportar.personagem.nome}" importada com sucesso!`,
-      fichaId: fichaParaImportar.id,
-      acao: 'adicionada',
-    };
-  } catch (error) {
-    console.error('Erro ao importar ficha individual:', error);
-    return {
-      sucesso: false,
-      mensagem: `Erro ao importar ficha: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
-      acao: 'erro',
-    };
   }
 }

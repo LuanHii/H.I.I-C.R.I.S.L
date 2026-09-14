@@ -159,6 +159,40 @@ describe('exportar: o JSON volta a importar; o resumo é outro artefato', () => 
   });
 });
 
+describe('importar: o arquivo do jogador entra na conta do mestre, nunca só no localStorage', () => {
+  const modal = fonte('components/master/ImportExportModal.tsx');
+  const utils = fonte('core/storage/exportImportUtils.ts');
+  const hook = fonte('core/storage/useCloudFichas.ts');
+
+  it('o modal importa pelo hook (planejarImportacao + onImportarRegistro) e não recarrega a página', () => {
+    expect(modal).toContain('planejarImportacao(');
+    expect(modal).toContain('await onImportarRegistro(plano.registro)');
+    expect(modal).not.toContain('localStorage');
+    expect(modal).not.toContain('window.location.reload');
+    expect(modal).not.toContain('importarFichaIndividual');
+  });
+
+  it('exportar fichas usa as fichas da conta, não o localStorage', () => {
+    expect(modal).toContain('exportarRegistros(fichas)');
+    expect(modal).toContain('exportarTudo(fichas)');
+    expect(utils).not.toMatch(/setItem\('fichas-origem'/);
+    expect(utils).not.toMatch(/getItem\('fichas-origem'/);
+  });
+
+  it('o hook grava a ficha importada na nuvem quando há conta, e local quando não há', () => {
+    const corpo = hook.slice(hook.indexOf('const importarRegistro = useCallback'), hook.indexOf('const sincronizarFicha'));
+    expect(corpo).toContain('saveFichaToCloud(userId, paraNuvem(naNuvem))');
+    expect(corpo).toContain('saveAgentToCloud(registro.id, registro.personagem)');
+    expect(corpo).toContain('gravarFichasLocal(atualizadas)');
+  });
+
+  it('o fim da criação oferece o arquivo que o importar aceita', () => {
+    expect(criador).toContain('registroParaExportar(criada.id, p, criada.ficha');
+    expect(criador).toContain('exportarFichaIndividual(registro)');
+    expect(criador).toContain('Exportar ficha');
+  });
+});
+
 describe('ficha nova nasce no motor novo', () => {
   it('o criador constrói o documento v2 e salva só por criar() — não existe fallback v0', () => {
     expect(criador).toContain('const resultado = criarFicha(dados);');

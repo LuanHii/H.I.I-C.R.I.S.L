@@ -7,12 +7,12 @@ import { ajustarAtributo, orcamentoDeAtributos, type Rascunho } from '@/logic/ra
 import { Aviso, Contador, TituloDaEtapa } from './PecasDaCriacao';
 import { cn } from '@/lib/utils';
 
-const ATRIBUTOS: { chave: AtributoKey; nome: string; efeito: string }[] = [
+const atributosDe = (usarPd: boolean, sobrevivente: boolean): { chave: AtributoKey; nome: string; efeito: string }[] => [
   { chave: 'AGI', nome: 'Agilidade', efeito: 'Reflexos, Iniciativa, Pontaria, Furtividade' },
   { chave: 'FOR', nome: 'Força', efeito: 'Luta, Atletismo, capacidade de carga' },
   { chave: 'INT', nome: 'Intelecto', efeito: '+1 perícia treinada por ponto' },
-  { chave: 'PRE', nome: 'Presença', efeito: 'Soma em PE (no início e a cada NEX); DT de rituais' },
-  { chave: 'VIG', nome: 'Vigor', efeito: 'Soma em PV (no início e a cada NEX); Fortitude' },
+  { chave: 'PRE', nome: 'Presença', efeito: `Soma em ${usarPd ? 'PD' : 'PE'} (no início${sobrevivente ? '' : ' e a cada NEX'}); DT de rituais` },
+  { chave: 'VIG', nome: 'Vigor', efeito: `Soma em PV (no início e a cada ${sobrevivente ? 'estágio' : 'NEX'}); Fortitude` },
 ];
 
 function descricaoDoValor(v: number): string {
@@ -22,6 +22,7 @@ function descricaoDoValor(v: number): string {
 
 export function EtapaAtributos({ rascunho, onChange, numero }: { rascunho: Rascunho; onChange: (r: Rascunho) => void; numero: number }) {
   const orcamento = orcamentoDeAtributos(rascunho);
+  const ATRIBUTOS = atributosDe(rascunho.usarPd, rascunho.tipo === 'Sobrevivente');
 
   return (
     <div>

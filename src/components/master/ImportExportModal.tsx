@@ -4,30 +4,33 @@ import { useState, useRef } from 'react';
 import { X } from 'lucide-react';
 import { Cantos, RotuloSecao } from './ui/Pecas';
 import {
-  exportarFichas,
+  exportarRegistros,
   exportarTudo,
   downloadJSON,
   validarDadosImportacao,
   importarDados,
   lerArquivoJSON,
   validarFichaIndividual,
-  importarFichaIndividual,
 } from '../../core/storage/exportImportUtils';
+import { planejarImportacao, type OpcaoDeImportacao } from '../../core/storage/importacaoDeFicha';
+import type { FichaRegistro } from '../../core/storage/registros';
 
 interface ImportExportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onImportComplete?: () => void;
+  fichas: readonly FichaRegistro[];
+  onImportarRegistro: (registro: FichaRegistro) => Promise<void>;
 }
 
 export function ImportExportModal({
   isOpen,
   onClose,
-  onImportComplete,
+  fichas,
+  onImportarRegistro,
 }: ImportExportModalProps) {
   const [modo, setModo] = useState<'exportar' | 'importar' | 'importar-ficha'>('exportar');
   const [opcaoImportacao, setOpcaoImportacao] = useState<'mesclar' | 'substituir'>('mesclar');
-  const [opcaoFichaIndividual, setOpcaoFichaIndividual] = useState<'mesclar' | 'substituir-se-existir'>('mesclar');
+  const [opcaoFichaIndividual, setOpcaoFichaIndividual] = useState<OpcaoDeImportacao>('mesclar');
   const [importando, setImportando] = useState(false);
   const [resultadoImportacao, setResultadoImportacao] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,9 +38,21 @@ export function ImportExportModal({
 
   if (!isOpen) return null;
 
+  const importarRegistros = async (recebidas: readonly FichaRegistro[], opcao: OpcaoDeImportacao): Promise<string[]> => {
+    const linhas: string[] = [];
+    let existentes = [...fichas];
+    for (const recebida of recebidas) {
+      const plano = planejarImportacao(existentes, recebida, opcao, new Date().toISOString(), () => crypto.randomUUID());
+      await onImportarRegistro(plano.registro);
+      existentes = [plano.registro, ...existentes.filter((f) => f.id !== plano.registro.id)];
+      linhas.push(`✓ ${plano.mensagem}`, ...plano.avisos.map((a) => `⚠ ${a}`));
+    }
+    return linhas;
+  };
+
   const handleExportarFichas = () => {
     try {
-      const data = exportarFichas();
+      const data = exportarRegistros(fichas);
       const timestamp = new Date().toISOString().split('T')[0];
       downloadJSON(data, `fichas-export-${timestamp}.json`);
       alert('Fichas exportadas com sucesso!');
@@ -50,7 +65,7 @@ export function ImportExportModal({
 
   const handleExportarTudo = () => {
     try {
-      const data = exportarTudo();
+      const data = exportarTudo(fichas);
       const timestamp = new Date().toISOString().split('T')[0];
       downloadJSON(data, `cris-backup-completo-${timestamp}.json`);
       alert('Todos os dados exportados com sucesso!');
@@ -81,10 +96,12 @@ export function ImportExportModal({
       const resultado = importarDados(dados, opcaoImportacao);
 
       const mensagens: string[] = [];
-      if (dados.fichas) {
-        mensagens.push(
-          `Fichas: ${resultado.fichas.importadas} de ${resultado.fichas.total} importadas`
+      if (dados.fichas && dados.fichas.length > 0) {
+        const linhas = await importarRegistros(
+          dados.fichas.filter((f) => f && typeof f === 'object' && f.personagem),
+          opcaoImportacao === 'substituir' ? 'substituir-se-existir' : 'mesclar',
         );
+        mensagens.push(`Fichas: ${linhas.filter((l) => l.startsWith('✓')).length} de ${dados.fichas.length} importadas`, ...linhas.filter((l) => l.startsWith('⚠')));
       }
       if (dados.itens) {
         mensagens.push(
@@ -103,14 +120,6 @@ export function ImportExportModal({
       }
 
       setResultadoImportacao(mensagens.join('\n'));
-
-      if (onImportComplete) {
-        onImportComplete();
-      }
-
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
     } catch (error) {
       console.error('Erro ao importar:', error);
       setResultadoImportacao(`Erro ao importar: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
@@ -136,21 +145,8 @@ export function ImportExportModal({
         return;
       }
 
-      const resultado = importarFichaIndividual(fichaData, opcaoFichaIndividual);
-
-      if (resultado.sucesso) {
-        setResultadoImportacao(`✓ ${resultado.mensagem}`);
-
-        if (onImportComplete) {
-          onImportComplete();
-        }
-
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      } else {
-        setResultadoImportacao(`Erro: ${resultado.mensagem}`);
-      }
+      const linhas = await importarRegistros([fichaData.ficha], opcaoFichaIndividual);
+      setResultadoImportacao(linhas.join('\n'));
     } catch (error) {
       console.error('Erro ao importar ficha individual:', error);
       setResultadoImportacao(`Erro ao importar ficha: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
@@ -293,8 +289,8 @@ export function ImportExportModal({
                 📋 Importar Ficha de Jogador
               </div>
               <div className="text-xs text-ordem-text-secondary">
-                Use esta opção para importar fichas que jogadores enviaram para você.
-                A ficha será adicionada às suas fichas existentes.
+                O arquivo que o jogador baixou em &quot;Exportar ficha&quot;, no fim da criação ou na própria ficha.
+                Ela entra na sua conta como está — inclusive o documento do motor novo.
               </div>
             </div>
 
@@ -318,8 +314,8 @@ export function ImportExportModal({
               </div>
               <div className="text-xs text-ordem-text-muted mt-1">
                 {opcaoFichaIndividual === 'mesclar'
-                  ? 'Cria uma nova ficha mesmo se já existir uma com mesmo ID'
-                  : 'Atualiza a ficha existente com os novos dados'}
+                  ? 'Se o id já existir, entra como cópia ("(importado)")'
+                  : 'Se o id já existir, a ficha é substituída pela do arquivo'}
               </div>
             </div>
 

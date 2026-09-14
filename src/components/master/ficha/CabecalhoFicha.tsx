@@ -75,15 +75,17 @@ export function CabecalhoFicha({
               )}
             </span>
 
-            <button
-              type="button"
-              onClick={onPatente}
-              disabled={readOnly || !construindo}
-              title={construindo ? 'Alterar patente (grava os pontos de prestígio)' : `${personagem.pp ?? 0} PP`}
-              className="border border-white/10 px-2.5 py-1 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-gold transition enabled:hover:border-ordem-gold/60 disabled:cursor-default"
-            >
-              {build.patente}
-            </button>
+            {ficha.identidade.classe !== 'Sobrevivente' && (
+              <button
+                type="button"
+                onClick={onPatente}
+                disabled={readOnly || !construindo}
+                title={construindo ? 'Alterar patente (grava os pontos de prestígio)' : `${personagem.pp ?? 0} PP`}
+                className="border border-white/10 px-2.5 py-1 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-gold transition enabled:hover:border-ordem-gold/60 disabled:cursor-default"
+              >
+                {build.patente}
+              </button>
+            )}
 
             <Fita variante="neutra">{ficha.identidade.origem}</Fita>
             {build.trilha && <Fita variante="contorno">{build.trilha}</Fita>}

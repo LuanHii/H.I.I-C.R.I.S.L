@@ -224,6 +224,24 @@ export function useCloudFichas() {
     [isAuthenticated, userId]
   );
 
+  const importarRegistro = useCallback(
+    async (registro: FichaRegistro) => {
+      if (isAuthenticated && userId) {
+        const naNuvem = { ...registro, sincronizadaNaNuvem: true as const };
+        await saveFichaToCloud(userId, paraNuvem(naNuvem));
+        await saveAgentToCloud(registro.id, registro.personagem);
+        setFichas((prev) => [naNuvem, ...prev.filter((f) => f.id !== registro.id)]);
+      } else {
+        setFichas((prev) => {
+          const atualizadas = [registro, ...prev.filter((f) => f.id !== registro.id)];
+          gravarFichasLocal(atualizadas);
+          return atualizadas;
+        });
+      }
+    },
+    [isAuthenticated, userId],
+  );
+
   const sincronizarFicha = useCallback(
     async (id: string) => {
       if (!isAuthenticated || !userId) return;
@@ -518,8 +536,9 @@ export function useCloudFichas() {
       definirNivelDaFicha,
       editarFicha,
       criar,
+      importarRegistro,
       isCloudMode: isAuthenticated,
     }),
-    [fichas, fichasResolvidas, loading, salvar, remover, duplicar, moverParaCampanha, marcarComoSincronizada, sincronizarFicha, migrar, responderEscolha, desfazerEscolha, definirNivelDaFicha, editarFicha, criar, isAuthenticated]
+    [fichas, fichasResolvidas, loading, salvar, remover, duplicar, moverParaCampanha, marcarComoSincronizada, sincronizarFicha, migrar, responderEscolha, desfazerEscolha, definirNivelDaFicha, editarFicha, criar, importarRegistro, isAuthenticated]
   );
 }

@@ -122,11 +122,11 @@ describe('paraPersonagem: a fronteira do que cada motor possui', () => {
   const DO_MOTOR_NOVO = [
     'nome', 'classe', 'origem', 'nex', 'atributos', 'pericias', 'periciasDetalhadas',
     'trilha', 'patente', 'pp', 'defesa', 'deslocamento', 'carga', 'poderes',
-    'limiteItens', 'pv', 'pe', 'san',
+    'limiteItens', 'pv', 'pe', 'san', 'pd', 'usarPd',
   ] as const;
 
   const CARREGADO_DO_V0 = [
-    'equipamentos', 'proficiencias', 'efeitosAtivos', 'usarPd', 'ativo',
+    'equipamentos', 'proficiencias', 'efeitosAtivos', 'ativo',
   ] as const;
 
   it('o que é carregado do v0 chega intacto', () => {
@@ -155,6 +155,8 @@ describe('paraPersonagem: a fronteira do que cada motor possui', () => {
       trilha: 'Trilha Que Não Existe',
       patente: 'Agente de Elite',
       pv: { ...v0.pv, max: 999 },
+      usarPd: true,
+      pd: { atual: 99, max: 99 },
     };
     const saida = paraPersonagem({ ficha, carregarDe: mentiroso });
     const build = buildFicha({ ficha });
@@ -164,6 +166,8 @@ describe('paraPersonagem: a fronteira do que cada motor possui', () => {
     expect(saida.trilha).toBe(build.trilha);
     expect(saida.patente).toBe(build.patente);
     expect(saida.pv.max).toBe(build.derivados.pv.max);
+    expect(saida.usarPd, 'a regra de PD é do documento, não do que a tela mandou').toBe(false);
+    expect(saida.pd).toBeUndefined();
     expect(DO_MOTOR_NOVO.every((c) => c in saida)).toBe(true);
   });
 
@@ -196,6 +200,20 @@ describe('paraPersonagem: a fronteira do que cada motor possui', () => {
 
     const manual = saida.poderes.find((p) => p.nome === 'Invenção do Mestre');
     expect(manual, 'poder sem entrada no catálogo sumiu da view').toBeTruthy();
+  });
+
+  it('usarPd vem do documento (sessao.pdGasto), não do personagem carregado', () => {
+    const v0 = salvar(criarFicha({ classe: 'Sobrevivente', estagio: 3 }));
+    const semFlag: Personagem = { ...v0, usarPd: undefined, pd: undefined };
+    const ficha = migrarFicha(semFlag).ficha;
+
+    const comPd = paraPersonagem({ ficha: { ...ficha, sessao: { ...ficha.sessao, pdGasto: 0 } }, carregarDe: semFlag });
+    expect(comPd.usarPd).toBe(true);
+    expect(comPd.pd?.max).toBeGreaterThan(0);
+
+    const semPd = paraPersonagem({ ficha: { ...ficha, sessao: { ...ficha.sessao, pdGasto: undefined } }, carregarDe: { ...semFlag, usarPd: true } });
+    expect(semPd.usarPd).toBe(false);
+    expect(semPd.pd).toBeUndefined();
   });
 
   it('habilidades automáticas de classe chegam com descrição, custo e livro — não como nome pelado', () => {

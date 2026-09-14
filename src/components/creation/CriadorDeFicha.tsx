@@ -2,12 +2,15 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, ChevronUp, ExternalLink, Plus } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ChevronUp, Download, ExternalLink, FileText, Plus } from 'lucide-react';
 import type { Personagem } from '@/core/types';
 import type { FichaPersistida } from '@/core/ficha/tipos';
 import { criarFicha } from '@/core/ficha/criacao';
 import { paraPersonagem } from '@/core/ficha/paraPersonagem';
 import { useCloudFichas } from '@/core/storage';
+import { downloadJSON, downloadMarkdown, exportarFichaIndividual } from '@/core/storage/exportImportUtils';
+import { registroParaExportar } from '@/core/storage/importacaoDeFicha';
+import { nomeDoArquivoDoResumo, resumoDoPersonagem } from '@/core/export/resumo';
 import {
   RASCUNHO_INICIAL,
   classeDe,
@@ -39,9 +42,14 @@ export interface CriadorDeFichaProps {
 }
 
 interface FichaCriada {
-  id?: string;
+  id: string;
+  salvaNaConta: boolean;
   personagem: Personagem;
   ficha: FichaPersistida;
+}
+
+export function nomeDoArquivoDaFicha(personagem: Personagem, id: string): string {
+  return `${personagem.nome.replace(/[^a-z0-9]/gi, '_')}-${id.slice(0, 8)}.json`;
 }
 
 export function nascerNoMotorNovo(rascunho: Rascunho): { ficha: FichaPersistida; personagem: Personagem } {
@@ -86,10 +94,10 @@ export default function CriadorDeFicha({ rascunhoInicial, etapaInicial, onCriada
       const { ficha, personagem } = nascerNoMotorNovo(rascunho);
       if (onCriada) {
         onCriada(personagem, ficha);
-        setCriada({ personagem, ficha });
+        setCriada({ id: crypto.randomUUID(), salvaNaConta: false, personagem, ficha });
       } else {
         const id = await criar(personagem, ficha);
-        setCriada({ id, personagem, ficha });
+        setCriada({ id, salvaNaConta: true, personagem, ficha });
       }
       if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (e) {
@@ -126,6 +134,11 @@ export default function CriadorDeFicha({ rascunhoInicial, etapaInicial, onCriada
   if (criada) {
     const p = criada.personagem;
     const usaPd = p.usarPd && p.pd;
+    const exportarFicha = () => {
+      const registro = registroParaExportar(criada.id, p, criada.ficha, new Date().toISOString());
+      downloadJSON(exportarFichaIndividual(registro), nomeDoArquivoDaFicha(p, criada.id));
+    };
+    const baixarResumo = () => downloadMarkdown(resumoDoPersonagem(p), nomeDoArquivoDoResumo(p));
     return (
       <div data-classe={classe ?? ''} className="mx-auto w-full max-w-3xl">
         <Painel cantos aura className="p-5 sm:p-8">
@@ -152,8 +165,33 @@ export default function CriadorDeFicha({ rascunhoInicial, etapaInicial, onCriada
           <p className="mt-4 text-xs text-ordem-text-muted">
             {isCloudMode ? 'Salva na sua conta.' : 'Salva neste navegador — entre para sincronizar.'} A ficha abre no painel do mestre, onde as pendências podem ser resolvidas em Construção.
           </p>
-          <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-            {criada.id ? (
+
+          <div className="mt-5 border border-[var(--mestre-primary,#DC2626)]/40 bg-white/[0.03] p-4">
+            <RotuloSecao>Mandar para o mestre</RotuloSecao>
+            <p className="mt-1 text-xs leading-relaxed text-ordem-text-secondary">
+              Baixe o arquivo da ficha e envie. O mestre importa em Fichas → Exp/Imp → &quot;Uma ficha&quot;, e ela entra na conta dele inteira, com tudo o que você escolheu.
+            </p>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+              <button
+                type="button"
+                onClick={exportarFicha}
+                className="inline-flex items-center justify-center gap-2 bg-[var(--mestre-primary,#DC2626)] px-5 py-3 font-carimbo text-[11px] uppercase tracking-[0.18em] text-black transition hover:brightness-110"
+              >
+                <Download size={14} /> Exportar ficha
+              </button>
+              <button
+                type="button"
+                onClick={baixarResumo}
+                title="Texto só com o que o personagem tem, para colar numa IA ou ler rápido"
+                className="inline-flex items-center justify-center gap-2 border border-white/15 px-5 py-3 font-carimbo text-[11px] uppercase tracking-[0.18em] text-ordem-text-secondary transition hover:border-white hover:text-white"
+              >
+                <FileText size={14} /> Resumo
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+            {criada.salvaNaConta ? (
               <Link
                 href={`/mestre/fichas/${criada.id}`}
                 className="inline-flex items-center justify-center gap-2 bg-white px-5 py-3 font-carimbo text-[11px] uppercase tracking-[0.18em] text-black transition hover:bg-[var(--mestre-primary,#DC2626)] hover:text-white"

@@ -30,7 +30,7 @@ export function EtapaRituais({ rascunho, onChange, numero }: { rascunho: Rascunh
 
   return (
     <div>
-      <TituloDaEtapa numero={numero} titulo="Rituais iniciais" descricao="Escolhido pelo Outro Lado: o Ocultista começa sabendo três rituais de 1º círculo (1 PE cada).">
+      <TituloDaEtapa numero={numero} titulo="Rituais iniciais" descricao={`Escolhido pelo Outro Lado: o Ocultista começa sabendo três rituais de 1º círculo (1 ${rascunho.usarPd ? 'PD' : 'PE'} cada).`}>
         <Contador atual={rascunho.rituais.length} total={RITUAIS_INICIAIS} rotulo="Rituais" />
       </TituloDaEtapa>
 
@@ -53,7 +53,7 @@ export function EtapaRituais({ rascunho, onChange, numero }: { rascunho: Rascunh
                 <span className={`font-carimbo text-[10px] uppercase tracking-[0.16em] ${TOM[r.elemento]}`}>{r.elemento}</span>
               </div>
               <div className="mt-0.5 font-mono text-[10px] text-ordem-text-muted">
-                {custoDoRitual(r.circulo)} PE · {r.execucao} · {r.alcance} · {r.alvo}
+                {custoDoRitual(r.circulo)} {rascunho.usarPd ? 'PD' : 'PE'} · {r.execucao} · {r.alcance} · {r.alvo}
               </div>
               <p className="mt-1.5 text-[11px] leading-snug text-ordem-text-secondary">{r.efeito.padrao}</p>
             </Cartao>

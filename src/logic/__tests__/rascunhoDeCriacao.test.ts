@@ -4,6 +4,7 @@ import { RITUAIS } from '@/data/magic/rituals';
 import { WEAPONS } from '@/data/combat/weapons';
 import { buildFicha } from '@/core/ficha/buildFicha';
 import { criarFicha } from '@/core/ficha/criacao';
+import { paraPersonagem } from '@/core/ficha/paraPersonagem';
 import { criarFicha as fixtureV0 } from '@/testUtils/fixtures';
 import { buildRecreateDraftFromPersonagem } from '../recreateFromPersonagem';
 import {
@@ -138,6 +139,35 @@ describe('o rascunho vira DadosDeCriacao e uma ficha v2 válida', () => {
 
   it('sem classe ainda não há prévia numérica', () => {
     expect(previaDe(agente({ classe: undefined })).build).toBeUndefined();
+  });
+});
+
+describe('Sobrevivente com a regra de PD (SOH:2990-3006)', () => {
+  const sobrevivente = (over: Partial<Rascunho> = {}): Rascunho => {
+    const base: Rascunho = { ...RASCUNHO_INICIAL, tipo: 'Sobrevivente', nome: 'Zé', usarPd: true, atributos: { AGI: 1, FOR: 2, INT: 1, PRE: 2, VIG: 2 }, origem: 'Policial', estagio: 3, trilha: 'Durão', ...over };
+    return { ...base, periciasLivres: metaDePericias(base)!.sugestao };
+  };
+
+  it('PD inicial 4 + PRE, +2 por estágio (sem PRE): estágio 3 com PRE 2 dá 10', () => {
+    const p = previaDe(sobrevivente());
+    expect(p.erros).toEqual([]);
+    expect(p.build?.derivados.pd?.max).toBe(4 + 2 + 2 * 2);
+  });
+
+  it('a ficha registrada nasce com usarPd e pd — a Mesa, o resumo e o interlúdio dependem da flag', () => {
+    const r = sobrevivente();
+    const ficha = criarFicha(dadosDe(r)).ficha;
+    expect(ficha.sessao.pdGasto).toBe(0);
+    const projetado = paraPersonagem({ ficha, carregarDe: esqueletoDe(r) });
+    expect(projetado.usarPd).toBe(true);
+    expect(projetado.pd).toEqual({ atual: 10, max: 10 });
+    expect(projetado.pe.rodada, 'limite de PE do sobrevivente vale como limite de PD (SOH:765, 3008)').toBe(1);
+  });
+
+  it('sem a regra, nada de PD', () => {
+    const projetado = paraPersonagem({ ficha: criarFicha(dadosDe(sobrevivente({ usarPd: false }))).ficha, carregarDe: esqueletoDe(sobrevivente({ usarPd: false })) });
+    expect(projetado.usarPd).toBe(false);
+    expect(projetado.pd).toBeUndefined();
   });
 });
 

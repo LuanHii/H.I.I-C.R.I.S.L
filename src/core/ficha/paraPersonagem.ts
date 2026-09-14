@@ -136,6 +136,7 @@ export function paraPersonagem({ ficha, carregarDe, build }: RenderInput): Perso
     pe: { ...carregarDe.pe, max: d.pe.max, atual: d.pe.atual, rodada: d.peRodada },
     san: { ...carregarDe.san, max: d.san.max, atual: d.san.atual, perturbado: d.san.perturbado },
     pd: d.pd,
+    usarPd: sessao.pdGasto !== undefined,
 
     overrides: {
       ...(ajustes.pvMaxDelta !== undefined ? { pvMax: d.pv.max } : {}),

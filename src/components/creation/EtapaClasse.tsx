@@ -26,15 +26,22 @@ const DESCRICAO: Record<ClasseName, string> = {
 const AGENTES: ClasseName[] = ['Combatente', 'Especialista', 'Ocultista'];
 const ESTAGIOS = [1, 2, 3, 4, 5] as const;
 
-function ResumoDaClasse({ classe }: { classe: ClasseName }) {
+function ResumoDaClasse({ classe, usarPd }: { classe: ClasseName; usarPd: boolean }) {
   const s = CLASSES[classe];
   const iniciais = HABILIDADES_DE_CLASSE[classe].filter((h) => h.nivel <= (classe === 'Sobrevivente' ? 1 : 5));
+  const porNivel = classe === 'Sobrevivente' ? 'estágio' : 'NEX';
   return (
     <>
       <dl className="mt-3 grid grid-cols-3 gap-1 border-t border-white/[0.06] pt-3 font-mono text-[11px]">
         <div><dt className="text-ordem-text-muted">PV</dt><dd className="text-white">{s.pvInicial}+VIG <span className="text-ordem-text-muted">(+{s.pvPorNivel})</span></dd></div>
-        <div><dt className="text-ordem-text-muted">PE</dt><dd className="text-white">{s.peInicial}+PRE <span className="text-ordem-text-muted">(+{s.pePorNivel})</span></dd></div>
-        <div><dt className="text-ordem-text-muted">SAN</dt><dd className="text-white">{s.sanInicial} <span className="text-ordem-text-muted">(+{s.sanPorNivel})</span></dd></div>
+        {usarPd ? (
+          <div className="col-span-2"><dt className="text-ordem-text-muted">PD</dt><dd className="text-white">{s.pdInicial}+PRE <span className="text-ordem-text-muted">(+{s.pdPorNivel}{classe === 'Sobrevivente' ? '' : '+PRE'} por {porNivel})</span></dd></div>
+        ) : (
+          <>
+            <div><dt className="text-ordem-text-muted">PE</dt><dd className="text-white">{s.peInicial}+PRE <span className="text-ordem-text-muted">(+{s.pePorNivel})</span></dd></div>
+            <div><dt className="text-ordem-text-muted">SAN</dt><dd className="text-white">{s.sanInicial} <span className="text-ordem-text-muted">(+{s.sanPorNivel})</span></dd></div>
+          </>
+        )}
       </dl>
       <div className="mt-2 font-mono text-[11px] text-ordem-text-secondary">
         {s.periciasIniciais}+INT perícias
@@ -177,14 +184,14 @@ export function EtapaClasse({ rascunho, onChange, numero }: { rascunho: Rascunho
       <TituloDaEtapa
         numero={numero}
         titulo={sobrevivente ? 'Sobrevivente' : 'Classe'}
-        descricao={sobrevivente ? 'Quem ainda não entrou na Ordem só tem uma classe. O que muda é o estágio de partida.' : 'O treinamento que a Ordem deu. Define PV, PE, Sanidade, perícias e a primeira habilidade.'}
+        descricao={sobrevivente ? 'Quem ainda não entrou na Ordem só tem uma classe. O que muda é o estágio de partida.' : `O treinamento que a Ordem deu. Define PV, ${rascunho.usarPd ? 'PD' : 'PE, Sanidade'}, perícias e a primeira habilidade.`}
       />
 
       {sobrevivente ? (
         <div className="border border-[var(--mestre-primary,#DC2626)]/50 bg-white/[0.03] p-4">
           <Fita variante="classe">Sobrevivente</Fita>
           <p className="mt-2 text-sm text-ordem-text-secondary">{DESCRICAO.Sobrevivente}</p>
-          <ResumoDaClasse classe="Sobrevivente" />
+          <ResumoDaClasse classe="Sobrevivente" usarPd={rascunho.usarPd} />
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
@@ -192,7 +199,7 @@ export function EtapaClasse({ rascunho, onChange, numero }: { rascunho: Rascunho
             <Cartao key={classe} selecionado={rascunho.classe === classe} onClick={() => onChange({ ...rascunho, classe, trilha: undefined, decisoesDeTrilha: {}, rituais: [] })}>
               <div data-classe={classe} className="pr-6 font-display text-lg font-bold text-[var(--mestre-primary)]">{classe}</div>
               <p className="mt-1 text-xs leading-relaxed text-ordem-text-secondary">{DESCRICAO[classe]}</p>
-              <ResumoDaClasse classe={classe} />
+              <ResumoDaClasse classe={classe} usarPd={rascunho.usarPd} />
             </Cartao>
           ))}
         </div>
