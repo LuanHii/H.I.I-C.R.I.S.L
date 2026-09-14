@@ -56,8 +56,8 @@ export function exportarTudo(): string {
   return JSON.stringify(data, null, 2);
 }
 
-export function downloadJSON(data: string, filename: string): void {
-  const blob = new Blob([data], { type: 'application/json' });
+export function downloadTexto(data: string, filename: string, tipo = 'text/plain;charset=utf-8'): void {
+  const blob = new Blob([data], { type: tipo });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -66,6 +66,14 @@ export function downloadJSON(data: string, filename: string): void {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+}
+
+export function downloadJSON(data: string, filename: string): void {
+  downloadTexto(data, filename, 'application/json');
+}
+
+export function downloadMarkdown(data: string, filename: string): void {
+  downloadTexto(data, filename, 'text/markdown;charset=utf-8');
 }
 
 export function validarDadosImportacao(jsonString: string): ExportData | null {

@@ -71,15 +71,9 @@ export const InterludeManager: React.FC<InterludeManagerProps> = ({ fichas, onUp
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="flex items-center gap-2 font-serif text-xl tracking-wide text-white">
-          <Moon className="h-5 w-5 text-ordem-blue" />
-          Interlúdio
-        </h2>
-        <p className="text-sm text-ordem-text-secondary">
-          Recuperação entre missões. As contas seguem o livro: dormir recupera o limite de PE em PV e PE, relaxar recupera o mesmo em Sanidade.
-        </p>
-      </div>
+      <p className="text-sm text-ordem-text-secondary">
+        As contas seguem o livro: dormir recupera o limite de PE em PV e PE; relaxar recupera o mesmo em Sanidade, +1 por agente relaxando junto; a condição do descanso multiplica tudo.
+      </p>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <div className="space-y-4">

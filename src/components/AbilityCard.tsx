@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Poder, Ritual } from '../core/types';
+import { custoDoRitual } from '@/core/rules/rituais';
 
 interface AbilityCardProps {
   data: Poder | Ritual;
@@ -25,8 +26,7 @@ export const AbilityCard: React.FC<AbilityCardProps> = ({ data, type, useSanity 
     let cost = '-';
     if (type === 'ritual') {
       const r = data as Ritual;
-      const costs = { 1: 1, 2: 3, 3: 6, 4: 10 };
-      cost = `${costs[r.circulo]} PE`;
+      cost = `${custoDoRitual(r.circulo)} PE`;
     } else {
       const p = data as Poder;
       cost = p.custo ? p.custo : '-';

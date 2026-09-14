@@ -9,11 +9,12 @@ import { FichaAntiga } from './ficha/FichaAntiga';
 import { normalizePersonagem } from '../../core/personagemUtils';
 import { saveAgentToCloud } from '../../core/firebase/firestore';
 import { ImportExportModal } from './ImportExportModal';
-import { downloadJSON, exportarFichaIndividual, exportarFichasPorCampanha } from '../../core/storage/exportImportUtils';
+import { downloadJSON, downloadMarkdown, exportarFichaIndividual, exportarFichasPorCampanha } from '../../core/storage/exportImportUtils';
+import { dossieParaIA, nomeDoArquivoDoDossie } from '../../core/export/dossie';
 import { CampanhaSection, NovaCampanhaForm } from './CampanhaSection';
 import { descreverSinal, sinalDaFicha } from '../../core/ficha/sinal';
 import { MigracaoWizard } from './MigracaoWizard';
-import { Cloud, CloudOff, ChevronLeft, Plus, Download, Eye, PanelLeftClose, PanelLeft, RefreshCw, MoreHorizontal } from 'lucide-react';
+import { Cloud, CloudOff, ChevronLeft, Plus, Download, Eye, PanelLeftClose, PanelLeft, RefreshCw, MoreHorizontal, Bot } from 'lucide-react';
 import { WeaponModsButton } from './WeaponModsModal';
 import { WatchedFichasSection } from './WatchedFichasSection';
 import { Cantos, Fita, Recurso, iniciaisDoNome } from './ui/Pecas';
@@ -206,6 +207,12 @@ export function FichasManager() {
       console.error('Erro ao exportar ficha:', error);
       alert('Erro ao exportar ficha. Verifique o console para mais detalhes.');
     }
+  };
+
+  const handleDossie = (id: string) => {
+    const registro = fichas.find((f) => f.id === id);
+    if (!registro) return;
+    downloadMarkdown(dossieParaIA(registro.personagem), nomeDoArquivoDoDossie(registro.personagem));
   };
 
   const handleRemoverCampanha = (campanhaId: string) => {
@@ -406,6 +413,18 @@ export function FichasManager() {
             <Download size={13} />
             Exportar
           </button>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleDossie(registro.id);
+            }}
+            className="flex items-center justify-center gap-1.5 border border-white/10 px-2.5 py-2 font-carimbo text-[10px] uppercase tracking-[0.14em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white touch-target-sm"
+            title="Dossiê em Markdown: só o que o personagem tem, para colar numa IA"
+          >
+            <Bot size={13} />
+            Dossiê IA
+          </button>
           <div className="contents" onClick={(e) => e.stopPropagation()}>
             <WeaponModsButton
               personagem={registro.personagem}
@@ -464,7 +483,7 @@ export function FichasManager() {
                 }
               }
             }}
-            className="flex items-center justify-center gap-1.5 border border-white/10 px-2.5 py-2 font-carimbo text-[10px] uppercase tracking-[0.14em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white touch-target-sm border-ordem-red/40 text-ordem-red hover:border-ordem-red hover:text-ordem-red"
+            className="col-span-full flex items-center justify-center gap-1.5 border border-white/10 px-2.5 py-2 font-carimbo text-[10px] uppercase tracking-[0.14em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white touch-target-sm border-ordem-red/40 text-ordem-red hover:border-ordem-red hover:text-ordem-red"
           >
             Remover
           </button>

@@ -17,7 +17,9 @@ A decisão vive em `FichasManager.tsx` e em `app/mestre/fichas/[id]/page.tsx`. A
 
 A ficha que o **jogador** vê (`/ficha/[id]`, `components/RemoteAgentView.tsx`) é só leitura, lê o `personagem` projetado e usa a mesma linguagem visual: cabeçalho com fitas, barras, atributos, e perícias agrupadas por atributo (Agilidade, Força, Intelecto, Presença, Vigor).
 
-A matemática de recursos por classe (`calcularRecursosClasse`) vive em `core/rules/recursos.ts` e é a única coisa que a criação antiga (`gerarFicha`, usada só para montar o esqueleto de itens/rituais que a projeção carrega) e o motor novo compartilham. O shadow mode (`observar`) foi desligado; `core/ficha/sombra.ts` guarda apenas o differ `comparar`, usado em testes.
+A matemática de recursos por classe (`calcularRecursosClasse`) vive em `core/rules/recursos.ts`; as perícias fixas de classe (`periciasFixasDaClasse`) em `core/rules/periciasDeClasse.ts`, lidas de `CLASSES`; e as habilidades automáticas (Ataque Especial, Eclético, Perito, Escolhido pelo Outro Lado, Empenho, Cicatrizado) em `core/rules/habilidadesDeClasse.ts`, com descrição vinda de `CLASS_ABILITIES`/`PODERES`. A criação antiga (`gerarFicha`, usada só para montar o esqueleto de itens/rituais que a projeção carrega, e como fixture v0 nos testes de conversão) consome essas mesmas funções — não existe switch por nome de classe fora dos dados. O shadow mode (`observar`) foi desligado; `core/ficha/sombra.ts` guarda apenas o differ `comparar`, usado em testes.
+
+**Gravação.** `useCloudFichas.salvar` passa por `core/storage/gravacaoDeSessao.ts` (`prepararGravacao`): numa ficha v2, a sessão é absorvida no documento e o `personagem` gravado no registro e em `agents/{id}` (o que jogador e overlay leem) é a **projeção do motor**, não o objeto que a tela mandou. Mudança estrutural pelo caminho de sessão é recusada (carimbo não avança). A sessão guarda deltas (`pvDano = max − atual` como a tela viu), então um máximo defasado na tela não corrompe o dano.
 
 ---
 
@@ -63,6 +65,15 @@ FichaPersistida
 - `sessao.condicoes` guarda só nomes do catálogo (`data/combat/conditions.ts`). Texto passivo de origem/trilha não é condição — está no card do poder.
 - Inventário e rituais aprendidos à mão vivem no `personagem` (v0) do registro e são preservados pela projeção (`paraPersonagem`, que faz a união com os derivados).
 - `identidade.periciasLivres` inclui o lado escolhido de cada par de classe (Combatente: Luta **ou** Pontaria, Fortitude **ou** Reflexos — Ordem:705).
+- Criação (`core/ficha/criacao.ts`): além de trilha e rituais iniciais, aceita `decisoesDeTrilha` (habilidade → opção, ex.: Carteirada → Diplomacia), registrada no slot `trilhaHabilidade` e validada pelo motor. O criador só oferece decisão quando a habilidade tem `escolha.opcoes` catalogadas; o resto vira pendência em Construção.
+
+### Interlúdio (`core/rules/interludio.ts`)
+
+Dormir recupera PV e PE iguais ao **limite de PE** (`pe.rodada`), multiplicado pela condição de descanso — precária ½ (arredonda para baixo, Ordem:12175), normal ×1, confortável ×2, luxuosa ×3 (Ordem:3694-3713). Relaxar faz o mesmo em Sanidade, **+1 por agente que relaxou no mesmo interlúdio** (Ordem:3726). Com a regra de PD, dormir só recupera PV e relaxar recupera PD (SOH:3006). Sobrevivente tem limite 1 (SOH:765). Nunca ultrapassa o máximo (Ordem:1321). A tela (`InterludeManager`) só escolhe condição e ação; a conta é da função pura.
+
+### Dossiê para IA (`core/export/dossie.ts`)
+
+`dossieParaIA(personagem)` gera Markdown com **só o que o personagem tem**: recursos (com limite de PE, condições, marcas), atributos, perícias treinadas com dados e bônus (as destreinadas viram uma linha por atributo), ataques com o teste certo (Luta corpo a corpo, Pontaria à distância, os dois para arma arremessável) e modificações aplicadas, proteções, poderes agrupados por proveniência com descrição, rituais com DT, custo por círculo (Ordem:4368-4376) e os três efeitos, proficiências e pendências. Seção vazia não existe no texto; nada interno (log, overrides, ids) vaza. É um artefato separado do JSON de exportação — o JSON continua sendo o registro inteiro (com o documento v2) e o único formato que importa de volta.
 
 ---
 
@@ -97,5 +108,9 @@ Regras de forma:
 | `core/ficha/__tests__/periciasDeClasse.test.ts` | pares do Combatente; detecção de conversão anterior à correção |
 | `core/ficha/__tests__/criacao.test.ts` | criação v2 bate com a antiga em 60 combinações |
 | `logic/__tests__/efeitosDeOrigem.test.ts` | poder de origem aparece uma vez nas condições |
+| `core/storage/__tests__/gravacaoDeSessao.test.ts` + `dualWrite.test.ts` | o que vai para o Firestore numa ficha v2 é a projeção do motor; `salvar` não chama `atualizarSessao` direto |
+| `core/rules/__tests__/interludio.test.ts` | dormir/relaxar com o exemplo do livro, condições, PD, Sobrevivente, custo de ritual |
+| `core/rules/__tests__/periciasDeClasse.test.ts` | perícias fixas e habilidades automáticas vêm dos dados; `rulesEngine` sem literais de classe |
+| `core/export/__tests__/dossie.test.ts` | o dossiê nunca lista o que o personagem não tem |
 
 Ao mexer na ficha: rodar `npm test`, `npx tsc --noEmit` e, com nenhum `next dev` de pé, `npm run build`.

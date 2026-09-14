@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Personagem } from '@/core/types';
 import { criarFicha } from '@/testUtils/fixtures';
+import { CUSTO_POR_CIRCULO } from '../rituais';
 import {
   CONDICOES_DE_DESCANSO,
   aplicarInterludio,
@@ -82,6 +83,12 @@ describe('relaxar funciona como dormir, mas em Sanidade, +1 por personagem que r
     expect(p.pe.rodada).toBe(1);
     expect(aplicarInterludio(p, { acao: 'dormir', condicao: 'normal' }).personagem.pv.atual).toBe(2);
     expect(aplicarInterludio(p, { acao: 'relaxar', condicao: 'confortavel', quantosRelaxaram: 2 }).personagem.san.atual).toBe(1 + 2 + 2);
+  });
+});
+
+describe('custo de ritual por círculo (Ordem:4368-4376)', () => {
+  it('1º 1 PE, 2º 3 PE, 3º 6 PE, 4º 10 PE', () => {
+    expect(CUSTO_POR_CIRCULO).toEqual({ 1: 1, 2: 3, 3: 6, 4: 10 });
   });
 });
 

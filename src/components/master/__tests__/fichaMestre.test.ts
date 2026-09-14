@@ -140,6 +140,21 @@ describe('na FichaMestre, cada canal escreve só o que lhe cabe', () => {
   });
 });
 
+describe('exportar: o JSON volta a importar; o dossiê é outro artefato', () => {
+  it('a rota [id] exporta o registro inteiro (com o documento v2), não um Personagem solto', () => {
+    expect(rota).toContain('exportarFichaIndividual({ ...registro, personagem: personagemAtual })');
+    expect(rota).not.toContain('JSON.stringify(personagemAtual');
+  });
+
+  it('o dossiê para IA existe nos dois lugares e nunca passa pelo caminho de importação', () => {
+    for (const texto of [rota, fichasManager]) {
+      expect(texto).toContain('dossieParaIA(');
+      expect(texto).toContain('downloadMarkdown(');
+    }
+    expect(fonte('core/storage/exportImportUtils.ts')).not.toContain('dossie');
+  });
+});
+
 describe('ficha nova nasce no motor novo', () => {
   it('o criador constrói o documento v2 e salva só por criar() — não existe mais fallback v0', () => {
     expect(creator).toContain('criarFicha(dados)');

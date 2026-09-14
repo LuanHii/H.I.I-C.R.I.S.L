@@ -9,13 +9,16 @@ import { useCloudFichas } from '../../../../core/storage';
 import { Personagem } from '../../../../core/types';
 import { normalizePersonagem } from '../../../../core/personagemUtils';
 import { MestreNavbar } from '../../../../components/master/MestreNavbar';
-import { ArrowLeft, Download } from 'lucide-react';
+import { ArrowLeft, Download, Bot, Copy, Check } from 'lucide-react';
+import { downloadJSON, downloadMarkdown, exportarFichaIndividual } from '../../../../core/storage/exportImportUtils';
+import { dossieParaIA, nomeDoArquivoDoDossie } from '../../../../core/export/dossie';
 import { WeaponModsButton } from '../../../../components/master/WeaponModsModal';
 
 export default function FichaDetalhePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = usePromise(params);
   const { fichas, fichasBrutas, salvar, migrar, definirNivelDaFicha, responderEscolha, desfazerEscolha, editarFicha } = useCloudFichas();
   const [convertendo, setConvertendo] = useState(false);
+  const [copiado, setCopiado] = useState(false);
   const registro = fichas.find((ficha) => ficha.id === resolvedParams.id);
   const [personagemView, setPersonagemView] = useState<Personagem | null>(
     registro ? registro.personagem : null,
@@ -40,18 +43,27 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
   );
 
   const handleExportarFicha = () => {
+    if (!registro || !personagemAtual) return;
+    downloadJSON(
+      exportarFichaIndividual({ ...registro, personagem: personagemAtual }),
+      `${personagemAtual.nome.replace(/[^a-z0-9]/gi, '_')}-${registro.id.slice(0, 8)}.json`,
+    );
+  };
+
+  const handleDossie = () => {
     if (!personagemAtual) return;
-    const blob = new Blob([JSON.stringify(personagemAtual, null, 2)], {
-      type: 'application/json',
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${personagemAtual.nome.replace(/\s+/g, '_')}_ficha.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadMarkdown(dossieParaIA(personagemAtual), nomeDoArquivoDoDossie(personagemAtual));
+  };
+
+  const handleCopiarDossie = async () => {
+    if (!personagemAtual) return;
+    try {
+      await navigator.clipboard.writeText(dossieParaIA(personagemAtual));
+      setCopiado(true);
+      window.setTimeout(() => setCopiado(false), 2000);
+    } catch {
+      handleDossie();
+    }
   };
 
   if (!registro) {
@@ -83,8 +95,23 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
             <button
               onClick={handleExportarFicha}
               className="flex items-center gap-1.5 border border-white/10 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
+              title="JSON completo, para importar de volta"
             >
               <Download size={13} /> Exportar
+            </button>
+            <button
+              onClick={handleDossie}
+              className="flex items-center gap-1.5 border border-white/10 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
+              title="Dossiê em Markdown: só o que o personagem tem, para colar numa IA"
+            >
+              <Bot size={13} /> Dossiê IA
+            </button>
+            <button
+              onClick={() => void handleCopiarDossie()}
+              className="flex items-center gap-1.5 border border-white/10 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
+              title="Copiar o dossiê para a área de transferência"
+            >
+              {copiado ? <Check size={13} className="text-ordem-green" /> : <Copy size={13} />} {copiado ? 'Copiado' : 'Copiar'}
             </button>
             <Link
               href="/mestre/fichas"
