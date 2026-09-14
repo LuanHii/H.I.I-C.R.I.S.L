@@ -17,11 +17,11 @@ import { useCloudFichas } from '../core/storage';
 import { criarFicha, type DadosDeCriacao } from '../core/ficha/criacao';
 import { paraPersonagem } from '../core/ficha/paraPersonagem';
 import type { FichaPersistida } from '../core/ficha/tipos';
-import { calcularPericiasIniciais, TODAS_PERICIAS } from '../logic/characterUtils';
+import { calcularPericiasIniciais } from '../logic/characterUtils';
 import { ORIGENS } from '../data/character/origins';
 import { RITUAIS } from '../data/magic/rituals';
 import { TRILHAS } from '../data/character/tracks';
-import { Atributos, ClasseName, Personagem, PericiaName, Ritual, Item, Elemento, Trilha, Poder, ModificacaoArma, Patente } from '../core/types';
+import { Atributos, ClasseName, Personagem, PericiaName, Ritual, Item, Elemento, Trilha, ModificacaoArma, Patente } from '../core/types';
 import { ClassePreferencias, getPatenteConfig } from '../logic/rulesEngine';
 import type { RecreateDraft } from '../logic/recreateFromPersonagem';
 import { TipoStep } from './creation/TipoStep';
@@ -137,7 +137,7 @@ export default function CharacterCreator({
   const [armaParaModificar, setArmaParaModificar] = useState<string | null>(null);
 
   const [trilhaSelecionada, setTrilhaSelecionada] = useState<Trilha | null>(null);
-  const [escolhasTrilha, setEscolhasTrilha] = useState<Record<string, string[]>>({});
+  const [decisoesDeTrilha, setDecisoesDeTrilha] = useState<Record<string, string>>({});
 
   const desbloqueouTrilha = useMemo(() => {
     if (tipoSelecionado === 'Agente') return nivelSelecionado >= 10;
@@ -153,9 +153,13 @@ export default function CharacterCreator({
 
   const habilidadesDesbloqueadas = useMemo(() => {
     if (!trilhaSelecionada) return [];
-    const nivel = tipoSelecionado === 'Sobrevivente' ? nivelSelecionado : nivelSelecionado;
-    return trilhaSelecionada.habilidades.filter(h => h.nex <= nivel);
-  }, [trilhaSelecionada, nivelSelecionado, tipoSelecionado]);
+    return trilhaSelecionada.habilidades.filter(h => h.nex <= nivelSelecionado);
+  }, [trilhaSelecionada, nivelSelecionado]);
+
+  const habilidadesComDecisao = useMemo(
+    () => habilidadesDesbloqueadas.filter((h) => (h.escolha?.opcoes?.length ?? 0) > 0),
+    [habilidadesDesbloqueadas],
+  );
 
   const classeAtual = state.data.classe ?? classeSelecionada ?? (tipoSelecionado === 'Sobrevivente' ? 'Sobrevivente' : 'Combatente');
   const targetSum = tipoSelecionado === 'Sobrevivente' ? 8 : 9;
@@ -209,7 +213,7 @@ export default function CharacterCreator({
     saveToStorage();
   }, [resultado, fichaV2, onCreated, criarFichaNova]);
 
-  const nascerNoMotorNovo = (st: CreationState, trilha?: string): FichaPersistida => {
+  const nascerNoMotorNovo = (st: CreationState, trilha?: string, decisoes?: Record<string, string>): FichaPersistida => {
     const d = st.data;
     if (!d.tipo || !d.nome || !d.classe || !d.origem) throw new Error('Dados incompletos para criar a ficha.');
     const dados: DadosDeCriacao = {
@@ -225,6 +229,7 @@ export default function CharacterCreator({
       usarPd: d.usarPd,
       rituais: (d.rituais ?? []).map((r) => r.nome),
       trilha,
+      ...(trilha && decisoes && Object.keys(decisoes).length > 0 ? { decisoesDeTrilha: decisoes } : {}),
       patente: d.tipo === 'Agente' ? patenteSelecionada : undefined,
     };
     const r = criarFicha(dados);
@@ -249,7 +254,7 @@ export default function CharacterCreator({
     setModificacoesArmas({});
     setArmaParaModificar(null);
     setTrilhaSelecionada(null);
-    setEscolhasTrilha({});
+    setDecisoesDeTrilha({});
     setError(null);
     setSuccess(false);
     setResultado(null);
@@ -379,96 +384,20 @@ export default function CharacterCreator({
           throw new Error("Selecione uma trilha.");
         }
 
-        for (const hab of habilidadesDesbloqueadas) {
-          if (hab.escolha) {
-            const escolhas = escolhasTrilha[hab.nome] || [];
-            if (escolhas.length < hab.escolha.quantidade) {
-              throw new Error(`Complete as escolhas de "${hab.nome}".`);
-            }
+        for (const hab of habilidadesComDecisao) {
+          if (!decisoesDeTrilha[hab.nome]) {
+            throw new Error(`Decida "${hab.nome}".`);
           }
         }
 
-        const personagem = finalizarCriacao(state);
-
-        if (trilhaSelecionada) {
-          personagem.trilha = trilhaSelecionada.nome;
-          personagem.escolhaTrilhaPendente = false;
-          personagem.poderes = personagem.poderes || [];
-
-          for (const hab of habilidadesDesbloqueadas) {
-            const poder: Poder = {
-              nome: hab.nome,
-              descricao: hab.descricao,
-              tipo: 'Trilha',
-              livro: trilhaSelecionada.livro,
-            };
-            personagem.poderes.push(poder);
-
-            if (hab.descricao.toLowerCase().includes('recebe treinamento em')) {
-              const match = hab.descricao.match(/recebe treinamento em ([\w\s()]+?)(?:\s|,|\.|$)/i);
-              if (match) {
-                const periciaNome = match[1].trim() as PericiaName;
-                if (personagem.periciasDetalhadas[periciaNome]) {
-                  if (personagem.periciasDetalhadas[periciaNome].grau === 'Destreinado') {
-                    personagem.periciasDetalhadas[periciaNome].grau = 'Treinado';
-                    personagem.periciasDetalhadas[periciaNome].bonusFixo += 5;
-                  } else {
-                    personagem.periciasDetalhadas[periciaNome].bonusFixo += 2;
-                  }
-                }
-              }
-            }
-
-            if (hab.escolha && escolhasTrilha[hab.nome]) {
-              const escolhas = escolhasTrilha[hab.nome];
-
-              if (hab.escolha.tipo === 'pericia') {
-                for (const p of escolhas) {
-                  const periciaNome = p as PericiaName;
-                  if (personagem.periciasDetalhadas[periciaNome]) {
-                    if (personagem.periciasDetalhadas[periciaNome].grau === 'Destreinado') {
-                      personagem.periciasDetalhadas[periciaNome].grau = 'Treinado';
-                      personagem.periciasDetalhadas[periciaNome].bonusFixo += 5;
-                    }
-                  }
-                }
-              }
-
-              if (hab.escolha.tipo === 'arma') {
-                for (const nomeArma of escolhas) {
-                  const armaIdx = personagem.equipamentos.findIndex(eq => eq.nome === nomeArma);
-                  if (armaIdx !== -1) {
-                    const arma = personagem.equipamentos[armaIdx];
-
-                    if (hab.nome === 'A Favorita') {
-                      const novaCategoria = Math.max(0, arma.categoria - 1) as 0 | 1 | 2 | 3 | 4;
-                      personagem.equipamentos[armaIdx] = {
-                        ...arma,
-                        categoria: novaCategoria,
-                        descricao: `${arma.descricao} [Arma Favorita - Cat. original: ${arma.categoria}]`
-                      };
-                    }
-                  }
-                }
-              }
-
-              if (hab.escolha.tipo === 'elemento') {
-
-                if (hab.descricao.toLowerCase().includes('escolha um elemento')) {
-                  personagem.afinidade = escolhas[0] as any;
-                }
-              }
-            }
-          }
-        }
-
-        aplicarModificacoesArmas(personagem);
+        let personagem = finalizarCriacao(state);
+        personagem = aplicarModificacoesArmas(personagem);
 
         if (tipoSelecionado === 'Agente') {
           personagem.patente = patenteSelecionada;
         }
 
-        const nascida = nascerNoMotorNovo(state, trilhaSelecionada?.nome);
+        const nascida = nascerNoMotorNovo(state, trilhaSelecionada?.nome, decisoesDeTrilha);
         const projetada = paraPersonagem({ ficha: nascida, carregarDe: personagem });
         setFichaV2(nascida);
         setResultado(projetada);
@@ -744,7 +673,7 @@ export default function CharacterCreator({
                     key={trilha.nome}
                     onClick={() => {
                       setTrilhaSelecionada(trilha);
-                      setEscolhasTrilha({});
+                      setDecisoesDeTrilha({});
                     }}
                     className={`p-4 border text-left transition-all duration-200 rounded-lg group ${isSelected
                       ? 'border-ordem-gold bg-ordem-gold/10 shadow-[0_0_15px_rgba(255,215,0,0.2)]'
@@ -779,82 +708,36 @@ export default function CharacterCreator({
                       </div>
                       <p className="text-xs text-ordem-text-secondary mb-2">{hab.descricao}</p>
 
-                      {hab.escolha && (() => {
-
-                        let opcoes: string[] = [];
-                        let tipoLabel: string = hab.escolha.tipo;
-
-                        if (hab.escolha.opcoes) {
-                          opcoes = hab.escolha.opcoes;
-                        } else if (hab.escolha.tipo === 'pericia') {
-                          opcoes = [...TODAS_PERICIAS];
-                          tipoLabel = 'perícia(s)';
-                        } else if (hab.escolha.tipo === 'arma') {
-
-                          opcoes = equipamentosSelecionados
-                            .filter(eq => eq.tipo === 'Arma' || (eq.stats && eq.stats.dano))
-                            .map(eq => eq.nome);
-                          tipoLabel = 'arma(s)';
-                        } else if (hab.escolha.tipo === 'elemento') {
-                          opcoes = ['Sangue', 'Morte', 'Conhecimento', 'Energia'];
-                          tipoLabel = 'elemento(s)';
-                        }
-
-                        return (
-                          <div className="mt-3 pt-3 border-t border-ordem-border">
-                            <div className="text-[10px] text-ordem-gold font-mono uppercase tracking-widest mb-2">
-                              Escolha {hab.escolha.quantidade} {tipoLabel}:
-                            </div>
-                            {opcoes.length === 0 ? (
-                              <div className="text-xs text-ordem-text-muted italic">
-                                {hab.escolha.tipo === 'arma'
-                                  ? 'Nenhuma arma no equipamento. Adicione armas na etapa anterior.'
-                                  : 'Nenhuma opção disponível.'}
-                              </div>
-                            ) : (
-                              <div className="flex flex-wrap gap-2">
-                                {opcoes.map((opcao) => {
-                                  const escolhasAtuais = escolhasTrilha[hab.nome] || [];
-                                  const isOpcaoSelected = escolhasAtuais.includes(opcao);
-                                  const podeSelecionar = escolhasAtuais.length < hab.escolha!.quantidade || isOpcaoSelected;
-
-                                  return (
-                                    <button
-                                      key={opcao}
-                                      onClick={() => {
-                                        setEscolhasTrilha(prev => {
-                                          const atuais = prev[hab.nome] || [];
-                                          if (isOpcaoSelected) {
-                                            return { ...prev, [hab.nome]: atuais.filter(e => e !== opcao) };
-                                          } else if (podeSelecionar) {
-                                            return { ...prev, [hab.nome]: [...atuais, opcao] };
-                                          }
-                                          return prev;
-                                        });
-                                      }}
-                                      disabled={!podeSelecionar && !isOpcaoSelected}
-                                      className={`px-2 py-1 text-xs font-mono border rounded transition-all ${isOpcaoSelected
-                                        ? 'border-ordem-green bg-ordem-green/20 text-white'
-                                        : podeSelecionar
-                                          ? 'border-ordem-border text-ordem-text-muted hover:border-ordem-border-light'
-                                          : 'border-ordem-border text-ordem-text-muted opacity-50 cursor-not-allowed'
-                                        }`}
-                                    >
-                                      {opcao}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            )}
-                            <div className={`mt-2 text-[10px] font-mono ${(escolhasTrilha[hab.nome]?.length || 0) >= hab.escolha.quantidade
-                              ? 'text-ordem-green'
-                              : 'text-ordem-text-muted'
-                              }`}>
-                              {escolhasTrilha[hab.nome]?.length || 0} / {hab.escolha.quantidade} selecionado(s)
-                            </div>
+                      {hab.escolha && (hab.escolha.opcoes?.length ?? 0) > 0 && (
+                        <div className="mt-3 pt-3 border-t border-ordem-border">
+                          <div className="text-[10px] text-ordem-gold font-mono uppercase tracking-widest mb-2">
+                            Decida agora:
                           </div>
-                        );
-                      })()}
+                          <div className="flex flex-wrap gap-2">
+                            {hab.escolha.opcoes!.map((opcao) => {
+                              const marcada = decisoesDeTrilha[hab.nome] === opcao;
+                              return (
+                                <button
+                                  key={opcao}
+                                  type="button"
+                                  onClick={() => setDecisoesDeTrilha((prev) => ({ ...prev, [hab.nome]: opcao }))}
+                                  className={`px-2 py-1 text-xs font-mono border rounded transition-all ${marcada
+                                    ? 'border-ordem-green bg-ordem-green/20 text-white'
+                                    : 'border-ordem-border text-ordem-text-muted hover:border-ordem-border-light'
+                                    }`}
+                                >
+                                  {opcao}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                      {hab.escolha && (hab.escolha.opcoes?.length ?? 0) === 0 && (
+                        <div className="mt-3 pt-3 border-t border-ordem-border text-[10px] font-mono text-ordem-text-muted">
+                          A decisão desta habilidade fica como pendência na ficha, em Construção.
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

@@ -1,5 +1,6 @@
 import type { Atributos, ClasseName, Patente, PericiaName } from '../types';
 import { CLASSES } from '../../data/character/classes';
+import { TRILHAS } from '../../data/character/tracks';
 import { getPatenteConfig } from '../../logic/rulesEngine';
 import { buildFicha } from './buildFicha';
 import { registrarEscolha } from './registrarEscolha';
@@ -18,6 +19,7 @@ export interface DadosDeCriacao {
   usarPd?: boolean;
   rituais?: readonly string[];
   trilha?: string;
+  decisoesDeTrilha?: Readonly<Record<string, string>>;
   patente?: Patente;
 }
 
@@ -98,12 +100,38 @@ export function criarFicha(dados: DadosDeCriacao): ResultadoCriacao {
     const vaga = buildFicha({ ficha }).pendencias.find((p) => p.slot.kind === 'trilha');
     if (vaga) {
       responder(vaga.slot.id, { tipo: 'trilha', trilha: dados.trilha });
+      responderDecisoesDeTrilha(dados.trilha, dados.decisoesDeTrilha ?? {});
     } else {
       problemas.push({
         gravidade: 'erro',
         codigo: 'trilha_sem_marco',
         mensagem: 'Trilha informada, mas este nível ainda não abre a escolha de trilha.',
       });
+    }
+  }
+
+  function responderDecisoesDeTrilha(nomeTrilha: string, decisoes: Readonly<Record<string, string>>) {
+    const trilha = TRILHAS.find((t) => t.nome === nomeTrilha);
+    for (const [habilidade, valor] of Object.entries(decisoes)) {
+      const hab = trilha?.habilidades.find((h) => h.nome === habilidade);
+      if (!hab) {
+        problemas.push({
+          gravidade: 'erro',
+          codigo: 'decisao_de_trilha_sem_habilidade',
+          mensagem: `"${habilidade}" não é uma habilidade da trilha ${nomeTrilha}.`,
+        });
+        continue;
+      }
+      const vaga = buildFicha({ ficha }).pendencias.find((p) => p.slot.kind === 'trilhaHabilidade' && p.slot.nivel === hab.nex);
+      if (!vaga) {
+        problemas.push({
+          gravidade: 'erro',
+          codigo: 'decisao_de_trilha_sem_vaga',
+          mensagem: `"${habilidade}" não abre decisão neste nível.`,
+        });
+        continue;
+      }
+      responder(vaga.slot.id, { tipo: 'habilidadeTrilha', habilidade, escolhaInterna: valor });
     }
   }
 

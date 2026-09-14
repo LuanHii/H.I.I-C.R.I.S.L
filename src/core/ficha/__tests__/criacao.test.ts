@@ -140,6 +140,36 @@ describe('o que a criação registra além da identidade', () => {
     expect(build.pendencias.some((p) => p.slot.kind === 'trilha')).toBe(false);
   });
 
+  it('decisão interna de habilidade de trilha (Carteirada: Diplomacia) nasce respondida', () => {
+    const state = estadoDe('Combatente', 'Policial', ATRIBUTOS.bruto, 10);
+    const r = criarFicha(dadosDe(state, { trilha: 'Agente Secreto', decisoesDeTrilha: { Carteirada: 'Diplomacia' } }));
+
+    expect(criacaoValida(r)).toBe(true);
+    const build = buildFicha({ ficha: r.ficha });
+    expect(build.pendencias.some((p) => p.slot.kind === 'trilhaHabilidade')).toBe(false);
+    expect(build.poderes.find((p) => p.nome === 'Carteirada')?.escolhaInterna).toBe('Diplomacia');
+    expect(paraPersonagem({ ficha: r.ficha, carregarDe: finalizarCriacao(state) }).poderes.find((p) => p.nome === 'Carteirada')?.escolhaInterna).toBe('Diplomacia');
+  });
+
+  it('sem a decisão, a habilidade fica pendente em Construção — nada é inventado', () => {
+    const state = estadoDe('Combatente', 'Policial', ATRIBUTOS.bruto, 10);
+    const r = criarFicha(dadosDe(state, { trilha: 'Agente Secreto' }));
+    expect(criacaoValida(r)).toBe(true);
+    expect(buildFicha({ ficha: r.ficha }).pendencias.some((p) => p.slot.kind === 'trilhaHabilidade')).toBe(true);
+  });
+
+  it('decisão fora das opções da habilidade é erro', () => {
+    const state = estadoDe('Combatente', 'Policial', ATRIBUTOS.bruto, 10);
+    const r = criarFicha(dadosDe(state, { trilha: 'Agente Secreto', decisoesDeTrilha: { Carteirada: 'Luta' } }));
+    expect(r.problemas.map((p) => p.codigo)).toContain('opcao_inexistente');
+  });
+
+  it('decisão para habilidade que a trilha não tem é erro, não silêncio', () => {
+    const state = estadoDe('Combatente', 'Policial', ATRIBUTOS.bruto, 10);
+    const r = criarFicha(dadosDe(state, { trilha: 'Agente Secreto', decisoesDeTrilha: { Mascate: 'Profissão (Armeiro)' } }));
+    expect(r.problemas.map((p) => p.codigo)).toContain('decisao_de_trilha_sem_habilidade');
+  });
+
   it('trilha informada em NEX 5% é erro — o marco ainda não existe', () => {
     const state = estadoDe('Combatente', 'Policial', ATRIBUTOS.bruto, 5);
     const r = criarFicha(dadosDe(state, { trilha: 'Aniquilador' }));

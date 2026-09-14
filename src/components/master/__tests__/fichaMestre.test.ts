@@ -150,6 +150,15 @@ describe('ficha nova nasce no motor novo', () => {
     expect(creator, 'o criador não pode mais subir de nível pelo motor antigo').not.toContain('subirNex');
   });
 
+  it('as decisões de trilha vão para o motor — o criador não aplica efeitos por regex nem mexe em periciasDetalhadas', () => {
+    expect(creator).toContain('decisoesDeTrilha: decisoes');
+    expect(creator).toContain('nascerNoMotorNovo(state, trilhaSelecionada?.nome, decisoesDeTrilha)');
+    expect(creator).not.toContain('recebe treinamento em');
+    expect(creator).not.toMatch(/personagem\.periciasDetalhadas\[/);
+    expect(creator).not.toMatch(/personagem\.poderes\.push/);
+    expect(creator).not.toContain('escolhasTrilha');
+  });
+
   it('recriar uma ficha também nasce v2', () => {
     expect(recriar).toContain('criar(final, ficha');
     expect(recriar).not.toContain('salvar(final');
