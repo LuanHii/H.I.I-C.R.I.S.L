@@ -22,7 +22,7 @@ describe('todo SlotKind tem rótulo nas duas superfícies', () => {
   const painel = fonte('components/master/PendenciasPanel.tsx');
   const mapaPainel = /const TITULO: Record<string, string> = \{([\s\S]*?)\};/.exec(painel)?.[1] ?? '';
   const nucleo = fonte('core/ficha/pendencias.ts');
-  const mapaResumo = /const nomes: Record<string, string> = \{([\s\S]*?)\};/.exec(nucleo)?.[1] ?? '';
+  const mapaResumo = /const nomes: Record<string, \[string, string\]> = \{([\s\S]*?)\};/.exec(nucleo)?.[1] ?? '';
 
   it('a uniao SlotKind foi lida do fonte', () => {
     expect(UNIAO_SLOT_KIND.length, 'uniao SlotKind nao localizada em tipos.ts').toBeGreaterThan(50);
@@ -46,11 +46,14 @@ describe('todo SlotKind tem rótulo nas duas superfícies', () => {
   });
 
   it('o resumo nunca vaza um identificador cru de kind', () => {
-    const nomeados = Array.from(mapaResumo.matchAll(/(\w+):\s*'([^']*)'/g));
+    const nomeados = Array.from(mapaResumo.matchAll(/(\w+):\s*\['([^']*)',\s*'([^']*)'\]/g));
     expect(nomeados.length).toBe(KINDS.length);
-    for (const [, kind, rotulo] of nomeados) {
-      expect(rotulo, `${kind} tem rótulo vazio`).not.toBe('');
-      expect(rotulo, `${kind} vazou o identificador camelCase como rótulo`).not.toMatch(/[a-z][A-Z]/);
+    for (const [, kind, singular, plural] of nomeados) {
+      for (const rotulo of [singular, plural]) {
+        expect(rotulo, `${kind} tem rótulo vazio`).not.toBe('');
+        expect(rotulo, `${kind} vazou o identificador camelCase como rótulo`).not.toMatch(/[a-z][A-Z]/);
+      }
+      expect(plural, `${kind}: o plural não pode ser o singular com "s" colado em "l"`).not.toMatch(/ls$/);
     }
   });
 

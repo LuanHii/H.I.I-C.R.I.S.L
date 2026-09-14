@@ -23,7 +23,16 @@ describe('as pendências que as fichas reais estão devendo', () => {
 
   it('o resumo é legível, não uma contagem crua', () => {
     const resumo = resumoDePendencias(fichaDe({ classe: 'Combatente', nex: 50 }));
-    expect(resumo).toContain('poder de classe');
+    expect(resumo).toContain('poderes de classe');
+    expect(resumo).not.toMatch(/\ds\b/);
+  });
+
+  it('o plural é de gente, não de código: 2 rituais, 2 decisões, 1 ritual', () => {
+    const nex50 = fichaDe({ classe: 'Ocultista', nex: 50 });
+    const resumo = resumoDePendencias(nex50) ?? '';
+    expect(resumo).not.toContain('rituals');
+    expect(resumo).not.toContain('classes');
+    expect(resumo).toMatch(/\d+ (ritual|rituais)\b/);
   });
 
   it('sem pendência, o resumo é nulo — nada a mostrar é nada a mostrar', () => {

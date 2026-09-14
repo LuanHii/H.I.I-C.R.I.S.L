@@ -378,3 +378,11 @@ html[data-overlay='valor'] .scanline,
 html[data-overlay='valor'] .vinheta {
   display: none !important;
 }
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

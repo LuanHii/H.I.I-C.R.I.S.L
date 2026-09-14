@@ -3,7 +3,6 @@ import { RITUAIS } from '../data/magic/rituals';
 import type { Atributos, ClasseName, PericiaName, Personagem, Ritual } from '../core/types';
 import type { ClassePreferencias } from './rulesEngine';
 import { calcularPericiasIniciais, TODAS_PERICIAS } from './characterUtils';
-import { INITIAL_STATE, type CreationState } from './creationWorkflow';
 
 export interface RecreateDraft {
 
@@ -15,6 +14,7 @@ export interface RecreateDraft {
   nexOrEstagio: number;
   origemNome: string;
   preferenciasClasse?: ClassePreferencias;
+  trilha?: string;
   atributosBase: Atributos;
   periciasLivres: PericiaName[];
   rituaisIniciais: Ritual[];
@@ -110,35 +110,10 @@ export function buildRecreateDraftFromPersonagem(p: Personagem): RecreateDraft {
     nexOrEstagio,
     origemNome,
     preferenciasClasse,
+    trilha: p.trilha,
     atributosBase,
     periciasLivres,
     rituaisIniciais: pickRituaisIniciais(p),
     equipamentosIniciais: p.equipamentos ?? [],
   };
-}
-
-export function buildCreationStateFromDraft(draft: RecreateDraft): CreationState {
-
-  const origemObj = ORIGENS.find((o) => o.nome === draft.origemNome);
-  const s: CreationState = {
-    ...INITIAL_STATE,
-    data: {
-      ...INITIAL_STATE.data,
-      tipo: draft.tipo,
-      nome: draft.nome,
-      conceito: draft.conceito,
-      classe: draft.classe,
-      origem: (origemObj ?? ORIGENS[0]) as any,
-      nex: draft.tipo === 'Agente' ? draft.nexOrEstagio : undefined,
-      estagio: draft.tipo === 'Sobrevivente' ? draft.nexOrEstagio : undefined,
-      usarPd: draft.usarPd,
-      preferenciasClasse: draft.preferenciasClasse,
-      atributos: draft.atributosBase,
-      periciasTreinadas: [],
-      periciasSelecionadas: draft.periciasLivres,
-      rituais: draft.rituaisIniciais,
-      equipamentos: draft.equipamentosIniciais,
-    },
-  };
-  return s;
 }

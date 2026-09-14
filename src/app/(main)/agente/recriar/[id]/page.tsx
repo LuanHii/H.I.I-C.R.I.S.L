@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { use as usePromise, useMemo } from 'react';
-import CharacterCreator from '../../../../../components/CharacterCreator';
+import CriadorDeFicha from '../../../../../components/creation/CriadorDeFicha';
+import { rascunhoDeDraft } from '../../../../../logic/rascunhoDeCriacao';
 import { useCloudFichas } from '../../../../../core/storage';
 import { buildRecreateDraftFromPersonagem } from '../../../../../logic/recreateFromPersonagem';
 import type { Personagem } from '../../../../../core/types';
@@ -14,9 +15,9 @@ export default function RecriarFichaPage({ params }: { params: Promise<{ id: str
   const { fichas, criar } = useCloudFichas();
   const registro = fichas.find((f) => f.id === resolved.id);
 
-  const draft = useMemo(() => {
+  const rascunho = useMemo(() => {
     if (!registro) return null;
-    return buildRecreateDraftFromPersonagem(registro.personagem);
+    return rascunhoDeDraft(buildRecreateDraftFromPersonagem(registro.personagem));
   }, [registro]);
 
   const onCreated = (created: Personagem, ficha: FichaPersistida) => {
@@ -42,7 +43,7 @@ export default function RecriarFichaPage({ params }: { params: Promise<{ id: str
     criar(final, ficha, { campanha: registro?.campanha });
   };
 
-  if (!registro || !draft) {
+  if (!registro || !rascunho) {
     return (
       <main className="min-h-screen bg-ordem-black text-white flex items-center justify-center p-6">
         <div className="max-w-lg w-full bg-ordem-ooze/40 border border-ordem-border rounded-xl p-6 text-center">
@@ -56,9 +57,5 @@ export default function RecriarFichaPage({ params }: { params: Promise<{ id: str
     );
   }
 
-  return (
-    <main className="min-h-screen p-8 flex items-center justify-center">
-      <CharacterCreator initialDraft={draft} initialStep={1} onCreated={onCreated} />
-    </main>
-  );
+  return <CriadorDeFicha rascunhoInicial={rascunho} etapaInicial="revisao" onCriada={onCreated} />;
 }

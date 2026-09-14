@@ -68,22 +68,22 @@ export function resumoDePendencias(ficha: FichaPersistida): string | null {
     porTipo.set(p.slot.kind, (porTipo.get(p.slot.kind) ?? 0) + 1);
   }
 
-  const nomes: Record<string, string> = {
-    trilha: 'trilha',
-    trilhaHabilidade: 'decisão de habilidade',
-    poderClasse: 'poder de classe',
-    atributo: 'aumento de atributo',
-    pericia: 'grau de treinamento',
-    afinidade: 'afinidade',
-    versatilidade: 'versatilidade',
-    ritual: 'ritual',
-    poderParanormal: 'poder paranormal',
-    poderDiletante: 'poder de outra classe',
-    origem: 'origem de flashback',
-    escolhaInterna: 'decisão de poder',
+  const nomes: Record<string, [string, string]> = {
+    trilha: ['trilha', 'trilhas'],
+    trilhaHabilidade: ['decisão de habilidade', 'decisões de habilidade'],
+    poderClasse: ['poder de classe', 'poderes de classe'],
+    atributo: ['aumento de atributo', 'aumentos de atributo'],
+    pericia: ['grau de treinamento', 'graus de treinamento'],
+    afinidade: ['afinidade', 'afinidades'],
+    versatilidade: ['versatilidade', 'versatilidades'],
+    ritual: ['ritual', 'rituais'],
+    poderParanormal: ['poder paranormal', 'poderes paranormais'],
+    poderDiletante: ['poder de outra classe', 'poderes de outra classe'],
+    origem: ['origem de flashback', 'origens de flashback'],
+    escolhaInterna: ['decisão de poder', 'decisões de poder'],
   };
 
   return Array.from(porTipo.entries())
-    .map(([kind, n]) => `${n} ${nomes[kind] ?? kind}${n > 1 ? 's' : ''}`)
+    .map(([kind, n]) => `${n} ${(nomes[kind] ?? [kind, kind])[n > 1 ? 1 : 0]}`)
     .join(', ');
 }

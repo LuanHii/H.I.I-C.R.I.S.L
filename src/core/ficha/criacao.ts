@@ -1,6 +1,7 @@
 import type { Atributos, ClasseName, Patente, PericiaName } from '../types';
 import { CLASSES } from '../../data/character/classes';
 import { TRILHAS } from '../../data/character/tracks';
+import { ORIGENS } from '../../data/character/origins';
 import { getPatenteConfig } from '../../logic/rulesEngine';
 import { buildFicha } from './buildFicha';
 import { registrarEscolha } from './registrarEscolha';
@@ -20,6 +21,7 @@ export interface DadosDeCriacao {
   rituais?: readonly string[];
   trilha?: string;
   decisoesDeTrilha?: Readonly<Record<string, string>>;
+  decisaoDeOrigem?: string;
   patente?: Patente;
 }
 
@@ -83,7 +85,7 @@ export function criarFicha(dados: DadosDeCriacao): ResultadoCriacao {
   if (rituais.length > 0) {
     const vagas = buildFicha({ ficha }).pendencias
       .map((p) => p.slot)
-      .filter((s) => s.kind === 'ritual' && s.nivel === 5);
+      .filter((s) => s.kind === 'ritual' && s.nivel === 5 && !s.paiId && !s.poderPai);
     rituais.slice(0, vagas.length).forEach((ritual, i) => {
       responder(vagas[i].id, { tipo: 'ritual', ritual });
     });
@@ -92,6 +94,20 @@ export function criarFicha(dados: DadosDeCriacao): ResultadoCriacao {
         gravidade: 'erro',
         codigo: 'rituais_iniciais_excedidos',
         mensagem: `${dados.classe} começa com ${vagas.length} ritual(is); ${rituais.length} foram informados.`,
+      });
+    }
+  }
+
+  if (dados.decisaoDeOrigem) {
+    const poderDaOrigem = ORIGENS.find((o) => o.nome === dados.origem)?.poder.nome;
+    const vaga = buildFicha({ ficha }).pendencias.find((p) => p.slot.poderPai === poderDaOrigem);
+    if (vaga) {
+      responder(vaga.slot.id, { tipo: 'poder', poder: dados.decisaoDeOrigem });
+    } else {
+      problemas.push({
+        gravidade: 'erro',
+        codigo: 'decisao_de_origem_sem_vaga',
+        mensagem: `A origem ${dados.origem} não abre escolha de poder.`,
       });
     }
   }

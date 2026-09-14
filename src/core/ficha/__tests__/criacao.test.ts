@@ -121,6 +121,19 @@ describe('o que a criação registra além da identidade', () => {
     expect(build.pendencias.filter((p) => p.slot.kind === 'ritual')).toEqual([]);
   });
 
+  it('os 3 rituais iniciais vão para as vagas da classe, não para a vaga aberta por Aprender Ritual (Cultista Arrependido)', () => {
+    const state = estadoDe('Ocultista', 'Cultista Arrependido', ATRIBUTOS.sabio);
+    const iniciais = RITUAIS.filter((r) => r.circulo === 1).slice(0, 3).map((r) => r.nome);
+    const r = criarFicha(dadosDe(state, { rituais: iniciais, decisaoDeOrigem: 'Aprender Ritual' }));
+
+    expect(criacaoValida(r)).toBe(true);
+    const ids = r.ficha.escolhas.filter((e) => e.valor.tipo === 'ritual').map((e) => e.id).sort();
+    expect(ids).toEqual(['ritual@nex:5#0', 'ritual@nex:5#1', 'ritual@nex:5#2']);
+    const pendentes = buildFicha({ ficha: r.ficha }).pendencias.filter((p) => p.slot.kind === 'ritual');
+    expect(pendentes).toHaveLength(1);
+    expect(pendentes[0].slot.poderPai).toBe('Aprender Ritual');
+  });
+
   it('um quarto ritual inicial é erro, não descarte silencioso', () => {
     const state = estadoDe('Ocultista', 'Acadêmico', ATRIBUTOS.sabio);
     const quatro = RITUAIS.filter((r) => r.circulo === 1).slice(0, 4).map((r) => r.nome);

@@ -30,9 +30,9 @@ export function NavBar() {
         Pular para o conteúdo
       </a>
       <nav className="fixed top-0 inset-x-0 z-[60] bg-ordem-black/85 backdrop-blur border-b border-ordem-white/10">
-        <div className="max-w-6xl mx-auto px-4 pr-32 sm:pr-36 py-3 flex items-center gap-4">
-        <div className="font-mono text-ordem-green tracking-[0.5em] text-xs">C.R.I.S</div>
-        <div className="flex flex-wrap gap-2 text-xs flex-1 justify-center">
+        <div className="max-w-6xl mx-auto px-3 pr-28 sm:px-4 sm:pr-36 py-2 sm:py-3 flex items-center gap-2 sm:gap-4">
+        <div className="hidden sm:block font-mono text-ordem-green tracking-[0.5em] text-xs">C.R.I.S</div>
+        <div className="flex flex-nowrap gap-1.5 sm:gap-2 text-[10px] sm:text-xs flex-1 justify-start sm:justify-center overflow-x-auto no-scrollbar">
           {LINKS.map((link) => {
             const active = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
             return (
@@ -40,7 +40,7 @@ export function NavBar() {
                 key={link.href}
                 href={link.href}
                 title={link.discreto ? 'Ordem Paranormal 2 — Playtest Alpha' : undefined}
-                className={`px-3 py-2 border tracking-[0.3em] transition ${active
+                className={`whitespace-nowrap px-2.5 sm:px-3 py-2 border tracking-[0.2em] sm:tracking-[0.3em] transition ${active
                   ? 'border-ordem-green text-ordem-green'
                   : link.discreto
                     ? 'border-ordem-white/10 text-ordem-white/40 hover:border-ordem-white/40 hover:text-ordem-white/70'
@@ -56,7 +56,7 @@ export function NavBar() {
           type="button"
           onClick={() => canGoBack && router.back()}
           disabled={!canGoBack}
-          className={`px-3 py-2 text-[10px] tracking-[0.3em] border ${canGoBack
+          className={`shrink-0 px-2.5 sm:px-3 py-2 text-[10px] tracking-[0.2em] sm:tracking-[0.3em] border ${canGoBack
             ? 'border-ordem-white/40 text-ordem-white hover:border-ordem-green'
             : 'border-ordem-white/10 text-ordem-white/40 cursor-not-allowed'
             }`}

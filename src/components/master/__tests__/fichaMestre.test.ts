@@ -10,7 +10,11 @@ const pastaFicha = readdirSync(join(process.cwd(), 'src', 'components', 'master'
   .map((f) => [f, fonte('components/master/ficha', f)] as const);
 const fichasManager = fonte('components/master/FichasManager.tsx');
 const rota = fonte('app', 'mestre', 'fichas', '[id]', 'page.tsx');
-const creator = fonte('components/CharacterCreator.tsx');
+const criador = fonte('components/creation/CriadorDeFicha.tsx');
+const rascunho = fonte('logic/rascunhoDeCriacao.ts');
+const etapasDaCriacao = readdirSync(join(process.cwd(), 'src', 'components', 'creation'))
+  .filter((f) => f.startsWith('Etapa') && f.endsWith('.tsx'))
+  .map((f) => [f, fonte('components/creation', f)] as const);
 const recriar = fonte('app', '(main)', 'agente', 'recriar', '[id]', 'page.tsx');
 
 describe('ficha v2 abre na FichaMestre; ficha v0 só pode ser convertida', () => {
@@ -156,26 +160,48 @@ describe('exportar: o JSON volta a importar; o resumo é outro artefato', () => 
 });
 
 describe('ficha nova nasce no motor novo', () => {
-  it('o criador constrói o documento v2 e salva só por criar() — não existe mais fallback v0', () => {
-    expect(creator).toContain('criarFicha(dados)');
-    expect(creator).toContain('await criarFichaNova(resultado, fichaV2);');
-    expect(creator, 'o criador voltou a gravar ficha no formato antigo').not.toContain('salvarFicha(');
-    expect(creator, 'erro na construção v2 precisa virar erro na tela, não ficha v0').toContain("if (erros.length > 0) throw new Error(");
-    expect((creator.match(/onCreated\(projetada, nascida\)/g) ?? []).length, 'os dois pontos de conclusão entregam a projeção do motor novo').toBe(2);
-    expect(creator, 'o criador não pode mais subir de nível pelo motor antigo').not.toContain('subirNex');
+  it('o criador constrói o documento v2 e salva só por criar() — não existe fallback v0', () => {
+    expect(criador).toContain('const resultado = criarFicha(dados);');
+    expect(criador, 'erro na construção v2 precisa virar erro na tela, não ficha v0').toContain('if (erros.length > 0) throw new Error(');
+    expect(criador).toContain('paraPersonagem({ ficha: resultado.ficha, carregarDe: esqueleto })');
+    expect(criador).toContain('await criar(personagem, ficha)');
+    expect(criador).toContain('onCriada(personagem, ficha)');
+    expect(criador, 'o criador voltou a gravar ficha no formato antigo').not.toContain('salvar(');
+    expect(criador, 'o criador não pode subir de nível pelo motor antigo').not.toContain('subirNex');
   });
 
-  it('as decisões de trilha vão para o motor — o criador não aplica efeitos por regex nem mexe em periciasDetalhadas', () => {
-    expect(creator).toContain('decisoesDeTrilha: decisoes');
-    expect(creator).toContain('nascerNoMotorNovo(state, trilhaSelecionada?.nome, decisoesDeTrilha)');
-    expect(creator).not.toContain('recebe treinamento em');
-    expect(creator).not.toMatch(/personagem\.periciasDetalhadas\[/);
-    expect(creator).not.toMatch(/personagem\.poderes\.push/);
-    expect(creator).not.toContain('escolhasTrilha');
+  it('as decisões (trilha e origem) vão para o motor pelo rascunho — nenhuma etapa aplica efeito por conta própria', () => {
+    expect(rascunho).toContain('decisoesDeTrilha: r.decisoesDeTrilha');
+    expect(rascunho).toContain('decisaoDeOrigem: r.decisaoDeOrigem');
+    for (const [nome, texto] of etapasDaCriacao) {
+      expect(texto, `${nome} lê a descrição por regex`).not.toContain('recebe treinamento em');
+      expect(texto, `${nome} mexe em periciasDetalhadas`).not.toMatch(/periciasDetalhadas\[/);
+      expect(texto, `${nome} empurra poder à mão`).not.toMatch(/poderes\.push/);
+      expect(texto, `${nome} deveria só editar o rascunho`).not.toMatch(/criarFicha\(|paraPersonagem\(|gerarFicha\(/);
+    }
+  });
+
+  it('as etapas seguem o livro: identidade, atributos, origem, classe, perícias (Ordem:211-225)', () => {
+    expect(rascunho).toMatch(/\['identidade', 'atributos', 'origem', 'classe', 'pericias'\]/);
+  });
+
+  it('a origem mostra o poder que concede e a escolha, quando existe', () => {
+    const origem = fonte('components/creation/EtapaOrigem.tsx');
+    expect(origem).toContain('selecionada.poder.descricao');
+    expect(origem).toContain('escolhaDaOrigem(');
+    expect(origem).toContain('decisaoDeOrigem: o.nome');
+  });
+
+  it('modificações de arma saem no formato do painel do mestre (modificacoes[] + categoriaBase), não em texto', () => {
+    expect(rascunho).toContain('modificacoes: [...nomes]');
+    expect(rascunho).toContain('categoriaBase');
+    expect(rascunho).not.toContain('[Mods:');
   });
 
   it('recriar uma ficha também nasce v2', () => {
     expect(recriar).toContain('criar(final, ficha');
     expect(recriar).not.toContain('salvar(final');
+    expect(recriar).toContain('rascunhoDeDraft(');
+    expect(recriar).toContain('etapaInicial="revisao"');
   });
 });

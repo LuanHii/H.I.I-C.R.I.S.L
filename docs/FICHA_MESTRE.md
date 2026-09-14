@@ -67,6 +67,10 @@ FichaPersistida
 - `identidade.periciasLivres` inclui o lado escolhido de cada par de classe (Combatente: Luta **ou** Pontaria, Fortitude **ou** Reflexos — Ordem:705).
 - Criação (`core/ficha/criacao.ts`): além de trilha e rituais iniciais, aceita `decisoesDeTrilha` (habilidade → opção, ex.: Carteirada → Diplomacia), registrada no slot `trilhaHabilidade` e validada pelo motor. O criador só oferece decisão quando a habilidade tem `escolha.opcoes` catalogadas; o resto vira pendência em Construção.
 
+### Criação (`logic/rascunhoDeCriacao.ts` + `components/creation/`)
+
+A tela `/agente/novo` (e `/agente/recriar/[id]`) é um rascunho puro (`Rascunho`) editado por etapas na ordem do livro (Ordem:211-225): **Identidade** (tipo, nome, conceito, regra de PD) → **Atributos** (orçamento 4/3 pontos, um a zero por +1) → **Origem** (perícias + poder visíveis; origem com escolha, como Cultista Arrependido, pede a decisão ali) → **Classe** (ou estágio do sobrevivente; NEX/patente; pares do Combatente; trilha e decisões de habilidade quando o nível abre) → **Perícias** (agrupadas por atributo, travadas marcadas com a fonte) → **Rituais** (só Ocultista) → **Equipamento** (limites por categoria da patente; modificações sobem a categoria) → **Revisão**. `problemasDaEtapa` valida cada etapa; `previaDe` monta a ficha v2 a cada mudança e alimenta a prévia lateral (PV/PE/SAN, perícias, poderes, pendências). No registro, `dadosDe(rascunho)` → `criarFicha` → `paraPersonagem` com o esqueleto (`esqueletoDe`, que ainda passa por `gerarFicha`) → `criar()`. Modificações de arma saem como `modificacoes[]` + `categoriaBase`, o mesmo formato do painel do mestre. `criarFicha` aceita `decisaoDeOrigem` além de `decisoesDeTrilha`; os três rituais iniciais só ocupam as vagas da classe (nunca a vaga aberta por Aprender Ritual).
+
 ### Interlúdio (`core/rules/interludio.ts`)
 
 Dormir recupera PV e PE iguais ao **limite de PE** (`pe.rodada`), multiplicado pela condição de descanso — precária ½ (arredonda para baixo, Ordem:12175), normal ×1, confortável ×2, luxuosa ×3 (Ordem:3694-3713). Relaxar faz o mesmo em Sanidade, **+1 por agente que relaxou no mesmo interlúdio** (Ordem:3726). Com a regra de PD, dormir só recupera PV e relaxar recupera PD (SOH:3006). Sobrevivente tem limite 1 (SOH:765). Nunca ultrapassa o máximo (Ordem:1321). A tela (`InterludeManager`) só escolhe condição e ação; a conta é da função pura.
@@ -112,5 +116,6 @@ Regras de forma:
 | `core/rules/__tests__/interludio.test.ts` | dormir/relaxar com o exemplo do livro, condições, PD, Sobrevivente, custo de ritual |
 | `core/rules/__tests__/periciasDeClasse.test.ts` | perícias fixas e habilidades automáticas vêm dos dados; `rulesEngine` sem literais de classe |
 | `core/export/__tests__/resumo.test.ts` | o resumo nunca lista o que o personagem não tem |
+| `logic/__tests__/rascunhoDeCriacao.test.ts` | etapas, orçamento, validação por etapa, decisão de origem, esqueleto com modificações, recriar |
 
 Ao mexer na ficha: rodar `npm test`, `npx tsc --noEmit` e, com nenhum `next dev` de pé, `npm run build`.
