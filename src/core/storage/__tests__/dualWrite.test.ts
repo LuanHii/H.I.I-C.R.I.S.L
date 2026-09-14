@@ -67,6 +67,31 @@ describe('nenhum caminho de escrita monta o payload à mão', () => {
   });
 });
 
+describe('salvar grava a projeção do motor, não o personagem que a tela mandou', () => {
+  const fonte = readFileSync(
+    join(process.cwd(), 'src', 'core', 'storage', 'useCloudFichas.ts'),
+    'utf8',
+  ).replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+
+  it('a sessão é absorvida por prepararGravacao — o store não chama atualizarSessao direto', () => {
+    expect(fonte).toMatch(/prepararGravacao\(/);
+    expect(fonte).not.toMatch(/atualizarSessao\(/);
+  });
+
+  it('o documento do jogador (agents/{id}) recebe o personagem preparado, nunca o argumento cru', () => {
+    const inicio = fonte.indexOf('const salvar = useCallback');
+    const fim = fonte.indexOf('const sincronizarFicha');
+    expect(inicio).toBeGreaterThan(-1);
+    const corpo = fonte.slice(inicio, fim);
+    const chamadas = corpo.match(/saveAgentToCloud\(\s*fichaId,\s*([^)]*)\)/g) ?? [];
+    expect(chamadas.length).toBeGreaterThan(0);
+    for (const chamada of chamadas) {
+      expect(chamada, chamada).toMatch(/saveAgentToCloud\(\s*fichaId,\s*gravacao\.personagem\s*\)/);
+    }
+    expect(corpo).not.toMatch(/^\s*personagem,\s*$/m);
+  });
+});
+
 describe('a fonte de leitura é decisão, não estado gravado', () => {
   it('nem `fonte` nem `motivoDaFonte` chegam ao payload da nuvem', () => {
     const saida = paraNuvem(registro({

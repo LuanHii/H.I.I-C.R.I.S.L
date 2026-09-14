@@ -13,7 +13,7 @@ import {
 import { saveAgentToCloud } from '../firebase/firestore';
 import type { FichaPersistida } from '../ficha/tipos';
 import { resolverPersonagem, type FonteDaFicha } from '../ficha/leitura';
-import { atualizarSessao } from '../ficha/sessao';
+import { prepararGravacao } from './gravacaoDeSessao';
 import { registrarEscolha, limparEscolha } from '../ficha/registrarEscolha';
 import { definirNivel } from '../ficha/buildFicha';
 import { paraPersonagem } from '../ficha/paraPersonagem';
@@ -186,21 +186,9 @@ export function useCloudFichas() {
         const fichaExistente = prev.find((f) => f.id === fichaId);
         const campanhaFinal = campanha !== undefined ? campanha : fichaExistente?.campanha;
 
-        const v2 = fichaExistente?.ficha
-          ? (() => {
-              try {
-                return atualizarSessao(fichaExistente.ficha!, personagem);
-              } catch {
-                return null;
-              }
-            })()
-          : null;
-
+        const gravacao = prepararGravacao(fichaExistente, personagem, now);
         const camposV2 = fichaExistente?.ficha
-          ? {
-              ficha: v2?.ficha ?? fichaExistente.ficha,
-              fichaMigradaDe: v2 && !v2.estrutural ? now : fichaExistente.fichaMigradaDe,
-            }
+          ? { ficha: gravacao.ficha, fichaMigradaDe: gravacao.fichaMigradaDe }
           : {};
 
         if (isAuthenticated && userId) {
@@ -208,7 +196,7 @@ export function useCloudFichas() {
             ...fichaExistente,
             ...camposV2,
             id: fichaId,
-            personagem,
+            personagem: gravacao.personagem,
             atualizadoEm: now,
             campanha: campanhaFinal,
             sincronizadaNaNuvem: true,
@@ -217,7 +205,7 @@ export function useCloudFichas() {
           saveFichaToCloud(userId, paraNuvem(registro)).catch((err) =>
             console.error('Erro ao salvar ficha na nuvem:', err)
           );
-          saveAgentToCloud(fichaId, personagem).catch((err) =>
+          saveAgentToCloud(fichaId, gravacao.personagem).catch((err) =>
             console.error('Erro saveAgent:', err)
           );
           const existentes = prev.filter((f) => f.id !== fichaId);
@@ -227,7 +215,7 @@ export function useCloudFichas() {
             ...fichaExistente,
             ...camposV2,
             id: fichaId,
-            personagem,
+            personagem: gravacao.personagem,
             atualizadoEm: now,
             campanha: campanhaFinal,
             sincronizadaNaNuvem: fichaExistente?.sincronizadaNaNuvem,
@@ -237,7 +225,7 @@ export function useCloudFichas() {
           gravarFichasLocal(atualizadas);
 
           if (fichaExistente?.sincronizadaNaNuvem) {
-            saveAgentToCloud(fichaId, personagem).catch(console.error);
+            saveAgentToCloud(fichaId, gravacao.personagem).catch(console.error);
           }
 
           return atualizadas;
