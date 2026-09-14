@@ -102,7 +102,7 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
             <button
               onClick={handleResumo}
               className="flex items-center gap-1.5 border border-white/10 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
-              title="Resumo em Markdown: só o que o personagem tem, pronto para colar numa IA"
+              title="Resumo em Markdown: só o que o personagem tem"
             >
               <FileText size={13} /> Resumo
             </button>
