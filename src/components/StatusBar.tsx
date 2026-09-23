@@ -95,12 +95,12 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
 
   return (
     <motion.div
-      className="w-full mb-4 select-none"
+      className="w-full select-none"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="mb-2 flex items-baseline gap-2">
+      <div className="mb-1.5 flex items-baseline gap-2">
         <span className={cn(
           'font-carimbo text-xs font-bold uppercase tracking-[0.18em] sm:text-sm',
           config.accent,
@@ -163,7 +163,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
           )}
         </div>
       </div>
-      <div className="flex h-6 gap-[3px]" aria-hidden>
+      <div className="flex h-3 gap-[3px] sm:h-6" aria-hidden>
         {Array.from({ length: 20 }, (_, indice) => {
           const aceso = indice < Math.round((percentage / 100) * 20);
           return (
@@ -180,7 +180,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
       </div>
 
       {!readOnly && (
-        <div className="mt-2 grid grid-cols-4 gap-1.5">
+        <div className="mt-2 grid grid-cols-4 gap-1.5 sm:gap-1.5">
           {[-5, -1, 1, 5].map((amount) => (
             <motion.button
               key={amount}

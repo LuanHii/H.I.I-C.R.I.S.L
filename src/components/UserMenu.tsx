@@ -68,10 +68,11 @@ export function UserMenu({ migrationStatus, hasPendingLocalData, onMigrateClick 
       <button
         onClick={signInWithGoogle}
         disabled={loading}
-        className="flex items-center gap-2 px-3 py-2 text-xs tracking-[0.2em] border border-ordem-white/30 text-ordem-white/80 hover:border-ordem-green hover:text-ordem-green transition-colors"
+        aria-label="Entrar com o Google"
+        className="flex h-10 items-center gap-2 border border-ordem-white/30 px-3 text-xs tracking-[0.2em] text-ordem-white/80 transition-colors hover:border-ordem-green hover:text-ordem-green"
       >
         <GoogleIcon />
-        <span>ENTRAR</span>
+        <span className="hidden sm:inline">ENTRAR</span>
       </button>
     );
   }

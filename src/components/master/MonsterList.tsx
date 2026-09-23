@@ -35,6 +35,7 @@ export const MonsterList: React.FC = () => {
   });
   const { monstros, salvar, remover, isCloudMode, loading } = useCloudMonsters();
   const [showEditor, setShowEditor] = useState(false);
+  const [filtrosAbertos, setFiltrosAbertos] = useState(false);
   const [editingMonster, setEditingMonster] = useState<{ ameaca: Ameaca, id?: string } | null>(null);
 
   const allMonsters = useMemo(() => {
@@ -94,7 +95,7 @@ export const MonsterList: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full relative">
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 p-1">
+      <div className="mb-4 grid grid-cols-1 gap-2 p-1 md:mb-6 md:grid-cols-5 md:gap-4">
         <input
           type="text"
           placeholder="Buscar ameaça..."
@@ -103,13 +104,25 @@ export const MonsterList: React.FC = () => {
           onKeyDown={(e) => {
             if (e.key === 'Escape') setSearch('');
           }}
-          className="bg-ordem-black/40 border border-ordem-border-light text-white px-3 py-2 rounded focus:border-ordem-red focus:outline-none font-mono text-sm"
+          className="h-11 rounded border border-ordem-border-light bg-ordem-black/40 px-3 font-mono text-sm text-white focus:border-ordem-red focus:outline-none"
         />
+
+        <button
+          type="button"
+          onClick={() => setFiltrosAbertos((v) => !v)}
+          aria-expanded={filtrosAbertos}
+          className="flex h-11 items-center justify-between rounded border border-ordem-border px-3 font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted md:hidden"
+        >
+          Filtros e ordem
+          <span className="text-ordem-text-secondary">{loading ? '...' : `${filteredMonsters.length} resultado(s)`}</span>
+        </button>
+
+        <div className={`${filtrosAbertos ? 'grid' : 'hidden'} grid-cols-1 gap-2 md:contents`}>
 
         <select
           value={selectedElement}
           onChange={(e) => setSelectedElement(e.target.value)}
-          className="bg-ordem-black/40 border border-ordem-border-light text-white px-3 py-2 rounded focus:border-ordem-red focus:outline-none font-mono text-sm"
+          className="h-11 rounded border border-ordem-border-light bg-ordem-black/40 px-3 font-mono text-sm text-white focus:border-ordem-red focus:outline-none"
         >
           {elements.map((el) => (
             <option key={el} value={el}>{el}</option>
@@ -148,16 +161,17 @@ export const MonsterList: React.FC = () => {
         <select
           value={order}
           onChange={(e) => setOrder(e.target.value as any)}
-          className="bg-ordem-black/40 border border-ordem-border-light text-white px-3 py-2 rounded focus:border-ordem-red focus:outline-none font-mono text-sm"
+          className="h-11 rounded border border-ordem-border-light bg-ordem-black/40 px-3 font-mono text-sm text-white focus:border-ordem-red focus:outline-none"
         >
           <option value="nome">Nome (A→Z)</option>
           <option value="vd-desc">VD (↓)</option>
           <option value="vd-asc">VD (↑)</option>
         </select>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
-        <div className="text-[10px] text-ordem-text-muted font-mono uppercase tracking-widest flex items-center gap-2">
+        <div className="hidden items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted md:flex">
           {loading ? 'Carregando...' : `${filteredMonsters.length} resultado(s)`}
           {isCloudMode ? (
             <span className="flex items-center gap-1 text-ordem-green" title="Monstros customizados sincronizados na nuvem">
@@ -171,7 +185,7 @@ export const MonsterList: React.FC = () => {
         </div>
         <button
           onClick={() => setCustomOnly((prev) => !prev)}
-          className={`px-3 py-2 rounded border font-mono text-[10px] uppercase tracking-widest ${
+          className={`flex h-11 items-center rounded border px-3 font-mono text-[10px] uppercase tracking-widest ${
             customOnly
               ? 'border-blue-500 text-blue-300 bg-blue-900/20'
               : 'border-ordem-border text-ordem-text-muted bg-ordem-black/40'
@@ -188,14 +202,14 @@ export const MonsterList: React.FC = () => {
               setOrder('nome');
               setCustomOnly(false);
             }}
-            className="px-3 py-2 rounded border border-ordem-border text-ordem-text-muted font-mono text-[10px] uppercase tracking-widest"
+            className="flex h-11 items-center rounded border border-ordem-border px-3 font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted"
           >
             Limpar filtros
           </button>
         )}
         <button
           onClick={handleCreate}
-          className="ml-auto bg-ordem-red/20 border border-ordem-red text-white px-3 py-2 rounded hover:bg-ordem-red/40 transition-colors font-mono text-sm uppercase"
+          className="ml-auto flex h-11 items-center rounded border border-ordem-red bg-ordem-red/20 px-3 font-mono text-sm uppercase text-white transition-colors hover:bg-ordem-red/40"
         >
           + Criar Ameaça
         </button>

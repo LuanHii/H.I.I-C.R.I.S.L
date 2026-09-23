@@ -6,8 +6,7 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-type MestreTab = 'ameacas' | 'inventario' | 'fichas' | 'guia' | 'combate' | 'npcs';
+import type { AbaMestre } from './AbasDoMestre';
 
 function MestreLink({
   href,
@@ -22,10 +21,8 @@ function MestreLink({
     <Link
       href={href}
       className={cn(
-        'relative px-3 sm:px-4 py-2.5 font-mono text-xs sm:text-sm transition-colors whitespace-nowrap touch-target-sm',
-        active
-          ? 'text-white'
-          : 'text-ordem-text-secondary hover:text-ordem-white-muted active:text-white',
+        'relative px-4 py-2.5 font-mono text-sm transition-colors whitespace-nowrap',
+        active ? 'text-white' : 'text-ordem-text-secondary hover:text-ordem-white-muted',
       )}
     >
       {label}
@@ -50,16 +47,12 @@ function MestreButton({
   onClick: () => void;
 }) {
   return (
-    <motion.button
+    <button
       type="button"
       onClick={onClick}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
       className={cn(
-        'relative px-3 sm:px-4 py-2.5 font-mono text-xs sm:text-sm transition-colors whitespace-nowrap touch-target-sm',
-        active
-          ? 'text-white'
-          : 'text-ordem-text-secondary hover:text-ordem-white-muted active:text-white',
+        'relative px-4 py-2.5 font-mono text-sm transition-colors whitespace-nowrap',
+        active ? 'text-white' : 'text-ordem-text-secondary hover:text-ordem-white-muted',
       )}
     >
       {label}
@@ -70,7 +63,7 @@ function MestreButton({
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
         />
       )}
-    </motion.button>
+    </button>
   );
 }
 
@@ -78,86 +71,82 @@ export function MestreNavbar({
   title = 'MESTRE',
   subtitle = 'PAINEL DE CONTROLE',
   rightSlot,
+  slotMobile,
   activeTab,
   onTabSelect,
+  voltarPara,
 }: {
   title?: string;
   subtitle?: string;
   rightSlot?: React.ReactNode;
-  activeTab?: MestreTab;
-  onTabSelect?: (tab: MestreTab) => void;
+  slotMobile?: React.ReactNode;
+  activeTab?: AbaMestre;
+  onTabSelect?: (tab: AbaMestre) => void;
+  voltarPara?: ComponentProps<typeof Link>['href'];
 }) {
   const pathname = usePathname();
 
   const inFichas = pathname?.startsWith('/mestre/fichas');
   const inMestreRoot = pathname === '/mestre';
-  const tab: MestreTab = activeTab ?? (inFichas ? 'fichas' : 'ameacas');
+  const tab: AbaMestre = activeTab ?? (inFichas ? 'fichas' : 'ameacas');
 
   return (
-    <header className="sticky top-0 z-50 min-h-[56px] sm:h-16 border-b border-ordem-border bg-ordem-black/95 backdrop-blur shrink-0 safe-top">
-      <div className="h-full flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-2 sm:py-0 gap-2 sm:gap-0">
-        <div className="flex items-center justify-between sm:justify-start gap-4 sm:gap-8">
-          <motion.div
-            className="flex flex-col shrink-0"
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <h1 className="text-lg sm:text-xl font-serif text-ordem-red tracking-wider leading-none">{title}</h1>
-            <span className="text-[9px] sm:text-[10px] text-ordem-text-secondary font-mono tracking-[0.15em] sm:tracking-[0.2em]">{subtitle}</span>
-          </motion.div>
+    <header className="sticky top-0 z-50 shrink-0 border-b border-ordem-border bg-ordem-black/95 backdrop-blur">
+      <div className="flex h-[52px] items-center gap-2 px-3 pr-[62px] lg:hidden">
+        <Link
+          href={voltarPara ?? '/'}
+          aria-label={voltarPara ? 'Voltar' : 'Voltar ao início'}
+          className="grid h-10 w-10 shrink-0 place-items-center border border-white/10 text-ordem-text-secondary transition active:border-white/30 active:text-white"
+        >
+          <Home size={17} />
+        </Link>
+        <div className="min-w-0 flex-1">
+          <div className="truncate font-serif text-base leading-tight tracking-wide text-ordem-red">{title}</div>
+          <div className="truncate font-mono text-[9px] leading-tight tracking-[0.15em] text-ordem-text-secondary">{subtitle}</div>
+        </div>
+        {(slotMobile ?? rightSlot) && <div className="flex shrink-0 items-center gap-1.5">{slotMobile ?? rightSlot}</div>}
+      </div>
 
-          <div className="flex sm:hidden items-center gap-2 pr-[108px]">
-            <Link
-              href="/"
-              className="p-2 text-ordem-text-secondary hover:text-white active:text-ordem-red transition-colors touch-target-sm"
-              aria-label="Voltar ao início"
-            >
-              <Home size={20} />
-            </Link>
+      <div className="hidden h-16 items-center justify-between gap-6 px-6 lg:flex">
+        <div className="flex items-center gap-8">
+          <div className="flex shrink-0 flex-col">
+            <h1 className="font-serif text-xl leading-none tracking-wider text-ordem-red">{title}</h1>
+            <span className="font-mono text-[10px] tracking-[0.2em] text-ordem-text-secondary">{subtitle}</span>
           </div>
+
+          <nav className="flex items-center gap-1">
+            {onTabSelect && inMestreRoot ? (
+              <>
+                <MestreButton label="AMEAÇAS" active={tab === 'ameacas'} onClick={() => onTabSelect('ameacas')} />
+                <MestreButton label="COMBATE" active={tab === 'combate'} onClick={() => onTabSelect('combate')} />
+                <MestreButton label="INVENTÁRIO" active={tab === 'inventario'} onClick={() => onTabSelect('inventario')} />
+                <MestreButton label="GUIA" active={tab === 'guia'} onClick={() => onTabSelect('guia')} />
+                <MestreButton label="NPCs" active={tab === 'npcs'} onClick={() => onTabSelect('npcs')} />
+                <MestreLink href="/mestre/fichas" label="FICHAS" active={false} />
+              </>
+            ) : (
+              <>
+                <MestreLink href="/mestre?tab=ameacas" label="AMEAÇAS" active={inMestreRoot && tab === 'ameacas'} />
+                <MestreLink href="/mestre?tab=combate" label="COMBATE" active={inMestreRoot && tab === 'combate'} />
+                <MestreLink href="/mestre?tab=inventario" label="INVENTÁRIO" active={inMestreRoot && tab === 'inventario'} />
+                <MestreLink href="/mestre?tab=guia" label="GUIA" active={inMestreRoot && tab === 'guia'} />
+                <MestreLink href="/mestre?tab=npcs" label="NPCs" active={inMestreRoot && tab === 'npcs'} />
+                <MestreLink href="/mestre/fichas" label="FICHAS" active={inFichas} />
+              </>
+            )}
+          </nav>
         </div>
 
-        {rightSlot && (
-          <div className="flex flex-wrap items-center gap-2 sm:hidden">
-            {rightSlot}
-          </div>
-        )}
-
-        <nav className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto touch-scroll custom-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 no-select">
-          {onTabSelect && inMestreRoot ? (
-            <>
-              <MestreButton label="AMEAÇAS" active={tab === 'ameacas'} onClick={() => onTabSelect('ameacas')} />
-              <MestreButton label="COMBATE" active={tab === 'combate'} onClick={() => onTabSelect('combate')} />
-              <MestreButton label="INVENTÁRIO" active={tab === 'inventario'} onClick={() => onTabSelect('inventario')} />
-              <MestreButton label="GUIA" active={tab === 'guia'} onClick={() => onTabSelect('guia')} />
-              <MestreButton label="NPCs" active={tab === 'npcs'} onClick={() => onTabSelect('npcs')} />
-              <MestreLink href="/mestre/fichas" label="FICHAS" active={false} />
-            </>
-          ) : (
-            <>
-              <MestreLink href="/mestre?tab=ameacas" label="AMEAÇAS" active={inMestreRoot && tab === 'ameacas'} />
-              <MestreLink href="/mestre?tab=combate" label="COMBATE" active={inMestreRoot && tab === 'combate'} />
-              <MestreLink href="/mestre?tab=inventario" label="INVENTÁRIO" active={inMestreRoot && tab === 'inventario'} />
-              <MestreLink href="/mestre?tab=guia" label="GUIA" active={inMestreRoot && tab === 'guia'} />
-              <MestreLink href="/mestre?tab=npcs" label="NPCs" active={inMestreRoot && tab === 'npcs'} />
-              <MestreLink href="/mestre/fichas" label="FICHAS" active={inFichas} />
-            </>
-          )}
-        </nav>
-
-        <div className="hidden sm:flex items-center gap-3 pr-[124px]">
+        <div className="flex items-center gap-3 pr-[124px]">
           {rightSlot}
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Link
-              href="/"
-              title="Voltar ao início do site"
-              className="text-xs font-mono text-ordem-text-secondary hover:text-white active:text-ordem-red transition-colors flex items-center gap-1.5 touch-target-sm"
-            >
-              <Home size={14} />
-              INÍCIO
-            </Link>
-          </motion.div>
+          <Link
+            href="/"
+            title="Voltar ao início do site"
+            className="flex items-center gap-1.5 font-mono text-xs text-ordem-text-secondary transition-colors hover:text-white"
+          >
+            <Home size={14} />
+            INÍCIO
+          </Link>
         </div>
       </div>
     </header>

@@ -8,6 +8,7 @@ import { FichasManager } from './master/FichasManager';
 import { GuiaMestre } from './master/GuiaMestre';
 import { CombatManager } from './master/CombatManager';
 import { MestreNavbar } from './master/MestreNavbar';
+import { AbasDoMestre } from './master/AbasDoMestre';
 import { NpcList } from './master/NpcList';
 import { useCloudFichas } from '../core/storage';
 
@@ -97,7 +98,7 @@ export const MasterDashboard: React.FC = () => {
           }}
         />
 
-        <div className="absolute inset-0 overflow-y-auto custom-scrollbar">
+        <div className="absolute inset-0 overflow-y-auto custom-scrollbar pb-[calc(60px+env(safe-area-inset-bottom))] lg:pb-0">
           <AnimatePresence mode="wait">
             {activeTab === 'fichas' && (
               <motion.div
@@ -189,6 +190,8 @@ export const MasterDashboard: React.FC = () => {
           </AnimatePresence>
         </div>
       </main>
+
+      <AbasDoMestre activeTab={activeTab} onTabSelect={setTab} />
     </div>
   );
 };

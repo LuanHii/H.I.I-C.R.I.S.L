@@ -9,7 +9,7 @@ import { useCloudFichas } from '../../../../core/storage';
 import { Personagem } from '../../../../core/types';
 import { normalizePersonagem } from '../../../../core/personagemUtils';
 import { MestreNavbar } from '../../../../components/master/MestreNavbar';
-import { ArrowLeft, Download, FileText, Copy, Check } from 'lucide-react';
+import { ArrowLeft, Download, FileText, Copy, Check, MoreHorizontal } from 'lucide-react';
 import { downloadJSON, downloadMarkdown, exportarFichaIndividual } from '../../../../core/storage/exportImportUtils';
 import { resumoDoPersonagem, nomeDoArquivoDoResumo } from '../../../../core/export/resumo';
 import { WeaponModsButton } from '../../../../components/master/WeaponModsModal';
@@ -19,6 +19,7 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
   const { fichas, fichasBrutas, salvar, migrar, definirNivelDaFicha, responderEscolha, desfazerEscolha, editarFicha } = useCloudFichas();
   const [convertendo, setConvertendo] = useState(false);
   const [copiado, setCopiado] = useState(false);
+  const [menuAberto, setMenuAberto] = useState(false);
   const registro = fichas.find((ficha) => ficha.id === resolvedParams.id);
   const [personagemView, setPersonagemView] = useState<Personagem | null>(
     registro ? registro.personagem : null,
@@ -84,8 +85,57 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
   return (
     <div className="min-h-screen bg-ordem-black text-white flex flex-col">
       <MestreNavbar
-        title="MESTRE"
+        title={personagemAtual.nome}
         subtitle="ARQUIVO // EDIÇÃO"
+        voltarPara="/mestre/fichas"
+        slotMobile={
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setMenuAberto((v) => !v)}
+              aria-label="Ações da ficha"
+              aria-expanded={menuAberto}
+              className="grid h-10 w-10 place-items-center border border-white/10 text-ordem-text-secondary transition active:border-white/30 active:text-white"
+            >
+              <MoreHorizontal size={18} />
+            </button>
+            {menuAberto && (
+              <>
+                <button type="button" aria-hidden tabIndex={-1} onClick={() => setMenuAberto(false)} className="fixed inset-0 z-40 cursor-default" />
+                <div className="absolute right-0 top-11 z-50 w-56 border border-white/10 bg-ordem-black/98 p-1 shadow-[0_30px_60px_-20px_rgba(0,0,0,1)] backdrop-blur">
+                  <button
+                    type="button"
+                    onClick={() => { setMenuAberto(false); handleExportarFicha(); }}
+                    className="flex h-11 w-full items-center gap-2 px-3 font-carimbo text-[11px] uppercase tracking-[0.14em] text-ordem-text-secondary transition active:bg-white/5 active:text-white"
+                  >
+                    <Download size={15} /> Exportar ficha
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setMenuAberto(false); handleResumo(); }}
+                    className="flex h-11 w-full items-center gap-2 px-3 font-carimbo text-[11px] uppercase tracking-[0.14em] text-ordem-text-secondary transition active:bg-white/5 active:text-white"
+                  >
+                    <FileText size={15} /> Baixar resumo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setMenuAberto(false); void handleCopiarResumo(); }}
+                    className="flex h-11 w-full items-center gap-2 px-3 font-carimbo text-[11px] uppercase tracking-[0.14em] text-ordem-text-secondary transition active:bg-white/5 active:text-white"
+                  >
+                    {copiado ? <Check size={15} className="text-ordem-green" /> : <Copy size={15} />} Copiar resumo
+                  </button>
+                  <div className="border-t border-white/[0.06]" onClick={() => setMenuAberto(false)}>
+                    <WeaponModsButton
+                      personagem={personagemAtual}
+                      onUpdate={atualizarPersonagem}
+                      className="h-11 w-full justify-start border-0 px-3 text-[11px] tracking-[0.14em] text-ordem-text-secondary hover:bg-transparent"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        }
         rightSlot={
           <div className="flex gap-2">
             <WeaponModsButton
@@ -123,9 +173,9 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
         }
       />
 
-      <main className="flex-1 bg-ordem-black-deep p-4">
-        <div className="max-w-7xl mx-auto h-[calc(100vh-96px)] flex flex-col">
-          <nav className="flex items-center gap-2 mb-3 text-xs font-mono text-ordem-text-muted shrink-0" aria-label="Navegação">
+      <main className="flex-1 bg-ordem-black-deep p-0 sm:p-4">
+        <div className="mx-auto flex min-h-[calc(100dvh-52px)] max-w-7xl flex-col sm:h-[calc(100vh-96px)] sm:min-h-0">
+          <nav className="mb-3 hidden shrink-0 items-center gap-2 font-mono text-xs text-ordem-text-muted sm:flex" aria-label="Navegação">
             <Link href="/mestre" className="hover:text-ordem-white transition-colors">Mestre</Link>
             <span>/</span>
             <Link href="/mestre/fichas" className="hover:text-ordem-white transition-colors">Fichas</Link>
@@ -133,7 +183,7 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
             <span className="text-ordem-white truncate max-w-[200px]">{personagemAtual.nome}</span>
           </nav>
 
-          <div className="flex-1 overflow-y-auto border border-white/10 bg-ordem-ooze/50">
+          <div className="flex flex-1 flex-col border-white/10 bg-ordem-ooze/50 sm:overflow-y-auto sm:border">
             {registro?.fonte === 'v2' && registro.ficha ? (
               <FichaMestre
                 ficha={registro.ficha}

@@ -54,12 +54,12 @@ export const NpcList: React.FC = () => {
                             placeholder="Buscar NPC..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full bg-ordem-black/40 border border-ordem-border-light pl-9 pr-3 py-2 rounded text-sm text-white focus:border-ordem-red outline-none shadow-inner"
+                            className="h-11 w-full rounded border border-ordem-border-light bg-ordem-black/40 pl-9 pr-3 text-sm text-white shadow-inner outline-none focus:border-ordem-red"
                         />
                     </div>
                     <button
                         onClick={handleCreate}
-                        className="bg-ordem-red hover:bg-red-700 text-white px-4 py-2 rounded transition-colors font-mono text-sm uppercase shadow-lg shadow-red-900/20 whitespace-nowrap"
+                        className="flex h-11 shrink-0 items-center whitespace-nowrap rounded bg-ordem-red px-4 font-mono text-sm uppercase text-white shadow-lg shadow-red-900/20 transition-colors hover:bg-red-700"
                     >
                         + Novo NPC
                     </button>

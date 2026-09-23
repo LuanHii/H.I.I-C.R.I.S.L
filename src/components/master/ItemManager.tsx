@@ -60,12 +60,12 @@ export const ItemManager: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col p-6 max-w-7xl mx-auto w-full">
-      <div className="flex justify-between items-center mb-6 border-b border-ordem-border pb-4">
-        <div className="flex gap-4">
+    <div className="mx-auto flex h-full w-full max-w-7xl flex-col p-3 sm:p-6">
+      <div className="mb-4 flex items-center justify-between gap-2 border-b border-ordem-border pb-3 sm:mb-6 sm:pb-4">
+        <div className="flex gap-1 sm:gap-4">
           <button
             onClick={() => setActiveTab('items')}
-            className={`px-4 py-2 font-mono text-sm transition-colors ${activeTab === 'items'
+            className={`h-11 whitespace-nowrap px-3 font-mono text-sm transition-colors sm:px-4 ${activeTab === 'items'
                 ? 'text-ordem-red border-b-2 border-ordem-red'
                 : 'text-ordem-text-muted hover:text-ordem-white-muted'
               }`}
@@ -74,7 +74,7 @@ export const ItemManager: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTab('weapons')}
-            className={`px-4 py-2 font-mono text-sm transition-colors ${activeTab === 'weapons'
+            className={`h-11 whitespace-nowrap px-3 font-mono text-sm transition-colors sm:px-4 ${activeTab === 'weapons'
                 ? 'text-ordem-red border-b-2 border-ordem-red'
                 : 'text-ordem-text-muted hover:text-ordem-white-muted'
               }`}
@@ -84,15 +84,15 @@ export const ItemManager: React.FC = () => {
         </div>
         <button
           onClick={() => setIsCreating(true)}
-          className="px-4 py-2 bg-ordem-red/20 text-ordem-red border border-ordem-red/50 hover:bg-ordem-red/30 transition-colors font-mono text-sm uppercase tracking-wider"
+          className="flex h-11 shrink-0 items-center whitespace-nowrap border border-ordem-red/50 bg-ordem-red/20 px-3 font-mono text-sm uppercase tracking-wider text-ordem-red transition-colors hover:bg-ordem-red/30 sm:px-4"
         >
-          + Criar {activeTab === 'items' ? 'Item' : 'Arma'}
+          + <span className="ml-1 hidden sm:inline">Criar </span>{activeTab === 'items' ? 'Item' : 'Arma'}
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         {activeTab === 'items' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 lg:gap-4">
             {allItems.map((item, idx) => (
               <div key={idx} className="bg-ordem-black/40 border border-ordem-border p-4 rounded hover:border-ordem-border-light transition-colors group relative">
                 <div className="flex justify-between items-start mb-2">

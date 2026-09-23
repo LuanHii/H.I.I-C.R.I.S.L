@@ -61,7 +61,7 @@ interface Aba<T extends string> {
 
 function Abas<T extends string>({ abas, ativa, onAtiva }: { abas: Aba<T>[]; ativa: T; onAtiva: (id: T) => void }) {
   return (
-    <div className="touch-scroll overflow-x-auto border-y border-white/10 bg-black/30 px-2 sm:px-4">
+    <div className="sticky top-[52px] z-30 touch-scroll overflow-x-auto border-y border-white/10 bg-ordem-black/95 px-2 backdrop-blur lg:static lg:bg-black/30 sm:px-4">
       <div className="flex min-w-max gap-1" role="tablist">
         {abas.map((aba) => {
           const estaAtiva = ativa === aba.id;
@@ -77,7 +77,7 @@ function Abas<T extends string>({ abas, ativa, onAtiva }: { abas: Aba<T>[]; ativ
                 }`}
             >
               <span className={estaAtiva ? 'opacity-100' : 'opacity-60'}>{aba.icone}</span>
-              <span className="hidden sm:inline">{aba.rotulo}</span>
+              <span className={estaAtiva ? 'inline' : 'hidden sm:inline'}>{aba.rotulo}</span>
               {aba.badge}
               {estaAtiva && (
                 <span
@@ -254,7 +254,7 @@ export function FichaMestre({
   ];
 
   return (
-    <div data-classe={ficha.identidade.classe} className="relative flex h-full flex-col">
+    <div data-classe={ficha.identidade.classe} className="relative flex flex-col lg:h-full">
       <span aria-hidden className="mestre-aura pointer-events-none absolute inset-x-0 top-0 h-64" />
 
       <CabecalhoFicha
@@ -278,8 +278,8 @@ export function FichaMestre({
 
           <Abas abas={abasMesa} ativa={abaMesa} onAtiva={setAbaMesa} />
 
-          <div className="flex-1 overflow-y-auto bg-ordem-ooze/50 rounded-b-xl">
-            <div className="p-4 sm:p-5">
+          <div className="bg-ordem-ooze/50 lg:flex-1 lg:overflow-y-auto lg:rounded-b-xl">
+            <div className="p-3 sm:p-5">
               {abaMesa === 'pericias' && (
                 <SkillsTabContent
                   agent={personagem}
@@ -309,7 +309,7 @@ export function FichaMestre({
         <>
           <Abas abas={abasConstrucao} ativa={abaConstrucao} onAtiva={setAbaConstrucao} />
 
-          <div className="flex-1 overflow-y-auto bg-ordem-ooze/50 rounded-b-xl">
+          <div className="bg-ordem-ooze/50 lg:flex-1 lg:overflow-y-auto lg:rounded-b-xl">
             <div className="space-y-6 p-4 sm:p-5">
               {abaConstrucao === 'progressao' && (
                 <>

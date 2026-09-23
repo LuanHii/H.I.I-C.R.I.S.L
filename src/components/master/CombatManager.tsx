@@ -98,7 +98,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
             >
                 <div className="flex items-center justify-between flex-wrap gap-4">
                     <div>
-                        <h1 className="text-2xl font-serif text-white flex items-center gap-3">
+                        <h1 className="flex items-center gap-3 font-serif text-xl text-white sm:text-2xl">
                             <Swords className="text-ordem-red" />
                             Gerenciador de Combate
                         </h1>
@@ -107,17 +107,17 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                         <button
                             onClick={() => setShowAddModal(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-ordem-green hover:bg-green-600 text-white rounded-lg transition-colors"
+                            className="flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-ordem-green px-4 text-white transition-colors hover:bg-green-600 sm:flex-none"
                         >
                             <Plus size={16} /> Adicionar
                         </button>
                         <button
                             onClick={() => setShowQuickRef(!showQuickRef)}
                             className={cn(
-                                'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors',
+                                'flex h-11 flex-1 items-center justify-center gap-2 rounded-lg px-4 transition-colors sm:flex-none',
                                 showQuickRef
                                     ? 'bg-blue-600 text-white'
                                     : 'bg-ordem-ooze border border-ordem-border text-ordem-text-secondary hover:text-white'
@@ -127,7 +127,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                         </button>
                         <button
                             onClick={resetCombat}
-                            className="flex items-center gap-2 px-4 py-2 bg-ordem-ooze border border-ordem-border hover:bg-red-900/50 hover:border-red-800 text-ordem-text-secondary hover:text-red-200 rounded-lg transition-colors"
+                            className="flex h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-ordem-border bg-ordem-ooze px-4 text-ordem-text-secondary transition-colors hover:border-red-800 hover:bg-red-900/50 hover:text-red-200 sm:flex-none"
                             title="Resetar e limpar combate"
                         >
                             <RotateCcw size={16} /> Encerrar
@@ -165,11 +165,11 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                 )}
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
                                 <button
                                     onClick={prevTurn}
                                     disabled={!state.isActive || sortedCombatants.length === 0}
-                                    className="p-2 bg-ordem-ooze border border-ordem-border rounded-lg text-ordem-text-secondary hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-ordem-border bg-ordem-ooze text-ordem-text-secondary transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                                     title="Turno anterior"
                                 >
                                     <SkipBack size={18} />
@@ -178,7 +178,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                 {state.isActive ? (
                                     <button
                                         onClick={endCombat}
-                                        className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors flex items-center gap-2"
+                                        className="flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-yellow-600 px-4 text-white transition-colors hover:bg-yellow-700 sm:flex-none min-w-[120px]"
                                     >
                                         <Pause size={16} /> Pausar
                                     </button>
@@ -186,7 +186,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                     <button
                                         onClick={startCombat}
                                         disabled={sortedCombatants.length === 0}
-                                        className="px-4 py-2 bg-ordem-green hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center gap-2"
+                                        className="flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-ordem-green px-4 text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-gray-600 sm:flex-none min-w-[120px]"
                                     >
                                         <Play size={16} /> Iniciar
                                     </button>
@@ -195,18 +195,18 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                 <button
                                     onClick={nextTurn}
                                     disabled={!state.isActive || sortedCombatants.length === 0}
-                                    className="p-2 bg-ordem-green hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                                    className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-ordem-green text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-gray-600"
                                     title="Próximo turno"
                                 >
                                     <SkipForward size={18} />
                                 </button>
 
-                                <div className="w-px h-8 bg-ordem-border mx-1" />
+                                <div className="mx-1 hidden h-8 w-px bg-ordem-border sm:block" />
 
                                 <button
                                     onClick={rerollAllInitiatives}
                                     disabled={state.combatants.length === 0}
-                                    className="p-2 bg-ordem-ooze border border-ordem-border rounded-lg text-ordem-text-secondary hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-ordem-border bg-ordem-ooze text-ordem-text-secondary transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                                     title="Rerolar iniciativas"
                                 >
                                     <RefreshCw size={18} />
@@ -216,7 +216,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
                                     onClick={sortByInitiative}
                                     disabled={state.combatants.length === 0}
                                     className={cn(
-                                        "p-2 border rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+                                        'grid h-11 w-11 shrink-0 place-items-center rounded-lg border transition-colors disabled:cursor-not-allowed disabled:opacity-50',
                                         orderMode === 'initiative'
                                             ? 'bg-ordem-green/20 border-ordem-green text-ordem-green'
                                             : 'bg-ordem-ooze border-ordem-border text-ordem-text-secondary hover:text-white'
@@ -228,7 +228,7 @@ export function CombatManager({ creatures = [] }: CombatManagerProps) {
 
                                 <button
                                     onClick={resetCombat}
-                                    className="p-2 bg-red-600/20 border border-red-600/30 rounded-lg text-red-400 hover:bg-red-600/40 transition-colors"
+                                    className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-red-600/30 bg-red-600/20 text-red-400 transition-colors hover:bg-red-600/40"
                                     title="Resetar combate"
                                 >
                                     <RotateCcw size={18} />

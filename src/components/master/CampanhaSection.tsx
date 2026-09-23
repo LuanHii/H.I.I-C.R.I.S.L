@@ -44,7 +44,7 @@ export function CampanhaSection({
     forceExpanded,
     autoExpand,
 }: CampanhaSectionProps) {
-    const [expandida, setExpandida] = useState(false);
+    const [expandida, setExpandida] = useState(true);
     const [editando, setEditando] = useState(false);
     const [novoNome, setNovoNome] = useState(campanha?.nome || '');
     const [menuAberto, setMenuAberto] = useState<string | null>(null);

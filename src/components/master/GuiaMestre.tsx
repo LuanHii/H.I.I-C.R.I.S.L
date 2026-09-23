@@ -149,7 +149,7 @@ export function GuiaMestre({ fichas, onUpdateFicha }: GuiaMestreProps) {
     ];
 
     return (
-        <div className="max-w-7xl mx-auto p-4 sm:p-6">
+        <div className="mx-auto max-w-7xl p-3 sm:p-6">
             <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -157,7 +157,7 @@ export function GuiaMestre({ fichas, onUpdateFicha }: GuiaMestreProps) {
                 className="mb-6 flex flex-col md:flex-row md:justify-between md:items-end gap-4"
             >
                 <div>
-                    <h1 className="text-2xl font-semibold text-white mb-1 tracking-tight">
+                    <h1 className="mb-1 text-xl font-semibold tracking-tight text-white sm:text-2xl">
                         {activeTab === 'regras' && '📖 Guia Rápido'}
                         {activeTab === 'investigacao' && '🔍 Investigação'}
                         {activeTab === 'interludio' && '🌙 Interlúdio'}
@@ -169,7 +169,7 @@ export function GuiaMestre({ fichas, onUpdateFicha }: GuiaMestreProps) {
                     </p>
                 </div>
 
-                <div className="flex p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm">
+                <div className="flex shrink-0 gap-1 rounded-xl border border-white/[0.06] bg-white/[0.03] p-1 backdrop-blur-sm">
                     {tabs.map(tab => (
                         <motion.button
                             key={tab.key}
@@ -177,7 +177,7 @@ export function GuiaMestre({ fichas, onUpdateFicha }: GuiaMestreProps) {
                             whileTap={{ scale: 0.97 }}
                             onClick={() => setActiveTab(tab.key)}
                             className={cn(
-                                "flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                                'flex h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-[13px] font-medium transition-all duration-200 sm:flex-none sm:px-4 sm:text-sm',
                                 activeTab === tab.key
                                     ? "bg-gradient-to-r from-red-500/20 to-red-500/5 text-white border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.08)]"
                                     : "text-white/30 hover:text-white/60 border border-transparent"

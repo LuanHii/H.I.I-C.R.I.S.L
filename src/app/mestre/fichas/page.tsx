@@ -2,6 +2,7 @@
 
 import { MestreNavbar } from '../../../components/master/MestreNavbar';
 import { FichasManager } from '../../../components/master/FichasManager';
+import { AbasDoMestre } from '../../../components/master/AbasDoMestre';
 
 export default function FichasPage() {
   return (
@@ -10,9 +11,10 @@ export default function FichasPage() {
         title="MESTRE"
         subtitle="ARQUIVO // FICHAS"
       />
-      <main className="flex-1 bg-ordem-black-deep overflow-hidden">
+      <main className="flex-1 overflow-hidden bg-ordem-black-deep">
         <FichasManager />
       </main>
+      <AbasDoMestre />
     </div>
   );
 }

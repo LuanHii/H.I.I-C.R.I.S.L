@@ -14,7 +14,7 @@ import { resumoDoPersonagem, nomeDoArquivoDoResumo } from '../../core/export/res
 import { CampanhaSection, NovaCampanhaForm } from './CampanhaSection';
 import { descreverSinal, sinalDaFicha } from '../../core/ficha/sinal';
 import { MigracaoWizard } from './MigracaoWizard';
-import { Cloud, CloudOff, ChevronLeft, Plus, Download, Eye, PanelLeftClose, PanelLeft, RefreshCw, MoreHorizontal, FileText } from 'lucide-react';
+import { Cloud, CloudOff, ChevronLeft, Plus, Download, Eye, PanelLeftClose, PanelLeft, RefreshCw, MoreHorizontal, FileText, SlidersHorizontal } from 'lucide-react';
 import { WeaponModsButton } from './WeaponModsModal';
 import { WatchedFichasSection } from './WatchedFichasSection';
 import { Cantos, Fita, Recurso, iniciaisDoNome } from './ui/Pecas';
@@ -32,6 +32,7 @@ export function FichasManager() {
   const [ordem, setOrdem] = useState<'atualizado' | 'nome' | 'nex'>('atualizado');
   const [viewMode, setViewMode] = useState<'compact' | 'full'>('full');
   const [expandAll, setExpandAll] = useState<boolean | undefined>(undefined);
+  const [filtrosAbertos, setFiltrosAbertos] = useState(false);
   const [modalAberto, setModalAberto] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [fichasViewMode, setFichasViewMode] = useState<FichasViewMode>('minhas');
@@ -382,10 +383,16 @@ export function FichasManager() {
           </div>
         </div>
 
-        <div className="relative mt-3 grid grid-cols-3 gap-3">
+        <div className={`relative mt-3 grid gap-3 ${registro.personagem.usarPd && registro.personagem.pd ? 'grid-cols-2' : 'grid-cols-3'}`}>
           <Recurso tom="pv" compacto atual={registro.personagem.pv.atual} max={registro.personagem.pv.max} />
-          <Recurso tom="pe" compacto atual={registro.personagem.pe.atual} max={registro.personagem.pe.max} />
-          <Recurso tom="san" compacto atual={registro.personagem.san.atual} max={registro.personagem.san.max} />
+          {registro.personagem.usarPd && registro.personagem.pd ? (
+            <Recurso tom="pd" compacto atual={registro.personagem.pd.atual} max={registro.personagem.pd.max} />
+          ) : (
+            <>
+              <Recurso tom="pe" compacto atual={registro.personagem.pe.atual} max={registro.personagem.pe.max} />
+              <Recurso tom="san" compacto atual={registro.personagem.san.atual} max={registro.personagem.san.max} />
+            </>
+          )}
         </div>
 
         {acoesAbertas.has(registro.id) && (
@@ -494,11 +501,11 @@ export function FichasManager() {
   };
 
   return (
-    <div className="flex flex-col lg:grid lg:grid-cols-3 h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)] overflow-hidden">
+    <div className="flex h-[calc(100dvh-52px)] flex-col overflow-hidden lg:grid lg:h-[calc(100vh-64px)] lg:grid-cols-3">
       <section
         className={`
           lg:border-r border-ordem-border
-          p-4 lg:p-6 space-y-4 overflow-hidden flex flex-col
+          flex flex-col gap-3 overflow-hidden p-3 lg:gap-4 lg:p-6
           ${mobileDetailOpen ? 'hidden lg:flex' : 'flex'}
           ${isSidebarCollapsed ? 'lg:hidden' : ''}
         `}
@@ -519,10 +526,8 @@ export function FichasManager() {
                 </span>
               )}
             </div>
-            <h2 className="truncate font-display text-2xl uppercase leading-none tracking-[0.06em] text-white lg:text-3xl">Fichas</h2>
-            <div className="text-xs font-mono text-ordem-text-muted mt-1">
-              {fichasLoading ? 'Carregando...' : ''}
-            </div>
+            <h2 className="truncate font-display text-xl uppercase leading-none tracking-[0.06em] text-white lg:text-3xl">Fichas</h2>
+            {fichasLoading && <div className="mt-1 font-mono text-xs text-ordem-text-muted">Carregando...</div>}
           </div>
           <div className="flex gap-2 shrink-0">
             {lastSelectedId && fichas.some((f) => f.id === lastSelectedId) && (
@@ -539,18 +544,19 @@ export function FichasManager() {
             )}
             <button
               onClick={() => setModalAberto(true)}
-              className="border border-white/10 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white touch-target-sm"
+              className="grid h-11 min-w-[44px] place-items-center border border-white/10 px-3 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
               aria-label="Exportar ou Importar fichas"
             >
-              <span className="hidden sm:inline">EXP/IMP</span>
-              <Download size={16} className="sm:hidden" />
+              <span className="hidden lg:inline">EXP/IMP</span>
+              <Download size={17} className="lg:hidden" />
             </button>
             <Link
               href="/agente/novo"
-              className="flex items-center gap-1.5 border border-ordem-red bg-ordem-red/15 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-white transition hover:bg-ordem-red/30 touch-target-sm"
+              aria-label="Nova ficha"
+              className="flex h-11 min-w-[44px] items-center justify-center gap-1.5 border border-ordem-red bg-ordem-red/15 px-3 font-carimbo text-[10px] uppercase tracking-[0.16em] text-white transition hover:bg-ordem-red/30"
             >
-              <Plus size={14} />
-              <span className="hidden sm:inline">NOVA</span>
+              <Plus size={17} />
+              <span className="hidden lg:inline">NOVA</span>
             </Link>
           </div>
         </div>
@@ -598,9 +604,26 @@ export function FichasManager() {
                 onKeyDown={(e) => {
                   if (e.key === 'Escape') setBusca('');
                 }}
-                className="w-full border border-white/10 bg-black/30 px-3 py-2.5 font-mono text-sm text-white placeholder:text-ordem-text-muted focus:border-ordem-red/60 focus:outline-none touch-target"
+                className="h-11 w-full border border-white/10 bg-black/30 px-3 font-mono text-sm text-white placeholder:text-ordem-text-muted focus:border-ordem-red/60 focus:outline-none"
                 aria-label="Buscar por nome, classe, NEX ou patente"
               />
+
+              <button
+                type="button"
+                onClick={() => setFiltrosAbertos((v) => !v)}
+                aria-expanded={filtrosAbertos}
+                className="flex h-11 w-full items-center justify-between border border-white/10 px-3 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary lg:hidden"
+              >
+                <span className="flex items-center gap-2">
+                  <SlidersHorizontal size={14} />
+                  Filtros e ordem
+                </span>
+                <span className="font-mono text-[11px] text-ordem-text-muted">
+                  {fichasFiltradas.length === fichas.length ? `${fichas.length} fichas` : `${fichasFiltradas.length} de ${fichas.length}`}
+                </span>
+              </button>
+
+              <div className={`${filtrosAbertos ? 'flex' : 'hidden'} flex-col gap-2 lg:flex`}>
               <div className="flex flex-wrap items-center gap-2">
                 <select
                   value={filtroClasse}
@@ -701,9 +724,10 @@ export function FichasManager() {
                   </button>
                 </div>
               </div>
+              </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto touch-scroll custom-scrollbar -mx-4 px-4 lg:mx-0 lg:px-0 lg:pr-2 space-y-3">
+            <div className="-mx-3 flex-1 space-y-3 overflow-y-auto px-3 pb-[calc(60px+env(safe-area-inset-bottom))] touch-scroll custom-scrollbar lg:mx-0 lg:px-0 lg:pb-0 lg:pr-2">
               {campanhas.map((campanha, indiceCampanha) => (
                 <CampanhaSection
                   key={campanha.id}

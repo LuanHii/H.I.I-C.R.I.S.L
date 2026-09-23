@@ -386,3 +386,18 @@ html[data-overlay='valor'] .vinheta {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* Celular: fonte 16px em campos evita o zoom automático do iOS ao focar. */
+@media (max-width: 1023px) {
+  input:not([type='checkbox']):not([type='radio']),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+@layer utilities {
+  .espaco-abas {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  }
+}
