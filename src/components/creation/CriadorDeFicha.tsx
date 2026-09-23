@@ -270,7 +270,7 @@ export default function CriadorDeFicha({ rascunhoInicial, etapaInicial, onCriada
         </aside>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-[55] border-t border-white/10 bg-ordem-black/95 backdrop-blur safe-bottom lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-[45] border-t border-white/10 bg-ordem-black/95 backdrop-blur safe-bottom lg:hidden">
         {previaAberta && (
           <div className="max-h-[55vh] overflow-y-auto border-b border-white/10 px-4 py-3">
             <PreviaDaFicha rascunho={rascunho} />

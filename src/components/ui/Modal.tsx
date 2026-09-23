@@ -53,7 +53,7 @@ export const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
                     />
                 </DialogPrimitive.Overlay>
 
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+                <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
                 <DialogPrimitive.Content asChild>
                     <motion.div
                         ref={ref}
@@ -63,8 +63,9 @@ export const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
                         exit="exit"
                         className={cn(
                             'pointer-events-auto relative w-full',
-                            'bg-ordem-ooze border border-ordem-border rounded-xl shadow-2xl shadow-black/50',
-                            'max-h-full overflow-hidden flex flex-col',
+                            'border border-ordem-border bg-ordem-ooze shadow-2xl shadow-black/50',
+                            'rounded-t-xl sm:rounded-xl',
+                            'flex max-h-[92dvh] flex-col overflow-hidden pb-[env(safe-area-inset-bottom)] sm:max-h-full sm:pb-0',
                             'focus:outline-none',
                             sizeStyles[size],
                             className
@@ -74,7 +75,7 @@ export const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
                         {showCloseButton && (
                             <DialogPrimitive.Close asChild>
                                 <button
-                                    className="absolute right-4 top-4 p-1.5 rounded-lg text-ordem-text-muted hover:text-white hover:bg-ordem-ooze-light transition-colors"
+                                    className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-lg text-ordem-text-muted transition-colors hover:bg-ordem-ooze-light hover:text-white"
                                     aria-label="Fechar"
                                 >
                                     <X size={18} />

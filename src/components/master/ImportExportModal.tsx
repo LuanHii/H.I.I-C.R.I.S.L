@@ -156,8 +156,8 @@ export function ImportExportModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ordem-black/80 p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-lg border border-white/10 bg-[var(--mestre-superficie,#16161a)] p-6 shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_40px_80px_-30px_rgba(0,0,0,1)]">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-ordem-black/80 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+      <div className="relative max-h-[92dvh] w-full overflow-y-auto border border-white/10 bg-[var(--mestre-superficie,#16161a)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_40px_80px_-30px_rgba(0,0,0,1)] sm:max-h-full sm:max-w-lg sm:p-6">
         <Cantos />
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
@@ -168,7 +168,7 @@ export function ImportExportModal({
           </div>
           <button
             onClick={onClose}
-            className="grid h-9 w-9 shrink-0 place-items-center border border-white/10 text-ordem-text-muted transition hover:border-white/30 hover:text-white"
+            className="grid h-10 w-10 shrink-0 place-items-center border border-white/10 text-ordem-text-muted transition hover:border-white/30 hover:text-white"
             aria-label="Fechar"
           >
             <X size={16} />
