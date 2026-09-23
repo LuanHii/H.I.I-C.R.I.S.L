@@ -44,10 +44,10 @@ const BOTAO_FANTASMA = 'flex items-center gap-1.5 border border-white/10 px-3 py
 
 function Fato({ icone, rotulo, valor }: { icone: React.ReactNode; rotulo: string; valor: React.ReactNode }) {
   return (
-    <div className="flex min-w-0 items-center gap-3 border border-white/10 bg-white/[0.02] px-3 py-2">
-      <span className="text-ordem-text-muted">{icone}</span>
+    <div className="flex min-w-0 items-center gap-2.5 border border-white/10 bg-white/[0.02] px-3 py-2">
+      <span className="shrink-0 text-ordem-text-muted">{icone}</span>
       <div className="min-w-0">
-        <RotuloSecao>{rotulo}</RotuloSecao>
+        <RotuloSecao className="block truncate tracking-[0.08em] sm:tracking-[0.22em]">{rotulo}</RotuloSecao>
         <div className="font-display text-xl font-bold leading-none text-white">{valor}</div>
       </div>
     </div>
@@ -117,10 +117,10 @@ export function RemoteAgentView({
       <div className="relative mx-auto w-full max-w-5xl px-3 py-4 sm:px-4 sm:py-6 safe-x safe-top safe-bottom">
         <span aria-hidden className="mestre-aura pointer-events-none absolute inset-x-0 top-0 h-72" />
 
-        <header className="relative border border-white/10 bg-[var(--mestre-superficie,#16161a)]/80 px-4 pb-4 pt-5 sm:px-6">
+        <header className="relative border border-white/10 bg-[var(--mestre-superficie,#16161a)]/80 px-3 pb-3 pt-4 sm:px-6 sm:pb-4 sm:pt-5">
           <Cantos />
-          <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
-            <div className="min-w-0">
+          <div className="flex items-start justify-between gap-x-4 gap-y-3 sm:flex-wrap sm:gap-x-6">
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-3">
                 <RotuloSecao>Ficha compartilhada</RotuloSecao>
                 <span className="flex items-center gap-1.5 font-carimbo text-[10px] uppercase tracking-[0.16em]">
@@ -128,9 +128,9 @@ export function RemoteAgentView({
                   <span className={connected ? 'text-ordem-green' : 'text-ordem-text-muted'}>{connected ? 'ao vivo' : 'offline'}</span>
                 </span>
               </div>
-              <h1 className="mt-1 font-display text-3xl uppercase leading-none tracking-[0.06em] text-white sm:text-4xl">{agent.nome}</h1>
+              <h1 className="mt-1 break-words font-display text-2xl uppercase leading-none tracking-[0.06em] text-white sm:text-4xl">{agent.nome}</h1>
               <div className="mt-1.5 h-px w-24 bg-[var(--mestre-primary,#DC2626)]" />
-              {agent.conceito && <p className="mt-2 max-w-xl text-sm italic text-ordem-text-secondary">{agent.conceito}</p>}
+              {agent.conceito && <p className="mt-2 max-w-xl text-xs italic text-ordem-text-secondary sm:text-sm">{agent.conceito}</p>}
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <Fita variante="classe">{agent.classe}</Fita>
                 <Fita variante="neutra">{rotuloNivel}</Fita>
@@ -145,11 +145,11 @@ export function RemoteAgentView({
                 <RotuloSecao>Defesa</RotuloSecao>
                 <div className="flex items-center justify-end gap-1.5">
                   <Shield size={18} className="text-ordem-text-muted" />
-                  <span className="font-display text-3xl font-bold leading-none text-white">{agent.defesa}</span>
+                  <span className="font-display text-2xl font-bold leading-none text-white sm:text-3xl">{agent.defesa}</span>
                 </div>
               </div>
               {(onOpenOverlayMini || onOpenOverlayFull) && (
-                <div className="flex flex-wrap justify-end gap-2">
+                <div className="hidden flex-wrap justify-end gap-2 sm:flex">
                   {onOpenOverlayMini && <button type="button" onClick={onOpenOverlayMini} className={BOTAO_FANTASMA}>Overlay mini</button>}
                   {onOpenOverlayFull && <button type="button" onClick={onOpenOverlayFull} className={BOTAO_FANTASMA}>Overlay completo</button>}
                 </div>
@@ -157,7 +157,7 @@ export function RemoteAgentView({
             </div>
           </div>
 
-          <div className="mt-5 grid gap-x-6 gap-y-2 sm:grid-cols-3">
+          <div className="mt-4 grid gap-x-6 gap-y-3 sm:mt-5 sm:grid-cols-3 sm:gap-y-2">
             <StatusBar label="PV" current={agent.pv.atual} max={agent.pv.max} color="red" onChange={() => undefined} readOnly />
             {usaPd ? (
               <StatusBar label="PD" current={agent.pd?.atual ?? 0} max={agent.pd?.max ?? 0} color="purple" onChange={() => undefined} readOnly />
@@ -181,13 +181,13 @@ export function RemoteAgentView({
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             <Fato icone={<Footprints size={14} />} rotulo="Deslocamento" valor={`${agent.deslocamento}m`} />
             <Fato icone={<Backpack size={14} />} rotulo="Carga" valor={<>{agent.carga.atual}<span className="text-sm text-ordem-text-muted">/{agent.carga.maxima}</span></>} />
-            <Fato icone={<Zap size={14} />} rotulo="PE por rodada" valor={agent.pe.rodada ?? '—'} />
+            <Fato icone={<Zap size={14} />} rotulo="Limite de PE" valor={agent.pe.rodada ?? '—'} />
             <Fato icone={<ShieldAlert size={14} />} rotulo="Condições" valor={condicoes.length} />
           </div>
         </header>
 
-        <div className="sticky top-0 z-20 mt-4 border-y border-white/10 bg-ordem-black/90 backdrop-blur">
-          <div className="touch-scroll flex min-w-max gap-1 overflow-x-auto px-2 sm:px-4" role="tablist">
+        <div className="sticky top-[var(--topo-ficha,0px)] z-20 mt-4 border-y border-white/10 bg-ordem-black/95 backdrop-blur">
+          <div className="grid grid-cols-4 sm:flex sm:gap-1 sm:px-4" role="tablist">
             {abas.map((a) => {
               const ativa = aba === a.id;
               return (
@@ -196,11 +196,14 @@ export function RemoteAgentView({
                   role="tab"
                   aria-selected={ativa}
                   onClick={() => setAba(a.id)}
-                  className={`relative flex items-center gap-1.5 whitespace-nowrap px-3 py-3 font-carimbo text-[11px] uppercase tracking-[0.14em] transition-colors ${ativa ? 'text-[var(--mestre-primary,#DC2626)]' : 'text-ordem-text-muted hover:text-ordem-white-muted'}`}
+                  className={`relative flex min-w-0 flex-col items-center justify-center gap-1 px-1 py-2.5 font-carimbo text-[9px] uppercase tracking-[0.06em] transition-colors sm:flex-row sm:gap-1.5 sm:whitespace-nowrap sm:px-3 sm:py-3 sm:text-[11px] sm:tracking-[0.14em] ${ativa ? 'text-[var(--mestre-primary,#DC2626)]' : 'text-ordem-text-muted hover:text-ordem-white-muted'}`}
                 >
-                  <span className={ativa ? 'opacity-100' : 'opacity-60'}>{a.icone}</span>
-                  <span>{a.rotulo}</span>
-                  {a.badge}
+                  <span className={`relative ${ativa ? 'opacity-100' : 'opacity-60'}`}>
+                    {a.icone}
+                    {a.badge && <span className="absolute left-full top-0 ml-1 leading-none sm:hidden">{a.badge}</span>}
+                  </span>
+                  <span className="max-w-full truncate">{a.rotulo}</span>
+                  {a.badge && <span className="hidden sm:inline">{a.badge}</span>}
                   {ativa && <span aria-hidden className="absolute inset-x-2 bottom-0 h-[2px] bg-[var(--mestre-primary,#DC2626)] shadow-[0_0_10px_-1px_var(--mestre-glow)]" />}
                 </button>
               );
@@ -367,8 +370,8 @@ export function RemoteAgentView({
                           <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0">
                               <p className="truncate text-sm font-semibold text-white">{it.nome}</p>
-                              <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-ordem-text-muted">
-                                <Fita variante="neutra">Cat. {categoriaRomana[it.categoria]}</Fita>
+                              <p className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-ordem-text-muted">
+                                <span className="border border-white/10 px-1.5 py-0.5 font-carimbo text-[9px] uppercase tracking-[0.14em] text-ordem-text-secondary">Cat. {categoriaRomana[it.categoria]}</span>
                                 <span>{it.tipo} · {it.espaco} espaço{it.espaco === 1 ? '' : 's'}</span>
                               </p>
                             </div>

@@ -145,13 +145,16 @@ function PlayerAgentContent() {
   }
 
   return (
-    <div className="min-h-screen bg-ordem-black">
+    <div
+      className="min-h-screen bg-ordem-black"
+      style={{ ['--topo-ficha' as string]: isFoundryEmbed ? '0px' : 'var(--altura-app-bar)' }}
+    >
       {!isFoundryEmbed && (
-        <div className="sticky top-0 z-50 border-b border-white/10 bg-ordem-black/95 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-2.5">
+        <div className="sticky top-0 z-50 border-b border-white/10 bg-ordem-black/95 pt-[env(safe-area-inset-top)] backdrop-blur">
+        <div className="mx-auto flex h-[52px] max-w-5xl items-center justify-between gap-4 px-3 sm:px-4">
           <div className="flex min-w-0 items-baseline gap-3">
             <span className="font-display text-lg uppercase tracking-[0.1em] text-ordem-red">C.R.I.S.</span>
-            <span className="font-carimbo text-[10px] uppercase tracking-[0.3em] text-ordem-text-muted">Ordo Realitas</span>
+            <span className="hidden font-carimbo text-[10px] uppercase tracking-[0.3em] text-ordem-text-muted min-[380px]:inline">Ordo Realitas</span>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
@@ -159,7 +162,8 @@ function PlayerAgentContent() {
               <button
                 onClick={handleToggleWatch}
                 disabled={watchLoading}
-                className={`flex items-center gap-2 border px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] transition-colors ${
+                aria-label={isCurrentlyWatching ? 'Parar de acompanhar' : 'Acompanhar esta ficha'}
+                className={`flex h-10 min-w-[40px] items-center justify-center gap-2 border px-3 font-carimbo text-[10px] uppercase tracking-[0.16em] transition-colors ${
                   isCurrentlyWatching
                     ? 'border-ordem-gold/60 bg-ordem-gold/10 text-ordem-gold hover:bg-ordem-gold/20'
                     : 'border-white/10 text-ordem-text-secondary hover:border-white/30 hover:text-white'
@@ -181,7 +185,7 @@ function PlayerAgentContent() {
                 type="button"
                 onClick={() => auth?.signInWithGoogle()}
                 disabled={auth?.loading}
-                className="flex items-center gap-2 border border-white/10 px-3 py-2 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary transition-colors hover:border-white/30 hover:text-white disabled:opacity-50 touch-target-sm"
+                className="flex h-10 items-center gap-2 border border-white/10 px-3 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary transition-colors hover:border-white/30 hover:text-white disabled:opacity-50"
               >
                 <LogIn size={14} />
                 <span>Entrar</span>
