@@ -8,6 +8,7 @@ html {
 }
 
 :root {
+  --altura-app-bar: calc(52px + env(safe-area-inset-top));
   --foreground-rgb: 245, 245, 245;
   --background-start-rgb: 26, 26, 26;
   --background-end-rgb: 26, 26, 26;

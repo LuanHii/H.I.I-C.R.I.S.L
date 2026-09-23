@@ -61,7 +61,7 @@ interface Aba<T extends string> {
 
 function Abas<T extends string>({ abas, ativa, onAtiva }: { abas: Aba<T>[]; ativa: T; onAtiva: (id: T) => void }) {
   return (
-    <div className="sticky top-[52px] z-30 touch-scroll overflow-x-auto border-y border-white/10 bg-ordem-black/95 px-2 backdrop-blur lg:static lg:bg-black/30 sm:px-4">
+    <div className="sticky top-[var(--altura-app-bar)] z-30 touch-scroll overflow-x-auto border-y border-white/10 bg-ordem-black/95 px-2 backdrop-blur lg:static lg:bg-black/30 sm:px-4">
       <div className="flex min-w-max gap-1" role="tablist">
         {abas.map((aba) => {
           const estaAtiva = ativa === aba.id;

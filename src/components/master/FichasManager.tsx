@@ -501,7 +501,7 @@ export function FichasManager() {
   };
 
   return (
-    <div className="flex h-[calc(100dvh-52px)] flex-col overflow-hidden lg:grid lg:h-[calc(100vh-64px)] lg:grid-cols-3">
+    <div className="flex h-[calc(100dvh-var(--altura-app-bar))] flex-col overflow-hidden lg:grid lg:h-[calc(100vh-64px)] lg:grid-cols-3">
       <section
         className={`
           lg:border-r border-ordem-border

@@ -91,7 +91,7 @@ export function MestreNavbar({
   const tab: AbaMestre = activeTab ?? (inFichas ? 'fichas' : 'ameacas');
 
   return (
-    <header className="sticky top-0 z-50 shrink-0 border-b border-ordem-border bg-ordem-black/95 backdrop-blur">
+    <header className="sticky top-0 z-50 shrink-0 border-b border-ordem-border bg-ordem-black/95 pt-[env(safe-area-inset-top)] backdrop-blur lg:pt-0">
       <div className="flex h-[52px] items-center gap-2 px-3 pr-[62px] lg:hidden">
         <Link
           href={voltarPara ?? '/'}

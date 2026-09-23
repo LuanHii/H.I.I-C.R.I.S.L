@@ -174,7 +174,7 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
       />
 
       <main className="flex-1 bg-ordem-black-deep p-0 sm:p-4">
-        <div className="mx-auto flex min-h-[calc(100dvh-52px)] max-w-7xl flex-col sm:h-[calc(100vh-96px)] sm:min-h-0">
+        <div className="mx-auto flex min-h-[calc(100dvh-var(--altura-app-bar))] max-w-7xl flex-col sm:h-[calc(100vh-96px)] sm:min-h-0">
           <nav className="mb-3 hidden shrink-0 items-center gap-2 font-mono text-xs text-ordem-text-muted sm:flex" aria-label="Navegação">
             <Link href="/mestre" className="hover:text-ordem-white transition-colors">Mestre</Link>
             <span>/</span>
