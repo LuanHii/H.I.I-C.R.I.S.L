@@ -139,17 +139,11 @@ function buildFoundryPayload(request: NextRequest, agentId: string, agent: Perso
     updatedAt: withMeta.updatedAt ?? null,
     revision: {
       updatedAt: withMeta.updatedAt ?? null,
-      hash: buildRevisionHash({
-        updatedAt: withMeta.updatedAt ?? null,
-        character: payload.character,
-        resources: payload.resources,
-        attributes: payload.attributes,
-        skills: payload.skills,
-        equipment: payload.equipment,
-        powers: payload.powers,
-        rituals: payload.rituals,
-        conditions: payload.conditions,
-      }),
+      // Hash da ficha inteira, sem `updatedAt`. Com `updatedAt`, salvar sem
+      // mudar nada forcava o Foundry a ressincronizar o Actor; e hasheando so
+      // o resumo acima, editar a descricao de um poder ou ritual nunca chegava
+      // ao Foundry, que usa a ficha completa.
+      hash: buildRevisionHash(sanitizeRawPersonagem(agent)),
     },
   };
 }
@@ -189,7 +183,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
   const payload = buildFoundryPayload(request, agentId, agent);
   const etag = `"${payload.revision.hash}"`;
 
-  if (!includeRaw && knownRevision === payload.revision.hash) {
+  // Vale tambem para `include=full`: o Foundry pede a ficha completa a cada
+  // ciclo para manter o Actor, e sem isto baixaria tudo mesmo sem mudanca.
+  if (knownRevision === payload.revision.hash) {
     return json({
       schemaVersion: payload.schemaVersion,
       agentId,
