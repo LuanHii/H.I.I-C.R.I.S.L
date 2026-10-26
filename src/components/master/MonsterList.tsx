@@ -5,6 +5,20 @@ import { useCloudMonsters } from '../../core/storage';
 import { ELEMENTO_FILTER_STYLES } from '../../data/magic/elementColors';
 import { MonsterEditor } from './MonsterEditor';
 import { Cloud, CloudOff } from 'lucide-react';
+import { downloadJSON } from '../../core/storage/exportImportUtils';
+
+// Exportar para a Mesa 3D (a VTT do mestre): a ameaça no formato `Ameaca`, sem os campos da lista.
+function paraExportar(m: Ameaca & { id?: string; isCustom?: boolean }): Ameaca {
+  const { id, isCustom, ...ameaca } = m;
+  void id;
+  void isCustom;
+  return ameaca;
+}
+
+function nomeDeArquivo(nome: string): string {
+  const base = nome.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return base || 'ameaca';
+}
 
 export const MonsterList: React.FC = () => {
   const [search, setSearch] = useState(() => {
@@ -207,9 +221,18 @@ export const MonsterList: React.FC = () => {
             Limpar filtros
           </button>
         )}
+        {monstros.length > 0 && (
+          <button
+            onClick={() => downloadJSON(JSON.stringify(monstros.map((m) => m.ameaca), null, 2), 'ameacas-custom.json')}
+            title="Baixa as suas ameaças em .json, para importar na Mesa 3D"
+            className="ml-auto flex h-11 items-center rounded border border-ordem-border px-3 font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted hover:border-ordem-border-light"
+          >
+            Exportar custom
+          </button>
+        )}
         <button
           onClick={handleCreate}
-          className="ml-auto flex h-11 items-center rounded border border-ordem-red bg-ordem-red/20 px-3 font-mono text-sm uppercase text-white transition-colors hover:bg-ordem-red/40"
+          className={`${monstros.length > 0 ? '' : 'ml-auto '}flex h-11 items-center rounded border border-ordem-red bg-ordem-red/20 px-3 font-mono text-sm uppercase text-white transition-colors hover:bg-ordem-red/40`}
         >
           + Criar Ameaça
         </button>
@@ -223,6 +246,7 @@ export const MonsterList: React.FC = () => {
             onEdit={monster.isCustom ? () => handleEdit(monster, monster.id!) : undefined}
             onDelete={monster.isCustom ? () => remover(monster.id!) : undefined}
             onClone={() => handleClone(monster)}
+            onExport={() => downloadJSON(JSON.stringify(paraExportar(monster), null, 2), `ameaca-${nomeDeArquivo(monster.nome)}.json`)}
           />
         ))}
         {filteredMonsters.length === 0 && (
@@ -248,9 +272,10 @@ interface MonsterCardProps {
   onEdit?: () => void;
   onDelete?: () => void;
   onClone?: () => void;
+  onExport?: () => void;
 }
 
-const MonsterCard: React.FC<MonsterCardProps> = ({ monster, onEdit, onDelete, onClone }) => {
+const MonsterCard: React.FC<MonsterCardProps> = ({ monster, onEdit, onDelete, onClone, onExport }) => {
   const [expanded, setExpanded] = useState(false);
 
   const getElementColor = (type: string) => {
@@ -299,6 +324,11 @@ const MonsterCard: React.FC<MonsterCardProps> = ({ monster, onEdit, onDelete, on
       {expanded && (
         <div className="p-4 border-t border-ordem-border bg-ordem-black/20">
             <div className="flex justify-end gap-2 mb-4 border-b border-ordem-border pb-2">
+              {onExport && (
+                <button onClick={(e) => { e.stopPropagation(); onExport(); }} title="Baixa esta ameaça em .json, para importar na Mesa 3D" className="text-xs bg-ordem-black/40 hover:bg-ordem-border-light text-ordem-text-secondary px-2 py-1 rounded border border-ordem-border">
+                  Exportar (.json)
+                </button>
+              )}
               {onClone && (
                 <button onClick={(e) => { e.stopPropagation(); onClone(); }} className="text-xs bg-ordem-ooze hover:bg-ordem-border-light text-white px-2 py-1 rounded border border-ordem-border-light">
                   Clonar / Editar Cópia
