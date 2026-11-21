@@ -1,654 +1,261 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Search, Users, Skull, UserPlus, Dice6, PlusCircle } from 'lucide-react';
-import { type Combatant, generateCombatantId, rollInitiative, type CombatantAbility } from './CombatManagerTypes';
-import { NPC } from '../../core/types';
+import Link from 'next/link';
+import { Check, ClipboardList, Minus, Plus, Search, Swords } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { normalizarBusca, type EntradaCatalogoAmeaca } from '@/core/rules/catalogoAmeacas';
+import { lerPerfilDeIniciativa } from '@/core/rules/ordemCombate';
+import { LIMITE_COPIAS_ENCONTRO, resumirDesafio, type TipoParticipante } from '@/core/rules/encontro';
+import type { NPCRegistro, PericiaDetalhada } from '@/core/types';
 import { cn } from '@/lib/utils';
+import { Modal, ModalBody, ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from '@/components/ui/Modal';
+import { useEncontroRascunho } from './EncontroRascunho';
+import { generateCombatantId, type Combatant, type CombatantAbility } from './CombatManagerTypes';
+import { criarCopiasAmeaca } from './criarCopiasAmeaca';
 
-interface AgentData {
-    id: string;
-    nome: string;
-    pvAtual: number;
-    pvMax: number;
-    peAtual: number;
-    peMax: number;
-    sanAtual: number;
-    sanMax: number;
-    defesa: number;
-    pericias?: { Iniciativa?: { total?: number } };
-    abilities?: CombatantAbility[];
-}
-
-interface AmeacaData {
-    id?: string;
-    nome: string;
-    pv?: number;
-    defesa?: number;
-    iniciativa?: number;
-    abilities?: CombatantAbility[];
-    atributos?: { AGI: number; FOR: number; INT: number; PRE: number; VIG: number };
-    fortitude?: string;
-    reflexos?: string;
-    vontade?: string;
-    resistencias?: string[];
-    imunidades?: string[];
-    vulnerabilidades?: string[];
-    deslocamento?: string;
+interface AgenteEncontro {
+  id: string;
+  nome: string;
+  nex?: number;
+  sobrevivente: boolean;
+  campanha?: string;
+  hp: Combatant['hp'];
+  pe?: Combatant['pe'];
+  pd?: Combatant['pd'];
+  san?: Combatant['san'];
+  defesa: number;
+  initiativeSkill?: PericiaDetalhada;
+  abilities?: CombatantAbility[];
 }
 
 interface AddCombatantModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onAdd: (combatants: Combatant[]) => void;
-    agents: AgentData[];
-    creatures: AmeacaData[];
-    npcs: NPC[];
-    onCreateThreat?: (threat: any) => void;
+  isOpen: boolean;
+  revisao: boolean;
+  setRevisao: (revisao: boolean) => void;
+  onClose: () => void;
+  onAdd: (combatants: Combatant[]) => void;
+  agents: AgenteEncontro[];
+  threats: EntradaCatalogoAmeaca[];
+  npcs: NPCRegistro[];
+  combatants: Combatant[];
+  emSessao: boolean;
+  onReturnFocus: () => void;
 }
 
-type ModalTab = 'agents' | 'creatures' | 'custom' | 'npcs';
+interface OpcaoEncontro {
+  tipo: TipoParticipante;
+  id: string;
+  nome: string;
+  detalhes: string;
+  origem?: string;
+}
 
-export function AddCombatantModal({
-    isOpen,
-    onClose,
-    onAdd,
-    agents,
-    creatures,
-    npcs,
-    onCreateThreat
-}: AddCombatantModalProps) {
-    const [tab, setTab] = useState<ModalTab>('agents');
-    const [search, setSearch] = useState('');
-    const [selectedAgents, setSelectedAgents] = useState<Set<string>>(new Set());
-    const [selectedCreatures, setSelectedCreatures] = useState<Set<string>>(new Set());
-    const [selectedNpcs, setSelectedNpcs] = useState<Set<string>>(new Set());
+type Aba = TipoParticipante | 'avulso';
+const ABAS: { id: Aba; titulo: string }[] = [
+  { id: 'agente', titulo: 'Agentes' },
+  { id: 'ameaca', titulo: 'Ameaças' },
+  { id: 'npc', titulo: 'NPCs' },
+  { id: 'avulso', titulo: 'Avulso' },
+];
+const NEUTRO = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-ordem-border-light bg-ordem-black/60 px-3 font-dados text-sm font-semibold text-ordem-white hover:border-ordem-green-muted/60 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-ordem-green-muted disabled:opacity-45';
+const PRIMARIO = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-ordem-green-muted px-4 font-dados text-sm font-semibold text-ordem-black hover:bg-white focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-ordem-green-muted disabled:bg-ordem-ooze disabled:text-ordem-text-muted';
+const CAMPO = 'min-h-11 w-full rounded-lg border border-ordem-border bg-ordem-black-deep px-3 font-dados text-sm text-ordem-white focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-ordem-green-muted';
 
-    const [customName, setCustomName] = useState('');
-    const [customHp, setCustomHp] = useState('20');
-    const [customDefense, setCustomDefense] = useState('12');
-    const [customInitBonus, setCustomInitBonus] = useState('0');
+export function AddCombatantModal({ isOpen, revisao, setRevisao, onClose, onAdd, agents, threats, npcs, combatants, emSessao, onReturnFocus }: AddCombatantModalProps) {
+  const { entradas, definirQuantidade, concluir, pronto } = useEncontroRascunho();
+  const [aba, setAba] = useState<Aba>('ameaca');
+  const [busca, setBusca] = useState('');
+  const tituloRevisao = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (isOpen && revisao) tituloRevisao.current?.focus();
+  }, [isOpen, revisao]);
+  const [rascunhoAvulso, setRascunhoAvulso] = useState({ nome: '', pv: 20, defesa: 12, iniciativa: 0, quantidade: 1, inimigo: false });
 
-    const [customCount, setCustomCount] = useState('1');
+  const opcoes = useMemo<OpcaoEncontro[]>(() => [
+    ...agents.map(a => ({
+      tipo: 'agente' as const, id: a.id, nome: a.nome,
+      detalhes: [a.campanha, a.sobrevivente ? 'Sobrevivente' : 'NEX ' + (a.nex ?? '—') + '%', a.hp.current + '/' + a.hp.max + ' PV'].filter(Boolean).join(' · '),
+    })),
+    ...threats.map(({ ameaca, origem, chave }) => ({
+      tipo: 'ameaca' as const, id: chave, nome: ameaca.nome, origem,
+      detalhes: [ameaca.tipo, 'VD ' + ameaca.vd, ameaca.vida + ' PV', 'Defesa ' + ameaca.defesa, origem].join(' · '),
+    })),
+    ...npcs.map(({ id, npc }) => ({
+      tipo: 'npc' as const, id, nome: npc.nome,
+      detalhes: npc.vida + ' PV · Defesa ' + npc.defesa,
+    })),
+  ], [agents, threats, npcs]);
 
-    const [isCreatingThreat, setIsCreatingThreat] = useState(false);
-    const [newThreat, setNewThreat] = useState({ nome: '', vd: 0, pv: 10, defesa: 10, iniciativa: 0 });
-    const [newThreatAction, setNewThreatAction] = useState('');
+  const indexar = (tipo: TipoParticipante, id: string) => tipo + ':' + id;
+  const disponiveis = new Map(opcoes.map(o => [indexar(o.tipo, o.id), o]));
+  const quantidades = new Map(entradas.map(e => [indexar(e.tipo, e.id), e.quantidade]));
+  const presentes = entradas.filter(e => disponiveis.has(indexar(e.tipo, e.id)));
+  const total = presentes.reduce((soma, entrada) => soma + entrada.quantidade, 0);
+  const termo = normalizarBusca(busca);
+  const filtradas = opcoes.filter(o => o.tipo === aba && normalizarBusca(o.nome + ' ' + o.detalhes).includes(termo));
+  const { vd, nex } = resumirDesafio(
+    presentes.filter(e => e.tipo === 'ameaca').map(e => ({ vd: threats.find(t => t.chave === e.id)?.ameaca.vd, quantidade: e.quantidade })),
+    agentesDoRascunho(),
+  );
+  const temNPC = presentes.some(e => e.tipo === 'npc');
 
-    const filteredAgents = useMemo(() => {
-        if (!search.trim()) return agents;
-        const term = search.toLowerCase();
-        return agents.filter(a => a.nome.toLowerCase().includes(term));
-    }, [agents, search]);
+  function agentesDoRascunho() {
+    return agents.filter(a => quantidades.has(indexar('agente', a.id)));
+  }
 
-    const filteredCreatures = useMemo(() => {
-        if (!search.trim()) return creatures;
-        const term = search.toLowerCase();
-        return creatures.filter(c => c.nome.toLowerCase().includes(term));
-    }, [creatures, search]);
-
-    const filteredNpcs = useMemo(() => {
-        if (!search.trim()) return npcs;
-        const term = search.toLowerCase();
-        return npcs.filter(n => n.nome.toLowerCase().includes(term));
-    }, [npcs, search]);
-
-    const toggleAgent = (id: string) => {
-        const next = new Set(selectedAgents);
-        if (next.has(id)) next.delete(id);
-        else next.add(id);
-        setSelectedAgents(next);
-    };
-
-    const toggleCreature = (nome: string) => {
-        const next = new Set(selectedCreatures);
-        if (next.has(nome)) next.delete(nome);
-        else next.add(nome);
-        setSelectedCreatures(next);
-    };
-
-    const toggleNpc = (nome: string) => {
-        const next = new Set(selectedNpcs);
-        if (next.has(nome)) next.delete(nome);
-        else next.add(nome);
-        setSelectedNpcs(next);
-    };
-
-    const handleCreateThreat = () => {
-        if (!newThreat.nome) return;
-
-        const abilities: CombatantAbility[] = [];
-        if (newThreatAction.trim()) {
-            abilities.push({
-                name: 'Ação/Habilidade',
-                description: newThreatAction,
-                type: 'Ação'
-            });
-        }
-
-        const threatData = {
-            ...newThreat,
-            abilities,
-            acoes: [],
-            habilidades: [],
-            tipo: 'Sangue',
-            tamanho: 'Médio',
-            sentidos: `Iniciativa +${newThreat.iniciativa}`,
-            pericias: {},
-            atributos: { AGI: 1, FOR: 1, INT: 1, PRE: 1, VIG: 1 }
-        };
-
-        if (onCreateThreat) {
-            onCreateThreat(threatData);
-            setIsCreatingThreat(false);
-            setNewThreat({ nome: '', vd: 0, pv: 10, defesa: 10, iniciativa: 0 });
-            setNewThreatAction('');
-        }
-    };
-
-    const handleAddSelected = () => {
-        const combatants: Combatant[] = [];
-
-        selectedAgents.forEach(id => {
-            const agent = agents.find(a => a.id === id);
-            if (agent) {
-                const initBonus = agent.pericias?.Iniciativa?.total ?? 0;
-                combatants.push({
-                    id: generateCombatantId(),
-                    name: agent.nome,
-                    type: 'agent',
-                    sourceId: agent.id,
-                    initiative: rollInitiative(1, initBonus),
-                    initiativeBonus: initBonus,
-                    hp: { current: agent.pvAtual, max: agent.pvMax },
-                    pe: { current: agent.peAtual, max: agent.peMax },
-                    san: { current: agent.sanAtual, max: agent.sanMax },
-                    defense: agent.defesa,
-                    conditions: [],
-                    notes: '',
-                    isActive: true,
-                    abilities: agent.abilities,
-                });
-            }
+  function adicionarRascunho() {
+    const novos: Combatant[] = [];
+    for (const entrada of presentes) {
+      if (entrada.tipo === 'agente') {
+        const agente = agents.find(a => a.id === entrada.id);
+        if (!agente) continue;
+        const bonus = agente.initiativeSkill?.bonusFixo ?? 0;
+        novos.push({
+          id: generateCombatantId(), name: agente.nome, type: 'agent', sourceId: agente.id,
+          initiative: 0, initiativeBonus: bonus, initiativeSkill: agente.initiativeSkill,
+          hp: { ...agente.hp }, pe: agente.pe ? { ...agente.pe } : undefined, pd: agente.pd ? { ...agente.pd } : undefined, san: agente.san ? { ...agente.san } : undefined,
+          defense: agente.defesa, conditions: [], notes: '', isActive: true, abilities: agente.abilities,
         });
-
-        selectedCreatures.forEach(nome => {
-            const creature = creatures.find(c => c.nome === nome);
-            if (creature) {
-                combatants.push({
-                    id: generateCombatantId(),
-                    name: creature.nome,
-                    type: 'creature',
-                    initiative: rollInitiative(1, creature.iniciativa ?? 0),
-                    initiativeBonus: creature.iniciativa ?? 0,
-                    hp: { current: creature.pv ?? 20, max: creature.pv ?? 20 },
-                    defense: creature.defesa ?? 12,
-                    conditions: [],
-                    notes: '',
-                    isActive: true,
-                    abilities: creature.abilities,
-                    atributos: creature.atributos,
-                    fortitude: creature.fortitude,
-                    reflexos: creature.reflexos,
-                    vontade: creature.vontade,
-                    resistencias: creature.resistencias,
-                    imunidades: creature.imunidades,
-                    vulnerabilidades: creature.vulnerabilidades,
-                    deslocamento: creature.deslocamento,
-                });
-            }
+      } else if (entrada.tipo === 'ameaca') {
+        const origem = threats.find(t => t.chave === entrada.id);
+        if (origem) novos.push(...criarCopiasAmeaca(origem, entrada.quantidade, combatants));
+      } else {
+        const registro = npcs.find(n => n.id === entrada.id);
+        if (!registro) continue;
+        const { npc } = registro;
+        const iniciativa = lerPerfilDeIniciativa(npc.pericias?.Iniciativa);
+        novos.push({
+          id: generateCombatantId(), name: npc.nome, type: 'npc', sourceId: registro.id,
+          initiative: 0, ...iniciativa,
+          hp: { current: npc.vida, max: npc.vida }, defense: npc.defesa,
+          conditions: [], notes: npc.descricao || '', isActive: !iniciativa.semTesteDeIniciativa,
+          abilities: [
+            ...npc.ataques.map(a => ({ name: a.nome, description: [a.teste, a.dano, a.critico, a.especial].filter(Boolean).join(' · '), type: 'Ataque' })),
+            ...npc.habilidades.map(h => ({ name: h.nome, description: h.descricao, type: 'Habilidade' })),
+          ],
         });
+      }
+    }
+    if (!novos.length) return;
+    onAdd(novos);
+    concluir(presentes);
+    setRevisao(false);
+  }
 
-        selectedNpcs.forEach(nome => {
-            const npc = npcs.find(n => n.nome === nome);
-            if (npc) {
-                const initBonus = parseInt(npc.pericias?.Iniciativa || '0') || 0;
+  function adicionarAvulso() {
+    const { nome, pv, defesa, iniciativa, quantidade, inimigo } = rascunhoAvulso;
+    const total = Math.min(LIMITE_COPIAS_ENCONTRO, Math.max(1, Math.trunc(quantidade || 1)));
+    onAdd(Array.from({ length: total }, (_, i) => ({
+      id: generateCombatantId(), name: (nome.trim() || 'NPC') + (total > 1 ? ' #' + (i + 1) : ''),
+      type: 'npc', inimigo, initiative: 0, initiativeBonus: iniciativa,
+      hp: { current: pv, max: pv }, defense: defesa, conditions: [], notes: '', isActive: true,
+    })));
+    setRascunhoAvulso({ nome: '', pv: 20, defesa: 12, iniciativa: 0, quantidade: 1, inimigo: false });
+  }
 
-                const abilities: CombatantAbility[] = [
-                    ...npc.ataques.map(atq => ({
-                        name: atq.nome,
-                        description: `${atq.teste ? `Teste: ${atq.teste}` : ''} | ${atq.dano ? `Dano: ${atq.dano}` : ''} | ${atq.critico ? `Crítico: ${atq.critico}` : ''} ${atq.especial ? `| ${atq.especial}` : ''}`,
-                        type: 'Ataque' as const
-                    })),
-                    ...npc.habilidades.map(hab => ({
-                        name: hab.nome,
-                        description: hab.descricao,
-                        type: 'Habilidade' as const
-                    }))
-                ];
+  function controleQuantidade(item: OpcaoEncontro, quantidade: number) {
+    const rotulo = item.nome + (item.origem ? ' (' + item.origem + ')' : '');
+    return <div className="flex shrink-0 items-center">
+      <button type="button" className={cn(NEUTRO, 'min-w-11 px-0')} aria-label={'Diminuir quantidade de ' + rotulo} onClick={() => definirQuantidade(item.tipo, item.id, quantidade - 1)}><Minus size={16} aria-hidden /></button>
+      <span className="min-w-7 text-center text-sm tabular-nums" aria-live="polite">{quantidade}</span>
+      <button type="button" className={cn(NEUTRO, 'min-w-11 px-0')} disabled={quantidade >= LIMITE_COPIAS_ENCONTRO} aria-label={'Aumentar quantidade de ' + rotulo} onClick={() => definirQuantidade(item.tipo, item.id, quantidade + 1)}><Plus size={16} aria-hidden /></button>
+    </div>;
+  }
 
-                combatants.push({
-                    id: generateCombatantId(),
-                    name: npc.nome,
-                    type: 'npc',
-                    initiative: rollInitiative(1, initBonus),
-                    initiativeBonus: initBonus,
-                    hp: { current: npc.vida, max: npc.vida },
-                    defense: npc.defesa,
-                    conditions: [],
-                    notes: npc.descricao || '',
-                    isActive: true,
-                    abilities: abilities
-                });
-            }
-        });
+  const painelRevisao = (
+    <aside aria-label="Composição do encontro" className="min-w-0 rounded-xl border border-ordem-border bg-ordem-black-deep p-3 sm:p-4">
+      <h3 tabIndex={-1} ref={tituloRevisao} className="flex items-center gap-2 font-dados text-base font-semibold text-ordem-white"><ClipboardList size={18} aria-hidden /> Composição</h3>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <div className="rounded-lg border border-ordem-border bg-ordem-ooze/35 p-2.5"><p className="text-xs text-ordem-text-secondary">VD das ameaças</p><p className="mt-1 text-xl font-semibold tabular-nums">{vd ?? '—'}</p></div>
+        <div className="rounded-lg border border-ordem-border bg-ordem-ooze/35 p-2.5"><p className="text-xs text-ordem-text-secondary">NEX dos agentes</p><p className="mt-1 text-xl font-semibold tabular-nums">{nex ?? '—'}</p></div>
+      </div>
+      {nex !== null && vd !== null && vd > 0 && !temNPC && <p className="mt-2 text-xs leading-relaxed text-ordem-text-secondary">VD e NEX equivalentes indicam equilíbrio. Terreno, recursos e experiência também pesam.</p>}
+      {temNPC && <p className="mt-2 text-xs text-ordem-text-secondary">NPCs ficam fora da soma de VD.</p>}
+      {presentes.length > 0 && <ul className="mt-3 space-y-2">
+        {presentes.map(e => {
+          const item = disponiveis.get(indexar(e.tipo, e.id))!;
+          return <li key={indexar(e.tipo, e.id)} className="flex items-center justify-between gap-2 border-t border-ordem-border pt-2">
+            <div className="min-w-0 break-words">
+              <p className="text-sm text-ordem-white">{e.quantidade > 1 && <strong>{e.quantidade}× </strong>}{item.nome}</p>
+              {item.origem && <p className="text-xs text-ordem-text-secondary">{item.origem}</p>}
+            </div>
+            {revisao && item.tipo === 'ameaca' ? controleQuantidade(item, e.quantidade)
+              : <button type="button" onClick={() => definirQuantidade(e.tipo, e.id, 0)} aria-label={'Remover ' + item.nome + ' do rascunho'} className={cn(NEUTRO, 'shrink-0 px-2 text-xs')}>Remover</button>}
+          </li>;
+        })}
+      </ul>}
+      {!total && <p className="mt-3 text-sm text-ordem-text-secondary">Seus participantes aparecem aqui.</p>}
+      {entradas.length > presentes.length && <div className="mt-3 border-t border-ordem-border pt-2">
+        <p className="mb-1 text-xs text-ordem-text-secondary">Há seleções que ainda não estão disponíveis no catálogo ou nas fichas.</p>
+        <button type="button" className={NEUTRO} onClick={() => concluir(entradas.filter(e => !disponiveis.has(indexar(e.tipo, e.id))))}>Remover indisponíveis</button>
+      </div>}
+      {emSessao && <p className="mt-3 text-xs text-ordem-gold">Os novos participantes entram na próxima rodada.</p>}
+    </aside>
+  );
 
-        if (combatants.length > 0) {
-            onAdd(combatants);
-            setSelectedAgents(new Set());
-            setSelectedCreatures(new Set());
-            setSelectedNpcs(new Set());
-        }
-    };
-
-    const handleAddCustom = () => {
-        const count = Math.max(1, parseInt(customCount, 10) || 1);
-        const hp = parseInt(customHp, 10) || 20;
-        const def = parseInt(customDefense, 10) || 12;
-        const initBonus = parseInt(customInitBonus, 10) || 0;
-        const baseName = customName.trim() || 'NPC';
-
-        const combatants: Combatant[] = [];
-        for (let i = 0; i < count; i++) {
-            combatants.push({
-                id: generateCombatantId(),
-                name: count > 1 ? `${baseName} #${i + 1}` : baseName,
-                type: 'npc',
-                initiative: rollInitiative(1, initBonus),
-                initiativeBonus: initBonus,
-                hp: { current: hp, max: hp },
-                defense: def,
-                conditions: [],
-                notes: '',
-                isActive: true,
-            });
-        }
-
-        onAdd(combatants);
-        setCustomName('');
-        setCustomHp('20');
-        setCustomDefense('12');
-        setCustomInitBonus('0');
-        setCustomCount('1');
-    };
-
-    if (!isOpen) return null;
-
-    const totalSelected = selectedAgents.size + selectedCreatures.size + selectedNpcs.size;
-
-    return (
-        <AnimatePresence>
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
-                onClick={onClose}
-            >
-                <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.9, opacity: 0 }}
-                    onClick={e => e.stopPropagation()}
-                    className="w-full max-w-2xl bg-ordem-black border border-ordem-border rounded-xl shadow-2xl overflow-hidden"
-                >
-
-                    <div className="px-4 py-3 border-b border-ordem-border flex items-center justify-between bg-ordem-ooze">
-                        <h2 className="text-lg font-serif text-white">Adicionar Combatentes</h2>
-                        <button onClick={onClose} className="p-1 text-ordem-text-secondary hover:text-white">
-                            <X size={20} />
-                        </button>
-                    </div>
-
-                    <div className="flex border-b border-ordem-border">
-                        <button
-                            onClick={() => setTab('agents')}
-                            className={cn(
-                                'flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors',
-                                tab === 'agents'
-                                    ? 'bg-ordem-ooze text-ordem-green border-b-2 border-ordem-green'
-                                    : 'text-ordem-text-secondary hover:text-white hover:bg-ordem-ooze/50'
-                            )}
-                        >
-                            <Users size={16} /> Agentes ({agents.length})
-                        </button>
-                        <button
-                            onClick={() => setTab('creatures')}
-                            className={cn(
-                                'flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors',
-                                tab === 'creatures'
-                                    ? 'bg-ordem-ooze text-ordem-red border-b-2 border-ordem-red'
-                                    : 'text-ordem-text-secondary hover:text-white hover:bg-ordem-ooze/50'
-                            )}
-                        >
-                            <Skull size={16} /> Ameaças ({creatures.length})
-                        </button>
-                        <button
-                            onClick={() => setTab('npcs')}
-                            className={cn(
-                                'flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors',
-                                tab === 'npcs'
-                                    ? 'bg-ordem-ooze text-blue-400 border-b-2 border-blue-400'
-                                    : 'text-ordem-text-secondary hover:text-white hover:bg-ordem-ooze/50'
-                            )}
-                        >
-                            <Users size={16} /> NPCs ({npcs.length})
-                        </button>
-                        <button
-                            onClick={() => setTab('custom')}
-                            className={cn(
-                                'flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors',
-                                tab === 'custom'
-                                    ? 'bg-ordem-ooze text-yellow-400 border-b-2 border-yellow-400'
-                                    : 'text-ordem-text-secondary hover:text-white hover:bg-ordem-ooze/50'
-                            )}
-                        >
-                            <UserPlus size={16} /> NPC Genérico
-                        </button>
-                    </div>
-
-                    <div className="p-4">
-
-                        {(tab === 'agents' || tab === 'creatures' || tab === 'npcs') && (
-                            <div className="relative mb-4">
-                                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ordem-text-muted" />
-                                <input
-                                    type="text"
-                                    placeholder={tab === 'agents' ? 'Buscar agente...' : tab === 'creatures' ? 'Buscar ameaça...' : 'Buscar NPC...'}
-                                    value={search}
-                                    onChange={e => setSearch(e.target.value)}
-                                    className="w-full bg-ordem-ooze border border-ordem-border-light rounded-lg pl-10 pr-4 py-2 text-sm text-white placeholder:text-ordem-text-muted focus:outline-none focus:border-ordem-green/50"
-                                />
-                            </div>
-                        )}
-
-                        {isCreatingThreat ? (
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between mb-2">
-                                    <h3 className="font-bold text-white text-sm">Nova Ameaça</h3>
-                                    <button
-                                        onClick={() => setIsCreatingThreat(false)}
-                                        className="text-xs text-ordem-text-secondary hover:text-white underline"
-                                    >
-                                        Voltar para lista
-                                    </button>
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="block text-xs text-ordem-text-muted mb-1">Nome</label>
-                                        <input
-                                            value={newThreat.nome}
-                                            onChange={e => setNewThreat({ ...newThreat, nome: e.target.value })}
-                                            className="w-full bg-ordem-black border border-ordem-border rounded px-2 py-1 text-sm text-white"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs text-ordem-text-muted mb-1">VD</label>
-                                        <input
-                                            value={newThreat.vd}
-                                            onChange={e => setNewThreat({ ...newThreat, vd: parseInt(e.target.value) || 0 })}
-                                            className="w-full bg-ordem-black border border-ordem-border rounded px-2 py-1 text-sm text-white"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-3 gap-3">
-                                    <div>
-                                        <label className="block text-xs text-ordem-text-muted mb-1">PV</label>
-                                        <input
-                                            type="number"
-                                            value={newThreat.pv}
-                                            onChange={e => setNewThreat({ ...newThreat, pv: parseInt(e.target.value) || 1 })}
-                                            className="w-full bg-ordem-black border border-ordem-border rounded px-2 py-1 text-sm text-white"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs text-ordem-text-muted mb-1">Defesa</label>
-                                        <input
-                                            type="number"
-                                            value={newThreat.defesa}
-                                            onChange={e => setNewThreat({ ...newThreat, defesa: parseInt(e.target.value) || 0 })}
-                                            className="w-full bg-ordem-black border border-ordem-border rounded px-2 py-1 text-sm text-white"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs text-ordem-text-muted mb-1">Iniciativa</label>
-                                        <input
-                                            type="number"
-                                            value={newThreat.iniciativa}
-                                            onChange={e => setNewThreat({ ...newThreat, iniciativa: parseInt(e.target.value) || 0 })}
-                                            className="w-full bg-ordem-black border border-ordem-border rounded px-2 py-1 text-sm text-white"
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-xs text-ordem-text-muted mb-1">Ações/Habilidades (Opcional)</label>
-                                    <textarea
-                                        placeholder="Ex: Ataque de Garra (Padrão): 1d20+10 (2d6+5)"
-                                        className="w-full h-20 bg-ordem-black border border-ordem-border rounded px-2 py-1 text-xs text-white resize-none"
-                                        value={newThreatAction}
-                                        onChange={e => setNewThreatAction(e.target.value)}
-                                    />
-                                    <p className="text-[10px] text-ordem-text-muted mt-1">
-                                        Adicione uma breve descrição para aparecer no card.
-                                    </p>
-                                </div>
-                                <button
-                                    onClick={handleCreateThreat}
-                                    className="w-full py-2 bg-ordem-red hover:bg-red-700 text-white rounded font-bold transition-colors"
-                                >
-                                    Salvar Ameaça
-                                </button>
-                            </div>
-                        ) : (
-
-                            tab === 'creatures' && (
-                                <button
-                                    onClick={() => setIsCreatingThreat(true)}
-                                    className="w-full mb-3 flex items-center justify-center gap-2 py-2 border border-dashed border-ordem-border hover:border-ordem-red text-ordem-text-secondary hover:text-ordem-red rounded transition-colors"
-                                >
-                                    <PlusCircle size={16} /> Criar Nova Ameaça
-                                </button>
-                            )
-                        )}
-
-                        {tab === 'agents' && (
-                            <div className="max-h-72 overflow-y-auto custom-scrollbar space-y-2">
-                                {filteredAgents.length === 0 ? (
-                                    <p className="text-center text-ordem-text-muted py-8">Nenhum agente encontrado</p>
-                                ) : (
-                                    filteredAgents.map(agent => (
-                                        <button
-                                            key={agent.id}
-                                            onClick={() => toggleAgent(agent.id)}
-                                            className={cn(
-                                                'w-full p-3 rounded-lg border flex items-center gap-3 transition-colors text-left',
-                                                selectedAgents.has(agent.id)
-                                                    ? 'bg-ordem-green/20 border-ordem-green'
-                                                    : 'bg-ordem-ooze/50 border-ordem-border hover:border-ordem-green/50'
-                                            )}
-                                        >
-                                            <div className={cn(
-                                                'w-5 h-5 rounded border-2 flex items-center justify-center shrink-0',
-                                                selectedAgents.has(agent.id) ? 'border-ordem-green bg-ordem-green' : 'border-ordem-border'
-                                            )}>
-                                                {selectedAgents.has(agent.id) && <span className="text-white text-xs">✓</span>}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-medium text-white truncate">{agent.nome}</p>
-                                                <p className="text-xs text-ordem-text-muted">
-                                                    PV: {agent.pvAtual}/{agent.pvMax} | DEF: {agent.defesa}
-                                                </p>
-                                            </div>
-                                        </button>
-                                    ))
-                                )}
-                            </div>
-                        )}
-
-                        {tab === 'creatures' && (
-                            <div className="max-h-72 overflow-y-auto custom-scrollbar space-y-2">
-                                {filteredCreatures.length === 0 ? (
-                                    <p className="text-center text-ordem-text-muted py-8">Nenhuma ameaça encontrada</p>
-                                ) : (
-                                    filteredCreatures.map((creature, idx) => (
-                                        <button
-                                            key={creature.nome + idx}
-                                            onClick={() => toggleCreature(creature.nome)}
-                                            className={cn(
-                                                'w-full p-3 rounded-lg border flex items-center gap-3 transition-colors text-left',
-                                                selectedCreatures.has(creature.nome)
-                                                    ? 'bg-ordem-red/20 border-ordem-red'
-                                                    : 'bg-ordem-ooze/50 border-ordem-border hover:border-ordem-red/50'
-                                            )}
-                                        >
-                                            <div className={cn(
-                                                'w-5 h-5 rounded border-2 flex items-center justify-center shrink-0',
-                                                selectedCreatures.has(creature.nome) ? 'border-ordem-red bg-ordem-red' : 'border-ordem-border'
-                                            )}>
-                                                {selectedCreatures.has(creature.nome) && <span className="text-white text-xs">✓</span>}
-                                            </div>
-                                            <Skull size={16} className="text-ordem-red shrink-0" />
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-medium text-white truncate">{creature.nome}</p>
-                                                <p className="text-xs text-ordem-text-muted">
-                                                    PV: {creature.pv ?? '?'} | DEF: {creature.defesa ?? '?'}
-                                                </p>
-                                            </div>
-                                        </button>
-                                    ))
-                                )}
-                            </div>
-                        )}
-
-                        {tab === 'npcs' && (
-                            <div className="max-h-72 overflow-y-auto custom-scrollbar space-y-2">
-                                {filteredNpcs.length === 0 ? (
-                                    <div className="text-center text-ordem-text-muted py-8 flex flex-col items-center">
-                                        <Users size={32} className="mb-2 opacity-20" />
-                                        <p>Nenhum NPC encontrado</p>
-                                        <p className="text-xs mt-1">Crie NPCs na aba &quot;NPCs&quot; do painel.</p>
-                                    </div>
-                                ) : (
-                                    filteredNpcs.map((npc, idx) => (
-                                        <button
-                                            key={npc.nome + idx}
-                                            onClick={() => toggleNpc(npc.nome)}
-                                            className={cn(
-                                                'w-full p-3 rounded-lg border flex items-center gap-3 transition-colors text-left',
-                                                selectedNpcs.has(npc.nome)
-                                                    ? 'bg-blue-900/20 border-blue-500'
-                                                    : 'bg-ordem-ooze/50 border-ordem-border hover:border-blue-500/50'
-                                            )}
-                                        >
-                                            <div className={cn(
-                                                'w-5 h-5 rounded border-2 flex items-center justify-center shrink-0',
-                                                selectedNpcs.has(npc.nome) ? 'border-blue-500 bg-blue-500' : 'border-ordem-border'
-                                            )}>
-                                                {selectedNpcs.has(npc.nome) && <span className="text-white text-xs">✓</span>}
-                                            </div>
-                                            <Users size={16} className="text-blue-400 shrink-0" />
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-medium text-white truncate">{npc.nome}</p>
-                                                <p className="text-xs text-ordem-text-muted">
-                                                    PV: {npc.vida} | DEF: {npc.defesa}
-                                                </p>
-                                            </div>
-                                        </button>
-                                    ))
-                                )}
-                            </div>
-                        )}
-
-                        {tab === 'custom' && (
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-xs text-ordem-text-secondary mb-1">Nome</label>
-                                    <input
-                                        type="text"
-                                        value={customName}
-                                        onChange={e => setCustomName(e.target.value)}
-                                        placeholder="Zumbi, Cultista, Guarda..."
-                                        className="w-full bg-ordem-ooze border border-ordem-border rounded px-3 py-2 text-white placeholder:text-ordem-text-muted"
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                    <div>
-                                        <label className="block text-xs text-ordem-text-secondary mb-1">PV</label>
-                                        <input
-                                            type="number"
-                                            value={customHp}
-                                            onChange={e => setCustomHp(e.target.value)}
-                                            className="w-full bg-ordem-ooze border border-ordem-border rounded px-3 py-2 text-white text-center"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs text-ordem-text-secondary mb-1">Defesa</label>
-                                        <input
-                                            type="number"
-                                            value={customDefense}
-                                            onChange={e => setCustomDefense(e.target.value)}
-                                            className="w-full bg-ordem-ooze border border-ordem-border rounded px-3 py-2 text-white text-center"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs text-ordem-text-secondary mb-1">Bônus Init.</label>
-                                        <input
-                                            type="number"
-                                            value={customInitBonus}
-                                            onChange={e => setCustomInitBonus(e.target.value)}
-                                            className="w-full bg-ordem-ooze border border-ordem-border rounded px-3 py-2 text-white text-center"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs text-ordem-text-secondary mb-1">Quantidade</label>
-                                        <input
-                                            type="number"
-                                            value={customCount}
-                                            onChange={e => setCustomCount(e.target.value)}
-                                            min="1"
-                                            max="20"
-                                            className="w-full bg-ordem-ooze border border-ordem-border rounded px-3 py-2 text-white text-center"
-                                        />
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={handleAddCustom}
-                                    disabled={!customName.trim()}
-                                    className="w-full py-2.5 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
-                                >
-                                    <Dice6 size={16} />
-                                    Adicionar {parseInt(customCount, 10) > 1 ? `${customCount}x ` : ''}{customName || 'NPC'}
-                                </button>
-                            </div>
-                        )}
-                    </div>
-
-                    {(tab === 'agents' || tab === 'creatures' || tab === 'npcs') && (
-                        <div className="px-4 py-3 border-t border-ordem-border bg-ordem-ooze flex items-center justify-between">
-                            <span className="text-sm text-ordem-text-secondary">
-                                {totalSelected} selecionado(s)
-                            </span>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={onClose}
-                                    className="px-4 py-2 text-sm text-ordem-text-secondary hover:text-white transition-colors"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    onClick={handleAddSelected}
-                                    disabled={totalSelected === 0}
-                                    className="px-4 py-2 bg-ordem-green hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
-                                >
-                                    <Dice6 size={14} />
-                                    Adicionar e Rolar Iniciativa
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </motion.div>
-            </motion.div>
-        </AnimatePresence >
-    );
+  return (
+    <Modal open={isOpen} onOpenChange={aberto => { if (!aberto) onClose(); }}>
+      <ModalContent size="full" onCloseAutoFocus={e => { e.preventDefault(); onReturnFocus(); }} className="max-h-[92dvh] bg-ordem-black font-dados sm:max-h-[90dvh]">
+        <ModalHeader className="pb-4 pt-4">
+          <ModalTitle className="flex items-center gap-2 font-display text-xl font-semibold text-ordem-white sm:text-2xl"><Swords size={20} className="shrink-0 text-ordem-green-muted" aria-hidden /> Montar encontro</ModalTitle>
+          <ModalDescription className="mt-1 text-sm text-ordem-text-secondary">Escolha participantes e revise antes de adicionar ao combate.</ModalDescription>
+        </ModalHeader>
+        <ModalBody className="min-h-0 p-3 sm:p-5">
+          <div className={cn('grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,.64fr)]', revisao && 'lg:grid-cols-1')}>
+            {!revisao && <div className="min-w-0 space-y-3">
+              <div role="group" aria-label="Origem dos participantes" className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+                {ABAS.map(({ id, titulo }) => <button key={id} type="button" aria-pressed={aba === id} onClick={() => { setAba(id); setBusca(''); }} className={cn(NEUTRO, aba === id && 'border-ordem-green-muted/55 bg-ordem-green-muted/10 text-ordem-green-muted')}>{titulo}</button>)}
+              </div>
+              {aba === 'avulso' ? <form className="space-y-3" onSubmit={e => { e.preventDefault(); adicionarAvulso(); }}>
+                <label className="block space-y-1 text-sm">Nome<input className={CAMPO} value={rascunhoAvulso.nome} onChange={e => setRascunhoAvulso(r => ({ ...r, nome: e.target.value }))} placeholder="NPC" /></label>
+                <div className="grid grid-cols-2 gap-2">
+                  {([{ chave: 'pv', rotulo: 'PV', min: 0 }, { chave: 'defesa', rotulo: 'Defesa', min: 0 }, { chave: 'iniciativa', rotulo: 'Bônus de iniciativa' }, { chave: 'quantidade', rotulo: 'Quantidade', min: 1, max: LIMITE_COPIAS_ENCONTRO }] as const).map(campo => (
+                    <label key={campo.chave} className="space-y-1 text-sm">{campo.rotulo}<input type="number" className={CAMPO} min={'min' in campo ? campo.min : undefined} max={'max' in campo ? campo.max : undefined} value={rascunhoAvulso[campo.chave]} onChange={e => setRascunhoAvulso(r => ({ ...r, [campo.chave]: Number(e.target.value) }))} /></label>
+                  ))}
+                </div>
+                <label className="block space-y-1 text-sm">Lado do NPC
+                  <select className={CAMPO} value={rascunhoAvulso.inimigo ? 'inimigo' : 'aliado'} onChange={e => setRascunhoAvulso(a => ({ ...a, inimigo: e.target.value === 'inimigo' }))}>
+                    <option value="aliado">Aliado</option><option value="inimigo">Inimigo</option>
+                  </select>
+                </label>
+                <button type="submit" className={PRIMARIO}><Plus size={16} aria-hidden /> Adicionar avulso ao combate</button>
+              </form> : <>
+                <label className="relative block">
+                  <span className="sr-only">Buscar participantes</span>
+                  <Search size={17} aria-hidden className="absolute left-3 top-3.5 text-ordem-text-muted" />
+                  <input type="search" className={cn(CAMPO, 'pl-10')} value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar participantes" />
+                </label>
+                {aba === 'ameaca' && <Link href="/mestre?tab=ameacas&nova=1" className="inline-flex min-h-11 items-center gap-2 rounded px-1 text-sm text-ordem-green-muted hover:underline"><Plus size={16} aria-hidden /> Criar ameaça no bestiário</Link>}
+                <div className="space-y-2">
+                  {filtradas.map(o => {
+                    const quantidade = quantidades.get(indexar(o.tipo, o.id)) ?? 0;
+                    return <div key={indexar(o.tipo, o.id)} className={cn('flex flex-wrap items-center justify-between gap-2 rounded-lg border p-2.5', quantidade ? 'border-ordem-green-muted/40 bg-ordem-green-muted/5' : 'border-ordem-border bg-ordem-ooze/25')}>
+                      <div className="min-w-0 flex-1">
+                        <p className="break-words text-sm font-semibold text-ordem-white">{o.nome}</p>
+                        <p className="mt-0.5 break-words text-xs text-ordem-text-secondary">{o.detalhes}</p>
+                      </div>
+                      {o.tipo === 'ameaca' && quantidade ? controleQuantidade(o, quantidade) : <button type="button" disabled={!pronto} aria-pressed={quantidade > 0} className={cn(NEUTRO, 'shrink-0')} aria-label={(quantidade ? 'Retirar ' : 'Selecionar ') + o.nome} onClick={() => definirQuantidade(o.tipo, o.id, quantidade ? 0 : 1)}>
+                        {quantidade ? <Check size={16} aria-hidden /> : <Plus size={16} aria-hidden />}{quantidade ? 'Selecionado' : 'Adicionar'}
+                      </button>}
+                    </div>;
+                  })}
+                  {!filtradas.length && <p role="status" className="rounded-lg border border-dashed border-ordem-border p-4 text-sm text-ordem-text-secondary">Nenhum participante encontrado.</p>}
+                </div>
+              </>}
+            </div>}
+            {revisao ? painelRevisao : <div className="hidden lg:sticky lg:top-0 lg:block lg:self-start">{painelRevisao}</div>}
+          </div>
+        </ModalBody>
+        <ModalFooter className="flex-wrap justify-between gap-2 px-3 py-3 sm:px-5">
+          <p role="status" className="self-center text-sm tabular-nums text-ordem-text-secondary">{total} {total === 1 ? 'participante' : 'participantes'}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            {revisao ? <>
+              <button type="button" className={NEUTRO} onClick={() => setRevisao(false)}>Voltar à seleção</button>
+              <button type="button" className={PRIMARIO} disabled={!total} onClick={adicionarRascunho}>Adicionar ao combate</button>
+            </> : <button type="button" className={PRIMARIO} disabled={!total} onClick={() => setRevisao(true)}>Revisar encontro</button>}
+          </div>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+  );
 }

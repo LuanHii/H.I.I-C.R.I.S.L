@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import { useRef } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import type { Personagem } from '@/core/types';
 import { Fita, RotuloSecao } from '../ui/Pecas';
@@ -14,25 +14,38 @@ interface InventoryTabContentProps {
 
 export function InventoryTabContent({ agent, readOnly, onAddItem, onRemoveItem }: InventoryTabContentProps) {
   const sobrecarga = agent.carga.atual > agent.carga.maxima;
+  const adicionar = useRef<HTMLButtonElement>(null);
 
   return (
-    <div className="animate-in fade-in-0 slide-in-from-bottom-2 duration-200 space-y-3">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <RotuloSecao className="text-[var(--mestre-primary,#DC2626)]">Equipamento</RotuloSecao>
-        <span className={`font-mono text-xs tabular-nums ${sobrecarga ? 'text-ordem-red' : 'text-ordem-text-secondary'}`}>
-          carga {agent.carga.atual}/{agent.carga.maxima}{sobrecarga ? ' — sobrecarregado' : ''}
-        </span>
+    <div className="space-y-3 font-dados">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <RotuloSecao className="text-ordem-white">Equipamento</RotuloSecao>
+          <p role="status" className={`mt-1 font-dados text-sm tabular-nums ${sobrecarga ? 'text-ordem-red-light' : 'text-ordem-text-secondary'}`}>
+            Carga {agent.carga.atual}/{agent.carga.maxima}{sobrecarga ? ' · Sobrecarregado' : ''}
+          </p>
+        </div>
+        {!readOnly && (
+          <button
+            ref={adicionar}
+            type="button"
+            onClick={onAddItem}
+            className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-ordem-green-muted px-3 font-dados text-sm font-semibold text-ordem-black hover:bg-white focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-ordem-green-muted"
+          >
+            <Plus size={16} aria-hidden /> Adicionar item
+          </button>
+        )}
       </div>
 
       {agent.equipamentos.length === 0 ? (
-        <p className="py-6 text-center text-sm italic text-ordem-text-muted">Inventário vazio.</p>
+        <p className="rounded-lg border border-dashed border-ordem-border py-5 text-center text-sm text-ordem-text-secondary">Inventário vazio.</p>
       ) : (
-        <ul className="divide-y divide-white/[0.06] border border-white/10 bg-white/[0.02]">
+        <ul className="divide-y divide-ordem-border rounded-lg border border-ordem-border bg-white/[0.02]">
           {agent.equipamentos.map((item, idx) => (
-            <li key={`${item.nome}-${idx}`} className="group flex items-center justify-between gap-3 px-3 py-2.5">
+            <li key={`${item.nome}-${idx}`} className="flex min-w-0 items-center justify-between gap-2 px-2.5 py-2 sm:px-3">
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white">{item.nome}</p>
-                <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-ordem-text-muted">
+                <p className="text-sm font-semibold text-white [overflow-wrap:anywhere]">{item.nome}</p>
+                <p className="mt-1 flex flex-wrap items-center gap-1.5 font-dados text-xs text-ordem-text-secondary">
                   <Fita variante="neutra">Cat. {item.categoria}</Fita>
                   <span>{item.espaco} espaço{item.espaco === 1 ? '' : 's'}</span>
                 </p>
@@ -40,26 +53,22 @@ export function InventoryTabContent({ agent, readOnly, onAddItem, onRemoveItem }
               {!readOnly && (
                 <button
                   type="button"
-                  onClick={() => onRemoveItem(idx)}
+                  onClick={evento => {
+                    const linha = evento.currentTarget.closest('li');
+                    const vizinha = linha?.nextElementSibling ?? linha?.previousElementSibling;
+                    (vizinha?.querySelector('button') ?? adicionar.current)?.focus();
+                    onRemoveItem(idx);
+                  }}
+                  aria-label={'Remover ' + item.nome}
                   title="Remover"
-                  className="shrink-0 p-1.5 text-ordem-text-muted opacity-0 transition hover:text-ordem-red group-hover:opacity-100 focus:opacity-100"
+                  className="grid size-11 shrink-0 place-items-center rounded-lg border border-ordem-border text-ordem-text-secondary hover:border-ordem-red-light hover:text-ordem-red-light focus-visible:outline focus-visible:outline-ordem-green-muted"
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={16} aria-hidden />
                 </button>
               )}
             </li>
           ))}
         </ul>
-      )}
-
-      {!readOnly && (
-        <button
-          type="button"
-          onClick={onAddItem}
-          className="flex w-full items-center justify-center gap-2 border border-dashed border-white/15 py-2.5 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/40 hover:text-white"
-        >
-          <Plus size={13} /> Adicionar item
-        </button>
       )}
     </div>
   );

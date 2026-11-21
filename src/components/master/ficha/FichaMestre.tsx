@@ -1,5 +1,6 @@
 'use client';
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import React, { useMemo, useState } from 'react';
 import { Backpack, ClipboardList, Dumbbell, Flame, ShieldAlert, Sparkles, Star, Swords, Zap } from 'lucide-react';
 import type { AtributoKey, Item, Patente, PericiaName, Personagem, Poder, Ritual } from '../../../core/types';
@@ -59,37 +60,17 @@ interface Aba<T extends string> {
   badge?: React.ReactNode;
 }
 
-function Abas<T extends string>({ abas, ativa, onAtiva }: { abas: Aba<T>[]; ativa: T; onAtiva: (id: T) => void }) {
+function Abas<T extends string>({ abas, rotulo }: { abas: Aba<T>[]; rotulo: string }) {
   return (
-    <div className="sticky top-[var(--altura-app-bar)] z-30 touch-scroll overflow-x-auto border-y border-white/10 bg-ordem-black/95 px-2 backdrop-blur lg:static lg:bg-black/30 sm:px-4">
-      <div className="flex min-w-max gap-1" role="tablist">
-        {abas.map((aba) => {
-          const estaAtiva = ativa === aba.id;
-          return (
-            <button
-              key={aba.id}
-              role="tab"
-              aria-selected={estaAtiva}
-              onClick={() => onAtiva(aba.id)}
-              className={`relative flex items-center gap-1.5 whitespace-nowrap px-3 py-3 font-carimbo text-[11px] uppercase tracking-[0.14em] transition-colors ${estaAtiva
-                ? 'text-[var(--mestre-primary,#DC2626)]'
-                : 'text-ordem-text-muted hover:text-ordem-white-muted'
-                }`}
-            >
-              <span className={estaAtiva ? 'opacity-100' : 'opacity-60'}>{aba.icone}</span>
-              <span className={estaAtiva ? 'inline' : 'hidden sm:inline'}>{aba.rotulo}</span>
-              {aba.badge}
-              {estaAtiva && (
-                <span
-                  aria-hidden
-                  className="absolute inset-x-2 bottom-0 h-[2px] bg-[var(--mestre-primary,#DC2626)] shadow-[0_0_10px_-1px_var(--mestre-glow)]"
-                />
-              )}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    <TabsList aria-label={rotulo} variant="underline" className="grid w-full grid-cols-2 border-y border-white/10 bg-ordem-black/95 px-1 min-[380px]:grid-cols-3 sm:flex sm:flex-wrap sm:px-4">
+      {abas.map(aba => (
+        <TabsTrigger key={aba.id} value={aba.id} variant="underline" className="min-h-11 min-w-0 justify-start gap-1.5 whitespace-normal rounded-none px-1.5 text-left font-dados text-xs leading-tight sm:px-3">
+          <span aria-hidden className="shrink-0">{aba.icone}</span>
+          <span>{aba.rotulo}</span>
+          {aba.badge}
+        </TabsTrigger>
+      ))}
+    </TabsList>
   );
 }
 
@@ -276,52 +257,56 @@ export function FichaMestre({
             <AtributosFicha ficha={ficha} build={build} modo="mesa" readOnly={readOnly} onAjustarBase={() => undefined} onResponderMarco={() => undefined} />
           </div>
 
-          <Abas abas={abasMesa} ativa={abaMesa} onAtiva={setAbaMesa} />
+          <Tabs value={abaMesa} onValueChange={valor => setAbaMesa(valor as AbaMesa)} className="min-w-0">
+            <Abas abas={abasMesa} rotulo="Seções da ficha de mesa" />
 
-          <div className="bg-ordem-ooze/50 lg:flex-1 lg:overflow-y-auto lg:rounded-b-xl">
-            <div className="p-3 sm:p-5">
-              {abaMesa === 'pericias' && (
-                <SkillsTabContent
-                  agent={personagem}
-                  isEditingMode={false}
-                  lastRoll={lastRoll}
-                  onLastRollChange={setLastRoll}
-                  editingSkill={null}
-                  tempSkillBonus=""
-                  onTempSkillBonusChange={() => undefined}
-                  onToggleSkillGrade={() => undefined}
-                  onManualSkillBonusChange={() => undefined}
-                  onStartEditingSkill={() => undefined}
-                />
-              )}
-              {abaMesa === 'acoes' && <ActionsTab character={personagem} useSanity={!personagem.usarPd} />}
-              {abaMesa === 'condicoes' && <ConditionsManager personagem={personagem} onUpdate={salvarSessao} readOnly={readOnly} />}
-              {abaMesa === 'inventario' && (
-                <InventoryTabContent agent={personagem} readOnly={readOnly} onAddItem={() => setItemAberto(true)} onRemoveItem={handleRemoveItem} />
-              )}
-              {abaMesa === 'rituais' && (
-                <RitualsTabContent agent={personagem} isEditingMode={false} onAddRitual={() => undefined} onRemoveRitual={() => undefined} />
-              )}
+            <div className="bg-ordem-ooze/50 lg:rounded-b-xl">
+              <div className="p-3 sm:p-5">
+                <TabsContent value="pericias" animate={false} className="mt-0">
+                  <SkillsTabContent
+                    agent={personagem}
+                    isEditingMode={false}
+                    lastRoll={lastRoll}
+                    onLastRollChange={setLastRoll}
+                    editingSkill={null}
+                    tempSkillBonus=""
+                    onTempSkillBonusChange={() => undefined}
+                    onToggleSkillGrade={() => undefined}
+                    onManualSkillBonusChange={() => undefined}
+                    onStartEditingSkill={() => undefined}
+                  />
+                </TabsContent>
+                <TabsContent value="acoes" animate={false} className="mt-0">
+                  <ActionsTab character={personagem} useSanity={!personagem.usarPd} />
+                </TabsContent>
+                <TabsContent value="condicoes" animate={false} className="mt-0">
+                  <ConditionsManager personagem={personagem} onUpdate={salvarSessao} readOnly={readOnly} />
+                </TabsContent>
+                <TabsContent value="inventario" animate={false} className="mt-0">
+                  <InventoryTabContent agent={personagem} readOnly={readOnly} onAddItem={() => setItemAberto(true)} onRemoveItem={handleRemoveItem} />
+                </TabsContent>
+                <TabsContent value="rituais" animate={false} className="mt-0">
+                  <RitualsTabContent agent={personagem} isEditingMode={false} onAddRitual={() => undefined} onRemoveRitual={() => undefined} />
+                </TabsContent>
+              </div>
             </div>
-          </div>
+          </Tabs>
         </>
       ) : (
         <>
-          <Abas abas={abasConstrucao} ativa={abaConstrucao} onAtiva={setAbaConstrucao} />
+          <Tabs value={abaConstrucao} onValueChange={valor => setAbaConstrucao(valor as AbaConstrucao)} className="min-w-0">
+            <Abas abas={abasConstrucao} rotulo="Seções de construção da ficha" />
 
-          <div className="bg-ordem-ooze/50 lg:flex-1 lg:overflow-y-auto lg:rounded-b-xl">
-            <div className="space-y-6 p-4 sm:p-5">
-              {abaConstrucao === 'progressao' && (
-                <>
+            <div className="bg-ordem-ooze/50 lg:rounded-b-xl">
+              <div className="space-y-6 p-4 sm:p-5">
+                <TabsContent value="progressao" animate={false} className="mt-0 space-y-6">
                   <HistoricoEscolhas ficha={ficha} onDesfazer={onDesfazer} />
                   <Secao titulo="Linha do tempo — origem e trilha">
                     <ProgressionTab character={personagem} />
                   </Secao>
-                </>
-              )}
+                </TabsContent>
 
-              {abaConstrucao === 'ajustes' && (
-                <>
+                <TabsContent value="ajustes" animate={false} className="mt-0 space-y-6">
                   <Secao titulo="Recursos — o máximo editável aqui é perda permanente (marca)">
                     <StatusBarsSection agent={personagem} readOnly={false} isEditingMode onStatChange={updateStat} onMaxStatChange={updateMaxStat} />
                   </Secao>
@@ -332,11 +317,9 @@ export function FichaMestre({
                       Usar Pontos de Determinação no lugar de PE e Sanidade (Sobrevivendo ao Horror)
                     </label>
                   </Secao>
-                </>
-              )}
+                </TabsContent>
 
-              {abaConstrucao === 'atributos' && (
-                <>
+                <TabsContent value="atributos" animate={false} className="mt-0 space-y-6">
                   <Secao titulo="Quem é">
                     <IdentidadeFicha ficha={ficha} onEditar={onEditar} />
                   </Secao>
@@ -358,21 +341,19 @@ export function FichaMestre({
                       dicaDeGrau={dicaDeGrau}
                     />
                   </Secao>
-                </>
-              )}
+                </TabsContent>
 
-              {abaConstrucao === 'poderes' && (
-                <>
+                <TabsContent value="poderes" animate={false} className="mt-0 space-y-6">
                   <Secao titulo="Poderes — agrupados por onde vieram">
                     <PoderesPorProveniencia build={build} personagem={personagem} editavel onAdicionar={() => setPoderAberto(true)} onRemoverManual={(nome) => onEditar((f) => removerPoderManual(f, nome))} />
                   </Secao>
                   <Secao titulo="Rituais — os que vêm de marcos não podem ser removidos aqui">
                     <RitualsTabContent agent={personagem} isEditingMode onAddRitual={() => setRitualAberto(true)} onRemoveRitual={handleRemoveRitual} podeRemover={(i) => !ritualDerivado(i)} />
                   </Secao>
-                </>
-              )}
+                </TabsContent>
+              </div>
             </div>
-          </div>
+          </Tabs>
         </>
       )}
 

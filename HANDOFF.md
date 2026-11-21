@@ -1,6 +1,6 @@
 # H.I.I-C.R.I.S — continuação do desenvolvimento
 
-Cole este arquivo inteiro como primeira mensagem no novo chat.
+> Este handoff registra uma etapa anterior da migração. Para retomar no estado atual, comece pelo [guia do projeto](AGENTS.md) e pela [arquitetura](docs/obsidian/Arquitetura.md).
 
 ---
 

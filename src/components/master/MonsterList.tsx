@@ -1,351 +1,209 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { AMEACAS } from '../../data/combat/monsters';
-import { Ameaca } from '../../core/types';
-import { useCloudMonsters } from '../../core/storage';
-import { ELEMENTO_FILTER_STYLES } from '../../data/magic/elementColors';
+'use client';
+
+import Link from 'next/link';
+import { ChevronDown, ChevronUp, ListPlus, Plus, Search, SlidersHorizontal } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import type { Ameaca } from '@/core/types';
+import { montarCatalogoAmeacas, normalizarBusca, type EntradaCatalogoAmeaca } from '@/core/rules/catalogoAmeacas';
+import { LIMITE_COPIAS_ENCONTRO } from '@/core/rules/encontro';
+import { useCloudMonsters } from '@/core/storage';
+import { downloadJSON } from '@/core/storage/exportImportUtils';
+import { ELEMENTO_FILTER_STYLES } from '@/data/magic/elementColors';
+import { cn } from '@/lib/utils';
+import { linkMontagem, useEncontroRascunho } from './EncontroRascunho';
 import { MonsterEditor } from './MonsterEditor';
-import { Cloud, CloudOff } from 'lucide-react';
-import { downloadJSON } from '../../core/storage/exportImportUtils';
 
-// Exportar para a Mesa 3D (a VTT do mestre): a ameaça no formato `Ameaca`, sem os campos da lista.
-function paraExportar(m: Ameaca & { id?: string; isCustom?: boolean }): Ameaca {
-  const { id, isCustom, ...ameaca } = m;
-  void id;
-  void isCustom;
-  return ameaca;
+type Ordem = 'nome' | 'vd-asc' | 'vd-desc';
+interface Filtros {
+  busca: string;
+  tipo: string;
+  fonte: string;
+  minimo: string;
+  maximo: string;
+  ordem: Ordem;
+}
+const PADRAO: Filtros = { busca: '', tipo: '', fonte: '', minimo: '', maximo: '', ordem: 'nome' };
+const CAMPOS = 'min-h-11 w-full rounded-lg border border-ordem-border bg-ordem-black-deep px-3 font-dados text-sm text-ordem-white focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-ordem-green-muted';
+const SECUNDARIO = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-ordem-border-light bg-ordem-ooze/45 px-3 font-dados text-sm text-ordem-white hover:border-ordem-green-muted/60 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-ordem-green-muted';
+const CHAVE = 'hiicris.bestiario.filtros';
+
+function lerFiltros(): Filtros {
+  try {
+    const raw = window.sessionStorage.getItem(CHAVE);
+    if (!raw) return PADRAO;
+    const salvo = JSON.parse(raw) as Partial<Filtros>;
+    return {
+      busca: typeof salvo.busca === 'string' ? salvo.busca : '',
+      tipo: typeof salvo.tipo === 'string' ? salvo.tipo : '',
+      fonte: typeof salvo.fonte === 'string' ? salvo.fonte : '',
+      minimo: typeof salvo.minimo === 'string' ? salvo.minimo : '',
+      maximo: typeof salvo.maximo === 'string' ? salvo.maximo : '',
+      ordem: salvo.ordem === 'vd-asc' || salvo.ordem === 'vd-desc' ? salvo.ordem : 'nome',
+    };
+  } catch {
+    return PADRAO;
+  }
 }
 
-function nomeDeArquivo(nome: string): string {
-  const base = nome.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  return base || 'ameaca';
+function baixarAmeaca(ameaca: Ameaca) {
+  const nome = normalizarBusca(ameaca.nome).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'ameaca';
+  downloadJSON(JSON.stringify(ameaca, null, 2), 'ameaca-' + nome + '.json');
 }
 
-export const MonsterList: React.FC = () => {
-  const [search, setSearch] = useState(() => {
-    if (typeof window === 'undefined') return '';
-    return window.localStorage.getItem('ameacas.search') ?? '';
-  });
-  const [selectedElement, setSelectedElement] = useState<string>(() => {
-    if (typeof window === 'undefined') return 'Todos';
-    return window.localStorage.getItem('ameacas.element') ?? 'Todos';
-  });
-  const [vdRange, setVdRange] = useState<[number, number]>(() => {
-    if (typeof window === 'undefined') return [0, 400];
-    const raw = window.localStorage.getItem('ameacas.vd');
-    if (!raw) return [0, 400];
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length === 2) return [Number(parsed[0]), Number(parsed[1])];
-    } catch { }
-    return [0, 400];
-  });
-  const [order, setOrder] = useState<'nome' | 'vd-desc' | 'vd-asc'>(() => {
-    if (typeof window === 'undefined') return 'nome';
-    return (window.localStorage.getItem('ameacas.order') as any) ?? 'nome';
-  });
-  const [customOnly, setCustomOnly] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return window.localStorage.getItem('ameacas.custom') === 'true';
-  });
-  const { monstros, salvar, remover, isCloudMode, loading } = useCloudMonsters();
-  const [showEditor, setShowEditor] = useState(false);
+export function MonsterList() {
+  const { monstros, salvar, remover, loading } = useCloudMonsters();
+  const { entradas, definirQuantidade, pronto } = useEncontroRascunho();
+  const params = useSearchParams();
+  const [filtros, setFiltros] = useState<Filtros>(PADRAO);
+  const [carregado, setCarregado] = useState(false);
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
-  const [editingMonster, setEditingMonster] = useState<{ ameaca: Ameaca, id?: string } | null>(null);
-
-  const allMonsters = useMemo(() => {
-    const customMonsters = monstros.map(m => ({ ...m.ameaca, id: m.id, isCustom: true }));
-    const staticMonsters = AMEACAS.map(m => ({ ...m, id: undefined, isCustom: false }));
-    return [...customMonsters, ...staticMonsters] as (Ameaca & { id?: string, isCustom: boolean })[];
-  }, [monstros]);
-
-  const filteredMonsters = useMemo(() => {
-    const filtered = allMonsters.filter((monster) => {
-      if (!monster || !monster.nome) return false;
-      const matchesSearch = monster.nome.toLowerCase().includes(search.toLowerCase());
-      const matchesElement = selectedElement === 'Todos' || monster.tipo === selectedElement;
-      const matchesVd = monster.vd >= vdRange[0] && monster.vd <= vdRange[1];
-      const matchesCustom = !customOnly || monster.isCustom === true;
-      return matchesSearch && matchesElement && matchesVd && matchesCustom;
-    });
-    return [...filtered].sort((a, b) => {
-      if (order === 'vd-desc') return b.vd - a.vd;
-      if (order === 'vd-asc') return a.vd - b.vd;
-      return a.nome.localeCompare(b.nome);
-    });
-  }, [search, selectedElement, vdRange, customOnly, order, allMonsters]);
+  const [editor, setEditor] = useState<{ ameaca?: Ameaca; id?: string } | null>(null);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem('ameacas.search', search);
-    window.localStorage.setItem('ameacas.element', selectedElement);
-    window.localStorage.setItem('ameacas.vd', JSON.stringify(vdRange));
-    window.localStorage.setItem('ameacas.order', order);
-    window.localStorage.setItem('ameacas.custom', String(customOnly));
-  }, [search, selectedElement, vdRange, order, customOnly]);
+    setFiltros(lerFiltros());
+    setCarregado(true);
+  }, []);
+  useEffect(() => {
+    if (!carregado) return;
+    try {
+      window.sessionStorage.setItem(CHAVE, JSON.stringify(filtros));
+    } catch {}
+  }, [carregado, filtros]);
+  useEffect(() => {
+    if (params.get('nova') === '1') {
+      setEditor({});
+      window.history.replaceState(null, '', '/mestre?tab=ameacas');
+    }
+  }, [params]);
 
-  const elements = ['Todos', 'Sangue', 'Morte', 'Conhecimento', 'Energia', 'Medo'];
-
-  const handleSave = (monster: Ameaca) => {
-    salvar(monster, editingMonster?.id);
-    setShowEditor(false);
-    setEditingMonster(null);
-  };
-
-  const handleCreate = () => {
-    setEditingMonster(null);
-    setShowEditor(true);
-  };
-
-  const handleEdit = (monster: Ameaca, id: string) => {
-    setEditingMonster({ ameaca: monster, id });
-    setShowEditor(true);
-  };
-
-  const handleClone = (monster: Ameaca) => {
-    const cloned = { ...monster, nome: `${monster.nome} (Cópia)` };
-    setEditingMonster({ ameaca: cloned });
-    setShowEditor(true);
-  };
+  const catalogo = useMemo(() => montarCatalogoAmeacas(monstros), [monstros]);
+  const tipos = useMemo(() => Array.from(new Set(catalogo.map(item => item.ameaca.tipo))).sort((a, b) => a.localeCompare(b, 'pt-BR')), [catalogo]);
+  const fontes = useMemo(() => Array.from(new Set(catalogo.map(item => item.origem))).sort((a, b) => a.localeCompare(b, 'pt-BR')), [catalogo]);
+  const exibidas = useMemo(() => {
+    const busca = normalizarBusca(filtros.busca);
+    return catalogo.filter(({ ameaca, origem }) => (
+      normalizarBusca(ameaca.nome).includes(busca)
+      && (!filtros.tipo || ameaca.tipo === filtros.tipo)
+      && (!filtros.fonte || origem === filtros.fonte)
+      && (!filtros.minimo || ameaca.vd >= Number(filtros.minimo))
+      && (!filtros.maximo || ameaca.vd <= Number(filtros.maximo))
+    )).sort((a, b) => {
+      const porNome = a.ameaca.nome.localeCompare(b.ameaca.nome, 'pt-BR');
+      if (filtros.ordem === 'vd-asc') return a.ameaca.vd - b.ameaca.vd || porNome;
+      if (filtros.ordem === 'vd-desc') return b.ameaca.vd - a.ameaca.vd || porNome;
+      return porNome;
+    });
+  }, [catalogo, filtros]);
+  const atualizar = <K extends keyof Filtros>(campo: K, valor: Filtros[K]) => setFiltros(anterior => ({ ...anterior, [campo]: valor }));
+  const ativas = ([
+    ['tipo', filtros.tipo],
+    ['fonte', filtros.fonte],
+    ['minimo', filtros.minimo && 'VD a partir de ' + filtros.minimo],
+    ['maximo', filtros.maximo && 'VD até ' + filtros.maximo],
+  ] as const).filter(([, valor]) => valor);
+  const quantidades = new Map(entradas.filter(item => item.tipo === 'ameaca').map(item => [item.id, item.quantidade]));
+  const totalRascunho = entradas.reduce((soma, item) => soma + item.quantidade, 0);
 
   return (
-    <div className="flex flex-col h-full relative">
-      <div className="mb-4 grid grid-cols-1 gap-2 p-1 md:mb-6 md:grid-cols-5 md:gap-4">
-        <input
-          type="text"
-          placeholder="Buscar ameaça..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') setSearch('');
-          }}
-          className="h-11 rounded border border-ordem-border-light bg-ordem-black/40 px-3 font-mono text-sm text-white focus:border-ordem-red focus:outline-none"
-        />
-
-        <button
-          type="button"
-          onClick={() => setFiltrosAbertos((v) => !v)}
-          aria-expanded={filtrosAbertos}
-          className="flex h-11 items-center justify-between rounded border border-ordem-border px-3 font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted md:hidden"
-        >
-          Filtros e ordem
-          <span className="text-ordem-text-secondary">{loading ? '...' : `${filteredMonsters.length} resultado(s)`}</span>
-        </button>
-
-        <div className={`${filtrosAbertos ? 'grid' : 'hidden'} grid-cols-1 gap-2 md:contents`}>
-
-        <select
-          value={selectedElement}
-          onChange={(e) => setSelectedElement(e.target.value)}
-          className="h-11 rounded border border-ordem-border-light bg-ordem-black/40 px-3 font-mono text-sm text-white focus:border-ordem-red focus:outline-none"
-        >
-          {elements.map((el) => (
-            <option key={el} value={el}>{el}</option>
-          ))}
-        </select>
-
-        <div className="flex items-center gap-2 bg-ordem-black/40 border border-ordem-border-light px-3 rounded">
-            <span className="text-xs font-mono text-ordem-text-muted">VD:</span>
-            <input
-                type="number"
-                min="0"
-                max="400"
-                value={vdRange[0]}
-                onChange={(e) => {
-                  const min = Number(e.target.value);
-                  const max = Math.max(min, vdRange[1]);
-                  setVdRange([min, max]);
-                }}
-                className="w-16 bg-transparent text-white text-sm font-mono focus:outline-none text-center"
-            />
-            <span className="text-ordem-text-muted">-</span>
-            <input
-                type="number"
-                min="0"
-                max="400"
-                value={vdRange[1]}
-                onChange={(e) => {
-                  const max = Number(e.target.value);
-                  const min = Math.min(vdRange[0], max);
-                  setVdRange([min, max]);
-                }}
-                className="w-16 bg-transparent text-white text-sm font-mono focus:outline-none text-center"
-            />
+    <div className="space-y-4 font-dados">
+      <div className="rounded-2xl border border-ordem-border bg-ordem-black/75 p-3 sm:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-4">
+          <p role="status" className="text-sm text-ordem-text-secondary">{loading ? 'Carregando ameaças' : exibidas.length + ' ameaças encontradas'}</p>
+          <div className="flex flex-wrap gap-2">
+            {monstros.length > 0 && <button type="button" className={SECUNDARIO} onClick={() => downloadJSON(JSON.stringify(monstros.map(m => m.ameaca), null, 2), 'ameacas-custom.json')}>Exportar personalizadas</button>}
+            <button type="button" className={SECUNDARIO} onClick={() => setEditor({})}><Plus size={17} aria-hidden /> Criar ameaça</button>
+          </div>
         </div>
-
-        <select
-          value={order}
-          onChange={(e) => setOrder(e.target.value as any)}
-          className="h-11 rounded border border-ordem-border-light bg-ordem-black/40 px-3 font-mono text-sm text-white focus:border-ordem-red focus:outline-none"
-        >
-          <option value="nome">Nome (A→Z)</option>
-          <option value="vd-desc">VD (↓)</option>
-          <option value="vd-asc">VD (↑)</option>
-        </select>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2 mb-4">
-        <div className="hidden items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted md:flex">
-          {loading ? 'Carregando...' : `${filteredMonsters.length} resultado(s)`}
-          {isCloudMode ? (
-            <span className="flex items-center gap-1 text-ordem-green" title="Monstros customizados sincronizados na nuvem">
-              <Cloud size={12} />
-            </span>
-          ) : (
-            <span className="flex items-center gap-1 text-ordem-text-muted" title="Dados locais">
-              <CloudOff size={12} />
-            </span>
-          )}
-        </div>
-        <button
-          onClick={() => setCustomOnly((prev) => !prev)}
-          className={`flex h-11 items-center rounded border px-3 font-mono text-[10px] uppercase tracking-widest ${
-            customOnly
-              ? 'border-blue-500 text-blue-300 bg-blue-900/20'
-              : 'border-ordem-border text-ordem-text-muted bg-ordem-black/40'
-          }`}
-        >
-          {customOnly ? 'Apenas custom' : 'Todas'}
-        </button>
-        {(search || selectedElement !== 'Todos' || customOnly || vdRange[0] !== 0 || vdRange[1] !== 400 || order !== 'nome') && (
-          <button
-            onClick={() => {
-              setSearch('');
-              setSelectedElement('Todos');
-              setVdRange([0, 400]);
-              setOrder('nome');
-              setCustomOnly(false);
-            }}
-            className="flex h-11 items-center rounded border border-ordem-border px-3 font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted"
-          >
-            Limpar filtros
+        <div className="flex gap-2">
+          <label className="relative min-w-0 flex-1">
+            <span className="sr-only">Buscar ameaça</span>
+            <Search size={17} aria-hidden className="pointer-events-none absolute left-3 top-3.5 text-ordem-text-muted" />
+            <input type="search" placeholder="Buscar por nome" value={filtros.busca} onChange={e => atualizar('busca', e.target.value)} className={cn(CAMPOS, 'pl-10')} />
+          </label>
+          <button type="button" aria-expanded={filtrosAbertos} onClick={() => setFiltrosAbertos(v => !v)} className={SECUNDARIO}>
+            <SlidersHorizontal size={16} aria-hidden /> Filtros
           </button>
-        )}
-        {monstros.length > 0 && (
-          <button
-            onClick={() => downloadJSON(JSON.stringify(monstros.map((m) => m.ameaca), null, 2), 'ameacas-custom.json')}
-            title="Baixa as suas ameaças em .json, para importar na Mesa 3D"
-            className="ml-auto flex h-11 items-center rounded border border-ordem-border px-3 font-mono text-[10px] uppercase tracking-widest text-ordem-text-muted hover:border-ordem-border-light"
-          >
-            Exportar custom
-          </button>
-        )}
-        <button
-          onClick={handleCreate}
-          className={`${monstros.length > 0 ? '' : 'ml-auto '}flex h-11 items-center rounded border border-ordem-red bg-ordem-red/20 px-3 font-mono text-sm uppercase text-white transition-colors hover:bg-ordem-red/40`}
-        >
-          + Criar Ameaça
-        </button>
+        </div>
+        {filtrosAbertos && <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+          <label className="space-y-1 text-xs text-ordem-text-secondary">Tipo<select className={CAMPOS} value={filtros.tipo} onChange={e => atualizar('tipo', e.target.value)}><option value="">Todos os tipos</option>{tipos.map(t => <option key={t}>{t}</option>)}</select></label>
+          <label className="space-y-1 text-xs text-ordem-text-secondary">Fonte<select className={CAMPOS} value={filtros.fonte} onChange={e => atualizar('fonte', e.target.value)}><option value="">Todas as fontes</option>{fontes.map(f => <option key={f}>{f}</option>)}</select></label>
+          <label className="space-y-1 text-xs text-ordem-text-secondary">VD mínimo<input className={CAMPOS} type="number" min="0" value={filtros.minimo} onChange={e => atualizar('minimo', e.target.value)} /></label>
+          <label className="space-y-1 text-xs text-ordem-text-secondary">VD máximo<input className={CAMPOS} type="number" min="0" value={filtros.maximo} onChange={e => atualizar('maximo', e.target.value)} /></label>
+          <label className="space-y-1 text-xs text-ordem-text-secondary">Ordenar por<select className={CAMPOS} value={filtros.ordem} onChange={e => atualizar('ordem', e.target.value as Ordem)}><option value="nome">Nome</option><option value="vd-asc">Menor VD</option><option value="vd-desc">Maior VD</option></select></label>
+        </div>}
+        {ativas.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{ativas.map(([campo, valor]) => (
+          <button key={campo} type="button" className={SECUNDARIO} aria-label={'Remover filtro ' + valor} onClick={() => atualizar(campo, '')}>{valor} ×</button>
+        ))}<button type="button" className={SECUNDARIO} onClick={() => setFiltros(PADRAO)}>Limpar filtros</button></div>}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 overflow-y-auto custom-scrollbar pr-2 pb-4">
-        {filteredMonsters.map((monster, index) => (
-          <MonsterCard
-            key={`${monster.nome}-${index}`}
-            monster={monster}
-            onEdit={monster.isCustom ? () => handleEdit(monster, monster.id!) : undefined}
-            onDelete={monster.isCustom ? () => remover(monster.id!) : undefined}
-            onClone={() => handleClone(monster)}
-            onExport={() => downloadJSON(JSON.stringify(paraExportar(monster), null, 2), `ameaca-${nomeDeArquivo(monster.nome)}.json`)}
-          />
-        ))}
-        {filteredMonsters.length === 0 && (
-            <div className="text-center text-ordem-text-muted font-mono py-8">
-                Nenhuma ameaça encontrada.
-            </div>
-        )}
+      {totalRascunho > 0 && <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-ordem-green-muted/35 bg-ordem-black p-3 shadow-lg">
+        <span className="text-sm font-semibold text-ordem-white" role="status">{totalRascunho} no rascunho do encontro</span>
+        <Link href={linkMontagem} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-ordem-green-muted px-3 text-sm font-semibold text-ordem-black hover:bg-white"><ListPlus size={17} aria-hidden /> Revisar encontro</Link>
+      </div>}
+
+      <div className="space-y-2.5">
+        {exibidas.map(item => <MonsterCard
+          key={item.chave}
+          entrada={item}
+          quantidade={quantidades.get(item.chave) ?? 0}
+          definirQuantidade={pronto ? quantidade => definirQuantidade('ameaca', item.chave, quantidade) : undefined}
+          onClone={() => setEditor({ ameaca: { ...item.ameaca, nome: item.ameaca.nome + ' (Cópia)' } })}
+          onEdit={item.registroId ? () => setEditor({ ameaca: item.ameaca, id: item.registroId }) : undefined}
+          onDelete={item.registroId ? () => { if (window.confirm('Excluir a ameaça personalizada ' + item.ameaca.nome + '?')) void remover(item.registroId!); } : undefined}
+        />)}
+        {!loading && exibidas.length === 0 && <div className="rounded-xl border border-dashed border-ordem-border p-6 text-center text-ordem-text-secondary">
+          <p className="mb-3">Nenhuma ameaça com esses filtros.</p><button type="button" className={SECUNDARIO} onClick={() => setFiltros(PADRAO)}>Mostrar todas</button>
+        </div>}
       </div>
 
-      {showEditor && (
-        <MonsterEditor
-          initialData={editingMonster?.ameaca}
-          onSave={handleSave}
-          onCancel={() => setShowEditor(false)}
-        />
-      )}
+      {editor && <MonsterEditor initialData={editor.ameaca} onSave={ameaca => { void salvar(ameaca, editor.id); setEditor(null); }} onCancel={() => setEditor(null)} />}
     </div>
   );
-};
-
-interface MonsterCardProps {
-  monster: Ameaca & { isCustom?: boolean, id?: string };
-  onEdit?: () => void;
-  onDelete?: () => void;
-  onClone?: () => void;
-  onExport?: () => void;
 }
 
-const MonsterCard: React.FC<MonsterCardProps> = ({ monster, onEdit, onDelete, onClone, onExport }) => {
-  const [expanded, setExpanded] = useState(false);
+interface MonsterCardProps {
+  entrada: EntradaCatalogoAmeaca;
+  quantidade: number;
+  definirQuantidade?: (quantidade: number) => void;
+  onClone: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+}
 
-  const getElementColor = (type: string) => {
-    const elem = type as keyof typeof ELEMENTO_FILTER_STYLES;
-    return ELEMENTO_FILTER_STYLES[elem] ?? 'text-ordem-text-secondary border-ordem-border';
-  };
-
-  const styleClass = getElementColor(monster.tipo);
+function MonsterCard({ entrada, quantidade, definirQuantidade, onClone, onEdit, onDelete }: MonsterCardProps) {
+  const [aberta, setAberta] = useState(false);
+  const { ameaca: monster, origem } = entrada;
+  const estilo = ELEMENTO_FILTER_STYLES[monster.tipo as keyof typeof ELEMENTO_FILTER_STYLES] ?? 'text-ordem-text-secondary border-ordem-border';
 
   return (
-    <div className={`border rounded transition-colors duration-300 ${expanded ? 'bg-ordem-black/80 border-ordem-border-light' : 'bg-ordem-black/40 border-ordem-border hover:border-ordem-border-light'}`}>
-      <div
-        className="p-4 flex items-center justify-between cursor-pointer select-none"
-        onClick={() => setExpanded(!expanded)}
-      >
-        <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 flex items-center justify-center rounded border font-bold text-lg ${styleClass}`}>
-                {monster.vd}
-            </div>
-            <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-serif text-white">{monster.nome}</h3>
-                  {monster.isCustom && <span className="text-[10px] bg-blue-900/30 text-blue-400 border border-blue-900/50 px-1 rounded uppercase">Custom</span>}
-                </div>
-                <p className="text-xs font-mono text-ordem-text-secondary">{monster.tipo} &bull; {monster.tamanho}</p>
-            </div>
+    <article className={cn('overflow-hidden rounded-xl border bg-ordem-ooze/25', aberta ? 'border-ordem-border-light' : 'border-ordem-border')}>
+      <div className="flex flex-col gap-3 p-3 sm:p-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex min-w-0 items-start gap-3">
+          <span className={cn('grid min-w-[3.4rem] shrink-0 place-items-center rounded-lg border px-2 py-1.5 font-dados font-semibold tabular-nums', estilo)}><span className="text-[11px] text-ordem-text-secondary">VD</span><span className="text-ordem-white">{monster.vd}</span></span>
+          <div className="min-w-0">
+            <h3 className="break-words font-dados text-lg font-semibold leading-snug text-ordem-white">{monster.nome}</h3>
+            <p className="text-xs leading-relaxed text-ordem-text-secondary">{monster.tipo} · {origem}</p>
+            <p className="mt-1 text-sm tabular-nums text-ordem-text-secondary"><span className="text-ordem-white">{monster.vida}</span> PV <span className="px-1">·</span> Defesa <span className="text-ordem-white">{monster.defesa}</span></p>
+          </div>
         </div>
-
-        <div className="flex items-center gap-6">
-            <div className="text-right hidden md:block">
-                <div className="text-[10px] font-mono text-ordem-text-muted uppercase">Vida</div>
-                <div className="text-lg font-bold text-white">{monster.vida}</div>
-            </div>
-            <div className="text-right hidden md:block">
-                <div className="text-[10px] font-mono text-ordem-text-muted uppercase">Defesa</div>
-                <div className="text-lg font-bold text-white">{monster.defesa}</div>
-            </div>
-            <div className={`transform transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`}>
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-            </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="button" aria-expanded={aberta} onClick={() => setAberta(v => !v)} className={SECUNDARIO}>
+            {aberta ? <ChevronUp size={16} aria-hidden /> : <ChevronDown size={16} aria-hidden />}{aberta ? 'Ocultar ficha' : 'Ver ficha'}
+          </button>
+          <button type="button" disabled={!definirQuantidade || quantidade >= LIMITE_COPIAS_ENCONTRO} aria-label={'Adicionar ' + monster.nome + ' ao encontro (' + origem + ')'} onClick={() => definirQuantidade?.(quantidade + 1)} className={cn(SECUNDARIO, 'disabled:opacity-50', quantidade > 0 && 'border-ordem-green-muted/50 text-ordem-green-muted')}>
+            <Plus size={16} aria-hidden /> {quantidade ? quantidade + ' no encontro · adicionar' : 'Adicionar ao encontro'}
+          </button>
         </div>
       </div>
 
-      {expanded && (
-        <div className="p-4 border-t border-ordem-border bg-ordem-black/20">
-            <div className="flex justify-end gap-2 mb-4 border-b border-ordem-border pb-2">
-              {onExport && (
-                <button onClick={(e) => { e.stopPropagation(); onExport(); }} title="Baixa esta ameaça em .json, para importar na Mesa 3D" className="text-xs bg-ordem-black/40 hover:bg-ordem-border-light text-ordem-text-secondary px-2 py-1 rounded border border-ordem-border">
-                  Exportar (.json)
-                </button>
-              )}
-              {onClone && (
-                <button onClick={(e) => { e.stopPropagation(); onClone(); }} className="text-xs bg-ordem-ooze hover:bg-ordem-border-light text-white px-2 py-1 rounded border border-ordem-border-light">
-                  Clonar / Editar Cópia
-                </button>
-              )}
-              {onEdit && (
-                <button onClick={(e) => { e.stopPropagation(); onEdit(); }} className="text-xs bg-blue-900/30 hover:bg-blue-900/50 text-blue-300 px-2 py-1 rounded border border-blue-900/50">
-                  Editar
-                </button>
-              )}
-              {onDelete && (
-                <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="text-xs bg-red-900/30 hover:bg-red-900/50 text-red-300 px-2 py-1 rounded border border-red-900/50">
-                  Excluir
-                </button>
-              )}
-            </div>
-
+      {aberta && <div className="border-t border-ordem-border bg-ordem-black/35 p-4">
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <button type="button" className={SECUNDARIO} onClick={() => baixarAmeaca(monster)}>Exportar JSON</button>
+          <button type="button" className={SECUNDARIO} onClick={onClone}>Copiar no bestiário</button>
+          {onEdit && <button type="button" className={SECUNDARIO} onClick={onEdit}>Editar</button>}
+          {onDelete && <button type="button" className={cn(SECUNDARIO, 'text-ordem-red-light')} onClick={onDelete}>Excluir</button>}
+        </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-6">
                     <div>
@@ -427,8 +285,7 @@ const MonsterCard: React.FC<MonsterCardProps> = ({ monster, onEdit, onDelete, on
                     )}
                 </div>
             </div>
-        </div>
-      )}
-    </div>
+      </div>}
+    </article>
   );
-};
+}

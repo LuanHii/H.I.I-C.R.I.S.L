@@ -5,6 +5,7 @@ import { AtributoKey, Personagem, PericiaName } from '../core/types';
 import { StatusBar } from './StatusBar';
 import { ActionsTab } from './ActionsTab';
 import { PERICIA_ATRIBUTO } from '../logic/rulesEngine';
+import { prepararTesteDaFicha } from '@/logic/combatUtils';
 import { rollPericia, type DiceRollResult } from '../logic/diceRoller';
 import { Backpack, Dices, Footprints, Search, Shield, ShieldAlert, Swords, X, Zap } from 'lucide-react';
 import { ActiveConditionsDisplay, ConditionsSummary } from './ConditionBadge';
@@ -92,9 +93,9 @@ export function RemoteAgentView({
   const totalVisivel = grupos.reduce((n, g) => n + g.pericias.length, 0);
 
   const rolar = (pericia: PericiaName) => {
-    const det = agent.periciasDetalhadas[pericia];
+    const det = prepararTesteDaFicha(agent, pericia, { bonusFixo: bonusSituacional });
     if (!det) return;
-    setUltimaRolagem({ pericia, result: rollPericia({ ...det, bonusFixo: det.bonusFixo + bonusSituacional }) });
+    setUltimaRolagem({ pericia, result: rollPericia(det) });
   };
 
   const abas: { id: AbaRemota; rotulo: string; icone: React.ReactNode; badge?: React.ReactNode }[] = [

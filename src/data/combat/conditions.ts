@@ -28,6 +28,7 @@ export const condicoes: CondicaoCompleta[] = [
       deslocamento: 'zero',
       defesa: -5,
       pericias: {
+        somenteAtaque: true,
         penalidadeDados: -1
       }
     },
@@ -69,6 +70,8 @@ export const condicoes: CondicaoCompleta[] = [
     descricao: 'Deitado no chão. Sofre -2d20 em ataques corpo a corpo e deslocamento reduzido a 1,5m.',
     efeito: {
       pericias: {
+        somenteAtaque: true,
+        somentePericias: ['Luta'],
         penalidadeDados: -2
       }
     },
@@ -110,6 +113,7 @@ export const condicoes: CondicaoCompleta[] = [
     efeito: {
       defesa: -5,
       pericias: {
+        somentePericias: ['Reflexos'],
         penalidadeDados: -1
       }
     },
@@ -184,6 +188,7 @@ export const condicoes: CondicaoCompleta[] = [
     efeito: {
       acoes: 'nenhuma',
       pericias: {
+        somentePericias: ['Percepção'],
         penalidadeDados: -2
       }
     },
@@ -368,8 +373,8 @@ export function calcularPenalidadeDados(efeitosAtivos: string[], atributo?: stri
     const cond = getCondicao(nome);
     if (cond?.efeito?.pericias?.penalidadeDados) {
 
-      if (!cond.efeito.pericias.atributos ||
-        (atributo && cond.efeito.pericias.atributos.includes(atributo as any))) {
+      const { atributos, somenteAtaque, somentePericias } = cond.efeito.pericias;
+      if (!somenteAtaque && !somentePericias && (!atributos || atributos.some(a => a === atributo))) {
         penalidadeTotal += cond.efeito.pericias.penalidadeDados;
       }
     }

@@ -66,7 +66,7 @@ export function NavBar() {
         </div>
 
         <div className="mx-auto hidden max-w-6xl items-center gap-4 px-4 py-3 pr-36 sm:flex">
-          <div className="font-mono text-xs tracking-[0.5em] text-ordem-green">C.R.I.S</div>
+          <Link href="/" aria-current={naInicial ? 'page' : undefined} className="font-mono text-xs tracking-[0.5em] text-ordem-green">C.R.I.S</Link>
           <div className="flex flex-1 justify-center gap-2 text-xs">
             {LINKS.map((link) => (
               <Link
@@ -84,7 +84,7 @@ export function NavBar() {
               </Link>
             ))}
           </div>
-          <button
+          {!naInicial && <button
             type="button"
             onClick={() => canGoBack && router.back()}
             disabled={!canGoBack}
@@ -94,7 +94,7 @@ export function NavBar() {
               }`}
           >
             VOLTAR
-          </button>
+          </button>}
         </div>
       </nav>
     </>

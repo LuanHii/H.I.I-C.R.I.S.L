@@ -22,15 +22,15 @@ export interface CabecalhoFichaProps {
 
 function SeletorDeModo({ modo, onModo, className = '' }: { modo: ModoDaFicha; onModo: (m: ModoDaFicha) => void; className?: string }) {
   return (
-    <div role="tablist" aria-label="Modo da ficha" className={`inline-flex border border-white/10 p-0.5 ${className}`}>
+    <div role="group" aria-label="Modo da ficha" className={`inline-flex gap-1 rounded-lg border border-ordem-border bg-ordem-black-deep p-1 ${className}`}>
       {(['mesa', 'construcao'] as const).map((m) => (
         <button
           key={m}
-          role="tab"
-          aria-selected={modo === m}
+          type="button"
+          aria-pressed={modo === m}
           onClick={() => onModo(m)}
-          className={`h-9 flex-1 px-3 font-carimbo text-[10px] uppercase tracking-[0.18em] transition ${modo === m
-            ? 'bg-[var(--mestre-primary,#DC2626)] text-black'
+          className={`min-h-11 flex-1 rounded px-3 font-dados text-sm font-semibold transition focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-ordem-green-muted ${modo === m
+            ? 'bg-ordem-green-muted text-ordem-black'
             : 'text-ordem-text-muted hover:text-white'
             }`}
         >
@@ -46,7 +46,7 @@ function BotaoPendencias({ pendentes, onClick, className = '' }: { pendentes: nu
     <button
       type="button"
       onClick={onClick}
-      className={`h-10 border border-ordem-gold/60 bg-ordem-gold/10 px-3 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-gold transition hover:bg-ordem-gold/20 ${className}`}
+      className={`min-h-11 rounded-lg border border-ordem-gold/60 bg-ordem-gold/10 px-3 font-dados text-sm font-medium text-ordem-gold transition hover:bg-ordem-gold/20 ${className}`}
     >
       {pendentes} escolha{pendentes === 1 ? '' : 's'} pendente{pendentes === 1 ? '' : 's'} → responder
     </button>
@@ -71,11 +71,11 @@ export function CabecalhoFicha({
 
   return (
     <header className="relative px-3 pb-3 pt-3 sm:px-6 sm:pb-4 sm:pt-5">
-      <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-start lg:justify-between lg:gap-x-6">
-        <div className="min-w-0">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-x-6">
+        <div className="min-w-0 lg:flex-1">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h2 className="truncate font-display text-2xl uppercase leading-none tracking-[0.06em] text-white sm:text-3xl lg:text-4xl">
+              <h2 className="font-display text-xl uppercase leading-tight tracking-[0.06em] [overflow-wrap:anywhere] text-white sm:text-3xl lg:text-4xl">
                 {ficha.identidade.nome}
               </h2>
               <div className="mt-1.5 h-px w-20 bg-[var(--mestre-primary,#DC2626)] sm:w-24" />
@@ -94,7 +94,7 @@ export function CabecalhoFicha({
             <p className="mt-2 line-clamp-2 max-w-xl text-xs italic text-ordem-text-secondary sm:text-sm">{ficha.identidade.conceito}</p>
           )}
 
-          <div className="-mx-3 mt-3 flex items-center gap-2 overflow-x-auto px-3 touch-scroll no-scrollbar sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <Fita variante="classe" className="shrink-0">{ficha.identidade.classe}</Fita>
 
             <span className="inline-flex shrink-0 items-stretch border border-white/10">

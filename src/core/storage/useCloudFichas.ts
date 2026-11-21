@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { carimbarSincronizacao } from './carimboDeSincronizacao';
+import { carimbarAtualizacao, carimbarSincronizacao } from './carimboDeSincronizacao';
 import { Personagem } from '../types';
 import { useAuthOptional } from '../firebase/auth';
 import {
@@ -36,7 +36,6 @@ export function paraNuvem(registro: FichaRegistroCloudType): FichaRegistroCloud 
 }
 
 const STORAGE_KEY = 'fichas-origem';
-const LIMITE_FICHAS = 50;
 
 function lerFichasLocal(): FichaRegistroCloudType[] {
   if (typeof window === 'undefined') return [];
@@ -79,13 +78,15 @@ function normalizarRegistro(entrada: unknown): FichaRegistroCloudType | null {
   return null;
 }
 
-function gravarFichasLocal(fichas: FichaRegistroCloudType[]) {
-  if (typeof window === 'undefined') return;
+function gravarFichasLocal(fichas: FichaRegistroCloudType[]): boolean {
+  if (typeof window === 'undefined') return false;
   try {
-    const payload = JSON.stringify(fichas.slice(0, LIMITE_FICHAS));
+    const payload = JSON.stringify(fichas);
     window.localStorage.setItem(STORAGE_KEY, payload);
+    return true;
   } catch (err) {
     console.error('Erro ao salvar fichas locais', err);
+    return false;
   }
 }
 
@@ -158,8 +159,7 @@ export function useCloudFichas() {
       } else {
         setFichas((prev) => {
           const atualizadas = prev.map((f) => (f.id === registro.id ? registro : f));
-          gravarFichasLocal(atualizadas);
-          return atualizadas;
+          return gravarFichasLocal(atualizadas) ? atualizadas : prev;
         });
       }
     },
@@ -211,7 +211,7 @@ export function useCloudFichas() {
           };
           const existentes = prev.filter((f) => f.id !== fichaId);
           const atualizadas = [registro, ...existentes];
-          gravarFichasLocal(atualizadas);
+          if (!gravarFichasLocal(atualizadas)) return prev;
 
           if (fichaExistente?.sincronizadaNaNuvem) {
             saveAgentToCloud(fichaId, gravacao.personagem).catch(console.error);
@@ -234,8 +234,7 @@ export function useCloudFichas() {
       } else {
         setFichas((prev) => {
           const atualizadas = [registro, ...prev.filter((f) => f.id !== registro.id)];
-          gravarFichasLocal(atualizadas);
-          return atualizadas;
+          return gravarFichasLocal(atualizadas) ? atualizadas : prev;
         });
       }
     },
@@ -280,8 +279,7 @@ export function useCloudFichas() {
         const atualizadas = prev.map((f) =>
           f.id === id ? carimbarSincronizacao(f, new Date().toISOString()) : f
         );
-        gravarFichasLocal(atualizadas);
-        return atualizadas;
+        return gravarFichasLocal(atualizadas) ? atualizadas : prev;
       });
     },
     [isAuthenticated, userId, fichas]
@@ -298,8 +296,7 @@ export function useCloudFichas() {
       } else {
         setFichas((prev) => {
           const filtradas = prev.filter((f) => f.id !== id);
-          gravarFichasLocal(filtradas);
-          return filtradas;
+          return gravarFichasLocal(filtradas) ? filtradas : prev;
         });
       }
     },
@@ -311,36 +308,33 @@ export function useCloudFichas() {
       const alvo = fichas.find((f) => f.id === id);
       if (!alvo) return;
 
-      const novoId = crypto.randomUUID();
-      const now = new Date().toISOString();
-      const novoPersonagem = { ...alvo.personagem, nome: `${alvo.personagem.nome} (cópia)` };
+      const nome = alvo.personagem.nome + ' (cópia)';
+      const agora = new Date().toISOString();
+      const novo: FichaRegistroCloudType = carimbarAtualizacao({
+        id: crypto.randomUUID(),
+        personagem: { ...alvo.personagem, nome },
+        ficha: alvo.ficha ? { ...alvo.ficha, identidade: { ...alvo.ficha.identidade, nome } } : undefined,
+        fichaConfirmada: alvo.fichaConfirmada,
+        fichaMigradaDe: alvo.fichaMigradaDe,
+        personagemOriginal: alvo.personagemOriginal ? { ...alvo.personagemOriginal, nome } : undefined,
+        atualizadoEm: alvo.atualizadoEm,
+        campanha: alvo.campanha,
+      }, agora);
 
       if (isAuthenticated && userId) {
         try {
-          await saveFichaToCloud(userId, {
-            id: novoId,
-            personagem: novoPersonagem,
-            atualizadoEm: now,
-            campanha: alvo.campanha,
-          });
+          await saveFichaToCloud(userId, paraNuvem(novo));
         } catch (err) {
           console.error('Erro ao duplicar ficha na nuvem:', err);
         }
       } else {
-        setFichas((prev) => {
-          const novo: FichaRegistroCloudType = {
-            id: novoId,
-            personagem: novoPersonagem,
-            atualizadoEm: now,
-            campanha: alvo.campanha,
-          };
+        setFichas(prev => {
           const atualizadas = [novo, ...prev];
-          gravarFichasLocal(atualizadas);
-          return atualizadas;
+          return gravarFichasLocal(atualizadas) ? atualizadas : prev;
         });
       }
     },
-    [fichas, isAuthenticated, userId]
+    [fichas, isAuthenticated, userId],
   );
 
   const migrar = useCallback(
@@ -362,8 +356,7 @@ export function useCloudFichas() {
       } else {
         setFichas((prev) => {
           const atualizadas = prev.map((f) => (f.id === id ? atualizado : f));
-          gravarFichasLocal(atualizadas);
-          return atualizadas;
+          return gravarFichasLocal(atualizadas) ? atualizadas : prev;
         });
       }
     },
@@ -477,8 +470,7 @@ export function useCloudFichas() {
       } else {
         setFichas((prev) => {
           const atualizadas = [registro, ...prev.filter((f) => f.id !== id)];
-          gravarFichasLocal(atualizadas);
-          return atualizadas;
+          return gravarFichasLocal(atualizadas) ? atualizadas : prev;
         });
       }
 
@@ -493,18 +485,13 @@ export function useCloudFichas() {
         const ficha = prev.find((f) => f.id === fichaId);
         if (!ficha) return prev;
 
-        const atualizadas = prev.map((f) =>
-          f.id === fichaId ? { ...f, campanha: campanhaId, atualizadoEm: new Date().toISOString() } : f
-        );
-
+        if (ficha.campanha === campanhaId) return prev;
+        const atualizada = carimbarAtualizacao({ ...ficha, campanha: campanhaId }, new Date().toISOString());
+        const atualizadas = prev.map(f => f.id === fichaId ? atualizada : f);
         if (isAuthenticated && userId) {
-          saveFichaToCloud(
-            userId,
-            paraNuvem({ ...ficha, campanha: campanhaId, atualizadoEm: new Date().toISOString() }),
-          ).catch((err) => console.error('Erro ao mover ficha de campanha:', err));
-        } else {
-          gravarFichasLocal(atualizadas);
-        }
+          saveFichaToCloud(userId, paraNuvem(atualizada))
+            .catch(err => console.error('Erro ao mover ficha de campanha:', err));
+        } else if (!gravarFichasLocal(atualizadas)) return prev;
         return atualizadas;
       });
     },

@@ -1,0 +1,233 @@
+{
+  "nodes": [
+    {
+      "id": "evidencia",
+      "type": "group",
+      "x": 0,
+      "y": 200,
+      "width": 390,
+      "height": 690,
+      "label": "Oráculo e evidência de regras",
+      "color": "6"
+    },
+    {
+      "id": "site",
+      "type": "group",
+      "x": 460,
+      "y": 200,
+      "width": 850,
+      "height": 690,
+      "label": "Site e sistemas de jogo",
+      "color": "5"
+    },
+    {
+      "id": "entrega",
+      "type": "group",
+      "x": 1370,
+      "y": 200,
+      "width": 390,
+      "height": 690,
+      "label": "Manutenção e validação",
+      "color": "3"
+    },
+    {
+      "id": "raiz",
+      "type": "text",
+      "x": 625,
+      "y": 0,
+      "width": 520,
+      "height": 150,
+      "text": "# H.I.I-C.R.I.S.\nGerenciador de campanhas, fichas e sessões de Ordem Paranormal.",
+      "color": "5"
+    },
+    {
+      "id": "livros",
+      "type": "text",
+      "x": 30,
+      "y": 255,
+      "width": 330,
+      "height": 135,
+      "text": "## Corpus OP1\nLivro de Regras e Sobrevivendo ao Horror em PyMuPDF. Confirmação por seção e linha.",
+      "color": "6"
+    },
+    {
+      "id": "rag",
+      "type": "text",
+      "x": 30,
+      "y": 440,
+      "width": 330,
+      "height": 155,
+      "text": "## Oráculo MCP\n`buscar_regras` recupera trechos via Chroma, BM25 e reranking. O playtest OP2 tem material próprio.",
+      "color": "6"
+    },
+    {
+      "id": "oraculo",
+      "type": "file",
+      "x": 30,
+      "y": 655,
+      "width": 330,
+      "height": 175,
+      "file": "Oraculo.md"
+    },
+    {
+      "id": "entradas",
+      "type": "text",
+      "x": 590,
+      "y": 255,
+      "width": 580,
+      "height": 115,
+      "text": "## Entradas\nFicha, painel do mestre, links de jogador, Foundry e Mesa 3D.",
+      "color": "5"
+    },
+    {
+      "id": "op1",
+      "type": "text",
+      "x": 505,
+      "y": 440,
+      "width": 330,
+      "height": 155,
+      "text": "## OP1 · Motor de ficha\n`core/ficha` e `core/rules` resolvem criação, progressão e sessão. Compatibilidade `v0`/`v2`.",
+      "color": "5"
+    },
+    {
+      "id": "op2",
+      "type": "text",
+      "x": 930,
+      "y": 440,
+      "width": 330,
+      "height": 155,
+      "text": "## OP2 · Playtest\n`op2/regras` resolve fichas, rolagens e investigação por edição de playtest.",
+      "color": "5"
+    },
+    {
+      "id": "storage",
+      "type": "text",
+      "x": 590,
+      "y": 675,
+      "width": 580,
+      "height": 150,
+      "text": "## Adaptadores e persistência\nZustand, armazenamento local e Firebase. Registro privado, projeções públicas e integração com controle de versão.",
+      "color": "5"
+    },
+    {
+      "id": "arquitetura",
+      "type": "file",
+      "x": 1400,
+      "y": 255,
+      "width": 330,
+      "height": 135,
+      "file": "Arquitetura.md"
+    },
+    {
+      "id": "validacao",
+      "type": "text",
+      "x": 1400,
+      "y": 440,
+      "width": 330,
+      "height": 155,
+      "text": "## Verificação\nEvidência → regressão que falha → correção → suíte, tipos e build. Persistência com dados sintéticos.",
+      "color": "3"
+    },
+    {
+      "id": "backlog",
+      "type": "file",
+      "x": 1400,
+      "y": 655,
+      "width": 330,
+      "height": 175,
+      "file": "Backlog.md"
+    }
+  ],
+  "edges": [
+    {
+      "id": "raiz-entradas",
+      "fromNode": "raiz",
+      "fromSide": "bottom",
+      "toNode": "entradas",
+      "toSide": "top",
+      "label": "fluxos do app",
+      "color": "5"
+    },
+    {
+      "id": "livros-busca",
+      "fromNode": "livros",
+      "fromSide": "bottom",
+      "toNode": "rag",
+      "toSide": "top",
+      "label": "indexação",
+      "color": "6"
+    },
+    {
+      "id": "busca-oraculo",
+      "fromNode": "rag",
+      "fromSide": "bottom",
+      "toNode": "oraculo",
+      "toSide": "top",
+      "label": "consulta e conferência",
+      "color": "6"
+    },
+    {
+      "id": "evidencia-op1",
+      "fromNode": "rag",
+      "fromSide": "right",
+      "toNode": "op1",
+      "toSide": "left",
+      "label": "evidência para revisão",
+      "color": "6"
+    },
+    {
+      "id": "entrada-op1",
+      "fromNode": "entradas",
+      "fromSide": "bottom",
+      "toNode": "op1",
+      "toSide": "top",
+      "label": "OP1",
+      "color": "5"
+    },
+    {
+      "id": "entrada-op2",
+      "fromNode": "entradas",
+      "fromSide": "bottom",
+      "toNode": "op2",
+      "toSide": "top",
+      "label": "OP2",
+      "color": "5"
+    },
+    {
+      "id": "op1-storage",
+      "fromNode": "op1",
+      "fromSide": "bottom",
+      "toNode": "storage",
+      "toSide": "top",
+      "label": "documento e projeção",
+      "color": "5"
+    },
+    {
+      "id": "op2-storage",
+      "fromNode": "op2",
+      "fromSide": "bottom",
+      "toNode": "storage",
+      "toSide": "top",
+      "label": "fichas e cenas",
+      "color": "5"
+    },
+    {
+      "id": "arquitetura-qa",
+      "fromNode": "arquitetura",
+      "fromSide": "bottom",
+      "toNode": "validacao",
+      "toSide": "top",
+      "label": "fronteiras e contratos",
+      "color": "3"
+    },
+    {
+      "id": "qa-backlog",
+      "fromNode": "validacao",
+      "fromSide": "bottom",
+      "toNode": "backlog",
+      "toSide": "top",
+      "label": "critérios de aceite",
+      "color": "3"
+    }
+  ]
+}

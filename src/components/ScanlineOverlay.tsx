@@ -8,5 +8,5 @@ export function ScanlineOverlay() {
 
   if (!scanlineEnabled) return null;
 
-  return <div className="scanline fixed inset-0 pointer-events-none z-50" aria-hidden="true" />;
+  return <div className="scanline fixed inset-0 pointer-events-none z-50 motion-reduce:hidden" aria-hidden="true" />;
 }

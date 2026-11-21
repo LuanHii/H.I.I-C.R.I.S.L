@@ -120,6 +120,14 @@ describe('o resumo diz o que o personagem TEM — nunca o que ele não tem', () 
     expect(md).toContain(`  Discente: ${ritual.efeito.discente}`);
   });
 
+  it('exibe o custo de ritual em PD quando essa regra está ativa', () => {
+    const ritual = RITUAIS.find(r => r.circulo === 2 && r.efeito.discente?.includes('+3 PE'))!;
+    const personagem = combatente({ usarPd: true, pd: { atual: 8, max: 14 }, rituais: [ritual] });
+    const resumo = resumoDoPersonagem(personagem);
+    expect(resumo).toContain('2º círculo · 3 PD');
+    expect(resumo).toContain('+3 PD');
+  });
+
   it('marcas de perda permanente e pendências ficam registradas quando existem', () => {
     const p = combatente({
       marcas: [{ id: 'm1', tipo: 'sanMaxPerdida', pontos: 3, motivo: 'Ritual falho', registradaEm: '2026-01-01' }],

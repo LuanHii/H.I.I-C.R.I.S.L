@@ -1,10 +1,11 @@
 import type { AtributoKey, Item, Marca, PericiaName, Personagem, Poder, Ritual } from '../types';
 import { calcularStatsModificados, parseCritico } from '../../data/equipment/modifications';
-import { calcularDefesaEfetiva, getPenalidadesPericia } from '../../logic/combatUtils';
+import { calcularDefesaEfetiva, formatarTesteDaFicha, getPenalidadesPericia } from '../../logic/combatUtils';
+import { prepararRolagemPericia } from '@/logic/diceRoller';
 import { calcularDTRitual } from '../../logic/rulesEngine';
 import { apenasCondicoes } from '../rules/condicoes';
 import { semAcento } from '../rules/pericias';
-import { custoDoRitual } from '../rules/rituais';
+import { apresentarEfeitoDeRitual, formatarCustoDoRitual } from '../rules/rituais';
 
 const ATRIBUTOS: AtributoKey[] = ['AGI', 'FOR', 'INT', 'PRE', 'VIG'];
 
@@ -63,14 +64,6 @@ function atributos(p: Personagem): string[] {
   return ['## Atributos', ATRIBUTOS.map((a) => `${a} ${p.atributos[a]}`).join(' · ')];
 }
 
-function testeDePericia(p: Personagem, pericia: PericiaName, extraFixo = 0): string {
-  const d = p.periciasDetalhadas[pericia];
-  const penalidade = getPenalidadesPericia(p, d.atributoBase);
-  const dados = Math.max(0, d.dados + penalidade.dados);
-  const bonus = d.bonusFixo + d.bonusO + penalidade.valor + extraFixo;
-  return `${dados}d20 ${sinal(bonus)}`;
-}
-
 function pericias(p: Personagem): string[] {
   const treinadas = (Object.keys(p.periciasDetalhadas) as PericiaName[])
     .filter((nome) => p.periciasDetalhadas[nome].grau !== 'Destreinado')
@@ -79,14 +72,23 @@ function pericias(p: Personagem): string[] {
   const linhas = ['## Perícias treinadas'];
   for (const nome of treinadas) {
     const d = p.periciasDetalhadas[nome];
-    linhas.push(`- ${nome} (${d.atributoBase}) — ${testeDePericia(p, nome)} · ${d.grau}`);
+    linhas.push(`- ${nome} (${d.atributoBase}) — ${formatarTesteDaFicha(p, nome)} · ${d.grau}`);
   }
 
   const dadosPorAtributo = ATRIBUTOS.map((a) => {
     const penalidade = getPenalidadesPericia(p, a);
-    return `${a} ${Math.max(0, p.atributos[a] + penalidade.dados)}d20`;
+    const atributo = p.atributos[a];
+    const plano = prepararRolagemPericia({
+      atributoBase: a,
+      dados: atributo > 0 ? atributo : 2,
+      criterio: atributo > 0 ? 'melhor' : 'pior',
+      bonusFixo: 0,
+      bonusO: penalidade.dados,
+      grau: 'Destreinado',
+    });
+    return `${a} ${plano.diceCount}d20${plano.criterio === 'pior' ? ' (pior)' : ''}`;
   });
-  linhas.push(`Demais perícias: destreinadas, rolam só o atributo (${dadosPorAtributo.join(', ')}), bônus +0; atributo 0 rola 2d20 e fica com o pior.`);
+  linhas.push(`Demais perícias: destreinadas, rolam só o atributo (${dadosPorAtributo.join(', ')}), bônus +0.`);
 
   const condicoes = apenasCondicoes(p.efeitosAtivos ?? []);
   if (condicoes.length > 0) {
@@ -101,11 +103,11 @@ const ehProtecao = (i: Item): boolean => i.tipo === 'Proteção' || (i.stats?.de
 function testeDeAtaque(p: Personagem, arma: Item, alcance: string, ataqueBonus: number): string {
   const baixo = alcance.toLowerCase();
   const corpoACorpo = baixo.includes('corpo') || baixo.includes('adjacente');
-  if (corpoACorpo) return `Luta ${testeDePericia(p, 'Luta', ataqueBonus)}`;
+  if (corpoACorpo) return `Luta ${formatarTesteDaFicha(p, 'Luta', { ataque: true, bonusFixo: ataqueBonus })}`;
   if (/arremess/i.test(arma.descricao ?? '')) {
-    return `Luta ${testeDePericia(p, 'Luta', ataqueBonus)} corpo a corpo ou Pontaria ${testeDePericia(p, 'Pontaria', ataqueBonus)} arremessada`;
+    return `Luta ${formatarTesteDaFicha(p, 'Luta', { ataque: true, bonusFixo: ataqueBonus })} corpo a corpo ou Pontaria ${formatarTesteDaFicha(p, 'Pontaria', { ataque: true, bonusFixo: ataqueBonus })} arremessada`;
   }
-  return `Pontaria ${testeDePericia(p, 'Pontaria', ataqueBonus)}`;
+  return `Pontaria ${formatarTesteDaFicha(p, 'Pontaria', { ataque: true, bonusFixo: ataqueBonus })}`;
 }
 
 function linhaDeAtaque(p: Personagem, arma: Item): string {
@@ -178,13 +180,13 @@ function poderes(p: Personagem): string[] {
   return linhas;
 }
 
-function linhaDeRitual(r: Ritual): string[] {
-  const meta = [`${r.elemento}, ${r.circulo}º círculo`, `${custoDoRitual(r.circulo)} PE`, r.execucao, r.alcance, r.alvo, r.duracao, r.resistencia]
+function linhaDeRitual(r: Ritual, usarPd?: boolean): string[] {
+  const meta = [`${r.elemento}, ${r.circulo}º círculo`, formatarCustoDoRitual(r.circulo, usarPd), r.execucao, r.alcance, r.alvo, r.duracao, r.resistencia]
     .filter(Boolean)
     .join(' · ');
-  const linhas = [`- ${r.nome} — ${meta}`, `  Padrão: ${r.efeito.padrao}`];
-  if (r.efeito.discente) linhas.push(`  Discente: ${r.efeito.discente}`);
-  if (r.efeito.verdadeiro) linhas.push(`  Verdadeiro: ${r.efeito.verdadeiro}`);
+  const linhas = [`- ${r.nome} — ${meta}`, `  Padrão: ${apresentarEfeitoDeRitual(r.efeito.padrao, usarPd)}`];
+  if (r.efeito.discente) linhas.push(`  Discente: ${apresentarEfeitoDeRitual(r.efeito.discente, usarPd)}`);
+  if (r.efeito.verdadeiro) linhas.push(`  Verdadeiro: ${apresentarEfeitoDeRitual(r.efeito.verdadeiro, usarPd)}`);
   return linhas;
 }
 
@@ -192,7 +194,7 @@ function rituais(p: Personagem): string[] {
   const lista = p.rituais ?? [];
   if (lista.length === 0) return [];
   const dt = calcularDTRitual({ atributos: p.atributos, limitePe: p.pe.rodada });
-  return [`## Rituais (DT ${dt})`, ...lista.flatMap(linhaDeRitual)];
+  return [`## Rituais (DT ${dt})`, ...lista.flatMap(r => linhaDeRitual(r, p.usarPd))];
 }
 
 function proficiencias(p: Personagem): string[] {

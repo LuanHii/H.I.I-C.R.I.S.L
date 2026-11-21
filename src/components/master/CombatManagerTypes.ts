@@ -1,3 +1,7 @@
+import type { PericiaDetalhada } from '@/core/types';
+import type { ModoDaOrdem, ParticipanteDaIniciativa } from '@/core/rules/ordemCombate';
+import { rollPericia } from '@/logic/diceRoller';
+
 export interface CombatantHP {
     current: number;
     max: number;
@@ -10,20 +14,18 @@ export interface CombatantAbility {
     cost?: string;
 }
 
-export interface Combatant {
-    id: string;
+export interface Combatant extends ParticipanteDaIniciativa {
     name: string;
-    type: 'agent' | 'npc' | 'creature';
     sourceId?: string;
-    initiative: number;
-    initiativeBonus: number;
+    initiativeDice?: number;
+    initiativeSkill?: PericiaDetalhada;
     hp: CombatantHP;
     pe?: CombatantHP;
+    pd?: CombatantHP;
     san?: CombatantHP;
     defense: number;
     conditions: string[];
     notes: string;
-    isActive: boolean;
     color?: string;
     abilities?: CombatantAbility[];
 
@@ -39,6 +41,9 @@ export interface Combatant {
 
 export interface CombatState {
     isActive: boolean;
+    isPaused?: boolean;
+    iniciativaPreparada?: boolean;
+    orderMode?: ModoDaOrdem;
     combatants: Combatant[];
     currentTurnIndex: number;
     round: number;
@@ -96,10 +101,12 @@ export function getConditionColor(conditionId: string): string {
 }
 
 export function generateCombatantId(): string {
-    return `cbt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return globalThis.crypto?.randomUUID?.() ?? `cbt_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 }
 
-export function rollInitiative(diceCount: number, bonus: number): number {
+export function rollInitiative(diceCount: number, bonus: number, skill?: PericiaDetalhada): number {
+    if (skill) return rollPericia(skill).total;
+
     const rolls: number[] = [];
     for (let i = 0; i < Math.max(1, diceCount); i++) {
         rolls.push(Math.floor(Math.random() * 20) + 1);

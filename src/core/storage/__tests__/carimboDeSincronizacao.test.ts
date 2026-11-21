@@ -4,7 +4,7 @@ import { normalizePersonagem } from '@/core/personagemUtils';
 import { criarFicha } from '@/testUtils/fixtures';
 import { migrarFicha } from '@/core/ficha/migracao/migrarFicha';
 import { resolverPersonagem } from '@/core/ficha/leitura';
-import { carimbarSincronizacao, type RegistroCarimbavel } from '../carimboDeSincronizacao';
+import { carimbarAtualizacao, carimbarSincronizacao, type RegistroCarimbavel } from '../carimboDeSincronizacao';
 
 const ANTES = '2026-09-01T10:00:00.000Z';
 const AGORA = '2026-09-10T18:30:00.000Z';
@@ -21,6 +21,14 @@ function registroConvertido() {
 describe('sincronizar com a nuvem não derruba a ficha para o motor antigo', () => {
   it('premissa: o registro convertido é lido do motor novo', () => {
     expect(resolverPersonagem(registroConvertido()).fonte).toBe('v2');
+  });
+
+  it('ao mudar de campanha, preserva a conversão sem marcar sincronização', () => {
+    const movida = carimbarAtualizacao({ ...registroConvertido(), campanha: 'destino' }, AGORA);
+    expect(movida.campanha).toBe('destino');
+    expect(movida.fichaMigradaDe).toBe(AGORA);
+    expect(movida).not.toHaveProperty('sincronizadaNaNuvem');
+    expect(resolverPersonagem(movida).fonte).toBe('v2');
   });
 
   it('depois de sincronizar, continua sendo lido do motor novo', () => {

@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { AbaMestre } from './AbasDoMestre';
+import { ABAS_MESTRE, hrefAbaMestre, type AbaMestre } from './AbasDoMestre';
 
 function MestreLink({
   href,
@@ -20,6 +20,8 @@ function MestreLink({
   return (
     <Link
       href={href}
+      prefetch={false}
+      aria-current={active ? 'page' : undefined}
       className={cn(
         'relative px-4 py-2.5 font-mono text-sm transition-colors whitespace-nowrap',
         active ? 'text-white' : 'text-ordem-text-secondary hover:text-ordem-white-muted',
@@ -37,43 +39,12 @@ function MestreLink({
   );
 }
 
-function MestreButton({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        'relative px-4 py-2.5 font-mono text-sm transition-colors whitespace-nowrap',
-        active ? 'text-white' : 'text-ordem-text-secondary hover:text-ordem-white-muted',
-      )}
-    >
-      {label}
-      {active && (
-        <motion.div
-          layoutId="nav-indicator"
-          className="absolute bottom-0 left-0 right-0 h-0.5 bg-ordem-red"
-          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-        />
-      )}
-    </button>
-  );
-}
-
 export function MestreNavbar({
   title = 'MESTRE',
   subtitle = 'PAINEL DE CONTROLE',
   rightSlot,
   slotMobile,
   activeTab,
-  onTabSelect,
   voltarPara,
 }: {
   title?: string;
@@ -81,7 +52,6 @@ export function MestreNavbar({
   rightSlot?: React.ReactNode;
   slotMobile?: React.ReactNode;
   activeTab?: AbaMestre;
-  onTabSelect?: (tab: AbaMestre) => void;
   voltarPara?: ComponentProps<typeof Link>['href'];
 }) {
   const pathname = usePathname();
@@ -114,26 +84,10 @@ export function MestreNavbar({
             <span className="font-mono text-[10px] tracking-[0.2em] text-ordem-text-secondary">{subtitle}</span>
           </div>
 
-          <nav className="flex items-center gap-1">
-            {onTabSelect && inMestreRoot ? (
-              <>
-                <MestreButton label="AMEAÇAS" active={tab === 'ameacas'} onClick={() => onTabSelect('ameacas')} />
-                <MestreButton label="COMBATE" active={tab === 'combate'} onClick={() => onTabSelect('combate')} />
-                <MestreButton label="INVENTÁRIO" active={tab === 'inventario'} onClick={() => onTabSelect('inventario')} />
-                <MestreButton label="GUIA" active={tab === 'guia'} onClick={() => onTabSelect('guia')} />
-                <MestreButton label="NPCs" active={tab === 'npcs'} onClick={() => onTabSelect('npcs')} />
-                <MestreLink href="/mestre/fichas" label="FICHAS" active={false} />
-              </>
-            ) : (
-              <>
-                <MestreLink href="/mestre?tab=ameacas" label="AMEAÇAS" active={inMestreRoot && tab === 'ameacas'} />
-                <MestreLink href="/mestre?tab=combate" label="COMBATE" active={inMestreRoot && tab === 'combate'} />
-                <MestreLink href="/mestre?tab=inventario" label="INVENTÁRIO" active={inMestreRoot && tab === 'inventario'} />
-                <MestreLink href="/mestre?tab=guia" label="GUIA" active={inMestreRoot && tab === 'guia'} />
-                <MestreLink href="/mestre?tab=npcs" label="NPCs" active={inMestreRoot && tab === 'npcs'} />
-                <MestreLink href="/mestre/fichas" label="FICHAS" active={inFichas} />
-              </>
-            )}
+          <nav aria-label="Seções do mestre" className="flex items-center gap-1">
+            {ABAS_MESTRE.map(({ id, rotulo }) => (
+              <MestreLink key={id} href={hrefAbaMestre(id)} label={rotulo.toLocaleUpperCase('pt-BR')} active={tab === id && (inMestreRoot || Boolean(inFichas))} />
+            ))}
           </nav>
         </div>
 

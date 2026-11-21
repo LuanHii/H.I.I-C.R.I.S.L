@@ -303,6 +303,8 @@ export interface EfeitoCondicao {
   defesa?: number;
   pericias?: {
     atributos?: AtributoKey[];
+    somentePericias?: PericiaName[];
+    somenteAtaque?: boolean;
     penalidadeDados?: number;
     penalidadeValor?: number;
   };

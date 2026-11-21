@@ -40,7 +40,7 @@ function secureDie(sides: number): number {
   return Math.floor(Math.random() * sides) + 1;
 }
 
-export function rollPericia(detalhe: PericiaDetalhada): DiceRollResult {
+export function prepararRolagemPericia(detalhe: PericiaDetalhada): Pick<DiceRollResult, 'criterio' | 'bonusFixo' | 'diceCount' | 'baseDice' | 'bonusO'> {
   const baseDice = Math.max(1, Number.isFinite(detalhe.dados) ? detalhe.dados : 1);
   const bonusO = Number.isFinite(detalhe.bonusO) ? detalhe.bonusO : 0;
 
@@ -49,14 +49,15 @@ export function rollPericia(detalhe: PericiaDetalhada): DiceRollResult {
   const diceCount = belowOne ? baseDice + Math.abs(bonusO) : Math.max(1, wouldBe);
   const criterio: 'melhor' | 'pior' = (detalhe.criterio === 'pior' || belowOne) ? 'pior' : 'melhor';
 
-  const dice: number[] = [];
-  for (let i = 0; i < diceCount; i++) dice.push(secureDie(20));
-
-  const chosen = criterio === 'melhor' ? Math.max(...dice) : Math.min(...dice);
   const bonusFixo = Number.isFinite(detalhe.bonusFixo) ? detalhe.bonusFixo : 0;
-  const total = chosen + bonusFixo;
+  return { criterio, bonusFixo, diceCount, baseDice, bonusO };
+}
 
-  return { dice, chosen, criterio, total, bonusFixo, diceCount, baseDice, bonusO };
+export function rollPericia(detalhe: PericiaDetalhada): DiceRollResult {
+  const plano = prepararRolagemPericia(detalhe);
+  const dice = Array.from({ length: plano.diceCount }, () => secureDie(20));
+  const chosen = plano.criterio === 'melhor' ? Math.max(...dice) : Math.min(...dice);
+  return { ...plano, dice, chosen, total: chosen + plano.bonusFixo };
 }
 
 export function rollCustomDice(config: CustomDiceRollConfig): CustomDiceRollResult {

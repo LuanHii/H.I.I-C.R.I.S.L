@@ -1,141 +1,21 @@
-# Regras para Agentes de IA — H.I.I-C.R.I.S
+# Regras para agentes do H.I.I-C.R.I.S.
 
-> Documento de referência para manter consistência e não se perder ao trabalhar neste repositório.
+## Começo de uma tarefa
 
----
+1. Leia [Arquitetura](obsidian/Arquitetura.md) e o trecho pertinente do código atual. Use `HANDOFF.md`, `codebase.md` e os planos anteriores para entender decisões históricas.
+2. Identifique a edição, o ponto de entrada real e o tipo de mudança. Dano e condições são estado de sessão. Progressão, escolhas e ajustes permanentes alteram a construção da ficha.
+3. Para regras do jogo, siga [Oráculo](obsidian/Oraculo.md). Registre fonte e exemplo verificável. Reserve para o mestre decisões em aberto, house rules e conversões que mudem fichas de campanha.
+4. Escreva a regressão no módulo responsável e confirme a falha na versão anterior. Teste a entrada usada pela interface quando o risco estiver no encadeamento entre camadas.
 
-## 1. Regras de Código
+## Código e UI
 
-### 1.1 Comentários
-- **NÃO adicionar comentários** em arquivos de código.
-- Código deve ser autoexplicativo. Se precisar de comentário, considere refatorar.
+- Use nomes descritivos, preferencialmente em português para conceitos do domínio. Trate `Personagem` e seus derivados como imutáveis. Prefira expressar decisões no código e registrar contexto na documentação.
+- Em OP1, reutilize `core/rules` para fórmulas e dados de regra e `core/ficha` para construir, progredir, aplicar sessão e projetar a ficha. Verifique consumidores legados ao corrigir uma regra. Um Sobrevivente do suplemento ainda é OP1 e tem progressão por estágio.
+- Em OP2, mantenha regras, dados, cenas e fichas dentro de `src/op2`. Componentes visuais neutros podem ser compartilhados entre edições.
+- Em UI, use `@/`, `cn()`, a paleta `ordem-*` e `elementColors.ts` onde já se aplicam. Use componentes do design system quando disponíveis. Preserve rótulos acessíveis em botões de ícone, navegação por teclado e zoom. No App Router, mantenha os caminhos em `href` e use componentes cliente quando exigido por hooks ou APIs do navegador.
 
-### 1.2 Manutenção Manual
-- **Deixar o código pronto para manutenção manual** por humanos.
-- Preferir clareza a concisão.
-- Nomes descritivos em português para variáveis e funções do domínio.
-- Evitar lógica excessivamente aninhada ou truques obscuros.
+## Persistência e entrega
 
-### 1.3 Imutabilidade
-- **Personagem** e dados derivados: sempre criar novo objeto, nunca mutar in place.
-- Usar spread (`{ ...obj }`) ou funções que retornam cópias.
-
-### 1.4 Estilo
-- **TailwindCSS** com paleta `ordem-*` do `tailwind.config.ts`.
-- Nunca usar hex direto em componentes.
-- Usar `cn()` de `@/lib/utils` para classes condicionais.
-- Import alias `@/` mapeado para `./src`.
-
----
-
-## 2. Regras de Regras do Jogo
-
-### 2.1 Fonte de Verdade
-- **PV/PE/SAN/PD/Defesa**: `calculateDerivedStats()` em `src/core/rules/derivedStats.ts`.
-- Nunca hardcodar fórmulas em outros arquivos.
-
-### 2.2 Duplicações Conhecidas (manter sincronizadas)
-- **NEX_EVENTOS**: fonte única em `src/core/rules/nexEventos.ts`. `rulesEngine.ts` e `levelUp.ts` importam de lá.
-- **Bônus de origem**: `calcularBonusOrigem()` em `derivedStats.ts` e `calcularBonusPoderOrigem()` em `rulesEngine.ts`. Alterar em ambos.
-
-### 2.3 Sobrevivente
-- Classe especial: usa `estagio` (1-4), não NEX. Limite de atributos = 3. Possui PD.
-- Sempre buscar `Sobrevivente` antes de mexer em progressão.
-
-### 2.4 Cores dos Elementos
-- **Sangue**: vermelho | **Conhecimento**: dourado | **Morte**: cinza/branco | **Energia**: roxo | **Medo**: azul
-- Usar `src/data/magic/elementColors.ts` (ELEMENTO_CONFIG, ELEMENTO_COR, ELEMENTO_FILTER_STYLES).
-
----
-
-## 3. MCP e Regras do Jogo
-
-### 3.1 Quando Consultar
-- Dúvidas sobre regras oficiais de Ordem Paranormal.
-- Validação de mecânicas (NEX, perícias, rituais, etc.).
-- Nomes corretos de poderes, rituais, origens.
-
-### 3.2 Como Usar
-- Verificar tools disponíveis no MCP (ex.: `buscar_regras`, `consultar_regras` ou equivalente).
-- Em caso de MCP indisponível, usar `codebase.md` seção 15 (Glossary) e `docs/` como fallback.
-
----
-
-## 4. Estrutura do Projeto
-
-### 4.1 Direção de Imports
-```
-types.ts / data/ / rules/
-    ↓
-logic/
-    ↓
-firebase/ | stores/ | storage/
-    ↓
-components/
-    ↓
-app/
-```
-- Nunca importar de `components/` em `logic/`.
-- Nunca importar de `app/` em `components/`.
-
-### 4.2 Onde Encontrar
-| Preciso... | Arquivo |
-|------------|---------|
-| Alterar regra de stat | `src/core/rules/derivedStats.ts` |
-| Alterar criação de personagem | `src/logic/rulesEngine.ts` + `creationWorkflow.ts` |
-| Alterar level-up | `src/logic/levelUp.ts` |
-| Novo campo em Personagem | `src/core/types.ts` → `Personagem` |
-| Novo dado estático | `src/data/` |
-| Nova entidade na nuvem | `userDataService.ts` + hook em `storage/` |
-| Novo componente UI | `src/components/ui/` |
-| Nova aba no dashboard | `MasterDashboard.tsx` + `MestreNavbar.tsx` |
-
----
-
-## 5. Firebase e Firestore
-
-### 5.1 Antes de Salvar
-- Chamar `removeUndefinedFields()` — Firestore rejeita `undefined`.
-
-### 5.2 Coleções
-- `agentes/` — público, leitura aberta.
-- `users/{userId}/` — privado, só o dono.
-
----
-
-## 6. Componentes e UI
-
-### 6.1 Client Components
-- `"use client"` em qualquer componente com hooks, state ou APIs do browser.
-
-### 6.2 Links (Next.js App Router)
-- Usar `href` como string: `href="/mestre?tab=ameacas"`.
-- Não usar `{ pathname, query }` (sintaxe do Pages Router).
-
-### 6.3 Acessibilidade
-- `aria-label` correto em botões de ícone.
-- Skip link presente no NavBar.
-- Permitir zoom (viewport `userScalable: true`).
-
----
-
-## 7. Documentos de Referência
-
-| Documento | Uso |
-|-----------|-----|
-| `codebase.md` | Visão geral, invariantes, glossário |
-| `docs/ANALISE_GERAL.md` | Correções concluídas, plano de refatoração, itens pendentes |
-| `docs/AGENT_RULES.md` | Este documento — regras para agentes |
-
----
-
-## 8. Checklist Antes de Finalizar
-
-- [ ] Sem comentários adicionados
-- [ ] Imports com alias `@/`
-- [ ] Cores usando `ordem-*` ou `elementColors.ts`
-- [ ] Personagem tratado como imutável
-- [ ] `removeUndefinedFields()` em writes no Firestore
-- [ ] Duplicações (bônus origem) atualizadas em ambos os lugares
-- [ ] `"use client"` em componentes que usam hooks
-- [ ] Links como string, não objeto
+- Use os adaptadores atuais e suas validações. Remova campos `undefined` antes de gravar no Firestore. Considere o espelho público, carimbos e conflito entre clientes. Consulte `firestore.rules` e teste permissões no emulador, com dados sintéticos.
+- Use `npm test`, `node node_modules/typescript/bin/tsc --noEmit --incremental false` e `npm run build`. Para o Oráculo, rode `testes/teste_logica.py` e `testes/teste_integracao.py` com o Python do projeto. Alterações no ranking ou no índice pedem também a bateria real.
+- Atualize a nota do fluxo alterado e o [Mapa H.I.I-C.R.I.S.](obsidian/Mapa%20H.I.I-C.R.I.S.canvas) se alguma fronteira ou dependência mudou.

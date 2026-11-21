@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 
 export type AbaMestre = 'ameacas' | 'inventario' | 'fichas' | 'guia' | 'combate' | 'npcs';
 
-const ABAS: { id: AbaMestre; rotulo: string; Icone: typeof Skull }[] = [
+export const ABAS_MESTRE: { id: AbaMestre; rotulo: string; Icone: typeof Skull }[] = [
   { id: 'fichas', rotulo: 'Fichas', Icone: ScrollText },
   { id: 'combate', rotulo: 'Combate', Icone: Swords },
   { id: 'ameacas', rotulo: 'Ameaças', Icone: Skull },
@@ -16,13 +16,11 @@ const ABAS: { id: AbaMestre; rotulo: string; Icone: typeof Skull }[] = [
   { id: 'guia', rotulo: 'Guia', Icone: BookOpen },
 ];
 
-export function AbasDoMestre({
-  activeTab,
-  onTabSelect,
-}: {
-  activeTab?: AbaMestre;
-  onTabSelect?: (aba: AbaMestre) => void;
-}) {
+export function hrefAbaMestre(aba: AbaMestre) {
+  return aba === 'fichas' ? '/mestre/fichas' as const : ('/mestre?tab=' + aba) as `/mestre?tab=${AbaMestre}`;
+}
+
+export function AbasDoMestre({ activeTab }: { activeTab?: AbaMestre }) {
   const pathname = usePathname();
   const emFichas = pathname?.startsWith('/mestre/fichas') ?? false;
   const atual: AbaMestre | undefined = emFichas ? 'fichas' : activeTab;
@@ -33,7 +31,7 @@ export function AbasDoMestre({
       className="fixed inset-x-0 bottom-0 z-[45] border-t border-white/10 bg-ordem-black/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
     >
       <ul className="grid grid-cols-6">
-        {ABAS.map(({ id, rotulo, Icone }) => {
+        {ABAS_MESTRE.map(({ id, rotulo, Icone }) => {
           const ativa = atual === id;
           const conteudo = (
             <>
@@ -52,19 +50,9 @@ export function AbasDoMestre({
 
           return (
             <li key={id}>
-              {onTabSelect && !emFichas && id !== 'fichas' ? (
-                <button type="button" onClick={() => onTabSelect(id)} aria-current={ativa ? 'page' : undefined} className={classe}>
-                  {conteudo}
-                </button>
-              ) : (
-                <Link
-                  href={id === 'fichas' ? '/mestre/fichas' : `/mestre?tab=${id}`}
-                  aria-current={ativa ? 'page' : undefined}
-                  className={classe}
-                >
-                  {conteudo}
-                </Link>
-              )}
+              <Link href={hrefAbaMestre(id)} prefetch={false} aria-current={ativa ? 'page' : undefined} className={classe}>
+                {conteudo}
+              </Link>
             </li>
           );
         })}

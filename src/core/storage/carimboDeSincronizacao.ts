@@ -6,16 +6,18 @@ export interface RegistroCarimbavel {
   fichaMigradaDe?: string;
 }
 
-export function carimbarSincronizacao<T extends RegistroCarimbavel>(
-  registro: T,
-  agora: string,
-): T & { atualizadoEm: string; sincronizadaNaNuvem: true } {
+export function carimbarAtualizacao<T extends RegistroCarimbavel>(registro: T, agora: string): T {
   const aindaValia = Boolean(registro.ficha) && registro.fichaMigradaDe === registro.atualizadoEm;
-
   return {
     ...registro,
     atualizadoEm: agora,
     ...(aindaValia ? { fichaMigradaDe: agora } : {}),
-    sincronizadaNaNuvem: true as const,
   };
+}
+
+export function carimbarSincronizacao<T extends RegistroCarimbavel>(
+  registro: T,
+  agora: string,
+): T & { atualizadoEm: string; sincronizadaNaNuvem: true } {
+  return { ...carimbarAtualizacao(registro, agora), sincronizadaNaNuvem: true };
 }

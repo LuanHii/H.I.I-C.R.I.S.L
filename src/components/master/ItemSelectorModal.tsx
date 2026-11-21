@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { chaveDeComparacao } from '@/core/rules/pericias';
 import { ITENS } from '../../data/equipment/items';
 import { WEAPONS } from '../../data/combat/weapons';
 import { useCloudItems } from '../../core/storage';
@@ -44,8 +45,9 @@ export const ItemSelectorModal: React.FC<ItemSelectorModalProps> = ({ isOpen, on
   }, [allItems]);
 
   const filteredItems = useMemo(() => {
+    const termo = chaveDeComparacao(search);
     return allItems.filter(item => {
-      const matchesSearch = item.nome.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch = chaveDeComparacao(item.nome).includes(termo);
       const matchesCategory = categoryFilter === 'all' || item.categoria === categoryFilter;
       const matchesType = typeFilter === 'all' || item.tipo === typeFilter;
       return matchesSearch && matchesCategory && matchesType;

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import { AtalhosEncontroFicha } from '@/components/master/EncontroRascunho';
 import { use as usePromise, useState, useEffect, useCallback } from 'react';
 import { FichaMestre } from '../../../../components/master/ficha/FichaMestre';
 import { FichaAntiga } from '../../../../components/master/ficha/FichaAntiga';
@@ -184,6 +185,7 @@ export default function FichaDetalhePage({ params }: { params: Promise<{ id: str
           </nav>
 
           <div className="flex flex-1 flex-col border-white/10 bg-ordem-ooze/50 sm:overflow-y-auto sm:border">
+            <AtalhosEncontroFicha id={registro.id} nome={personagemAtual.nome} />
             {registro?.fonte === 'v2' && registro.ficha ? (
               <FichaMestre
                 ficha={registro.ficha}

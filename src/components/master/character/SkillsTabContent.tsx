@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { PERICIA_ATRIBUTO } from '@/logic/rulesEngine';
+import { prepararTesteDaFicha } from '@/logic/combatUtils';
 import { rollPericia } from '@/logic/diceRoller';
 import type { DiceRollResult } from '@/logic/diceRoller';
 import type { AtributoKey, PericiaName, Personagem } from '@/core/types';
@@ -71,7 +72,7 @@ export function SkillsTabContent({
                       <span className={`block truncate text-sm ${(detalhe.grau || 'Destreinado') === 'Destreinado' ? 'text-ordem-text-muted' : 'font-medium text-white'}`}>{nome}</span>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <button type="button" onClick={() => { const pericia = nome as PericiaName; const det = agent.periciasDetalhadas[pericia]; if (!det) return; onLastRollChange({ pericia, result: rollPericia(det) }); }} className="border border-white/10 p-1.5 text-ordem-text-muted opacity-0 transition-all hover:border-ordem-text-muted hover:text-white focus:opacity-100 group-hover:opacity-100" title="Rolar teste">
+                      <button type="button" onClick={() => { const pericia = nome as PericiaName; const det = prepararTesteDaFicha(agent, pericia); if (!det) return; onLastRollChange({ pericia, result: rollPericia(det) }); }} className="grid h-9 w-9 place-items-center rounded border border-ordem-border text-ordem-text-secondary hover:border-ordem-text-muted hover:text-white focus-visible:outline focus-visible:outline-ordem-red-light" aria-label={`Rolar ${nome}`} title="Rolar teste">
                         <Dices size={14} />
                       </button>
                       {((detalhe.grau || 'Destreinado') !== 'Destreinado' || isEditingMode) && (
@@ -83,7 +84,7 @@ export function SkillsTabContent({
                         <input type="number" value={tempSkillBonus} onChange={(e) => onTempSkillBonusChange(e.target.value)} onBlur={() => onManualSkillBonusChange(nome as PericiaName, parseInt(tempSkillBonus) || 0)} onKeyDown={(e) => e.key === 'Enter' && onManualSkillBonusChange(nome as PericiaName, parseInt(tempSkillBonus) || 0)} autoFocus className="w-12 border border-[var(--mestre-primary,#DC2626)] bg-black/40 text-center font-mono text-xs text-white focus:outline-none" />
                       ) : (
                         <span onClick={() => isEditingMode && onStartEditingSkill(nome as PericiaName, detalhe.bonusFixo)} className={`w-8 text-right font-mono text-base font-bold tabular-nums ${(detalhe.grau || 'Destreinado') === 'Destreinado' ? 'text-ordem-text-muted' : 'text-white'} ${isEditingMode ? 'cursor-pointer underline decoration-dashed underline-offset-4 hover:text-ordem-red' : ''}`} title={isEditingMode ? "Editar bônus" : ""}>
-                          +{detalhe.bonusFixo || 0}
+                          {detalhe.bonusFixo >= 0 ? '+' : ''}{detalhe.bonusFixo || 0}
                         </span>
                       )}
                     </div>

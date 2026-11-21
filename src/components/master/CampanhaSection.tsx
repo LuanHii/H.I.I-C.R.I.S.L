@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Modal, ModalBody, ModalContent, ModalDescription, ModalHeader, ModalTitle } from '@/components/ui/Modal';
 import { ChevronRight, Download, FolderInput, Plus } from 'lucide-react';
 import { Fita } from './ui/Pecas';
 import type { FichaRegistro, Campanha } from '../../core/storage/registros';
@@ -21,7 +22,7 @@ interface CampanhaSectionProps {
     onPriorizarCampanha?: (id: string) => void;
     podeSubir?: boolean;
     podeDescer?: boolean;
-    forceExpanded?: boolean;
+    forceExpanded?: { expandida: boolean };
     autoExpand?: boolean;
 }
 
@@ -47,18 +48,17 @@ export function CampanhaSection({
     const [expandida, setExpandida] = useState(true);
     const [editando, setEditando] = useState(false);
     const [novoNome, setNovoNome] = useState(campanha?.nome || '');
-    const [menuAberto, setMenuAberto] = useState<string | null>(null);
+    const [fichaParaMover, setFichaParaMover] = useState<FichaRegistro | null>(null);
+    const botaoMover = useRef<HTMLButtonElement | null>(null);
     useEffect(() => {
         if (forceExpanded !== undefined) {
-            setExpandida(forceExpanded);
+            setExpandida(forceExpanded.expandida);
         }
     }, [forceExpanded]);
 
     useEffect(() => {
-        if (autoExpand && !expandida) {
-            setExpandida(true);
-        }
-    }, [autoExpand, expandida]);
+        if (autoExpand) setExpandida(true);
+    }, [autoExpand]);
 
     const cor = campanha?.cor || '#71717a';
     const nome = campanha?.nome || 'Fichas Soltas';
@@ -77,14 +77,14 @@ export function CampanhaSection({
     return (
         <div className="mb-4">
             <div
-                className="flex cursor-pointer items-center gap-2 px-3 py-2 transition hover:bg-white/[0.03]"
+                className="flex min-w-0 flex-wrap cursor-pointer items-center gap-2 px-3 py-2 transition hover:bg-white/[0.03]"
                 style={{ borderLeft: `3px solid ${cor}` }}
                 onClick={() => setExpandida(!expandida)}
                 aria-expanded={expandida}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
+                    if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
                         e.preventDefault();
                         setExpandida(!expandida);
                     }
@@ -106,12 +106,12 @@ export function CampanhaSection({
                             if (e.key === 'Escape') setEditando(false);
                         }}
                         onClick={(e) => e.stopPropagation()}
-                        className="border border-white/20 bg-black/40 px-2 py-1 text-sm font-semibold text-white focus:outline-none"
+                        className="min-w-0 flex-1 border border-white/20 bg-black/40 px-2 py-1 text-sm font-semibold text-white focus:outline-none"
                         autoFocus
                     />
                 ) : (
                     <span
-                        className="font-semibold text-white text-sm flex-1"
+                        className="min-w-0 flex-1 text-sm font-semibold text-white [overflow-wrap:anywhere]"
                         onDoubleClick={(e) => {
                             if (id) {
                                 e.stopPropagation();
@@ -219,58 +219,23 @@ export function CampanhaSection({
             {expandida && (
                 <div className="mt-2 space-y-2 pl-4">
                     {fichas.map((registro) => (
-                        <div key={registro.id} className="relative group">
+                        <div key={registro.id} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-1.5">
                             {renderFichaCard(registro)}
-
-                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition">
+                            {campanhasDisponiveis.length > 0 && <div>
                                 <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setMenuAberto(menuAberto === registro.id ? null : registro.id);
+                                    type="button"
+                                    onClick={e => {
+                                        botaoMover.current = e.currentTarget;
+                                        setFichaParaMover(registro);
                                     }}
-                                    className="border border-white/10 bg-black/60 p-1 text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
+                                    className="grid size-11 place-items-center rounded-md border border-ordem-border bg-ordem-black text-ordem-text-secondary hover:border-ordem-border-light hover:text-white focus-visible:outline focus-visible:outline-ordem-green-muted"
                                     title="Mover para campanha"
-                                    aria-label="Mover para campanha"
+                                    aria-label={'Mover ' + registro.personagem.nome + ' para campanha'}
+                                    aria-haspopup="dialog"
                                 >
-                                    <FolderInput size={13} />
+                                    <FolderInput size={16} aria-hidden />
                                 </button>
-
-                                {menuAberto === registro.id && (
-                                    <div className="absolute right-0 top-full z-50 mt-1 min-w-[150px] border border-white/10 bg-[var(--mestre-superficie,#16161a)] shadow-xl">
-                                        <div className="py-1">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    onMover(registro.id, undefined);
-                                                    setMenuAberto(null);
-                                                }}
-                                                className={`w-full text-left px-3 py-2 text-xs hover:bg-ordem-ooze ${!registro.campanha ? 'text-ordem-green' : 'text-ordem-white-muted'
-                                                    }`}
-                                            >
-                                                📂 Fichas Soltas
-                                            </button>
-                                            {campanhasDisponiveis.map((c) => (
-                                                <button
-                                                    key={c.id}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        onMover(registro.id, c.id);
-                                                        setMenuAberto(null);
-                                                    }}
-                                                    className={`w-full text-left px-3 py-2 text-xs hover:bg-ordem-ooze flex items-center gap-2 ${registro.campanha === c.id ? 'text-ordem-green' : 'text-ordem-white-muted'
-                                                        }`}
-                                                >
-                                                    <span
-                                                        className="w-2 h-2 rounded-full"
-                                                        style={{ backgroundColor: c.cor }}
-                                                    />
-                                                    {c.nome}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                            </div>}
                         </div>
                     ))}
                     {fichas.length === 0 && (
@@ -280,6 +245,35 @@ export function CampanhaSection({
                     )}
                 </div>
             )}
+            <Modal open={Boolean(fichaParaMover)} onOpenChange={aberto => { if (!aberto) setFichaParaMover(null); }}>
+                <ModalContent onCloseAutoFocus={evento => {
+                    evento.preventDefault();
+                    if (botaoMover.current?.isConnected) botaoMover.current.focus();
+                    else document.querySelector<HTMLInputElement>('#busca-fichas-mestre')?.focus();
+                }}>
+                    <ModalHeader>
+                        <ModalTitle>Mover para campanha</ModalTitle>
+                        <ModalDescription className="break-words">{fichaParaMover?.personagem.nome}</ModalDescription>
+                    </ModalHeader>
+                    <ModalBody className="space-y-1 p-3">
+                        {[{ id: undefined, nome: 'Fichas Soltas', cor: '#71717a' }, ...campanhasDisponiveis].map(c => (
+                            <button
+                                key={c.id ?? 'soltas'}
+                                type="button"
+                                onClick={() => {
+                                    if (fichaParaMover && fichaParaMover.campanha !== c.id) onMover(fichaParaMover.id, c.id);
+                                    setFichaParaMover(null);
+                                }}
+                                className="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-left text-sm text-ordem-white hover:bg-ordem-border focus-visible:outline focus-visible:outline-ordem-green-muted"
+                            >
+                                <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: c.cor }} aria-hidden />
+                                <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">{c.nome}</span>
+                                {fichaParaMover?.campanha === c.id && <span className="text-xs text-ordem-text-secondary">Atual</span>}
+                            </button>
+                        ))}
+                    </ModalBody>
+                </ModalContent>
+            </Modal>
         </div>
     );
 }

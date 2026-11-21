@@ -27,6 +27,7 @@ interface ModalContentProps {
     children: React.ReactNode;
     className?: string;
     showCloseButton?: boolean;
+    onCloseAutoFocus?: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>['onCloseAutoFocus'];
     size?: 'sm' | 'md' | 'lg' | 'xl' | 'full' | 'wide';
 }
 
@@ -40,7 +41,7 @@ const sizeStyles = {
 };
 
 export const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
-    ({ children, className, showCloseButton = true, size = 'md' }, ref) => {
+    ({ children, className, showCloseButton = true, size = 'md', onCloseAutoFocus }, ref) => {
         return (
             <DialogPrimitive.Portal forceMount>
                 <DialogPrimitive.Overlay asChild>
@@ -49,12 +50,12 @@ export const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
                         initial="initial"
                         animate="animate"
                         exit="exit"
-                        className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
+                        className="fixed inset-0 z-[80] bg-black/70 backdrop-blur-sm"
                     />
                 </DialogPrimitive.Overlay>
 
-                <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
-                <DialogPrimitive.Content asChild>
+                <div className="pointer-events-none fixed inset-0 z-[80] flex items-end justify-center p-0 sm:items-center sm:p-4">
+                <DialogPrimitive.Content asChild onCloseAutoFocus={onCloseAutoFocus}>
                     <motion.div
                         ref={ref}
                         variants={modalVariants}
@@ -75,7 +76,7 @@ export const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
                         {showCloseButton && (
                             <DialogPrimitive.Close asChild>
                                 <button
-                                    className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-lg text-ordem-text-muted transition-colors hover:bg-ordem-ooze-light hover:text-white"
+                                    className="absolute right-3 top-3 grid size-11 place-items-center rounded-lg text-ordem-text-muted transition-colors hover:bg-ordem-ooze-light hover:text-white"
                                     aria-label="Fechar"
                                 >
                                     <X size={18} />

@@ -1,4 +1,5 @@
 'use client';
+import { useCloudFichas } from '@/core/storage';
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -543,4 +544,9 @@ function RegraCard({ regra, expandido, favorito, onToggle, onFavorito }: RegraCa
             </AnimatePresence>
         </motion.div>
     );
+}
+
+export function GuiaMestreComFichas() {
+  const { fichas, salvar } = useCloudFichas();
+  return <GuiaMestre fichas={fichas} onUpdateFicha={(id, personagem) => salvar(personagem, id)} />;
 }

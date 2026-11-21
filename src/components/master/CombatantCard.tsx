@@ -4,18 +4,22 @@ import React, { useState, forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import {
     Skull, Heart, Zap, Brain, Shield, Swords, ChevronDown, ChevronUp,
-    Trash2, Copy, Check, X, Minus, Plus, StickyNote, GripVertical
+    Trash2, Copy, Check, X, Minus, Plus, StickyNote, GripVertical, MoveUp, MoveDown
 } from 'lucide-react';
 import { type Combatant } from './CombatManagerTypes';
 import { ConditionPicker, ConditionBadges } from './ConditionPicker';
+import { participanteInimigo } from '@/core/rules/ordemCombate';
 import { cn } from '@/lib/utils';
 
 interface CombatantCardProps {
     combatant: Combatant;
     isCurrentTurn: boolean;
+    iniciativaVisivel: boolean;
     onUpdate: (updates: Partial<Combatant>) => void;
     onRemove: () => void;
     onDuplicate: () => void;
+    onMoveUp?: () => void;
+    onMoveDown?: () => void;
     isDragging?: boolean;
     dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
@@ -23,9 +27,12 @@ interface CombatantCardProps {
 export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(function CombatantCard({
     combatant,
     isCurrentTurn,
+    iniciativaVisivel,
     onUpdate,
     onRemove,
     onDuplicate,
+    onMoveUp,
+    onMoveDown,
     isDragging,
     dragHandleProps
 }, ref) {
@@ -34,11 +41,12 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
     const [isEditingName, setIsEditingName] = useState(false);
     const [editedName, setEditedName] = useState(combatant.name);
     const [isEditingInit, setIsEditingInit] = useState(false);
-    const [editedInit, setEditedInit] = useState(String(combatant.initiative));
+    const [editedInit, setEditedInit] = useState('');
+    const iniciativaDefinida = (iniciativaVisivel && !combatant.semTesteDeIniciativa) || combatant.iniciativaManual;
     const [isEditingHp, setIsEditingHp] = useState(false);
     const [editedHp, setEditedHp] = useState(String(combatant.hp.current));
 
-    const hpPercent = (combatant.hp.current / combatant.hp.max) * 100;
+    const hpPercent = combatant.hp.max > 0 ? Math.max(0, (combatant.hp.current / combatant.hp.max) * 100) : 0;
     const isDead = combatant.hp.current <= 0;
     const isDying = combatant.hp.current <= 0 && combatant.hp.current > -combatant.hp.max;
     const isCritical = hpPercent <= 25 && hpPercent > 0;
@@ -113,7 +121,7 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                 isDragging && 'opacity-90 shadow-2xl ring-2 ring-ordem-gold z-50'
             )}
         >
-            <div className="p-3 flex items-center gap-2">
+            <div className="grid grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1 p-2 sm:flex sm:p-3">
                 <div
                     {...dragHandleProps}
                     className="cursor-grab active:cursor-grabbing p-1 text-ordem-text-muted hover:text-white transition-colors touch-none"
@@ -123,17 +131,14 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                 </div>
 
                 {isCurrentTurn && !isDead && (
-                    <motion.div
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ repeat: Infinity, duration: 2 }}
-                        className="w-3 h-3 rounded-full bg-ordem-green shrink-0"
-                    />
+                    <span aria-hidden className="hidden size-2.5 shrink-0 rounded-full bg-ordem-green sm:block" />
                 )}
 
                 {isEditingInit ? (
                     <div className="w-14 flex items-center gap-0.5">
                         <input
                             type="number"
+                            aria-label={'Resultado da iniciativa de ' + combatant.name}
                             value={editedInit}
                             onChange={e => setEditedInit(e.target.value)}
                             onKeyDown={e => {
@@ -148,28 +153,29 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                 ) : (
                     <button
                         onClick={() => {
-                            setEditedInit(String(combatant.initiative));
+                            setEditedInit(iniciativaDefinida ? String(combatant.initiative) : '');
                             setIsEditingInit(true);
                         }}
                         className="w-10 text-center shrink-0 hover:bg-ordem-ooze rounded p-1 transition-colors group"
-                        title="Clique para editar iniciativa"
+                        aria-label={'Editar iniciativa de ' + combatant.name}
+                        title="Editar iniciativa"
                     >
-                        <span className="text-lg font-bold text-white group-hover:text-ordem-green transition-colors">{combatant.initiative}</span>
-                        <p className="text-[9px] text-ordem-text-muted uppercase">INIT</p>
+                        <span className="text-lg font-bold text-white group-hover:text-ordem-green transition-colors">{iniciativaDefinida ? combatant.initiative : '—'}</span>
+                        <span className="block text-[10px] text-ordem-text-secondary">Inic.</span>
                     </button>
                 )}
 
-                <div className="flex-1 min-w-0">
+                <div className="col-start-3 row-start-1 min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                         {getTypeIcon()}
                         {isEditingName ? (
-                            <div className="flex items-center gap-1">
+                            <div className="flex min-w-0 flex-1 items-center gap-1">
                                 <input
                                     type="text"
                                     value={editedName}
                                     onChange={e => setEditedName(e.target.value)}
                                     onKeyDown={e => e.key === 'Enter' && handleNameSave()}
-                                    className="bg-ordem-black border border-ordem-border rounded px-2 py-0.5 text-sm text-white"
+                                    className="min-w-0 flex-1 rounded border border-ordem-border bg-ordem-black px-2 py-0.5 text-sm text-white"
                                     autoFocus
                                 />
                                 <button onClick={handleNameSave} className="text-ordem-green hover:text-green-400">
@@ -183,7 +189,7 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                             <button
                                 onClick={() => setIsEditingName(true)}
                                 className={cn(
-                                    'font-bold truncate hover:text-ordem-green transition-colors',
+                                    'min-w-0 break-words text-left text-sm font-bold leading-snug transition-colors hover:text-ordem-green sm:text-base',
                                     isDead ? 'text-gray-400 line-through' : 'text-white'
                                 )}
                             >
@@ -192,6 +198,8 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                         )}
                     </div>
 
+                    {combatant.semTesteDeIniciativa && !combatant.iniciativaManual && <p className="pl-5 text-xs text-ordem-text-secondary">Iniciativa manual</p>}
+                    {combatant.type === 'npc' && <p className="pl-5 text-xs text-ordem-text-secondary">{participanteInimigo(combatant) ? 'NPC inimigo' : 'NPC aliado'}</p>}
                     {combatant.conditions.length > 0 && (
                         <div className="mt-1">
                             <ConditionBadges
@@ -204,7 +212,7 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                     )}
                 </div>
 
-                <div className="flex items-center gap-4 shrink-0">
+                <div className="col-span-2 col-start-2 row-start-2 flex shrink-0 items-center gap-4">
                     <div className="text-center">
                         <div className="flex items-center justify-center gap-1 text-red-400">
                             <Heart size={12} />
@@ -254,8 +262,11 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                 </div>
 
                 <button
+                    type="button"
+                    aria-expanded={isExpanded}
+                    aria-label={(isExpanded ? 'Ocultar detalhes de ' : 'Ver detalhes de ') + combatant.name}
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="p-1.5 text-ordem-text-secondary hover:text-white transition-colors"
+                    className="col-start-4 row-start-1 grid size-11 shrink-0 place-items-center rounded-md text-ordem-text-secondary transition-colors hover:bg-white/5 hover:text-white focus-visible:outline focus-visible:outline-ordem-green-muted"
                 >
                     {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </button>
@@ -295,42 +306,25 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                         <button onClick={() => applyHealing(10)} className="px-2 py-1 text-xs bg-green-600/20 hover:bg-green-600/40 text-green-400 rounded">+10</button>
                     </div>
 
-                    {(combatant.pe || combatant.san) && (
-                        <div className="flex items-center gap-4">
-                            {combatant.pe && (
-                                <div className="flex items-center gap-2">
-                                    <Zap size={14} className="text-yellow-400" />
-                                    <span className="text-sm text-ordem-text-secondary">PE:</span>
-                                    <div className="flex items-center gap-1">
-                                        <button
-                                            onClick={() => onUpdate({ pe: { ...combatant.pe!, current: Math.max(0, combatant.pe!.current - 1) } })}
-                                            className="p-0.5 text-ordem-text-muted hover:text-white"
-                                        ><Minus size={12} /></button>
-                                        <span className="text-sm font-mono text-white">{combatant.pe.current}/{combatant.pe.max}</span>
-                                        <button
-                                            onClick={() => onUpdate({ pe: { ...combatant.pe!, current: Math.min(combatant.pe!.max, combatant.pe!.current + 1) } })}
-                                            className="p-0.5 text-ordem-text-muted hover:text-white"
-                                        ><Plus size={12} /></button>
+                    {(combatant.pe || combatant.pd || combatant.san) && (
+                        <div className="flex flex-wrap items-center gap-3 font-dados">
+                            {([
+                                ['pe', 'PE', Zap],
+                                ['pd', 'PD', Zap],
+                                ['san', 'SAN', Brain],
+                            ] as const).map(([chave, rotulo, Icone]) => {
+                                const recurso = combatant[chave];
+                                if (!recurso) return null;
+                                return (
+                                    <div key={chave} className="flex items-center gap-1.5 rounded-lg border border-ordem-border px-2">
+                                        <Icone size={15} aria-hidden className="text-ordem-text-secondary" />
+                                        <span className="text-sm text-ordem-text-secondary">{rotulo}</span>
+                                        <button type="button" aria-label={'Diminuir ' + rotulo} disabled={recurso.current <= 0} onClick={() => onUpdate({ [chave]: { ...recurso, current: Math.max(0, recurso.current - 1) } })} className="grid min-h-11 min-w-9 place-items-center rounded text-ordem-white focus-visible:outline focus-visible:outline-ordem-green-muted disabled:opacity-45"><Minus size={15} aria-hidden /></button>
+                                        <span className="text-sm text-white tabular-nums">{recurso.current}/{recurso.max}</span>
+                                        <button type="button" aria-label={'Aumentar ' + rotulo} disabled={recurso.current >= recurso.max} onClick={() => onUpdate({ [chave]: { ...recurso, current: Math.min(recurso.max, recurso.current + 1) } })} className="grid min-h-11 min-w-9 place-items-center rounded text-ordem-white focus-visible:outline focus-visible:outline-ordem-green-muted disabled:opacity-45"><Plus size={15} aria-hidden /></button>
                                     </div>
-                                </div>
-                            )}
-                            {combatant.san && (
-                                <div className="flex items-center gap-2">
-                                    <Brain size={14} className="text-purple-400" />
-                                    <span className="text-sm text-ordem-text-secondary">SAN:</span>
-                                    <div className="flex items-center gap-1">
-                                        <button
-                                            onClick={() => onUpdate({ san: { ...combatant.san!, current: Math.max(0, combatant.san!.current - 1) } })}
-                                            className="p-0.5 text-ordem-text-muted hover:text-white"
-                                        ><Minus size={12} /></button>
-                                        <span className="text-sm font-mono text-white">{combatant.san.current}/{combatant.san.max}</span>
-                                        <button
-                                            onClick={() => onUpdate({ san: { ...combatant.san!, current: Math.min(combatant.san!.max, combatant.san!.current + 1) } })}
-                                            className="p-0.5 text-ordem-text-muted hover:text-white"
-                                        ><Plus size={12} /></button>
-                                    </div>
-                                </div>
-                            )}
+                                );
+                            })}
                         </div>
                     )}
 
@@ -448,7 +442,16 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                         </div>
                     )}
 
-                    <div className="flex items-center gap-2 pt-2 border-t border-ordem-border/50">
+                    <div className="flex flex-wrap items-center gap-2 border-t border-ordem-border/50 pt-2 font-dados">
+                        {combatant.type === 'npc' && <label className="flex items-center gap-2 text-xs text-ordem-text-secondary">
+                            Lado
+                            <select value={participanteInimigo(combatant) ? 'inimigo' : 'aliado'} onChange={e => onUpdate({ inimigo: e.target.value === 'inimigo' })} className="min-h-11 rounded-lg border border-ordem-border bg-ordem-black px-2 text-ordem-white">
+                                <option value="aliado">Aliado</option>
+                                <option value="inimigo">Inimigo</option>
+                            </select>
+                        </label>}
+                        {onMoveUp && <button type="button" onClick={onMoveUp} className="flex min-h-11 items-center gap-1.5 rounded-lg border border-ordem-border px-2.5 text-xs text-ordem-white hover:bg-ordem-black focus-visible:outline focus-visible:outline-ordem-green-muted"><MoveUp size={15} aria-hidden /> Mover acima</button>}
+                        {onMoveDown && <button type="button" onClick={onMoveDown} className="flex min-h-11 items-center gap-1.5 rounded-lg border border-ordem-border px-2.5 text-xs text-ordem-white hover:bg-ordem-black focus-visible:outline focus-visible:outline-ordem-green-muted"><MoveDown size={15} aria-hidden /> Mover abaixo</button>}
                         <button
                             onClick={onDuplicate}
                             className="flex items-center gap-1 px-2 py-1 text-xs bg-ordem-ooze hover:bg-ordem-border rounded text-ordem-text-secondary hover:text-white transition-colors"
@@ -457,6 +460,7 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                         </button>
                         <button
                             onClick={() => onUpdate({ isActive: !combatant.isActive })}
+                            disabled={!combatant.isActive && combatant.semTesteDeIniciativa && !combatant.iniciativaManual}
                             className={cn(
                                 'flex items-center gap-1 px-2 py-1 text-xs rounded transition-colors',
                                 combatant.isActive

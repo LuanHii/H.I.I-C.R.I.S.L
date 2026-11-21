@@ -4,8 +4,10 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useCloudFichas, useCloudCampanhas, useWatchedFichas, type FichaRegistro } from '../../core/storage';
 import type { Personagem } from '../../core/types';
+import { AtalhosEncontroFicha } from './EncontroRascunho';
 import { FichaMestre } from './ficha/FichaMestre';
 import { FichaAntiga } from './ficha/FichaAntiga';
+import { chaveDeComparacao } from '@/core/rules/pericias';
 import { normalizePersonagem } from '../../core/personagemUtils';
 import { saveAgentToCloud } from '../../core/firebase/firestore';
 import { ImportExportModal } from './ImportExportModal';
@@ -31,7 +33,7 @@ export function FichasManager() {
   const [filtroPatente, setFiltroPatente] = useState<'Todas' | 'Recruta' | 'Operador' | 'Agente Especial' | 'Oficial de Operações' | 'Agente de Elite'>('Todas');
   const [ordem, setOrdem] = useState<'atualizado' | 'nome' | 'nex'>('atualizado');
   const [viewMode, setViewMode] = useState<'compact' | 'full'>('full');
-  const [expandAll, setExpandAll] = useState<boolean | undefined>(undefined);
+  const [expandAll, setExpandAll] = useState<{ expandida: boolean }>();
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
   const [modalAberto, setModalAberto] = useState(false);
   const [hydrated, setHydrated] = useState(false);
@@ -60,6 +62,7 @@ export function FichasManager() {
     if (typeof window !== 'undefined') {
       const storedOrdem = window.localStorage.getItem('fichas.ordem') as 'atualizado' | 'nome' | 'nex' | null;
       const storedView = window.localStorage.getItem('fichas.view') as 'compact' | 'full' | null;
+      setBusca(window.sessionStorage.getItem('hiicris.fichas.busca') ?? '');
       if (storedOrdem) setOrdem(storedOrdem);
       if (storedView) setViewMode(storedView);
       setHydrated(true);
@@ -97,6 +100,13 @@ export function FichasManager() {
     }
   }, [selecionada]);
 
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      window.sessionStorage.setItem('hiicris.fichas.busca', busca);
+    } catch {}
+  }, [busca, hydrated]);
+
   const formatUpdated = (value: unknown) => {
     const timestamp = toMs(value);
     if (!timestamp) return '—';
@@ -113,27 +123,18 @@ export function FichasManager() {
     return 0;
   };
 
+  const buscaAtiva = Boolean(busca.trim() || filtroClasse !== 'Todas' || filtroPatente !== 'Todas');
   const fichasFiltradas = useMemo(() => {
-    const filtradas = fichas.filter((r) => {
-      if (!busca.trim()) return true;
-      const b = busca.trim().toLowerCase();
-      const p = r.personagem;
-      return (
-        p.nome.toLowerCase().includes(b) ||
-        p.classe.toLowerCase().includes(b) ||
-        String(p.nex).includes(b) ||
-        (p.patente || '').toLowerCase().includes(b)
-      );
+    const termo = chaveDeComparacao(busca);
+    const filtradas = fichas.filter(({ personagem }) => {
+      if (filtroClasse !== 'Todas' && personagem.classe !== filtroClasse) return false;
+      if (filtroPatente !== 'Todas' && personagem.patente !== filtroPatente) return false;
+      const nivel = personagem.classe === 'Sobrevivente' ? personagem.estagio : personagem.nex;
+      return !termo || [personagem.nome, personagem.classe, nivel ?? '', personagem.patente ?? '']
+        .some(valor => chaveDeComparacao(String(valor)).includes(termo));
     });
 
-    const filtradasPorTag = filtradas.filter((r) => {
-      const p = r.personagem;
-      if (filtroClasse !== 'Todas' && p.classe !== filtroClasse) return false;
-      if (filtroPatente !== 'Todas' && p.patente !== filtroPatente) return false;
-      return true;
-    });
-
-    return [...filtradasPorTag].sort((a, b) => {
+    return filtradas.sort((a, b) => {
       if (ordem === 'nome') return a.personagem.nome.localeCompare(b.personagem.nome);
       if (ordem === 'nex') return (b.personagem.nex ?? 0) - (a.personagem.nex ?? 0);
       return toMs(b.atualizadoEm) - toMs(a.atualizadoEm);
@@ -146,17 +147,15 @@ export function FichasManager() {
     campanhas.forEach((c) => grupos.set(c.id, []));
     grupos.set(undefined, []);
 
-    fichasFiltradas.forEach((f) => {
-      const campanhaId = f.campanha;
-      if (!grupos.has(campanhaId)) {
-        grupos.set(undefined, [...(grupos.get(undefined) || []), f]);
-      } else {
-        grupos.get(campanhaId)!.push(f);
-      }
-    });
+    fichasFiltradas.forEach(f => (grupos.get(f.campanha) ?? grupos.get(undefined))!.push(f));
 
     return grupos;
   }, [fichasFiltradas, campanhas]);
+
+  const idsCampanha = useMemo(() => new Set(campanhas.map(c => c.id)), [campanhas]);
+  const fichasDaCampanha = (id?: string) => fichas.filter(f =>
+    (f.campanha && idsCampanha.has(f.campanha) ? f.campanha : undefined) === id,
+  );
 
   const handleUpdate = (updated: any) => {
     if (!registroAtual) return;
@@ -273,7 +272,7 @@ export function FichasManager() {
           tabIndex={0}
           onClick={() => handleSelectFicha(registro.id)}
           onKeyDown={(event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
+            if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
               event.preventDefault();
               handleSelectFicha(registro.id);
             }
@@ -287,7 +286,7 @@ export function FichasManager() {
         >
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-white truncate">{registro.personagem.nome}</p>
+              <p className="truncate text-sm font-semibold text-white" title={registro.personagem.nome}>{registro.personagem.nome}</p>
               <p className="text-[10px] text-ordem-text-secondary">
                 {registro.personagem.classe} · NEX {registro.personagem.nex}% · {registro.personagem.patente}
               </p>
@@ -317,7 +316,7 @@ export function FichasManager() {
         tabIndex={0}
         onClick={() => handleSelectFicha(registro.id)}
         onKeyDown={(event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
+          if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
             event.preventDefault();
             handleSelectFicha(registro.id);
           }
@@ -343,7 +342,7 @@ export function FichasManager() {
           </span>
 
           <div className="min-w-0 flex-1">
-            <p className="truncate font-display text-[15px] font-semibold leading-tight tracking-wide text-white">
+            <p className="line-clamp-2 font-display text-[15px] font-semibold leading-tight tracking-wide text-white [overflow-wrap:anywhere]">
               {registro.personagem.nome}
             </p>
             <div className="mt-1 flex flex-wrap items-center gap-1">
@@ -510,12 +509,11 @@ export function FichasManager() {
           ${isSidebarCollapsed ? 'lg:hidden' : ''}
         `}
       >
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-ordem-border bg-gradient-to-br from-ordem-ooze/60 to-ordem-black-deep p-3 sm:p-4">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <div className="font-carimbo text-[10px] uppercase tracking-[0.35em] text-ordem-text-muted">Arquivo</div>
               {isCloudMode ? (
-                <span className="flex items-center gap-1 text-[10px] text-ordem-green" title="Sincronizado na nuvem">
+                <span className="flex items-center gap-1 text-[10px] text-ordem-green" title="Acesso à nuvem">
                   <Cloud size={12} />
                   <span className="hidden sm:inline">Nuvem</span>
                 </span>
@@ -526,10 +524,10 @@ export function FichasManager() {
                 </span>
               )}
             </div>
-            <h2 className="truncate font-display text-xl uppercase leading-none tracking-[0.06em] text-white lg:text-3xl">Fichas</h2>
+            <h2 className="truncate font-display text-xl uppercase leading-none tracking-[0.06em] text-white lg:text-3xl">Fichas da mesa</h2>
             {fichasLoading && <div className="mt-1 font-mono text-xs text-ordem-text-muted">Carregando...</div>}
           </div>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2">
             {lastSelectedId && fichas.some((f) => f.id === lastSelectedId) && (
               <button
                 onClick={() => {
@@ -556,7 +554,7 @@ export function FichasManager() {
               className="flex h-11 min-w-[44px] items-center justify-center gap-1.5 border border-ordem-red bg-ordem-red/15 px-3 font-carimbo text-[10px] uppercase tracking-[0.16em] text-white transition hover:bg-ordem-red/30"
             >
               <Plus size={17} />
-              <span className="hidden lg:inline">NOVA</span>
+              <span className="hidden sm:inline">Nova ficha</span>
             </Link>
           </div>
         </div>
@@ -600,12 +598,13 @@ export function FichasManager() {
               <input
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
+                id="busca-fichas-mestre"
                 placeholder="Buscar fichas..."
                 onKeyDown={(e) => {
                   if (e.key === 'Escape') setBusca('');
                 }}
                 className="h-11 w-full border border-white/10 bg-black/30 px-3 font-mono text-sm text-white placeholder:text-ordem-text-muted focus:border-ordem-red/60 focus:outline-none"
-                aria-label="Buscar por nome, classe, NEX ou patente"
+                aria-label="Buscar por nome, classe, NEX, estágio ou patente"
               />
 
               <button
@@ -663,7 +662,7 @@ export function FichasManager() {
                   </button>
                 )}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="shrink-0 font-carimbo text-[10px] uppercase tracking-[0.18em] text-ordem-text-muted">Ordenar por</span>
                 <select
                   value={ordem}
@@ -710,14 +709,14 @@ export function FichasManager() {
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
-                    onClick={() => setExpandAll(true)}
+                    onClick={() => setExpandAll({ expandida: true })}
                     className="font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-muted transition hover:text-white"
                   >
                     Expandir tudo
                   </button>
                   <button
                     type="button"
-                    onClick={() => setExpandAll(false)}
+                    onClick={() => setExpandAll({ expandida: false })}
                     className="font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-muted transition hover:text-white"
                   >
                     Colapsar tudo
@@ -728,7 +727,7 @@ export function FichasManager() {
             </div>
 
             <div className="-mx-3 flex-1 space-y-3 overflow-y-auto px-3 pb-[calc(60px+env(safe-area-inset-bottom))] touch-scroll custom-scrollbar lg:mx-0 lg:px-0 lg:pb-0 lg:pr-2">
-              {campanhas.map((campanha, indiceCampanha) => (
+              {campanhas.map((campanha, indiceCampanha) => (!buscaAtiva || !!fichasPorCampanha.get(campanha.id)?.length) && (
                 <CampanhaSection
                   key={campanha.id}
                   campanha={campanha}
@@ -740,18 +739,18 @@ export function FichasManager() {
                   renderFichaCard={renderFichaCard}
                   onRenomear={renomearCampanha}
                   onRemoverCampanha={handleRemoverCampanha}
-                  onExportarCampanha={handleExportarCampanha}
+                  onExportarCampanha={(_, nome, id) => handleExportarCampanha(fichasDaCampanha(id), nome, id)}
                   onConverterCampanha={handleConverterCampanha}
                   onMoverCampanha={moverCampanha}
                   onPriorizarCampanha={priorizarCampanha}
                   podeSubir={indiceCampanha > 0}
                   podeDescer={indiceCampanha < campanhas.length - 1}
                   forceExpanded={expandAll}
-                  autoExpand={busca.trim().length > 0}
+                  autoExpand={buscaAtiva}
                 />
               ))}
 
-              <CampanhaSection
+              {(!buscaAtiva || !!fichasPorCampanha.get(undefined)?.length) && <CampanhaSection
                 campanha={null}
                 fichas={fichasPorCampanha.get(undefined) || []}
                 selecionada={selecionada}
@@ -759,11 +758,11 @@ export function FichasManager() {
                 onMover={moverParaCampanha}
                 campanhasDisponiveis={campanhas}
                 renderFichaCard={renderFichaCard}
-                onExportarCampanha={handleExportarCampanha}
+                onExportarCampanha={(_, nome, id) => handleExportarCampanha(fichasDaCampanha(id), nome, id)}
                   onConverterCampanha={handleConverterCampanha}
                 forceExpanded={expandAll}
-                autoExpand={busca.trim().length > 0}
-              />
+                autoExpand={buscaAtiva}
+              />}
 
               <NovaCampanhaForm onCriar={criarCampanha} />
 
@@ -788,10 +787,10 @@ export function FichasManager() {
                   </p>
                   <button
                     type="button"
-                    onClick={() => setBusca('')}
+                    onClick={() => { setBusca(''); setFiltroClasse('Todas'); setFiltroPatente('Todas'); }}
                     className="inline-flex items-center gap-2 border border-white/10 px-4 py-2.5 font-carimbo text-[11px] uppercase tracking-[0.16em] text-ordem-text-secondary transition hover:border-white/30 hover:text-white"
                   >
-                    Limpar busca
+                    Limpar busca e filtros
                   </button>
                 </div>
               )}
@@ -809,7 +808,7 @@ export function FichasManager() {
       >
         {fichaAtual ? (
           <div className="flex-1 flex flex-col min-h-0">
-            <div className="lg:hidden flex items-center gap-3 p-4 border-b border-ordem-border bg-ordem-black safe-top shrink-0">
+            <div className="lg:hidden flex items-center gap-3 p-4 pr-[68px] border-b border-ordem-border bg-ordem-black safe-top shrink-0">
               <button
                 onClick={handleCloseDetail}
                 className="p-2 -ml-2 rounded-lg hover:bg-ordem-ooze/50 active:bg-ordem-ooze touch-target"
@@ -819,7 +818,7 @@ export function FichasManager() {
               </button>
               <div className="flex-1 min-w-0">
                 <h2 className="font-semibold text-white truncate">{fichaAtual.nome}</h2>
-                <p className="text-xs text-ordem-text-secondary">{fichaAtual.classe} · NEX {fichaAtual.nex}%</p>
+                <p className="text-xs text-ordem-text-secondary">{fichaAtual.classe} · {fichaAtual.classe === 'Sobrevivente' ? 'Estágio ' + (fichaAtual.estagio ?? 1) : 'NEX ' + fichaAtual.nex + '%'}</p>
               </div>
             </div>
 
@@ -856,10 +855,12 @@ export function FichasManager() {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto touch-scroll p-4 lg:p-6 safe-bottom">
+            <div className="flex-1 overflow-y-auto touch-scroll p-3 pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:p-6">
               <div className="overflow-hidden border border-white/10">
+                {registroAtual && <AtalhosEncontroFicha id={registroAtual.id} nome={fichaAtual.nome} />}
                 {registroAtual?.fonte === 'v2' && registroAtual.ficha ? (
                   <FichaMestre
+                    key={registroAtual.id}
                     ficha={registroAtual.ficha}
                     personagem={fichaAtual}
                     onSessao={handleUpdate}

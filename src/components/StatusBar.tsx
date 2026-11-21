@@ -149,14 +149,16 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
                 className="w-14 border border-white/20 bg-black/40 px-1 text-center text-sm text-white focus:border-[var(--mestre-primary,#DC2626)] focus:outline-none"
               />
             ) : (
-              <motion.span
+              <motion.button
+                type="button"
+                aria-label={'Editar máximo de ' + label}
                 whileHover={{ scale: 1.1 }}
                 onClick={() => setIsEditingMax(true)}
                 className="text-ordem-text-secondary text-sm cursor-pointer hover:text-white border-b border-dashed border-ordem-text-muted hover:border-white transition-colors"
                 title="Clique para editar"
               >
                 {max}
-              </motion.span>
+              </motion.button>
             )
           ) : (
             <span className="text-ordem-text-secondary text-sm">{max}</span>
@@ -185,9 +187,11 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
             <motion.button
               key={amount}
               whileTap={{ scale: 0.96 }}
+              type="button"
+              aria-label={(amount > 0 ? 'Adicionar ' + amount : 'Reduzir ' + Math.abs(amount)) + ' ' + label}
               onClick={() => handleAdjust(amount)}
               className={cn(
-                'border py-1.5 text-center font-mono text-xs transition-colors',
+                'min-h-11 border text-center font-dados text-sm transition-colors focus-visible:outline focus-visible:outline-ordem-green-muted sm:min-h-8',
                 'border-white/10 bg-white/[0.02] text-ordem-text-secondary',
                 amount < 0
                   ? 'hover:border-ordem-red/50 hover:bg-ordem-red/10 hover:text-ordem-red'

@@ -1,13 +1,20 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, ChevronDown, Swords, Zap, Crosshair, Sparkles, BookOpen, Flame, Shield, Wind, Clock, ArrowRight } from 'lucide-react';
-import { Personagem, Poder, Ritual } from '../core/types';
+import type { AtributoKey, Personagem, Poder, Ritual } from '@/core/types';
 import { UNIVERSAL_ACTIONS, INVESTIGATION_ACTIONS, CHASE_ACTIONS, STEALTH_ACTIONS, MANEUVER_ACTIONS, ACAO_BADGE, ActionDefinition, TipoAcao } from '../data/combat/actions';
 import { ORIGENS } from '../data/character/origins';
 import { CLASS_ABILITIES } from '../data/character/classAbilities';
 import { TRILHAS } from '../data/character/tracks';
-import { getPenalidadesPericia } from '../logic/combatUtils';
-import { calcularStatsModificados, MODIFICACOES_ARMAS } from '../data/equipment/modifications';
+import { prepararAtaquesDaFicha, type AtaqueDaFicha } from '@/logic/combatUtils';
+import { calcularDTRitual } from '@/logic/rulesEngine';
+import { apresentarEfeitoDeRitual, formatarCustoDoRitual } from '@/core/rules/rituais';
+import { MODIFICACOES_ARMAS } from '@/data/equipment/modifications';
+
+type AcaoDaFicha = ActionDefinition | Ritual | (Pick<Poder, 'nome' | 'descricao' | 'custo' | 'acao'> & {
+  tipo: string;
+  teste?: string;
+});
 
 interface ActionsTabProps {
   character: Personagem;
@@ -68,9 +75,9 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
     , [character.poderes]);
 
   const q = query.trim().toLowerCase();
-  const matchesQuery = useCallback((a: any) => {
+  const matchesQuery = useCallback((a: { nome: string; descricao: string; teste?: string; acao?: string; custo?: string }) => {
     if (!q) return true;
-    return `${a.nome ?? ''} ${a.descricao ?? ''} ${a.teste ?? ''} ${a.acao ?? ''} ${a.custo ?? ''}`.toLowerCase().includes(q);
+    return [a.nome, a.descricao, a.teste, a.acao, a.custo].join(' ').toLowerCase().includes(q);
   }, [q]);
 
   const formatCost = (cost?: string) => {
@@ -79,17 +86,10 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
     return cost.replace(/PE/g, 'PD').replace(/SAN/g, 'PD');
   };
 
-  const getRitualCost = (circle: number) => ({ 1: '1 PE', 2: '3 PE', 3: '6 PE', 4: '10 PE' }[circle] || '? PE');
+  const parseDtAttr = (raw?: string): AtributoKey | undefined =>
+    raw?.match(/\bDT\s*(Agi|For|Int|Pre|Vig)\b/i)?.[1].toUpperCase() as AtributoKey | undefined;
 
-  const parseDtAttr = (raw?: string): 'AGI' | 'FOR' | 'INT' | 'PRE' | 'VIG' | null => {
-    if (!raw) return null;
-    const m = raw.match(/\bDT\s*(Agi|For|Int|Pre|Vig)\b/i);
-    if (!m) return null;
-    const key = m[1].toUpperCase() as 'AGI' | 'FOR' | 'INT' | 'PRE' | 'VIG';
-    return ['AGI', 'FOR', 'INT', 'PRE', 'VIG'].includes(key) ? key : null;
-  };
-
-  const renderActionCard = (action: ActionDefinition | Poder | Ritual, source?: string, idx = 0) => {
+  const renderActionCard = (action: AcaoDaFicha, source?: string, idx = 0) => {
     const isRitual = 'circulo' in action;
     const isActionDef = 'tipoAcao' in action;
     const cardKey = action.nome + (source || '');
@@ -97,16 +97,14 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
 
     let cost: string | undefined;
     if ('custo' in action) cost = action.custo;
-    if (isRitual) cost = getRitualCost((action as Ritual).circulo);
-    const displayCost = formatCost(cost);
+    const displayCost = isRitual ? formatarCustoDoRitual(action.circulo, !useSanity) : formatCost(cost);
 
-    const dtRitual = isRitual ? 10 + (character.pe?.rodada ?? 1) + (character.atributos?.PRE ?? 0) + ritualDtBonus : null;
-    const dtAttr = !isRitual ? (parseDtAttr((action as any).teste) ?? parseDtAttr((action as any).descricao)) : null;
-    const dtVal = !isRitual && dtAttr ? 10 + (character.pe?.rodada ?? 1) + (character.atributos?.[dtAttr] ?? 0) : null;
-
-    const dtText = isRitual ? `DT ${dtRitual ?? '?'}`
-      : (action as any).tipo === 'Ataque' ? `DEF ${character.defesa ?? 10}`
-        : dtVal !== null ? `DT ${dtVal}` : '';
+    const limite = character.pe?.rodada ?? 1;
+    const dtAttr = isRitual ? undefined : parseDtAttr('teste' in action ? action.teste : undefined) ?? parseDtAttr(action.descricao);
+    const dt = isRitual && action.resistencia?.trim() && !/^(?:nenhuma?|[-—]+)$/i.test(action.resistencia.trim())
+      ? calcularDTRitual({ atributos: character.atributos, limitePe: limite, bonusDT: ritualDtBonus })
+      : dtAttr ? 10 + limite + character.atributos[dtAttr] : null;
+    const dtText = dt === null ? '' : 'DT ' + dt;
 
     const numericCost = displayCost ? Number(displayCost.match(/(\d+)/)?.[1] || 0) : 0;
     const overLimit = numericCost > 0 && numericCost > (character.pe?.rodada ?? 1);
@@ -125,38 +123,42 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
         transition={{ ...springTransition, delay: idx * 0.02 }}
         whileHover={{ scale: 1.005 }}
         className={`
-          relative overflow-hidden transition-all duration-300 cursor-pointer
+          relative overflow-hidden transition-colors duration-200
           border border-white/[0.06] 
           bg-gradient-to-r ${gradientBg || 'from-white/[0.02] to-transparent'}
           ${hoverGlow}
           ${isOpen ? 'ring-1 ring-white/10 shadow-lg' : 'hover:border-white/[0.12]'}
         `}
-        onClick={() => toggleCard(cardKey)}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent pointer-events-none" />
 
-        <div className="relative p-3.5 sm:p-4 flex items-start gap-3">
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          onClick={() => toggleCard(cardKey)}
+          className="relative flex w-full flex-wrap items-start gap-3 p-3.5 text-left focus-visible:outline focus-visible:-outline-offset-2 focus-visible:outline-ordem-red-light sm:flex-nowrap sm:p-4"
+        >
           {isActionDef && tipoAcao && (
-            <div className={`shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center ${badge?.bg} border ${badge?.border}`}>
+            <span className={`shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center ${badge?.bg} border ${badge?.border}`}>
               <span className={badge?.color}>{TIPO_ICON[tipoAcao]}</span>
-            </div>
+            </span>
           )}
 
           {isRitual && (
-            <div className={`shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center bg-purple-500/10 border border-purple-500/20`}>
+            <span className={`shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center bg-purple-500/10 border border-purple-500/20`}>
               <Sparkles size={13} className="text-purple-400" />
-            </div>
+            </span>
           )}
 
           {!isActionDef && !isRitual && (
-            <div className="shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center bg-white/5 border border-white/10">
+            <span className="shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center bg-white/5 border border-white/10">
               <Zap size={13} className="text-ordem-text-muted" />
-            </div>
+            </span>
           )}
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold text-white text-[13px] leading-tight">{action.nome}</span>
+          <span className="min-w-[8rem] flex-1">
+            <span className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-white text-sm leading-tight">{action.nome}</span>
 
               {isActionDef && badge && (
                 <span className={`inline-flex items-center gap-1 text-[9px] font-medium px-1.5 py-[2px] ${badge.bg} ${badge.color} border ${badge.border}`}>
@@ -179,30 +181,30 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
                   </span>
                 ) : null;
               })()}
-            </div>
-            <p className="text-xs text-white/40 mt-1 line-clamp-1 leading-relaxed">{action.descricao}</p>
-          </div>
+            </span>
+            <span className="text-xs text-ordem-text-secondary mt-1 line-clamp-1 leading-relaxed">{action.descricao}</span>
+          </span>
 
-          <div className="flex items-center gap-1.5 shrink-0 ml-1">
+          <span className="flex items-center gap-1.5 shrink-0 ml-auto">
             {dtText && (
-              <span className="text-[10px] font-mono px-2 py-1 bg-white/[0.04] text-emerald-400/80 border border-emerald-500/10">
+              <span className="text-xs font-mono px-2 py-1 bg-white/[0.04] text-emerald-400/80 border border-emerald-500/10">
                 {dtText}
               </span>
             )}
             {displayCost && (
-              <span className={`text-[10px] font-mono px-2 py-1 border ${overLimit ? 'bg-red-500/10 text-red-400/80 border-red-500/10' : 'bg-white/[0.04] text-amber-400/80 border-amber-500/10'}`}>
+              <span className={`text-xs font-mono px-2 py-1 border ${overLimit ? 'bg-red-500/10 text-red-400/80 border-red-500/10' : 'bg-white/[0.04] text-amber-400/80 border-amber-500/10'}`}>
                 {displayCost}
               </span>
             )}
-            <motion.div
+            <motion.span
               animate={{ rotate: isOpen ? 180 : 0 }}
               transition={{ duration: 0.25 }}
               className="ml-0.5"
             >
-              <ChevronDown size={14} className="text-white/20" />
-            </motion.div>
-          </div>
-        </div>
+              <ChevronDown size={14} className="text-ordem-text-muted" />
+            </motion.span>
+          </span>
+        </button>
 
         <AnimatePresence>
           {isOpen && (
@@ -239,11 +241,11 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
                   </div>
                 )}
 
-                {'teste' in action && (action as any).teste && (
+                {'teste' in action && ('teste' in action ? action.teste : undefined) && (
                   <div className="flex items-center gap-2.5">
                     <span className="text-[10px] text-white/25 uppercase tracking-wider font-medium">Teste</span>
                     <span className="text-xs font-mono text-emerald-400/70 bg-emerald-500/[0.06] px-2.5 py-1 border border-emerald-500/10">
-                      {(action as any).teste}
+                      {('teste' in action ? action.teste : undefined)}
                     </span>
                   </div>
                 )}
@@ -285,11 +287,11 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
 
                     <div className="space-y-2">
                       {[
-                        { key: 'padrao', label: 'Padrão', text: (action as Ritual).efeito.padrao, color: 'white/20', labelColor: 'text-white/50' },
-                        { key: 'discente', label: 'Discente', text: (action as Ritual).efeito.discente, color: 'amber-400/30', labelColor: 'text-amber-400/70' },
-                        { key: 'verdadeiro', label: 'Verdadeiro', text: (action as Ritual).efeito.verdadeiro, color: 'red-400/30', labelColor: 'text-red-400/70' },
+                        { key: 'padrao', label: 'Padrão', text: apresentarEfeitoDeRitual(action.efeito.padrao ?? '', !useSanity), color: 'border-white/20', labelColor: 'text-white/50' },
+                        { key: 'discente', label: 'Discente', text: apresentarEfeitoDeRitual(action.efeito.discente ?? '', !useSanity), color: 'border-amber-400/30', labelColor: 'text-amber-400/70' },
+                        { key: 'verdadeiro', label: 'Verdadeiro', text: apresentarEfeitoDeRitual(action.efeito.verdadeiro ?? '', !useSanity), color: 'border-red-400/30', labelColor: 'text-red-400/70' },
                       ].filter(t => t.text).map(tier => (
-                        <div key={tier.key} className={`p-3 bg-black/20 border-l-2 border-${tier.color}`}>
+                        <div key={tier.key} className={`p-3 bg-black/20 border-l-2 ${tier.color}`}>
                           <span className={`text-[10px] ${tier.labelColor} font-semibold uppercase tracking-widest block mb-1.5`}>{tier.label}</span>
                           <p className="text-xs text-white/45 leading-relaxed">{tier.text}</p>
                         </div>
@@ -312,8 +314,9 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
     );
   };
 
-  const renderWeaponCard = (a: any, idx: number) => {
-    const cardKey = 'wpn-' + a.nome;
+  const renderWeaponCard = (a: AtaqueDaFicha, idx: number) => {
+    const cardKey = a.chave;
+    const modificacoes = a.item.modificacoes ?? [];
     const isOpen = expandedCards.has(cardKey);
 
     return (
@@ -325,45 +328,49 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
         transition={{ ...springTransition, delay: idx * 0.02 }}
         whileHover={{ scale: 1.005 }}
         className={`
-          relative overflow-hidden transition-all duration-300 cursor-pointer
+          relative overflow-hidden transition-colors duration-200
           border border-white/[0.06] 
           bg-gradient-to-r from-red-500/[0.06] via-transparent to-transparent
           hover:shadow-[0_0_20px_rgba(239,68,68,0.06)]
           ${isOpen ? 'ring-1 ring-white/10 shadow-lg' : 'hover:border-white/[0.12]'}
         `}
-        onClick={() => toggleCard(cardKey)}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
 
-        <div className="relative p-3.5 sm:p-4 flex items-start gap-3">
-          <div className="shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center bg-red-500/10 border border-red-500/20">
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          onClick={() => toggleCard(cardKey)}
+          className="relative flex w-full flex-wrap items-start gap-3 p-3.5 text-left focus-visible:outline focus-visible:-outline-offset-2 focus-visible:outline-ordem-red-light sm:flex-nowrap sm:p-4"
+        >
+          <span className="shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center bg-red-500/10 border border-red-500/20">
             <Crosshair size={13} className="text-red-400" />
-          </div>
+          </span>
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold text-white text-[13px]">{a.nome}</span>
-              {a.statsModificados && (
+          <span className="min-w-[8rem] flex-1">
+            <span className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-white text-sm">{a.item.nome}</span>
+              {modificacoes.length > 0 && (
                 <span className="text-[9px] px-1.5 py-[2px] bg-emerald-500/10 text-emerald-400/80 border border-emerald-500/15 font-medium">
-                  +{a.itemOriginal.modificacoes.length} mod
+                  +{modificacoes.length} mod
                 </span>
               )}
               <span className="text-[9px] px-1.5 py-[2px] bg-red-500/10 text-red-400/80 border border-red-500/15 font-medium">
                 Ataque
               </span>
-            </div>
-            <p className="text-xs text-white/40 mt-1 line-clamp-1">{a.descricao.split('\n')[0]}</p>
-          </div>
+            </span>
+            <span className="text-xs text-ordem-text-secondary mt-1 line-clamp-1">{a.descricao.split('\n')[0]}</span>
+          </span>
 
-          <div className="flex items-center gap-1.5 shrink-0 ml-1">
-            <span className="text-[10px] font-mono px-2 py-1 bg-white/[0.04] text-emerald-400/80 border border-emerald-500/10">
+          <span className="flex items-center gap-1.5 shrink-0 ml-auto">
+            <span className="text-xs font-mono px-2 py-1 bg-white/[0.04] text-emerald-400/80 border border-emerald-500/10">
               {a.teste}
             </span>
-            <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.25 }}>
-              <ChevronDown size={14} className="text-white/20" />
-            </motion.div>
-          </div>
-        </div>
+            <motion.span animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.25 }}>
+              <ChevronDown size={14} className="text-ordem-text-muted" />
+            </motion.span>
+          </span>
+        </button>
 
         <AnimatePresence>
           {isOpen && (
@@ -382,20 +389,20 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
                 <div className="flex items-center gap-2.5 flex-wrap">
                   <span className="text-[10px] text-white/25 uppercase tracking-wider font-medium">Teste</span>
                   <span className="text-xs font-mono text-emerald-400/70 bg-emerald-500/[0.06] px-2.5 py-1 border border-emerald-500/10">
-                    {a.teste}
+                    {a.pericia} · {a.teste}
                   </span>
-                  {a.ataqueBonus > 0 && (
+                  {a.ataqueBonus !== 0 && (
                     <span className="text-xs font-mono text-amber-400/70 bg-amber-500/[0.06] px-2.5 py-1 border border-amber-500/10">
-                      MOD +{a.ataqueBonus}
+                      Arma {a.ataqueBonus > 0 ? '+' : ''}{a.ataqueBonus}
                     </span>
                   )}
                 </div>
 
-                {a.modificacoes && (
+                {modificacoes.length > 0 && (
                   <div>
                     <span className="text-[9px] text-white/25 uppercase tracking-widest font-medium block mb-2">Modificações</span>
                     <div className="flex flex-wrap gap-1.5">
-                      {a.itemOriginal.modificacoes.map((modNome: string) => {
+                      {modificacoes.map((modNome: string) => {
                         const mod = MODIFICACOES_ARMAS.find(m => m.nome === modNome);
                         return (
                           <div key={modNome} className="group/mod relative">
@@ -424,39 +431,16 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
     );
   };
 
-  const activePowers = character.poderes.filter(p => p.custo || p.acao || p.tipo === 'Paranormal');
+  const activePowers = character.poderes.filter(p => (p.custo || p.acao || p.tipo === 'Paranormal') && matchesQuery(p));
   const originData = ORIGENS.find(o => o.nome === character.origem);
-  const originPower = originData?.poder;
+  const originPower = originData?.poder && matchesQuery(originData.poder) ? originData.poder : undefined;
   const nivelDoPersonagem = character.classe === 'Sobrevivente' ? (character.estagio ?? 1) : character.nex;
-  const classAbilities = CLASS_ABILITIES[character.classe]?.filter(a => a.nex <= nivelDoPersonagem) || [];
+  const classAbilities = CLASS_ABILITIES[character.classe]?.filter(a => a.nex <= nivelDoPersonagem && matchesQuery(a)) || [];
   const trackData = TRILHAS.find(t => t.nome === character.trilha);
-  const trackAbilities = trackData?.habilidades.filter(h => h.nex <= character.nex) || [];
+  const trackAbilities = trackData?.habilidades.filter(h => h.nex <= character.nex && matchesQuery(h)) || [];
 
-  const weaponActions = useMemo(() => character.equipamentos
-    .filter(item => item.tipo === 'Arma' || (item.stats && (item.stats.dano || item.stats.danoBase)))
-    .map(item => {
-      const hasMods = item.modificacoes && item.modificacoes.length > 0;
-      const stats = hasMods ? calcularStatsModificados(item) : item.stats;
-      const alcance = stats?.alcance?.toLowerCase() || '';
-      const isMelee = alcance.includes('corpo') || alcance.includes('adjacente') || alcance === '';
-      const periciaName = isMelee ? 'Luta' : 'Pontaria';
-      const pericia = character.periciasDetalhadas[periciaName];
-      const penalidade = getPenalidadesPericia(character, pericia.atributoBase);
-      let dados = Math.max(0, pericia.dados + penalidade.dados);
-      let bonus = pericia.bonusFixo + pericia.bonusO + penalidade.valor;
-      if (stats?.ataqueBonus) bonus += stats.ataqueBonus;
-      const sinal = bonus >= 0 ? '+' : '';
-      return {
-        nome: item.nome, tipo: 'Ataque',
-        descricao: `Dano: ${stats?.dano || '-'} | Crítico: ${stats?.critico || '-'} | Alcance: ${stats?.alcance || '-'} ${stats?.tipoDano ? `| ${stats.tipoDano}` : ''}${stats?.automatica ? ' | AUTOMÁTICA' : ''}\n${item.descricao}`,
-        pericia: periciaName,
-        teste: `${dados}d20 ${sinal}${bonus}${penalidade.dados !== 0 ? ` (${penalidade.dados}d)` : ''}${penalidade.valor !== 0 ? ` (${penalidade.valor})` : ''}`,
-        modificacoes: hasMods ? item.modificacoes!.join(', ') : null,
-        itemOriginal: item, statsModificados: hasMods, ataqueBonus: stats?.ataqueBonus,
-      } as any;
-    }), [character.equipamentos, character.periciasDetalhadas]);
-
-  const filteredWeaponActions = weaponActions.filter(matchesQuery);
+  const weaponActions = useMemo(() => prepararAtaquesDaFicha(character), [character]);
+  const filteredWeaponActions = weaponActions.filter(a => matchesQuery({ ...a, nome: a.item.nome }));
   const filteredUniversal = UNIVERSAL_ACTIONS.filter(matchesQuery);
   const filteredInv = INVESTIGATION_ACTIONS.filter(matchesQuery);
   const filteredChase = CHASE_ACTIONS.filter(matchesQuery);
@@ -464,11 +448,9 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
   const filteredManeuvers = MANEUVER_ACTIONS.filter(matchesQuery);
   const filteredRituais = character.rituais.filter(matchesQuery);
 
-  const actionsByType = useMemo(() => {
-    const groups: Record<TipoAcao, ActionDefinition[]> = { 'Padrão': [], 'Movimento': [], 'Completa': [], 'Livre': [], 'Reação': [] };
-    filteredUniversal.forEach(a => groups[a.tipoAcao].push(a));
-    return groups;
-  }, [filteredUniversal]);
+  const actionsByType: Record<TipoAcao, ActionDefinition[]> = { 'Padrão': [], 'Movimento': [], 'Completa': [], 'Livre': [], 'Reação': [] };
+  filteredUniversal.forEach(a => actionsByType[a.tipoAcao].push(a));
+  const totalHabilidades = activePowers.length + classAbilities.length + trackAbilities.length + Number(Boolean(originPower));
 
   const SectionHeader = ({ icon, title, count }: { icon: React.ReactNode; title: string; count: number; color: string }) => (
     <div className="sticky top-0 z-10 mb-3 flex items-baseline gap-2 bg-ordem-ooze/95 py-2 backdrop-blur-sm">
@@ -487,15 +469,19 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
     </div>
   );
 
-  const filterButtons: { key: FilterKey; label: string; icon: React.ReactNode; count: number; color: string; activeGradient: string }[] = [
-    { key: 'todos', label: 'Todos', icon: <BookOpen size={12} />, count: 0, color: 'text-white/40', activeGradient: 'from-white/10 to-white/5 border-white/20 text-white' },
-    { key: 'universais', label: 'Ações', icon: <Swords size={12} />, count: filteredUniversal.length, color: 'text-red-400/60', activeGradient: 'from-red-500/15 to-red-500/5 border-red-500/30 text-red-300' },
-    { key: 'manobras', label: 'Manobras', icon: <Shield size={12} />, count: filteredManeuvers.length, color: 'text-orange-400/60', activeGradient: 'from-orange-500/15 to-orange-500/5 border-orange-500/30 text-orange-300' },
-    { key: 'ataques', label: 'Ataques', icon: <Crosshair size={12} />, count: filteredWeaponActions.length, color: 'text-red-400/60', activeGradient: 'from-red-500/15 to-red-500/5 border-red-500/30 text-red-300' },
-    { key: 'habilidades', label: 'Habilidades', icon: <Zap size={12} />, count: 0, color: 'text-yellow-400/60', activeGradient: 'from-yellow-500/15 to-yellow-500/5 border-yellow-500/30 text-yellow-300' },
-    { key: 'rituais', label: 'Rituais', icon: <Sparkles size={12} />, count: filteredRituais.length, color: 'text-purple-400/60', activeGradient: 'from-purple-500/15 to-purple-500/5 border-purple-500/30 text-purple-300' },
-    { key: 'cenarios', label: 'Cenários', icon: <BookOpen size={12} />, count: filteredInv.length + filteredChase.length + filteredStealth.length, color: 'text-cyan-400/60', activeGradient: 'from-cyan-500/15 to-cyan-500/5 border-cyan-500/30 text-cyan-300' },
+  const filterButtons: { key: FilterKey; label: string; icon: React.ReactNode; count: number }[] = [
+    { key: 'todos', label: 'Todos', icon: <BookOpen size={12} />, count: 0 },
+    { key: 'universais', label: 'Ações', icon: <Swords size={12} />, count: filteredUniversal.length },
+    { key: 'manobras', label: 'Manobras', icon: <Shield size={12} />, count: filteredManeuvers.length },
+    { key: 'ataques', label: 'Ataques', icon: <Crosshair size={12} />, count: filteredWeaponActions.length },
+    { key: 'habilidades', label: 'Habilidades', icon: <Zap size={12} />, count: totalHabilidades },
+    { key: 'rituais', label: 'Rituais', icon: <Sparkles size={12} />, count: filteredRituais.length },
+    { key: 'cenarios', label: 'Cenários', icon: <BookOpen size={12} />, count: filteredInv.length + filteredChase.length + filteredStealth.length },
   ];
+
+  const haResultados = filterButtons.some(({ key, count }) =>
+    count > 0 && (filter === 'todos' || filter === key),
+  );
 
   return (
     <div className="h-full flex flex-col">
@@ -510,6 +496,7 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
+            aria-label="Buscar ações, rituais e poderes"
             placeholder="Buscar ações, rituais, poderes…"
             className="w-full bg-transparent py-2 text-sm text-white placeholder:text-ordem-text-muted focus:outline-none"
           />
@@ -524,10 +511,12 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
           {filterButtons.map(fb => (
             <motion.button
               key={fb.key}
+              type="button"
+              aria-pressed={filter === fb.key}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => setFilter(fb.key)}
-              className={`inline-flex items-center gap-1.5 border px-2.5 py-1 font-carimbo text-[10px] uppercase tracking-[0.14em] transition ${filter === fb.key
+              className={`inline-flex items-center gap-1.5 min-h-9 border px-2.5 py-1 font-carimbo text-xs uppercase tracking-[0.14em] transition ${filter === fb.key
                   ? 'border-[var(--mestre-primary,#DC2626)] bg-[var(--mestre-primary,#DC2626)]/15 text-white'
                   : 'border-white/10 text-ordem-text-muted hover:border-white/30 hover:text-white'
                 }`}
@@ -541,6 +530,11 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
       </motion.div>
 
       <div className="overflow-y-auto pr-1 custom-scrollbar flex-1 space-y-8 pb-4">
+        {!haResultados && (
+          <p role="status" className="border border-dashed border-ordem-border p-6 text-center text-sm text-ordem-text-secondary">
+            {q ? 'Nenhum resultado para esta busca.' : 'Nenhum registro nesta categoria.'}
+          </p>
+        )}
         {(filter === 'todos' || filter === 'ataques') && filteredWeaponActions.length > 0 && (
           <section>
             <SectionHeader icon={<Crosshair size={15} className="text-red-400" />} title="Armas & Ataques" count={filteredWeaponActions.length} color="from-red-500/20 to-red-500/5 border border-red-500/15" />
@@ -580,17 +574,14 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
           </section>
         )}
 
-        {(filter === 'todos' || filter === 'habilidades') && (
+        {(filter === 'todos' || filter === 'habilidades') && totalHabilidades > 0 && (
           <section>
-            <SectionHeader icon={<Zap size={15} className="text-yellow-400" />} title="Habilidades & Poderes" count={activePowers.length + classAbilities.length + trackAbilities.length + (originPower ? 1 : 0)} color="from-yellow-500/20 to-yellow-500/5 border border-yellow-500/15" />
+            <SectionHeader icon={<Zap size={15} className="text-yellow-400" />} title="Habilidades & Poderes" count={totalHabilidades} color="from-yellow-500/20 to-yellow-500/5 border border-yellow-500/15" />
             <div className="space-y-2">
-              {originPower && renderActionCard({ nome: originPower.nome, descricao: originPower.descricao, tipo: 'Origem' } as any, 'Origem', 0)}
-              {classAbilities.map((a, i) => renderActionCard({ nome: a.nome, descricao: a.descricao, custo: a.custo, acao: a.acao, tipo: 'Classe' } as any, `Classe ${a.nex}%`, i + 1))}
-              {trackAbilities.map((a, i) => renderActionCard({ nome: a.nome, descricao: a.descricao, tipo: 'Trilha' } as any, `Trilha ${a.nex}%`, i + classAbilities.length + 2))}
+              {originPower && renderActionCard({ nome: originPower.nome, descricao: originPower.descricao, tipo: 'Origem' }, 'Origem', 0)}
+              {classAbilities.map((a, i) => renderActionCard({ nome: a.nome, descricao: a.descricao, custo: a.custo, acao: a.acao, tipo: 'Classe' }, `Classe ${a.nex}%`, i + 1))}
+              {trackAbilities.map((a, i) => renderActionCard({ nome: a.nome, descricao: a.descricao, tipo: 'Trilha' }, `Trilha ${a.nex}%`, i + classAbilities.length + 2))}
               {activePowers.map((p, i) => renderActionCard(p, undefined, i + classAbilities.length + trackAbilities.length + 3))}
-              {!originPower && classAbilities.length === 0 && trackAbilities.length === 0 && activePowers.length === 0 && (
-                <div className="text-center py-12"> <p className="text-sm text-white/20">Nenhuma habilidade ativa registrada.</p> </div>
-              )}
             </div>
           </section>
         )}
