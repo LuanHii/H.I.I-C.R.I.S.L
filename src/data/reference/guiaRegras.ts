@@ -57,7 +57,7 @@ export const REGRAS: Regra[] = [
         titulo: 'Iniciativa e Surpresa',
         categoria: 'combate',
         resumo: 'Teste de Iniciativa define a ordem. Surpresos não agem na 1ª rodada.',
-        detalhes: '• A ordem de Iniciativa se mantém igual durante todo o combate.\n• Empates: Rolar novamente entre os empatados.\n• Surpresa: Quem não percebe o inimigo fica **Surpreendido**.\n• Surpreendido: Fica Desprevenido e **não age na 1ª rodada**.\n• Chegando Atrasado: Se entrar depois que a luta começou, rola Iniciativa e age a partir da rodada seguinte.',
+        detalhes: '• Cada jogador envolvido faz um teste. O mestre faz um só para todos os inimigos, usando o menor bônus de Iniciativa entre eles.\n• Resultados maiores agem primeiro. Em empate, os empatados rolam entre si para desempatar.\n• A ordem se mantém durante todo o combate.\n• Quem não percebeu os inimigos fica Surpreendido. Ainda rola Iniciativa no começo da cena, fica Desprevenido e age a partir da 2ª rodada.\n• Quem entra depois de o combate começar rola Iniciativa e age a partir da rodada seguinte.',
         tags: ['iniciativa', 'surpreendido', 'desprevenido', 'percepção']
     },
     {
@@ -195,16 +195,16 @@ export const REGRAS: Regra[] = [
         id: 'teste-ataque-dano',
         titulo: 'Teste de Ataque e Dano',
         categoria: 'ataques',
-        resumo: 'Teste de Luta/Pontaria VS Defesa. Soma Força no dano corpo a corpo.',
-        detalhes: 'Teste: O resultado bruto de (Luta/Pontaria + bônus + Ocultismo) igual ou maior a Defesa do Alvo registra Acerto Automático.\n\n⚠️ Atirar em Corpo-a-Corpo: Fazer um teste de ataque de arma a distância na frente do alvo garante uma penalidade universal passiva (-1d20) engajada na rolagem. Aliados próximos ao alvo também fornecem -5 para a precisão do ataque (exceto caso o alvo declare manobra da habilidade `Mirar` ou possua o passivo de pontaria de classe avançada).',
+        resumo: 'Luta corpo a corpo ou Pontaria à distância contra a Defesa do alvo.',
+        detalhes: 'O ataque acerta se o total do teste alcançar a Defesa do alvo. Uma faca, por exemplo, usa Luta corpo a corpo ou Pontaria quando arremessada.\n\nSome Força ao dano de ataques corpo a corpo e de arremesso, observadas as exceções da arma ou de habilidades. Armas de disparo e de fogo normalmente usam o dano da arma, sem somar atributo.\n\nAtacar à distância um alvo engajado em combate corpo a corpo impõe -1d20. Quem é treinado em Pontaria pode gastar uma ação de movimento para Mirar e anular essa penalidade contra aquele alvo até o fim do próximo turno.',
         tags: ['ataque', 'dano', 'teste', 'pontaria', 'luta']
     },
     {
         id: 'acertos-criticos',
         titulo: 'Acertos Críticos',
         categoria: 'ataques',
-        resumo: 'Margem do acerto multiplica os dados de base da arma.',
-        detalhes: '• Margem e Multiplicador: A Margem de Ameaça normal de qualquer coisa é 20, e multiplicador base de dano x2.\n• Critar no D20: A rolagem crítica atua a partir do "valor bruto" puro do dado de vinte lados.\n• Multiplicação de Crítico: Um Crítico multiplica exclusivamente os dados da arma bruta.\n• Restrições: Bônus numéricos fixos, dano de "Ataque Furtivo" (classes e itens Ocultistas), assim como magias/maldições em formato de "+d4" extras raramente acumulam para o cálculo exponencial.',
+        resumo: 'Se o ataque acertar e o d20 alcançar a margem, aplique o multiplicador aos dados de dano da arma.',
+        detalhes: 'A coluna Crítico indica a margem de ameaça e o multiplicador. Quando um valor está omitido, use margem 20 ou multiplicador x2. Por exemplo, a Pistola tem 18/x2 e o Revólver tem 19/x3.\n\nO resultado natural do d20 precisa atingir a margem em um ataque que acertou. Multiplique os dados de dano da arma. Bônus numéricos e dados extras, como os de Ataque Furtivo, ficam fora da multiplicação, salvo regra específica. Um alvo imune recebe o dano de um ataque normal.',
         tags: ['crítico', 'margem', 'multiplicador', 'dano']
     },
     {
@@ -237,8 +237,8 @@ export const REGRAS: Regra[] = [
         id: 'manobra-agarrar',
         titulo: '🤼 Agarrar',
         categoria: 'manobras',
-        resumo: 'Imobiliza. Você fica com -1 mão e lento. O alvo fica Desprevenido e Imóvel.',
-        detalhes: 'Requisito: Mão livre (Ataque desarmado).\nO Alvo Agarrado:\n- Fica Desprevenido e Imóvel.\n- Sofre -1d20 em testes de ataque e só pode atacar com armas leves.\nO Agarrador:\n- Fica com 1 mão ocupada.\n- Move-se com metade do deslocamento normal.\n\nSufocar/Esmagar:\nO agarrador pode usar uma ação padrão para fazer um novo teste de manobra. Se vencer, causa o dano de seu ataque desarmado automaticamente.\n\nEscapar:\nO alvo pode usar uma ação padrão para tentar escapar fazendo um teste de manobra. Se vencer, ele se liberta.\n⚠️ Atirar corpor a corpo: Atirar com arma à distância numa criatura envolvida na manobra agarrar tem 50% de chance de atingir o alvo errado.',
+        resumo: 'O alvo fica Desprevenido e Imóvel. Quem o segura ocupa uma mão e se move à metade do deslocamento.',
+        detalhes: 'Exige um ataque desarmado com uma mão livre.\n\nO alvo fica Desprevenido e Imóvel, sofre -1d20 em ataques e só pode atacar com armas leves. Para se soltar, gasta uma ação padrão e deve vencer um teste de manobra oposto.\n\nQuem segura arrasta o alvo à metade do seu deslocamento normal e pode soltá-lo com uma ação livre. Pode atacar o alvo com a mão livre ou substituir um ataque por um teste de manobra oposto. Se vencer, causa dano de impacto igual ao de um ataque desarmado.\n\nAtaques à distância contra um ser envolvido na manobra têm 50% de chance de atingir o alvo errado.',
         tags: ['agarrar', 'prender', 'imóvel', 'manobra']
     },
     {
@@ -271,7 +271,7 @@ export const REGRAS: Regra[] = [
         titulo: 'Condições Fatais (Morrendo e Inconsciente)',
         categoria: 'condicoes',
         resumo: 'Regras de PV, Estabilização e Morte.',
-        detalhes: '• Machucado: PV ≤ metade do PV Máximo.\n• Morrendo (PV = 0): Você cai Caído, e fica Inconsciente e Morrendo.\n• Morte Definitiva: Falhar em 3 testes de Morte ou Iniciar 3 turnos na condição "Morrendo" em uma mesma cena.\n\nCura vs Morrendo:\n- Acordar da condição INCONSCIENTE ocorre ao ser curado para 1 ou mais PV.\n- A condição MORRENDO termina ao receber cura para 1+ PV ou ao ser alvo de Primeiros Socorros (Medicina DT 20, feito por um aliado).\n\nDano Massivo:\nSofrer dano ≥ 50% do PV Máximo em um único ataque (sem zerar sua vida) exige um teste de Fortitude (DT 15 ou metade do dano). Em caso de falha, cai a 0 PV e fica Morrendo.',
+        detalhes: '• Machucado: PV ≤ metade do máximo.\n• Ao chegar a 0 PV, fica Inconsciente e Morrendo, salvo exceções como dano não letal.\n• Morte: começa três turnos Morrendo na mesma cena, mesmo quando não são consecutivos.\n\nCurar pelo menos 1 PV encerra a inconsciência causada por chegar a 0 PV. Morrendo exige Medicina ou efeito específico. Primeiros Socorros gastam uma ação padrão em alvo adjacente, Morrendo e Inconsciente (DT 20, +5 por estabilização anterior na cena). Em sucesso, o alvo perde as duas condições e fica com 1 PV.\n\nDano Massivo: dano de pelo menos metade dos PV máximos de uma só vez, sem chegar a 0 PV, exige Fortitude (DT 15 + 2 por cada 10 pontos de dano sofrido). Na falha, vai a 0 PV.',
         tags: ['morte', 'morrendo', 'pv', 'dano massivo', 'inconsciente', 'machucado']
     },
     {
@@ -279,7 +279,7 @@ export const REGRAS: Regra[] = [
         titulo: 'Dano Não Letal',
         categoria: 'condicoes',
         resumo: 'Ataques nocautes dão -5 no acerto.',
-        detalhes: '• Se um ataque que lida dano letal for declarado para dar dano não letal, sofre -5 no teste de ataque.\n• Dano não letal é acumulado junto aos danos recebidos para verificação da saúde máxima.\n• Se o seu PV for zerado por uma fonte que causou apenas dano NÃO LETAL, o personagem fica apenas Inconsciente, porém estável (não recebe a condição Morrendo).\n• Qualquer cura recobre todo dano não letal igual ao dobro do valor da cura.',
+        detalhes: '• Dano não letal soma com o letal para determinar Inconsciente. Para determinar Morrendo, considere apenas o dano letal.\n• Se houver ambos quando o alvo receber cura, cure primeiro o dano não letal.\n• Para trocar dano letal por não letal com arma corpo a corpo, aplique -5 no teste de ataque. Também se aplica -5 ao converter para letal um ataque desarmado ou arma que costuma causar dano não letal.',
         tags: ['não letal', 'nocaute', 'apagar']
     },
     {
@@ -290,9 +290,9 @@ export const REGRAS: Regra[] = [
         tabela: {
             cabecalho: ['Tipo', 'Progressão', 'Efeito Final'],
             linhas: [
-                ['Físicos (FOR, AGI, VIG)', 'Fraco (-1d20 nas três skills) → Debilitado (-2d20)', 'Terceira vez = Inconsciente'],
-                ['Mentais (INT, PRE)', 'Frustrado (-1d20 nas duas skills) → Esmorecido (-2d20)', 'Fim de linha'],
-                ['Fadiga', 'Fatigado (Fraco + Vulnerável) → Exausto (Debilitado + Lento + Vulnerável)', 'Terceira vez = Inconsciente']
+                ['Físicos (FOR, AGI, VIG)', 'Reaplicar Fraco (-1d20) agrava para Debilitado (-2d20).', 'Reaplicar Debilitado deixa Inconsciente.'],
+                ['Mentais (INT, PRE)', 'Reaplicar Frustrado (-1d20) agrava para Esmorecido (-2d20).', 'Esmorecido não tem agravamento próprio.'],
+                ['Fadiga', 'Reaplicar Fatigado (Fraco + Vulnerável) agrava para Exausto (Debilitado + Lento + Vulnerável).', 'Reaplicar Exausto deixa Inconsciente. Considere apenas reaplicações permitidas pela fonte.']
             ]
         },
         tags: ['fadiga', 'fraco', 'debilitado', 'exausto', 'físico', 'mental', 'esmorecido']
@@ -305,14 +305,30 @@ export const REGRAS: Regra[] = [
         tabela: {
             cabecalho: ['Doença/Situação', 'Regra da Condição'],
             linhas: [
-                ['Sangrando', 'No início de seus turnos, faz Fortitude DT 20. Se falhar, perde 1d6 PV. Se passar, sangramento termina. Pode ser retirado com Medicina (DT 20) no aliado.'],
-                ['Em Chamas', 'No início de seus turnos, sofre 1d6 de dano de Fogo. Um personagem pode gastar uma ação padrão para apagar as chamas de si ou adjacente.'],
-                ['Asfixiado', 'Pode prender a respiração por turnos iguais a sua Vigília. Depois, Fortitude (DT 5 +5 inst.); falha causa 1d6 dano contínuo.'],
-                ['Envenenado', 'Sofre o efeito do veneno. Efeitos iguais não acumulam, apenas prolongam a duração do debuff ou se resistem individualmente.'],
-                ['Enjoado', 'Só pode realizar uma ação padrão ou de movimento (não ambas) em seu turno.']
+                ['Sangrando', 'No início do turno, faça um teste de Vigor DT 20. Em falha, perde 1d6 PV e continua sangrando. Em sucesso, encerra a condição. Outra pessoa pode estabilizá-lo com uma ação completa e Medicina DT 20. RD não reduz perda de PV. A maldição Sanguinária tem uma regra própria de acúmulo.'],
+                ['Em Chamas', 'No início do turno, sofre 1d6 de dano de fogo. Pode apagar as chamas com uma ação padrão ou por imersão em água. Dano de fogo instantâneo só incendeia se a descrição do efeito indicar isso.'],
+                ['Asfixiado', 'Pode prender o fôlego por um número de rodadas igual ao Vigor. Depois, faz Fortitude por rodada (DT 5 +5 por teste anterior). Se falhar, cai Inconsciente e perde 1d6 PV por rodada até respirar ou morrer.'],
+                ['Envenenado', 'Aplica o efeito e a duração descritos no veneno. Se a duração não for indicada, dura pela cena. O dano recorrente por Envenenado sempre se acumula, inclusive de fontes iguais.'],
+                ['Enjoado', 'Só pode realizar uma ação padrão ou de movimento por rodada.']
             ]
         },
         tags: ['sangrando', 'chamas', 'asfixiado', 'envenenado', 'enjoado']
+    },
+    {
+        id: 'imunidade-e-remocao-de-condicoes',
+        titulo: 'Imunidade e Remoção de Condições',
+        categoria: 'condicoes',
+        resumo: 'Confira a origem da condição e se a proteção está ativa.',
+        tabela: {
+            cabecalho: ['Fonte', 'Regra'],
+            linhas: [
+                ['Óculos Escuros', 'Quando vestidos, impedem Ofuscado.'],
+                ['Sangue de Ferro', 'O benefício de Afinidade concede imunidade a venenos e doenças.'],
+                ['Medo Tangível', 'Durante a cena, impede as condições da descrição do ritual, doenças e venenos. O piso de 1 PV vale para balístico, corte, impacto e perfuração.'],
+                ['Milagre Ionizante', 'Remove um efeito elegível de origem paranormal. Efeitos da entidade de Energia e condições permanentes ficam fora. Após a cura, o alvo faz Fortitude DT 30. Em falha, é incubado pelo vírus do infecticídio.']
+            ]
+        },
+        tags: ['imunidade', 'remoção', 'veneno', 'doença', 'milagre ionizante', 'medo tangível']
     },
     {
         id: 'condicoes-sentidos-mente',
@@ -322,13 +338,13 @@ export const REGRAS: Regra[] = [
         tabela: {
             cabecalho: ['Condição', 'Problema Mecânico'],
             linhas: [
-                ['Ofuscado', 'Sofre -1d20 em testes de ataque e Percepção para observar.'],
-                ['Cego', 'Fica desprevenido e lento, falha em Percepção visual, e sofre -1d20 em testes de atributos FOR ou AGI. Ataques de seus inimigos ganham camuflagem total (50% de falha).'],
-                ['Surdo', 'Falha em testes de Percepção baseados em audição. Sofre -1d20 em Iniciativa e tem 50% de chance de falhar em conjurações não mentais.'],
-                ['Pasmo', 'Não pode realizar ações (mas pode realizar reações).'],
-                ['Confuso', 'Ações determinadas por d6: 1) afasta-se para longe; 2-3) não faz nada; 4-5) ataca criatura adjacente aleatória; 6) age normalmente.'],
-                ['Fascinado', 'Sofre -2d20 em Percepção e não pode realizar ações além de focar na atração.'],
-                ['Atordoado', 'Fica desprevenido e não pode realizar ações.'],
+                ['Ofuscado', 'Sofre -1d20 em testes de ataque e de Percepção.'],
+                ['Cego', 'Fica Desprevenido e Lento, não pode fazer Percepção para observar e sofre -2d20 em perícias de Agilidade ou Força. Os alvos de seus ataques têm camuflagem total. Perceber no escuro ou voltar à luz encerra a condição causada apenas por escuridão total.'],
+                ['Surdo', 'Não pode fazer Percepção para ouvir e sofre -2d20 em Iniciativa. Conjura em condição ruim: Vontade DT 15 + custo em PE do ritual. Se falhar, perde os PE e o ritual não funciona.'],
+                ['Pasmo', 'Não pode fazer ações normais. Reações automáticas seguem a regra geral de reação.'],
+                ['Confuso', 'Role 1d6 no início do turno. 1: move-se na direção indicada por 1d8. 2–3: balbucia e fica sem ações. 4–5: ataca o ser mais próximo com a arma empunhada, ou a si mesmo se estiver sozinho. 6: encerra a condição e age normalmente.'],
+                ['Fascinado', 'Sofre -2d20 em Percepção e só pode observar aquilo que o fascinou. Uma ação hostil contra ele encerra a condição. Alguém também pode balançá-lo com uma ação padrão.'],
+                ['Atordoado', 'Fica Desprevenido e não pode fazer ações normais. Ainda pode fazer reações automáticas, como um teste de Reflexos. Bloqueio e esquiva têm restrições próprias.'],
                 ['Alquebrado', 'O custo em PE das habilidades e rituais do personagem aumenta em +1.'],
                 ['Abalado / Apavorado', 'Abalado: -1d20 em testes. Apavorado: -2d20 em testes e tenta fugir da fonte do medo.']
             ]
@@ -346,9 +362,9 @@ export const REGRAS: Regra[] = [
                 ['Vulnerável', 'Sofre -2 na Defesa.'],
                 ['Desprevenido', 'Sofre -5 na Defesa e -1d20 nas rolagens de Reflexos.'],
                 ['Indefeso', 'Fica Desprevenido, sofre -10 na Defesa, falha em testes de Reflexos e pode sofrer Golpe de Misericórdia.'],
-                ['Caído', 'Sofre -2d20 em ataques corpo a corpo. Sua Defesa diminui em 5 contra ataques corpo a corpo e aumenta em 5 contra longo alcance. Deslocamento reduzido a 1,5m.'],
-                ['Enredado', 'Fica lento e vulnerável, e sofre -1d20 em testes de ataque e Agilidade.'],
-                ['Paralisado', 'Fica imóvel e indefeso. Só pode realizar ações puramente mentais.']
+                ['Caído', 'Sofre -2d20 em ataques corpo a corpo. Defesa -5 contra corpo a corpo e +5 contra ataques à distância. Deslocamento de 1,5 m. Levantar custa ação de movimento. Com Acrobacia treinada, DT 20 e uma ação de movimento disponível, sucesso permite levantar como ação livre; falha gasta o movimento e mantém Caído.'],
+                ['Enredado', 'Fica Lento e Vulnerável e sofre -1d20 em testes de ataque. Segue a duração da fonte ou termina no fim da cena.'],
+                ['Paralisado', 'Fica Imóvel e Indefeso, com -10 na Defesa e falha automática em Reflexos. Só pode realizar ações puramente mentais.']
             ]
         },
         tags: ['indefeso', 'desprevenido', 'vulnerável', 'caído', 'enredado', 'paralisado']
@@ -472,6 +488,47 @@ export const REGRAS: Regra[] = [
     },
 
     {
+        id: 'granadas-consumiveis',
+        titulo: 'Granadas e Medicamentos',
+        categoria: 'equipamento',
+        resumo: 'Ação para usar, DT de resistência e consumo.',
+        detalhes: 'Empunhe a granada e use uma ação padrão para arremessá-la em alcance médio (18m). A área padrão é um raio de 6m. A Granada de PEM tem raio de 18m. Confira na descrição do item quem é afetado e quanto tempo dura.\n\nQuando a descrição indicar DT Agi ou DT Int, calcule 10 + limite de PE do usuário + o atributo indicado. Em caso de dano reduzido à metade, arredonde para baixo antes de aplicar a resistência a dano.\n\nMedicamentos e cicatrizantes gastam a dose e, em geral, uma ação padrão em você ou em um ser adjacente. Um aplicador carregado permite usar uma dose em seu usuário com uma ação de movimento.',
+        tags: ['granada', 'explosivo', 'medicamento', 'cicatrizante', 'resistência', 'dt']
+    },
+    {
+        id: 'municao-e-requisicao',
+        titulo: 'Munição e Modificações',
+        categoria: 'equipamento',
+        resumo: 'O sistema padrão gasta pacotes por cena. Contagem por disparo é uma regra opcional.',
+        tabela: {
+            cabecalho: ['Munição', 'Duração no sistema padrão'],
+            linhas: [
+                ['Balas curtas', 'Duas cenas de uso'],
+                ['Balas longas, cartuchos e combustível', 'Uma cena de uso'],
+                ['Flechas', 'Uma missão'],
+                ['Foguete', 'Um disparo por foguete']
+            ]
+        },
+        detalhes: 'Na regra opcional de contagem, um pacote serve para 20 ataques, com exceção dos foguetes. Cada arma tem a sua capacidade. Carregador Rápido, de Sobrevivendo ao Horror, é uma opção dessa regra para armas de fogo, bestas e balestras.\n\nCada modificação aumenta em I a categoria do item que a recebe. Modificações iguais não se acumulam. Dum Dum e Explosiva são opções de balas curtas ou longas. Calibre Grosso aumenta em um dado o dano da arma e exige munição de calibre grosso.',
+        tags: ['munição', 'balas', 'cartuchos', 'flechas', 'modificação', 'carregador']
+    },
+    {
+        id: 'modificacoes-de-protecao',
+        titulo: 'Modificações de Proteção',
+        categoria: 'equipamento',
+        resumo: 'Cada modificação aumenta a categoria em I. Cada opção só se aplica uma vez.',
+        tabela: {
+            cabecalho: ['Modificação', 'Regra'],
+            linhas: [
+                ['Antibombas', 'Só proteção pesada. +5 em testes de resistência contra efeitos de área.'],
+                ['Blindada', 'Só proteção pesada. A RD que a proteção fornece passa a 5 e o item ocupa mais 1 espaço.'],
+                ['Discreta', 'Só proteção leve. Ocupa 1 espaço a menos e dá +5 em Crime para ocultá-la, mesmo sem treinamento.'],
+                ['Reforçada', '+2 à Defesa que o item fornece e +1 espaço. Incompatível com Discreta.']
+            ]
+        },
+        tags: ['proteção', 'blindada', 'antibombas', 'discreta', 'reforçada']
+    },
+    {
         id: 'quebrando-objetos',
         titulo: 'PV, Defesa e RD de Itens',
         categoria: 'equipamento',
@@ -495,7 +552,7 @@ export const REGRAS: Regra[] = [
         titulo: 'Acumulando Bônus Mecânicos',
         categoria: 'testes',
         resumo: 'Regras de empilhamento de habilidades em RPG (Stacking Rules).',
-        detalhes: '⚠️ Mesma Fonte: Bônus da mesma origem ou mesmo tipo de ritual não se acumulam (Ex: lançar duas magias da mesma escola no alvo só resulta no bônus de maior valor).\n⚠️ Aumentos e Diminuições: Habilidades somam entre si se forem de fontes diferentes; Itens nunca acumulam duas proteções ou armaduras, você sempre escolhe o bônus final de maior valor.\n⚠️ Chance Falha (Camuflar): Chances de falha não são cumulativas. Você joga a maior chance de falha aplicável (O máximo é sempre 50% da Camuflagem Total).\n⚠️ Condições: Podem se somar caso o status final progrida para o estado seguinte (Exemplo: Fraco + Fraco = Debilitado).',
+        detalhes: '• Bônus e penalidades de fontes diferentes acumulam. Quando afetam o mesmo valor, um bônus e uma penalidade se combinam.\n• Habilidades de classe e origem acumulam entre si, salvo a mesma habilidade. Efeitos de rituais não acumulam entre si.\n• Bônus na Defesa de proteção acumulam com escudo e itens paranormais. Duas proteções ou dois escudos não podem ser usados ao mesmo tempo. Demais bônus de itens não acumulam.\n• Chances de falha de fontes diferentes acumulam até 75%.\n• Condições com o mesmo efeito usam o mais severo. Se a fonte permite uma reaplicação, aplique a progressão escrita na condição, como Fatigado para Exausto.',
         tags: ['bônus', 'acumular', 'matemática', 'falha']
     },
 

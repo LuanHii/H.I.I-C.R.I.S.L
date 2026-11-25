@@ -1,4 +1,4 @@
-import { Condicao } from '../../core/types';
+import type { Condicao, TipoAtaqueCondicao } from '../../core/types';
 
 export type ConditionCategory = 'medo' | 'mental' | 'paralisia' | 'sentidos' | 'fadiga' | 'outros';
 
@@ -8,6 +8,8 @@ export interface CondicaoCompleta extends Condicao {
   remocao?: string;
   especial?: string;
 }
+
+const FIM_DA_DURACAO = 'Encerra quando termina a duração indicada pela fonte. Se não houver duração específica, termina no fim da cena.';
 
 export const condicoes: CondicaoCompleta[] = [
   {
@@ -27,13 +29,15 @@ export const condicoes: CondicaoCompleta[] = [
     efeito: {
       deslocamento: 'zero',
       defesa: -5,
+      desprevenido: true,
       pericias: {
         somenteAtaque: true,
         penalidadeDados: -1
       }
     },
     categoria: 'paralisia',
-    especial: 'Um ataque à distância contra um alvo envolvido na manobra agarrar tem 50% de chance de acertar o alvo errado. Pode se soltar com ação padrão (teste de manobra).'
+    remocao: 'Na manobra Agarrar, gaste uma ação padrão e vença um teste de manobra oposto. Quem está segurando pode soltar com uma ação livre. Para outras fontes, confira a regra que aplicou o efeito.',
+    especial: 'Por estar desprevenido, sofre -5 na Defesa e -1d20 em Reflexos. Um ataque à distância contra um ser envolvido na manobra tem 50% de chance de acertar o alvo errado.'
   },
   {
     nome: 'Alquebrado',
@@ -54,34 +58,42 @@ export const condicoes: CondicaoCompleta[] = [
   {
     nome: 'Asfixiado',
     descricao: 'O personagem não pode respirar. Pode prender a respiração por um número de rodadas igual ao seu Vigor.',
-    especial: 'Depois disso, deve fazer um teste de Fortitude por rodada (DT 5 +5 por teste anterior). Se falhar, cai inconsciente e perde 1d6 PV por rodada até respirar novamente ou morrer.'
+    especial: 'Depois disso, deve fazer um teste de Fortitude por rodada (DT 5 +5 por teste anterior). Se falhar, cai inconsciente e perde 1d6 PV por rodada até respirar novamente ou morrer.',
+    remocao: 'Voltar a respirar encerra a asfixia e a perda recorrente de PV.'
   },
   {
     nome: 'Atordoado',
     descricao: 'O personagem fica desprevenido e não pode fazer ações.',
     efeito: {
       defesa: -5,
+      desprevenido: true,
       acoes: 'nenhuma'
     },
-    categoria: 'mental'
+    categoria: 'mental',
+    especial: 'Pode fazer reações automáticas, como um teste de Reflexos. Ações especiais de defesa, como bloquear e esquivar, seguem suas próprias restrições.',
+    remocao: FIM_DA_DURACAO
   },
   {
     nome: 'Caído',
     descricao: 'Deitado no chão. Sofre -2d20 em ataques corpo a corpo e deslocamento reduzido a 1,5m.',
     efeito: {
+      deslocamento: 1.5,
+      defesaPorAtaque: { 'corpo-a-corpo': -5, distancia: 5 },
       pericias: {
         somenteAtaque: true,
         somentePericias: ['Luta'],
         penalidadeDados: -2
       }
     },
-    especial: 'Sofre -5 na Defesa contra ataques corpo a corpo, mas recebe +5 na Defesa contra ataques à distância.'
+    especial: 'Sofre -5 na Defesa contra ataques corpo a corpo e recebe +5 contra ataques à distância.',
+    remocao: 'Levantar-se gasta uma ação de movimento. Com Acrobacia treinada e uma ação de movimento disponível, um teste DT 20 permite levantar como ação livre. Em falha, gasta a ação de movimento e continua caído.'
   },
   {
     nome: 'Cego',
     descricao: 'O personagem fica desprevenido e lento, não pode fazer testes de Percepção para observar e sofre -2d20 em testes de Agilidade e Força.',
     efeito: {
       defesa: -5,
+      desprevenido: true,
       deslocamento: 'metade',
       pericias: {
         atributos: ['AGI', 'FOR'],
@@ -89,7 +101,8 @@ export const condicoes: CondicaoCompleta[] = [
       }
     },
     categoria: 'sentidos',
-    especial: 'Todos os alvos de seus ataques recebem camuflagem total. Você é considerado cego em uma área de escuridão total, a menos que algo lhe permita perceber no escuro.'
+    especial: 'Todos os alvos de seus ataques recebem camuflagem total. Você é considerado cego em uma área de escuridão total, a menos que algo lhe permita perceber no escuro.',
+    remocao: 'Siga a duração da fonte. Se a causa for apenas escuridão total, a condição deixa de valer quando você consegue perceber no escuro ou volta a um local iluminado.'
   },
   {
     nome: 'Confuso',
@@ -121,11 +134,13 @@ export const condicoes: CondicaoCompleta[] = [
   },
   {
     nome: 'Doente',
-    descricao: 'Sob efeito de uma doença. O efeito específico depende da doença.'
+    descricao: 'Sob efeito de uma doença. A doença determina os efeitos, quando ocorrem e se há testes para resistir.',
+    remocao: 'Siga o tratamento, os testes e a duração descritos na doença.'
   },
   {
     nome: 'Em Chamas',
     descricao: 'No início de seus turnos, sofre 1d6 pontos de dano de fogo.',
+    especial: 'Exposição direta a chamas causa esta condição em falha em Reflexos (DT 15). Fogo de efeitos instantâneos só incendeia o alvo quando o efeito diz que causa Em Chamas, como a Granada Incendiária.',
     remocao: 'Pode gastar uma ação padrão para apagar o fogo com as mãos. Imersão em água também apaga as chamas.'
   },
   {
@@ -147,15 +162,18 @@ export const condicoes: CondicaoCompleta[] = [
       deslocamento: 'metade',
       defesa: -2,
       pericias: {
+        somenteAtaque: true,
         penalidadeDados: -1
       }
     },
-    categoria: 'paralisia'
+    categoria: 'paralisia',
+    remocao: FIM_DA_DURACAO
   },
   {
     nome: 'Envenenado',
     descricao: 'O efeito varia de acordo com o veneno. Pode ser outra condição ou dano recorrente.',
-    especial: 'Dano recorrente de condições envenenado sempre se acumula (mesmo se as fontes forem iguais).'
+    especial: 'Some o dano recorrente de cada aplicação, mesmo quando a fonte é a mesma. As outras condições impostas pelo veneno seguem as regras de acúmulo próprias.',
+    remocao: 'Siga a duração e a forma de cura indicadas pelo veneno. Quando a duração não for indicada, a condição termina no fim da cena. O Antídoto específico remove esse veneno. O comum dá +5 no próximo teste de Fortitude contra o veneno até o fim do dia.'
   },
   {
     nome: 'Esmorecido',
@@ -180,7 +198,9 @@ export const condicoes: CondicaoCompleta[] = [
       }
     },
     categoria: 'fadiga',
-    acumulo: 'Inconsciente'
+    acumulo: 'Inconsciente',
+    especial: 'Sofre -2d20 em testes de Agilidade, Força e Vigor e -2 na Defesa. Todos os deslocamentos caem à metade, arredondada para baixo em passos de 1,5 m. Não pode correr nem fazer investidas.',
+    remocao: 'Confira a duração ou a remoção da causa. Uma reaplicação válida pode agravar a condição. Efeitos de rituais não acumulam entre si.'
   },
   {
     nome: 'Fascinado',
@@ -206,7 +226,9 @@ export const condicoes: CondicaoCompleta[] = [
       }
     },
     categoria: 'fadiga',
-    acumulo: 'Exausto'
+    acumulo: 'Exausto',
+    especial: 'Sofre -1d20 em testes de Agilidade, Força e Vigor e -2 na Defesa.',
+    remocao: 'Confira a duração ou a remoção da causa. Uma reaplicação válida pode agravar a condição. Efeitos de rituais não acumulam entre si.'
   },
   {
     nome: 'Fraco',
@@ -244,15 +266,19 @@ export const condicoes: CondicaoCompleta[] = [
     descricao: 'O personagem fica indefeso e não pode fazer ações, incluindo reações.',
     efeito: {
       defesa: -10,
+      falhaEmReflexos: true,
+      bloqueiaReacoes: true,
       acoes: 'nenhuma'
     },
-    remocao: 'Balançar um ser para acordá-lo gasta uma ação padrão.'
+    remocao: 'Balançar um ser para acordá-lo gasta uma ação padrão, observadas as restrições da causa. Se a inconsciência veio de chegar a 0 PV, curar pelo menos 1 PV encerra Inconsciente.',
+    especial: 'Por estar indefeso, sofre -10 na Defesa, falha automaticamente em Reflexos e fica sujeito a golpes de misericórdia. Se desmaiou por falta de sono, só pode acordar depois de dormir pelo menos oito horas.'
   },
   {
     nome: 'Indefeso',
     descricao: 'O personagem é considerado desprevenido, mas sofre -10 na Defesa, falha automaticamente em testes de Reflexos e pode sofrer golpes de misericórdia.',
     efeito: {
-      defesa: -10
+      defesa: -10,
+      falhaEmReflexos: true
     }
   },
   {
@@ -270,12 +296,8 @@ export const condicoes: CondicaoCompleta[] = [
   },
   {
     nome: 'Morrendo',
-    descricao: 'Com 0 pontos de vida. Se iniciar três turnos morrendo na mesma cena (não necessariamente consecutivos), você morre.',
-    efeito: {
-      defesa: -10,
-      acoes: 'nenhuma'
-    },
-    remocao: 'Teste de Medicina (DT 20, +5 por vez que já tiver sido estabilizado na cena) ou efeitos específicos.',
+    descricao: 'Ao ser reduzido a 0 PV, você fica Morrendo, salvo exceções como dano não letal. Se iniciar três turnos morrendo na mesma cena (não necessariamente consecutivos), você morre.',
+    remocao: 'Teste de Medicina (DT 20, +5 por estabilização anterior na cena) ou efeito específico. Primeiros Socorros em um alvo adjacente, Morrendo e Inconsciente, gastam uma ação padrão. Em sucesso, encerram ambas as condições e deixam o alvo com 1 PV.',
     especial: 'Ao ser reduzido a 0 PV, o personagem fica inconsciente e morrendo. Curar pelo menos 1 PV encerra a condição inconsciente, mas não a morrendo.'
   },
   {
@@ -283,10 +305,13 @@ export const condicoes: CondicaoCompleta[] = [
     descricao: 'O personagem sofre -1d20 em testes de ataque e de Percepção.',
     efeito: {
       pericias: {
+        somentePericias: ['Percepção'],
+        tambemEmAtaques: true,
         penalidadeDados: -1
       }
     },
-    categoria: 'sentidos'
+    categoria: 'sentidos',
+    remocao: FIM_DA_DURACAO
   },
   {
     nome: 'Paralisado',
@@ -294,9 +319,11 @@ export const condicoes: CondicaoCompleta[] = [
     efeito: {
       deslocamento: 'zero',
       defesa: -10,
+      falhaEmReflexos: true,
       acoes: 'mentais'
     },
-    categoria: 'paralisia'
+    categoria: 'paralisia',
+    remocao: FIM_DA_DURACAO
   },
   {
     nome: 'Pasmo',
@@ -304,7 +331,9 @@ export const condicoes: CondicaoCompleta[] = [
     efeito: {
       acoes: 'nenhuma'
     },
-    categoria: 'mental'
+    categoria: 'mental',
+    especial: 'Reações automáticas seguem a regra geral de reação. Bloqueio e esquiva têm restrições próprias.',
+    remocao: FIM_DA_DURACAO
   },
   {
     nome: 'Perturbado',
@@ -316,12 +345,15 @@ export const condicoes: CondicaoCompleta[] = [
     descricao: 'O personagem fica inconsciente e recebe resistência a dano 10.',
     efeito: {
       defesa: -10,
+      falhaEmReflexos: true,
+      bloqueiaReacoes: true,
       acoes: 'nenhuma'
     }
   },
   {
     nome: 'Sangrando',
     descricao: 'No início de seus turnos, deve fazer um teste de Vigor (DT 20). Se falhar, perde 1d6 PV e continua sangrando.',
+    especial: 'A perda de PV de Sangrando não é reduzida por RD. Algumas fontes têm acúmulo explícito: com dois acertos de uma arma com a maldição Sanguinária, o sangramento acumula para 2d6 por rodada.',
     remocao: 'Sucesso no teste de Vigor (DT 20) estabiliza e remove essa condição. Também é possível estabilizar com ação completa e teste de Medicina (DT 20).'
   },
   {
@@ -329,19 +361,23 @@ export const condicoes: CondicaoCompleta[] = [
     descricao: 'O personagem não pode fazer testes de Percepção para ouvir e sofre -2d20 em testes de Iniciativa.',
     efeito: {
       pericias: {
+        somentePericias: ['Iniciativa'],
         penalidadeDados: -2
       }
     },
     categoria: 'sentidos',
-    especial: 'É considerado em condição ruim para lançar rituais.'
+    especial: 'É considerado em condição ruim para lançar rituais. Exige Vontade (DT 15 + custo em PE do ritual). Em falha, o ritual não funciona e os PE são perdidos.',
+    remocao: FIM_DA_DURACAO
   },
   {
     nome: 'Surpreendido',
     descricao: 'Não ciente de seus inimigos. O personagem fica desprevenido e não pode fazer ações.',
     efeito: {
       defesa: -5,
+      desprevenido: true,
       acoes: 'nenhuma'
-    }
+    },
+    remocao: 'Na surpresa inicial do combate, faz Iniciativa no começo da cena e passa a agir a partir da segunda rodada.'
   },
   {
     nome: 'Vulnerável',
@@ -356,30 +392,45 @@ export function getCondicao(nome: string): CondicaoCompleta | undefined {
   return condicoes.find(c => c.nome.toLowerCase() === nome.toLowerCase());
 }
 
-export function calcularPenalidadeDefesa(efeitosAtivos: string[]): number {
-  let penalidadeTotal = 0;
-  for (const nome of efeitosAtivos) {
-    const cond = getCondicao(nome);
-    if (cond?.efeito?.defesa) {
-      penalidadeTotal += cond.efeito.defesa;
-    }
-  }
-  return penalidadeTotal;
+// Livro de Regras v1.3, Apêndice > Exceções & Explicações > Condições
+// (Ordem PyMuPDF.md:12524–12525). Use o maior efeito de cada sinal.
+export function combinarModificadoresDeCondicao(valores: readonly number[]): number {
+  return Math.min(0, ...valores) + Math.max(0, ...valores);
+}
+
+export function calcularPenalidadeDefesa(
+  efeitosAtivos: readonly string[],
+  tipoAtaque?: TipoAtaqueCondicao,
+): number {
+  return combinarModificadoresDeCondicao(efeitosAtivos.map((nome) => {
+    const efeito = getCondicao(nome)?.efeito;
+    const porAtaque = tipoAtaque ? efeito?.defesaPorAtaque?.[tipoAtaque] : undefined;
+    return porAtaque ?? efeito?.defesa ?? 0;
+  }));
+}
+
+export function deslocamentoComCondicoes(deslocamento: number, efeitosAtivos: readonly string[]): number {
+  return efeitosAtivos.reduce((limite, nome) => {
+    const efeito = getCondicao(nome)?.efeito?.deslocamento;
+    if (efeito === 'zero') return 0;
+    if (efeito === 'metade') return Math.min(limite, Math.floor(deslocamento / 3) * 1.5);
+    return typeof efeito === 'number' ? Math.min(limite, efeito) : limite;
+  }, deslocamento);
 }
 
 export function calcularPenalidadeDados(efeitosAtivos: string[], atributo?: string): number {
-  let penalidadeTotal = 0;
+  const penalidades: number[] = [];
   for (const nome of efeitosAtivos) {
     const cond = getCondicao(nome);
     if (cond?.efeito?.pericias?.penalidadeDados) {
 
       const { atributos, somenteAtaque, somentePericias } = cond.efeito.pericias;
       if (!somenteAtaque && !somentePericias && (!atributos || atributos.some(a => a === atributo))) {
-        penalidadeTotal += cond.efeito.pericias.penalidadeDados;
+        penalidades.push(cond.efeito.pericias.penalidadeDados);
       }
     }
   }
-  return penalidadeTotal;
+  return combinarModificadoresDeCondicao(penalidades);
 }
 
 export function estaImovel(efeitosAtivos: string[]): boolean {

@@ -301,11 +301,12 @@ export function armaComoItem(arma: Weapow): Item {
 export function comModificacoes(item: Item, nomes: readonly string[]): Item {
   if (nomes.length === 0) return item;
   const categoriaBase = item.categoriaBase ?? item.categoria;
+  const modificacoes = Array.from(new Set(nomes));
   return {
     ...item,
     categoriaBase,
-    categoria: Math.min(4, categoriaBase + nomes.length) as Item['categoria'],
-    modificacoes: [...nomes],
+    categoria: Math.min(4, categoriaBase + modificacoes.length) as Item['categoria'],
+    modificacoes,
     stats: { ...item.stats, ...(item.stats?.dano && !item.stats.danoBase ? { danoBase: item.stats.dano } : {}) },
   };
 }

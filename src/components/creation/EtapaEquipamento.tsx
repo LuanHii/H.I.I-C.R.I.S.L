@@ -3,8 +3,9 @@
 import React, { useMemo, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import { ITENS } from '@/data/equipment/items';
+import { ehArmaDeEquipamento } from '@/core/rules/catalogo';
 import { WEAPONS } from '@/data/combat/weapons';
-import { MODIFICACOES_ARMAS } from '@/data/equipment/modifications';
+import { getModificacoesParaArma, MODIFICACOES_ARMAS } from '@/data/equipment/modifications';
 import { chaveDeComparacao } from '@/core/rules/pericias';
 import { getPatenteConfig } from '@/logic/rulesEngine';
 import type { Item } from '@/core/types';
@@ -24,7 +25,7 @@ function limitesDe(r: Rascunho): Record<Categoria, number> {
   return { 0: Infinity, 1: l.I, 2: l.II, 3: l.III, 4: l.IV };
 }
 
-const ehArma = (i: Item) => i.tipo === 'Arma' || Boolean(i.stats?.dano);
+const ITENS_E_MUNICOES = [...ITENS, ...WEAPONS.filter(w => w.tipo === 'Munição').map(armaComoItem)];
 
 export function EtapaEquipamento({ rascunho, onChange, numero }: { rascunho: Rascunho; onChange: (r: Rascunho) => void; numero: number }) {
   const [aba, setAba] = useState<Aba>('armas');
@@ -33,7 +34,8 @@ export function EtapaEquipamento({ rascunho, onChange, numero }: { rascunho: Ras
   const limites = limitesDe(rascunho);
   const maiorCategoria = ([4, 3, 2, 1, 0] as Categoria[]).find((c) => limites[c] > 0) ?? 0;
 
-  const categoriaEfetiva = (item: Item): Categoria => Math.min(4, item.categoria + (rascunho.modificacoes[item.nome]?.length ?? 0)) as Categoria;
+  const categoriaEfetiva = (item: Item): Categoria =>
+    Math.min(4, item.categoria + new Set(rascunho.modificacoes[item.nome]).size) as Categoria;
 
   const contagem: Record<Categoria, number> = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 };
   for (const item of rascunho.equipamentos) contagem[categoriaEfetiva(item)] += 1;
@@ -44,7 +46,7 @@ export function EtapaEquipamento({ rascunho, onChange, numero }: { rascunho: Ras
   const bate = (texto: string) => !termo || chaveDeComparacao(texto).includes(termo);
 
   const armas = useMemo(() => WEAPONS.filter((w) => w.categoria <= maiorCategoria && w.tipo !== 'Munição'), [maiorCategoria]);
-  const itens = useMemo(() => ITENS.filter((i) => i.categoria <= maiorCategoria), [maiorCategoria]);
+  const itens = useMemo(() => ITENS_E_MUNICOES.filter(i => i.categoria <= maiorCategoria), [maiorCategoria]);
   const escolhidos = new Set(rascunho.equipamentos.map((i) => i.nome));
 
   const adicionar = (item: Item) => onChange({ ...rascunho, equipamentos: [...rascunho.equipamentos, item] });
@@ -66,12 +68,13 @@ export function EtapaEquipamento({ rascunho, onChange, numero }: { rascunho: Ras
   const alternarMod = (arma: Item, mod: string) => {
     const atuais = rascunho.modificacoes[arma.nome] ?? [];
     const removendo = atuais.includes(mod);
-    if (!removendo && !cabeMaisUmaMod(arma)) return;
+    if (!removendo && (!cabeMaisUmaMod(arma)
+      || !getModificacoesParaArma({ ...arma, modificacoes: atuais }).some(m => m.nome === mod))) return;
     const proximas = removendo ? atuais.filter((m) => m !== mod) : [...atuais, mod];
     onChange({ ...rascunho, modificacoes: { ...rascunho.modificacoes, [arma.nome]: proximas } });
   };
 
-  const armasEscolhidas = rascunho.equipamentos.filter(ehArma);
+  const armasEscolhidas = rascunho.equipamentos.filter(ehArmaDeEquipamento);
 
   return (
     <div>
@@ -146,8 +149,8 @@ export function EtapaEquipamento({ rascunho, onChange, numero }: { rascunho: Ras
             )}
             {aba === 'modificacoes' && armasEscolhidas.map((arma) => {
               const aplicadas = rascunho.modificacoes[arma.nome] ?? [];
-              const deFogo = Boolean(arma.stats?.alcance && !/corpo/i.test(arma.stats.alcance));
-              const disponiveis = MODIFICACOES_ARMAS.filter((m) => m.tipo === 'universal' || (deFogo ? m.tipo === 'fogo' : m.tipo === 'cac'));
+              const disponiveis = new Set(getModificacoesParaArma({ ...arma, modificacoes: aplicadas }));
+              const opcoes = MODIFICACOES_ARMAS.filter(m => disponiveis.has(m) || aplicadas.includes(m.nome));
               const podeMais = cabeMaisUmaMod(arma);
               const proxima = Math.min(4, categoriaEfetiva(arma) + 1) as Categoria;
               return (
@@ -162,7 +165,7 @@ export function EtapaEquipamento({ rascunho, onChange, numero }: { rascunho: Ras
                     </p>
                   )}
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    {disponiveis.map((m) => {
+                    {opcoes.map((m) => {
                       const ativa = aplicadas.includes(m.nome);
                       return (
                         <Chip key={m.nome} ativo={ativa} desabilitado={!ativa && !podeMais} titulo={m.efeito} onClick={() => alternarMod(arma, m.nome)}>

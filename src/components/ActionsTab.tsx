@@ -362,10 +362,12 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
             <span className="text-xs text-ordem-text-secondary mt-1 line-clamp-1">{a.descricao.split('\n')[0]}</span>
           </span>
 
-          <span className="flex items-center gap-1.5 shrink-0 ml-auto">
-            <span className="text-xs font-mono px-2 py-1 bg-white/[0.04] text-emerald-400/80 border border-emerald-500/10">
-              {a.teste}
-            </span>
+          <span className="flex flex-wrap items-center justify-end gap-1.5 ml-auto">
+            {a.testes.map(({ pericia, rolagem }) => (
+              <span key={pericia} className="text-xs font-mono px-2 py-1 bg-white/[0.04] text-emerald-400/80 border border-emerald-500/10">
+                {a.testes.length > 1 ? `${pericia} ${rolagem}` : rolagem}
+              </span>
+            ))}
             <motion.span animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.25 }}>
               <ChevronDown size={14} className="text-ordem-text-muted" />
             </motion.span>
@@ -388,9 +390,11 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
 
                 <div className="flex items-center gap-2.5 flex-wrap">
                   <span className="text-[10px] text-white/25 uppercase tracking-wider font-medium">Teste</span>
-                  <span className="text-xs font-mono text-emerald-400/70 bg-emerald-500/[0.06] px-2.5 py-1 border border-emerald-500/10">
-                    {a.pericia} · {a.teste}
-                  </span>
+                  {a.testes.map(({ pericia, rolagem }) => (
+                    <span key={pericia} className="text-xs font-mono text-emerald-400/70 bg-emerald-500/[0.06] px-2.5 py-1 border border-emerald-500/10">
+                      {pericia} · {rolagem}
+                    </span>
+                  ))}
                   {a.ataqueBonus !== 0 && (
                     <span className="text-xs font-mono text-amber-400/70 bg-amber-500/[0.06] px-2.5 py-1 border border-amber-500/10">
                       Arma {a.ataqueBonus > 0 ? '+' : ''}{a.ataqueBonus}
@@ -440,7 +444,11 @@ export const ActionsTab: React.FC<ActionsTabProps> = ({ character, useSanity }) 
   const trackAbilities = trackData?.habilidades.filter(h => h.nex <= character.nex && matchesQuery(h)) || [];
 
   const weaponActions = useMemo(() => prepararAtaquesDaFicha(character), [character]);
-  const filteredWeaponActions = weaponActions.filter(a => matchesQuery({ ...a, nome: a.item.nome }));
+  const filteredWeaponActions = weaponActions.filter(a => matchesQuery({
+    nome: a.item.nome,
+    descricao: a.descricao,
+    teste: a.testes.map(({ pericia, rolagem }) => `${pericia} ${rolagem}`).join(' '),
+  }));
   const filteredUniversal = UNIVERSAL_ACTIONS.filter(matchesQuery);
   const filteredInv = INVESTIGATION_ACTIONS.filter(matchesQuery);
   const filteredChase = CHASE_ACTIONS.filter(matchesQuery);

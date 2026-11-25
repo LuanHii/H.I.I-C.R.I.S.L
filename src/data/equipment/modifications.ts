@@ -1,17 +1,18 @@
-import { ModificacaoArma, Item, ItemStats } from '../../core/types';
+import type { ModificacaoArma, Item, ItemStats } from '../../core/types';
+import { WEAPONS } from '../combat/weapons';
 
 export const MODIFICACOES_ARMAS: ModificacaoArma[] = [
 
     {
         nome: 'Certeira',
-        tipo: 'universal',
+        tipo: 'cac-disparo',
         efeito: '+2 em testes de ataque.',
         stats: { ataqueBonus: 2 },
         livro: 'Regras Básicas'
     },
     {
         nome: 'Cruel',
-        tipo: 'universal',
+        tipo: 'cac-disparo',
         efeito: '+2 em rolagens de dano.',
         stats: { danoBonus: 2 },
         livro: 'Regras Básicas'
@@ -19,13 +20,13 @@ export const MODIFICACOES_ARMAS: ModificacaoArma[] = [
     {
         nome: 'Discreta',
         tipo: 'universal',
-        efeito: '+5 em testes para ser ocultada e reduz o espaço em –1.',
+        efeito: '+5 em Crime para ocultar a arma, mesmo sem treinamento em Crime, e ocupa 1 espaço a menos.',
         stats: { espacoReduzido: 1, crimeBonus: 5 },
         livro: 'Regras Básicas'
     },
     {
         nome: 'Perigosa',
-        tipo: 'cac',
+        tipo: 'cac-disparo',
         efeito: '+2 em margem de ameaça.',
         stats: { margemAmeaca: 2 },
         livro: 'Regras Básicas'
@@ -48,7 +49,7 @@ export const MODIFICACOES_ARMAS: ModificacaoArma[] = [
     {
         nome: 'Calibre Grosso',
         tipo: 'fogo',
-        efeito: 'Aumenta o dano em mais um dado do mesmo tipo.',
+        efeito: 'Adiciona 1 dado do mesmo tipo ao dano. Exige munição de calibre grosso, de mesma categoria que a munição comum. A munição de calibre grosso só funciona em armas modificadas para usá-la.',
         stats: { dadoDanoExtra: 1 },
         livro: 'Regras Básicas'
     },
@@ -100,26 +101,26 @@ export const MODIFICACOES_ARMAS: ModificacaoArma[] = [
         tipo: 'fogo',
         efeito: 'Permite usar a arma com uma mão (–2 em testes de ataque).',
         stats: { empunhaduraUmaMao: true },
-        livro: 'Regras Básicas'
+        livro: 'Ajuste de mesa'
     },
     {
         nome: 'Cano Longo',
         tipo: 'fogo',
         efeito: 'Aumenta o dano em +2, mas reduz a margem de ameaça em 1.',
         stats: { danoBonus: 2, margemAmeaca: -1 },
-        livro: 'Regras Básicas'
+        livro: 'Ajuste de mesa'
     },
     {
         nome: 'Carregador Estendido',
         tipo: 'fogo',
         efeito: 'Dobra a capacidade de munição da arma.',
         stats: { capacidadeMunicaoDupla: true },
-        livro: 'Regras Básicas'
+        livro: 'Ajuste de mesa'
     },
     {
         nome: 'Carregador Rápido',
-        tipo: 'fogo',
-        efeito: 'Permite recarregar como ação livre 1x/rodada.',
+        tipo: 'fogo-bestas',
+        efeito: 'Disponível com a regra opcional de contagem de munição. Em armas de fogo, permite uma recarga como ação livre por rodada. Em bestas e balestras, permite até cinco recargas como ação livre com uma mão. Depois, reabastecer gasta uma ação de movimento por virote.',
         stats: { recargaLivre: true },
         livro: 'Sobrevivendo ao Horror'
     },
@@ -141,29 +142,43 @@ export const MODIFICACOES_ARMAS: ModificacaoArma[] = [
         livro: 'Regras Básicas'
     },
 ];
-export function getModificacoesParaArma(tipoArma: 'cac' | 'disparo' | 'fogo'): ModificacaoArma[] {
+const ARMAS_DE_FOGO_NAO_BALISTICAS = ['Bazuca', 'Lança-chamas', 'Revólver Compacto'];
+const ARMAS_AUTOMATICAS = ['Submetralhadora', 'Fuzil de Assalto', 'Metralhadora'];
+
+export function getModificacoesParaArma(arma: Item): ModificacaoArma[] {
+    const canonica = WEAPONS.find(item => item.nome === arma.nome);
+    const fogo = canonica
+        ? canonica.stats.Dano_Tipo === 'Balístico' || ARMAS_DE_FOGO_NAO_BALISTICAS.includes(canonica.nome)
+        : arma.stats?.tipoDano?.toLowerCase() === 'balístico' || /arma de fogo|balas/i.test(arma.descricao);
+    const besta = arma.nome === 'Besta' || arma.nome === 'Balestra';
+    const automatica = arma.stats?.automatica || ARMAS_AUTOMATICAS.includes(arma.nome)
+        || arma.modificacoes?.includes('Ferrolho Automático');
+
+    // O seletor segue os grupos da tabela 3.5. As modificações legadas continuam legíveis.
     return MODIFICACOES_ARMAS.filter(mod => {
+        if (mod.livro === 'Ajuste de mesa') return false;
         if (mod.tipo === 'universal') return true;
-        if (mod.tipo === 'cac' && tipoArma === 'cac') return true;
-        if (mod.tipo === 'fogo' && tipoArma === 'fogo') return true;
-        if (mod.tipo === 'disparo' && (tipoArma === 'disparo' || tipoArma === 'fogo')) return true;
+        if (mod.tipo === 'cac-disparo') return !fogo && arma.nome !== 'Shuriken';
+        if (mod.tipo === 'fogo-bestas') return fogo || besta;
+        if (mod.tipo === 'fogo') return fogo && (mod.nome !== 'Compensador' || Boolean(automatica));
         return false;
     });
 }
 
 export function parseDano(dano: string): { quantidade: number; dado: number; bonus: number } {
-    const match = dano.match(/(\d+)d(\d+)(?:\s*\+\s*(\d+))?/);
+    const match = dano.match(/(\d+)d(\d+)(?:\s*([+-])\s*(\d+))?/i);
     if (!match) return { quantidade: 1, dado: 6, bonus: 0 };
     return {
         quantidade: parseInt(match[1], 10),
         dado: parseInt(match[2], 10),
-        bonus: match[3] ? parseInt(match[3], 10) : 0
+        bonus: match[4] ? (match[3] === '-' ? -1 : 1) * parseInt(match[4], 10) : 0
     };
 }
 
 export function formatDano(quantidade: number, dado: number, bonus: number): string {
     let result = `${quantidade}d${dado}`;
     if (bonus > 0) result += `+${bonus}`;
+    if (bonus < 0) result += String(bonus);
     return result;
 }
 
@@ -182,6 +197,13 @@ export function parseCritico(critico: string): { margem: number; multiplicador: 
     }
 
     return { margem, multiplicador };
+}
+
+export function formatarCriticoCompleto(critico: string): string {
+    const normalizado = critico.trim().toLowerCase();
+    if (!/^(?:\d+(?:\/x\d+)?|x\d+)$/.test(normalizado)) return critico;
+    const { margem, multiplicador } = parseCritico(normalizado);
+    return `${margem}/x${multiplicador}`;
 }
 
 export function formatCritico(margem: number, multiplicador: number): string {
@@ -204,14 +226,15 @@ export function aumentarAlcance(alcance: string): string {
 
 export function calcularStatsModificados(arma: Item): ItemStats {
     const statsBase = arma.stats || {};
-    const mods = arma.modificacoes || [];
+    const mods = Array.from(new Set(arma.modificacoes));
 
     const danoOriginal = statsBase.dano || statsBase.danoBase || '1d6';
-    let { quantidade: qntDado, dado, bonus: bonusDano } = parseDano(danoOriginal);
+    let dadosAdicionais = 0;
+    let bonusDeMods = 0;
     let { margem, multiplicador } = parseCritico(statsBase.critico || 'x2');
     let alcance = statsBase.alcance || 'Corpo a corpo';
     let ataqueBonus = statsBase.ataqueBonus || 0;
-    let automatica = statsBase.automatica || false;
+    let automatica = statsBase.automatica || ARMAS_AUTOMATICAS.includes(arma.nome);
     let danoExtraStr = '';
 
     for (const modNome of mods) {
@@ -222,10 +245,10 @@ export function calcularStatsModificados(arma: Item): ItemStats {
             ataqueBonus += mod.stats.ataqueBonus;
         }
         if (mod.stats.danoBonus) {
-            bonusDano += mod.stats.danoBonus;
+            bonusDeMods += mod.stats.danoBonus;
         }
         if (mod.stats.dadoDanoExtra) {
-            qntDado += mod.stats.dadoDanoExtra;
+            dadosAdicionais += mod.stats.dadoDanoExtra;
         }
         if (mod.stats.margemAmeaca) {
             margem = Math.max(1, margem - mod.stats.margemAmeaca);
@@ -244,10 +267,13 @@ export function calcularStatsModificados(arma: Item): ItemStats {
         }
     }
 
-    let danoFinal = formatDano(qntDado, dado, bonusDano);
-    if (danoExtraStr) {
-        danoFinal += danoExtraStr;
-    }
+    const danoFinal = danoOriginal.split('/').map(opcao => {
+        if (!/^(?:\s*\d+d\d+(?:\s*[+-]\s*\d+)?\s*)$/i.test(opcao)) return opcao + danoExtraStr;
+        if (!dadosAdicionais && !bonusDeMods) return opcao + danoExtraStr;
+        const { quantidade, dado, bonus } = parseDano(opcao);
+        return formatDano(quantidade + dadosAdicionais, dado, bonus + bonusDeMods) + danoExtraStr;
+    }).join('/');
+    const bonusDano = parseDano(danoOriginal).bonus + bonusDeMods;
 
     return {
         ...statsBase,
@@ -255,8 +281,8 @@ export function calcularStatsModificados(arma: Item): ItemStats {
         danoBase: danoOriginal,
         critico: formatCritico(margem, multiplicador),
         alcance,
-        ataqueBonus: ataqueBonus > 0 ? ataqueBonus : undefined,
-        danoBonus: bonusDano > 0 ? bonusDano : undefined,
+        ataqueBonus: ataqueBonus || undefined,
+        danoBonus: bonusDano || undefined,
         margemAmeaca: margem < 20 ? margem : undefined,
         multiplicadorCritico: multiplicador > 2 ? multiplicador : undefined,
         automatica: automatica || undefined,
@@ -264,7 +290,7 @@ export function calcularStatsModificados(arma: Item): ItemStats {
 }
 
 export function getResumoModificacoes(arma: Item): string[] {
-    const mods = arma.modificacoes || [];
+    const mods = Array.from(new Set(arma.modificacoes));
     const resumos: string[] = [];
 
     for (const modNome of mods) {

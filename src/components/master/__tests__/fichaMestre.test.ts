@@ -1,6 +1,8 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import type { Item } from '@/core/types';
+import { equipamentosFinais, RASCUNHO_INICIAL } from '@/logic/rascunhoDeCriacao';
 
 const fonte = (...rel: string[]) => readFileSync(join(process.cwd(), 'src', ...rel), 'utf8');
 
@@ -227,9 +229,13 @@ describe('ficha nova nasce no motor novo', () => {
   });
 
   it('modificações de arma saem no formato do painel do mestre (modificacoes[] + categoriaBase), não em texto', () => {
-    expect(rascunho).toContain('modificacoes: [...nomes]');
-    expect(rascunho).toContain('categoriaBase');
-    expect(rascunho).not.toContain('[Mods:');
+    const arma: Item = {
+      nome: 'Bastão', tipo: 'Arma', categoria: 0, espaco: 1,
+      descricao: 'Bastão de teste', livro: 'Regras Básicas',
+    };
+    expect(equipamentosFinais({
+      ...RASCUNHO_INICIAL, equipamentos: [arma], modificacoes: { Bastão: ['Certeira'] },
+    })).toEqual([{ ...arma, modificacoes: ['Certeira'], categoriaBase: 0, categoria: 1, stats: {} }]);
   });
 
   it('recriar uma ficha também nasce v2', () => {

@@ -234,10 +234,10 @@ export const RITUAIS: Ritual[] = [
     alcance: 'Toque',
     alvo: '1 ser',
     duracao: 'Instantânea',
-    resistencia: 'Fortitude parcial',
-    descricao: 'Cura completamente todos os PV do alvo e remove todas as doenças e venenos (exceto Energia e condições permanentes). Se o alvo falhar em Fortitude DT 30, é incubado pelo vírus do infecticídio (OPRPG, p. 292).',
+    resistencia: 'Nenhuma',
+    descricao: 'Remove uma condição elegível, uma doença ou um veneno de origem paranormal. A cura exclui efeitos da entidade de Energia e condições permanentes. Depois, o alvo faz Fortitude (DT 30). Se falhar, é incubado pelo vírus do infecticídio.',
     efeito: {
-      padrao: 'Cura PV total, remove doenças e venenos. Requer Fortitude DT 30 ou ser incubado pelo vírus do infecticídio.',
+      padrao: 'Escolha uma condição entre Abalado, Apavorado, Alquebrado, Atordoado, Cego, Confuso, Debilitado, Enjoado, Envenenado, Esmorecido, Exausto, Fascinado, Fatigado, Fraco, Frustrado, Lento, Ofuscado, Paralisado, Pasmo e Surdo. Você também pode escolher uma doença ou um veneno. O ritual remove o efeito escolhido se for de origem paranormal. Exclui efeitos causados pela entidade de Energia e condições permanentes. Após a cura, o alvo faz Fortitude (DT 30). Em falha, é incubado pelo vírus do infecticídio.',
       discente: 'Não possui forma Discente listada.',
       verdadeiro: 'Não possui forma Verdadeira listada.'
     },
@@ -663,11 +663,11 @@ export const RITUAIS: Ritual[] = [
     alvo: '1 ser',
     duracao: 'Cena',
     resistencia: 'Fortitude parcial',
-    descricao: 'O alvo fica fatigado. Se passar, fica vulnerável.',
+    descricao: 'O alvo fica Fatigado, ou Vulnerável se passar em Fortitude. Efeitos de rituais não acumulam entre si.',
     efeito: {
       padrao: 'O alvo fica fatigado (vulnerável se passar).',
       discente: 'O alvo fica exausto (fatigado se passar). Requer 2º círculo (+2 PE).',
-      verdadeiro: 'Muda o alvo para “até 5 seres”. Requer 3º círculo e afinidade (+5 PE).'
+      verdadeiro: 'Como na forma discente, cada alvo fica Exausto em falha ou Fatigado em sucesso. Afeta até 5 seres. Requer 3º círculo e afinidade com Morte (+5 PE).'
     },
     livro: 'Regras Básicas'
   },
@@ -1652,9 +1652,9 @@ export const RITUAIS: Ritual[] = [
     alvo: 'Você',
     duracao: 'Cena',
     resistencia: 'Nenhuma',
-    descricao: 'Imune a condições atordoado, cego, debilitado, enjoado, envenenado, exausto, fatigado, fraco, lento, ofuscado e paralisado. Dano físico não reduz PV abaixo de 1.',
+    descricao: 'Pela cena, concede imunidades a condições, doenças e venenos. Você ignora o dano adicional de acertos críticos e ataques furtivos. Dano balístico, corte, impacto e perfuração não pode reduzir seus PV abaixo de 1.',
     efeito: {
-      padrao: 'Imunidade a diversas condições; Dano físico não reduz PV abaixo de 1.',
+      padrao: 'Você fica imune a Atordoado, Cego, Debilitado, Enjoado, Envenenado, Exausto, Fatigado, Fraco, Lento, Ofuscado e Paralisado, além de doenças e venenos. Você ignora o dano adicional de acertos críticos e ataques furtivos. Dano dos tipos balístico, corte, impacto e perfuração só pode reduzir sua vida até 1 PV.',
       discente: 'Não possui forma Discente listada.',
       verdadeiro: 'Não possui forma Verdadeira listada.'
     },

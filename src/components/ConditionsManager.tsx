@@ -12,6 +12,7 @@ import { Collapsible } from './ui/Collapsible';
 import { listContainer, listItem, slideUp, scaleIn } from '@/lib/motion';
 import { Plus, X, Search } from 'lucide-react';
 import { RotuloSecao } from './master/ui/Pecas';
+import { aplicarCondicao, type ReaplicacaoCondicao } from '@/core/rules/condicoes';
 
 interface ConditionsManagerProps {
   personagem: Personagem;
@@ -21,6 +22,7 @@ interface ConditionsManagerProps {
 
 export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem, onUpdate, readOnly = false }) => {
   const [isAdding, setIsAdding] = useState(false);
+  const [reaplicando, setReaplicando] = useState<CondicaoCompleta | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<ConditionCategory | 'todas'>('todas');
 
@@ -29,21 +31,26 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
     [personagem.efeitosAtivos]
   );
 
-  const handleAddCondition = (condicaoNome: string) => {
-    if (!activeConditions.includes(condicaoNome)) {
+  const handleAddCondition = (condicaoNome: string, reaplicacao?: ReaplicacaoCondicao) => {
+    const repetir = activeConditions.includes(condicaoNome);
+    const efeitosAtivos = reaplicacao && !repetir
+      ? activeConditions
+      : aplicarCondicao(activeConditions, condicaoNome, reaplicacao);
+    if (efeitosAtivos.length !== activeConditions.length || efeitosAtivos.some((nome, i) => nome !== activeConditions[i])) {
       const logEntry = {
         timestamp: Date.now(),
-        mensagem: `Condição adicionada: ${condicaoNome}`,
+        mensagem: repetir ? `Condição agravada: ${condicaoNome}` : `Condição adicionada: ${condicaoNome}`,
         tipo: 'condicao' as const
       };
       const updated = {
         ...personagem,
-        efeitosAtivos: [...activeConditions, condicaoNome],
+        efeitosAtivos,
         log: [logEntry, ...(personagem.log || [])].slice(0, 50)
       };
       onUpdate(updated);
     }
     setIsAdding(false);
+    setReaplicando(null);
     setSearchTerm('');
   };
 
@@ -64,9 +71,9 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
   const filteredConditions = useMemo(() => {
     return condicoes.filter(c => {
       const matchesSearch = c.nome.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = categoryFilter === 'todas' || c.categoria === categoryFilter;
-      const notActive = !activeConditions.includes(c.nome);
-      return matchesSearch && matchesCategory && notActive;
+      const matchesCategory = categoryFilter === 'todas' || (c.categoria ?? 'outros') === categoryFilter;
+      const podeAplicar = !activeConditions.includes(c.nome) || Boolean(c.acumulo);
+      return matchesSearch && matchesCategory && podeAplicar;
     });
   }, [searchTerm, categoryFilter, activeConditions]);
 
@@ -100,7 +107,10 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
         {!readOnly && (
           <button
             type="button"
-            onClick={() => setIsAdding(!isAdding)}
+            onClick={() => {
+              setIsAdding(!isAdding);
+              setReaplicando(null);
+            }}
             className={`flex items-center gap-1.5 border px-3 py-1.5 font-carimbo text-[10px] uppercase tracking-[0.16em] transition ${isAdding
               ? 'border-white/10 text-ordem-text-secondary hover:text-white'
               : 'border-[var(--mestre-primary,#DC2626)] bg-[var(--mestre-primary,#DC2626)]/15 text-white hover:bg-[var(--mestre-primary,#DC2626)]/30'
@@ -122,7 +132,7 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
               exit="exit"
               className="mb-4 border border-white/10 bg-white/[0.02] p-3"
             >
-              <RotuloSecao>Penalidades somadas</RotuloSecao>
+              <RotuloSecao>Penalidades aplicadas</RotuloSecao>
               <div className="mt-2" />
               <ConditionsSummary efeitosAtivos={activeConditions} />
             </motion.div>
@@ -163,7 +173,25 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
                 ))}
               </div>
 
-              <motion.div
+              {reaplicando ? (
+                <div className="space-y-2 border border-white/10 p-3" aria-label={`Reaplicar ${reaplicando.nome}`} role="group">
+                  <p className="text-sm font-semibold text-white">Reaplicar {reaplicando.nome}</p>
+                  <p className="text-xs text-ordem-text-secondary">
+                    Efeitos de dois rituais não acumulam. Agrave a condição quando a fonte permitir.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button type="button" size="sm" variant="secondary" onClick={() => handleAddCondition(reaplicando.nome, 'entre-rituais')}>
+                      Manter {reaplicando.nome}
+                    </Button>
+                    <Button type="button" size="sm" variant="danger" onClick={() => handleAddCondition(reaplicando.nome, 'acumulo-permitido')}>
+                      Agravar condição
+                    </Button>
+                    <Button type="button" size="sm" variant="ghost" onClick={() => setReaplicando(null)}>
+                      Voltar
+                    </Button>
+                  </div>
+                </div>
+              ) : <motion.div
                 variants={listContainer}
                 initial="initial"
                 animate="animate"
@@ -179,12 +207,12 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
                         key={cond.nome}
                         variants={listItem}
                         whileHover={{ x: 4, backgroundColor: 'rgba(58, 58, 58, 0.5)' }}
-                        onClick={() => handleAddCondition(cond.nome)}
+                        onClick={() => activeConditions.includes(cond.nome) ? setReaplicando(cond) : handleAddCondition(cond.nome)}
                         className="w-full text-left px-3 py-2.5 flex flex-col gap-0.5 group border-l-2 border-transparent hover:border-l-2"
                       >
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-ordem-white group-hover:text-red-400 text-sm transition-colors">
-                            {cond.nome}
+                            {activeConditions.includes(cond.nome) ? `Reaplicar ${cond.nome}` : cond.nome}
                           </span>
                           {cond.efeito?.defesa && (
                             <Badge variant="danger" size="sm">
@@ -214,7 +242,7 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
                     Nenhuma condição encontrada.
                   </p>
                 )}
-              </motion.div>
+              </motion.div>}
             </motion.div>
           )}
         </AnimatePresence>
@@ -284,12 +312,13 @@ const ConditionCardActive: React.FC<ConditionCardActiveProps> = ({ nome, onRemov
   return (
     <motion.div
       layout
-      className={`border overflow-hidden transition-all ${categoriaClasses}`}
+      className={`relative border overflow-hidden transition-all ${categoriaClasses}`}
     >
       <motion.button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-3 flex justify-between items-start text-left hover:bg-black/10 transition-colors"
+        aria-expanded={isExpanded}
+        className={`w-full p-3 flex justify-between items-start text-left hover:bg-black/10 transition-colors ${onRemove ? 'pr-10' : ''}`}
         whileHover={{ backgroundColor: 'rgba(0,0,0,0.1)' }}
       >
         <div className="flex-1 min-w-0">
@@ -307,12 +336,13 @@ const ConditionCardActive: React.FC<ConditionCardActiveProps> = ({ nome, onRemov
             )}
             {cond.efeito?.deslocamento && (
               <Badge variant="warning" size="sm">
-                {cond.efeito.deslocamento === 'zero' ? 'Imóvel' : 'Lento'}
+                {cond.efeito.deslocamento === 'zero' ? 'Imóvel' :
+                  cond.efeito.deslocamento === 'metade' ? 'Lento' : `${cond.efeito.deslocamento.toLocaleString('pt-BR')} m`}
               </Badge>
             )}
             {cond.efeito?.acoes === 'nenhuma' && (
               <Badge variant="danger" size="sm" pulse>
-                Sem ações
+                {cond.efeito.bloqueiaReacoes ? 'Sem ações nem reações' : 'Sem ações normais'}
               </Badge>
             )}
           </div>
@@ -339,19 +369,20 @@ const ConditionCardActive: React.FC<ConditionCardActiveProps> = ({ nome, onRemov
               <path d="m6 9 6 6 6-6" />
             </svg>
           </motion.div>
-          {onRemove && (
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={(e) => { e.stopPropagation(); onRemove(); }}
-              className="p-1 hover:bg-red-900/50 text-current hover:text-red-300 transition-colors"
-              title="Remover condição"
-            >
-              <X size={14} />
-            </motion.button>
-          )}
         </div>
       </motion.button>
+      {onRemove && (
+        <motion.button
+          type="button"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={onRemove}
+          className="absolute right-3 top-3 p-1 hover:bg-red-900/50 text-current hover:text-red-300 transition-colors"
+          aria-label={`Remover ${nome}`}
+        >
+          <X size={14} />
+        </motion.button>
+      )}
 
       <AnimatePresence>
         {isExpanded && (
@@ -380,7 +411,8 @@ const ConditionCardActive: React.FC<ConditionCardActiveProps> = ({ nome, onRemov
                     <div className="flex items-center gap-2 text-xs">
                       <span className="opacity-70">Deslocamento:</span>
                       <span className="font-mono">
-                        {cond.efeito.deslocamento === 'zero' ? '0m (Imóvel)' : 'Metade'}
+                        {cond.efeito.deslocamento === 'zero' ? '0m (Imóvel)' :
+                          cond.efeito.deslocamento === 'metade' ? 'Metade' : `${cond.efeito.deslocamento.toLocaleString('pt-BR')} m`}
                       </span>
                     </div>
                   )}

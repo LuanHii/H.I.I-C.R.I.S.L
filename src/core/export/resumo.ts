@@ -1,11 +1,13 @@
 import type { AtributoKey, Item, Marca, PericiaName, Personagem, Poder, Ritual } from '../types';
-import { calcularStatsModificados, parseCritico } from '../../data/equipment/modifications';
-import { calcularDefesaEfetiva, formatarTesteDaFicha, getPenalidadesPericia } from '../../logic/combatUtils';
+import { ehArmaDeEquipamento } from '../rules/catalogo';
+import { calcularStatsModificados, formatarCriticoCompleto } from '../../data/equipment/modifications';
+import { calcularDefesaEfetiva, formatarTesteDaFicha, getPenalidadesPericia, prepararTestesDaArma } from '../../logic/combatUtils';
 import { prepararRolagemPericia } from '@/logic/diceRoller';
 import { calcularDTRitual } from '../../logic/rulesEngine';
 import { apenasCondicoes } from '../rules/condicoes';
 import { semAcento } from '../rules/pericias';
 import { apresentarEfeitoDeRitual, formatarCustoDoRitual } from '../rules/rituais';
+import { deslocamentoComCondicoes } from '../../data/combat/conditions';
 
 const ATRIBUTOS: AtributoKey[] = ['AGI', 'FOR', 'INT', 'PRE', 'VIG'];
 
@@ -46,8 +48,14 @@ function recursos(p: Personagem): string[] {
   }
 
   const defesaEfetiva = calcularDefesaEfetiva(p);
-  const defesa = defesaEfetiva !== p.defesa ? `Defesa ${p.defesa} (efetiva ${defesaEfetiva} com as condições)` : `Defesa ${p.defesa}`;
-  linhas.push(`- ${defesa} · Deslocamento ${p.deslocamento}m · Carga ${p.carga.atual}/${p.carga.maxima} espaços`);
+  const defesaCorpoACorpo = calcularDefesaEfetiva(p, 'corpo-a-corpo');
+  const defesaDistancia = calcularDefesaEfetiva(p, 'distancia');
+  const defesaSituacional = defesaCorpoACorpo !== defesaDistancia;
+  const defesa = defesaSituacional
+    ? `Defesa ${p.defesa} (efetiva ${defesaCorpoACorpo} contra corpo a corpo, ${defesaDistancia} contra ataques à distância)`
+    : defesaEfetiva !== p.defesa ? `Defesa ${p.defesa} (efetiva ${defesaEfetiva} com as condições)` : `Defesa ${p.defesa}`;
+  const deslocamento = deslocamentoComCondicoes(p.deslocamento, p.efeitosAtivos ?? []);
+  linhas.push(`- ${defesa} · Deslocamento ${deslocamento}m · Carga ${p.carga.atual}/${p.carga.maxima} espaços`);
 
   const condicoes = apenasCondicoes(p.efeitosAtivos ?? []);
   if (condicoes.length > 0) linhas.push(`- Condições ativas: ${condicoes.join(', ')}`);
@@ -97,28 +105,21 @@ function pericias(p: Personagem): string[] {
   return linhas;
 }
 
-const ehArma = (i: Item): boolean => i.tipo === 'Arma' || Boolean(i.stats?.dano || i.stats?.danoBase);
 const ehProtecao = (i: Item): boolean => i.tipo === 'Proteção' || (i.stats?.defesa ?? 0) > 0 || (i.stats?.resistencia ?? 0) > 0;
-
-function testeDeAtaque(p: Personagem, arma: Item, alcance: string, ataqueBonus: number): string {
-  const baixo = alcance.toLowerCase();
-  const corpoACorpo = baixo.includes('corpo') || baixo.includes('adjacente');
-  if (corpoACorpo) return `Luta ${formatarTesteDaFicha(p, 'Luta', { ataque: true, bonusFixo: ataqueBonus })}`;
-  if (/arremess/i.test(arma.descricao ?? '')) {
-    return `Luta ${formatarTesteDaFicha(p, 'Luta', { ataque: true, bonusFixo: ataqueBonus })} corpo a corpo ou Pontaria ${formatarTesteDaFicha(p, 'Pontaria', { ataque: true, bonusFixo: ataqueBonus })} arremessada`;
-  }
-  return `Pontaria ${formatarTesteDaFicha(p, 'Pontaria', { ataque: true, bonusFixo: ataqueBonus })}`;
-}
 
 function linhaDeAtaque(p: Personagem, arma: Item): string {
   const stats = arma.modificacoes?.length ? calcularStatsModificados(arma) : (arma.stats ?? {});
   const alcance = stats.alcance ?? 'Corpo a corpo';
-  const { margem, multiplicador } = parseCritico(stats.critico ?? 'x2');
+  const testes = prepararTestesDaArma(p, arma, stats);
+  const testeDeAtaque = testes.map(({ pericia, rolagem }) => {
+    const modo = testes.length === 1 ? '' : pericia === 'Luta' ? ' corpo a corpo' : ' arremessada';
+    return `${pericia} ${rolagem}${modo}`;
+  }).join(' ou ');
 
   const partes = [
-    testeDeAtaque(p, arma, alcance, stats.ataqueBonus ?? 0),
+    testeDeAtaque,
     `dano ${stats.dano ?? stats.danoBase ?? '—'}${stats.tipoDano ? ` ${stats.tipoDano}` : ''}`,
-    `crítico ${margem}/x${multiplicador}`,
+    `crítico ${formatarCriticoCompleto(stats.critico ?? 'x2')}`,
     `alcance ${alcance}`,
   ];
   if (stats.automatica) partes.push('automática');
@@ -138,9 +139,9 @@ function equipamento(p: Personagem): string[][] {
   if (itens.length === 0) return [];
 
   const blocos: string[][] = [];
-  const armas = itens.filter(ehArma);
-  const protecoes = itens.filter((i) => !ehArma(i) && ehProtecao(i));
-  const outros = itens.filter((i) => !ehArma(i) && !ehProtecao(i));
+  const armas = itens.filter(ehArmaDeEquipamento);
+  const protecoes = itens.filter(i => !ehArmaDeEquipamento(i) && ehProtecao(i));
+  const outros = itens.filter(i => !ehArmaDeEquipamento(i) && !ehProtecao(i));
 
   if (armas.length > 0) blocos.push(['## Ataques', ...armas.map((a) => linhaDeAtaque(p, a))]);
   if (protecoes.length > 0) blocos.push(['## Proteções', ...protecoes.map(linhaDeProtecao)]);

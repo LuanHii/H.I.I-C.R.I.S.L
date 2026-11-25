@@ -1,4 +1,7 @@
-import { Item } from '../../core/types';
+import type { Item } from '../../core/types';
+
+const ARREMESSAR_GRANADA = 'Empunhe a granada e gaste uma ação padrão para arremessá-la em um ponto em alcance médio.';
+const APLICAR_MEDICAMENTO = 'Com uma ação padrão, consuma uma dose para aplicar o efeito em você ou em um ser adjacente.';
 
 export const ITENS: Item[] = [
 
@@ -40,6 +43,23 @@ export const ITENS: Item[] = [
     espaco: 1,
     tipo: 'Amaldiçoado (Sangue)',
     descricao: 'Um par de soqueiras de metal vermelho vivo. Seus ataques desarmados causam +1d8 de dano de Sangue e seu dano se torna letal. Sempre que acerta um ataque desarmado, pode fazer outro ataque desarmado contra o mesmo alvo, pagando 2 PE por cada ataque já realizado no turno.',
+    livro: 'Regras Básicas'
+  },
+  // Livro de Regras v1.3, Itens Amaldiçoados Especiais, pp. 148–149 impressas.
+  {
+    nome: 'Coração Pulsante',
+    categoria: 2,
+    espaco: 1,
+    tipo: 'Amaldiçoado (Sangue)',
+    descricao: 'Se sofrer dano enquanto estiver empunhando o coração, pode gastar uma reação para reduzir esse dano à metade. A cada uso, faça um teste de Fortitude (DT 15 + 5 por uso adicional no mesmo dia). Em falha, o item é destruído. Drene diariamente o compartimento em que ele está guardado para o sangue não danificar outros objetos. Conta como uma maldição.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Amarras Mortais',
+    categoria: 2,
+    espaco: 1,
+    tipo: 'Amaldiçoado (Morte)',
+    descricao: 'Uma vez por rodada, gaste uma ação padrão e 2 PE para usar a manobra agarrar contra um alvo Grande ou menor em alcance curto, com +10 no teste oposto. Uma ação de movimento permite puxar um alvo agarrado para perto, deixando-o adjacente. Conta como uma maldição.',
     livro: 'Regras Básicas'
   },
   {
@@ -325,7 +345,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 0.5,
     tipo: 'Geral (Medicamento)',
-    descricao: 'Fortalece a imunidade. Fornece +5 no próximo teste de Fortitude contra efeitos de doença até o fim do dia.',
+    descricao: `${APLICAR_MEDICAMENTO} Fornece +5 no próximo teste de Fortitude contra efeitos de uma doença feito até o fim do dia.`,
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -333,7 +353,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 0.5,
     tipo: 'Geral (Medicamento)',
-    descricao: 'Ajuda contra venenos. Fornece +5 no próximo teste de Fortitude contra veneno até o fim do dia. Antídoto específico remove completamente o veneno.',
+    descricao: `${APLICAR_MEDICAMENTO} Fornece +5 no próximo teste de Fortitude contra efeitos de um veneno feito até o fim do dia. Um antídoto feito para aquele veneno o remove por completo.`,
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -341,7 +361,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 0.5,
     tipo: 'Geral (Medicamento)',
-    descricao: 'Remove a condição enjoado e fornece +5 em testes para evitá-la até o fim da cena.',
+    descricao: `${APLICAR_MEDICAMENTO} Remove Enjoado e fornece +5 em testes para evitar a condição até o fim da cena. A critério do mestre, pode ajudar contra outras condições causadas por náuseas ou vômitos.`,
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -349,7 +369,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 0.5,
     tipo: 'Geral (Medicamento)',
-    descricao: 'Reduz reações alérgicas. Fornece +5 no próximo teste contra efeitos de alergia até o fim do dia.',
+    descricao: `${APLICAR_MEDICAMENTO} Fornece +5 no próximo teste contra efeitos de uma alergia feito até o fim do dia.`,
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -357,7 +377,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 0.5,
     tipo: 'Geral (Medicamento)',
-    descricao: 'Reduz dor e inchaço. Fornece 1d8+2 PV temporários.',
+    descricao: `${APLICAR_MEDICAMENTO} Fornece 1d8+2 PV temporários.`,
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -365,7 +385,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 0.5,
     tipo: 'Geral (Medicamento)',
-    descricao: 'Reduz febre e dores de cabeça. Permite novo teste contra condição mental que esteja sofrendo. Só funciona 1x por cena.',
+    descricao: `${APLICAR_MEDICAMENTO} Permite um novo teste contra uma condição mental que o alvo já esteja sofrendo. Só funciona uma vez por cena.`,
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -373,7 +393,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 0.5,
     tipo: 'Geral (Medicamento)',
-    descricao: 'Auxilia na respiração. Fornece +5 em testes para evitar asfixiado ou fatigado até o fim do dia.',
+    descricao: `${APLICAR_MEDICAMENTO} Fornece +5 em testes para evitar Asfixiado ou Fatigado feitos até o fim do dia.`,
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -381,7 +401,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 0.5,
     tipo: 'Geral (Medicamento)',
-    descricao: 'Aumenta coagulação. Fornece +5 em testes para estabilizar de sangrando. Com Medicina para remover morrendo, também +5.',
+    descricao: `${APLICAR_MEDICAMENTO} Fornece +5 em testes para se estabilizar de Sangrando feitos até o fim do dia. Se for usado junto a um teste de Medicina para encerrar Morrendo, fornece +5 nesse teste.`,
     livro: 'Sobrevivendo ao Horror'
   },
 
@@ -390,7 +410,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 1,
     tipo: 'Explosivo',
-    descricao: 'Bastão de 20cm. Ação padrão: acende e arremessa em alcance médio. Raio 6m: 4d6 impacto + 4d6 fogo, condição em chamas (Reflexos DT Agi reduz/evita).',
+    descricao: 'Gaste uma ação padrão usando as duas mãos para arremessar em alcance médio. Em um raio de 6m, seres e objetos soltos sofrem 4d6 de impacto e 4d6 de fogo e ficam Em Chamas. Passar em Reflexos (DT Agi) reduz à metade o dano e evita Em Chamas.',
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -398,7 +418,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 1,
     tipo: 'Explosivo',
-    descricao: 'Massa adesiva com detonador remoto. 2 rodadas para preparar. Detonação: 16d6 impacto em raio 3m (Reflexos DT Int reduz). Especialista em explosivos: dobro de dano em objetos, ignora RD.',
+    descricao: 'A preparação em uma superfície leva 2 rodadas. Detonar é uma ação livre em alcance longo. O explosivo também detona se sofrer ao menos 1 ponto de dano de fogo ou eletricidade. Seres e objetos em um raio de 3m sofrem 16d6 de impacto (Reflexos DT Int reduz à metade). Se o usuário for treinado em Crime ou em uma Profissão adequada, a critério do mestre, dobra o dano a objetos e estruturas e ignora a RD deles.',
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -406,7 +426,7 @@ export const ITENS: Item[] = [
     categoria: 0,
     espaco: 2,
     tipo: 'Explosivo',
-    descricao: 'Galão com substância inflamável. Ao sofrer dano de fogo ou balístico, explode em esfera de 6m: 12d6 fogo, condição em chamas (Reflexos DT 25 reduz/evita). Área fica em chamas.',
+    descricao: 'Ao sofrer dano de fogo ou balístico, explode num raio de 6m. Seres na área sofrem 12d6 de fogo e ficam Em Chamas. Passar em Reflexos (DT 25) reduz à metade o dano e evita Em Chamas. A área causa 1d6 de fogo por rodada a seres e objetos até o fogo ser apagado ou a cena acabar.',
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -414,7 +434,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 1,
     tipo: 'Explosivo',
-    descricao: 'Libera fumaça branca em raio 6m por 2 rodadas. Seres que começam turno na área ficam inconscientes ou exaustos/fatigados (Fortitude DT Agi reduz para fatigado 1d4 rodadas).',
+    descricao: `${ARREMESSAR_GRANADA} O gás ocupa um raio de 6m por 2 rodadas. Ao começar o turno na área, o ser fica Inconsciente e Caído. Em atividade física intensa, como combate, o resultado é Exausto por 1 rodada e depois Fatigado. Em ambos os casos, passar em Fortitude (DT Agi) reduz o efeito para Fatigado por 1d4 rodadas.`,
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -422,7 +442,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 1,
     tipo: 'Explosivo',
-    descricao: 'Pulso eletromagnético em raio 18m. Desativa equipamentos elétricos até fim da cena. Criaturas de Energia: 6d6 impacto e paralisadas 1 rodada (Fortitude DT Agi reduz/evita).',
+    descricao: `${ARREMESSAR_GRANADA} O pulso desativa equipamentos elétricos num raio de 18m até o fim da cena. Criaturas de Energia na área sofrem 6d6 de impacto e ficam Paralisadas por 1 rodada, uma vez por cena. Em sucesso em Fortitude (DT Agi), a criatura sofre metade do dano e evita Paralisado.`,
     livro: 'Sobrevivendo ao Horror'
   },
 
@@ -447,7 +467,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Bomba injetora portátil para braço/perna. Aplica substância com ação de movimento. Espaço para 3 doses. Carregar dose é ação padrão.',
+    descricao: 'Preso ao braço ou à perna, aplica ao usuário uma dose, como cicatrizante ou medicamento, com uma ação de movimento. Acomoda 3 doses no espaço do próprio item. Carregar cada dose exige uma ação padrão.',
     livro: 'Sobrevivendo ao Horror'
   },
   {
@@ -561,7 +581,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Ação padrão: cura 2d8+2 PV em você ou ser adjacente.',
+    descricao: 'Com uma ação padrão, consuma este item para recuperar 2d8+2 PV em você ou em um ser adjacente.',
     livro: 'Regras Básicas'
   },
   {
@@ -569,7 +589,7 @@ export const ITENS: Item[] = [
     categoria: 0,
     espaco: 1,
     tipo: 'Explosivo',
-    descricao: 'Estouro e luz. Seres na área atordoados 1 rodada (Fortitude DT Agi reduz para ofuscado e surdo).',
+    descricao: `${ARREMESSAR_GRANADA} Em um raio de 6m, os seres ficam Atordoados por 1 rodada. Quem passar em Fortitude (DT Agi) fica Ofuscado e Surdo por 1 rodada.`,
     livro: 'Regras Básicas'
   },
   {
@@ -577,7 +597,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 1,
     tipo: 'Explosivo',
-    descricao: 'Espalha fragmentos. Seres na área: 8d6 perfuração (Reflexos DT Agi reduz à metade).',
+    descricao: `${ARREMESSAR_GRANADA} Em um raio de 6m, os seres sofrem 8d6 de perfuração. Passar em Reflexos (DT Agi) reduz o dano à metade.`,
     livro: 'Regras Básicas'
   },
   {
@@ -585,7 +605,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 1,
     tipo: 'Explosivo',
-    descricao: 'Espalha líquido inflamável. Seres na área: 6d6 fogo e condição em chamas (Reflexos DT Agi reduz/evita).',
+    descricao: `${ARREMESSAR_GRANADA} Em um raio de 6m, os seres sofrem 6d6 de fogo e ficam Em Chamas. Em sucesso em Reflexos (DT Agi), o alvo sofre metade do dano e evita Em Chamas.`,
     livro: 'Regras Básicas'
   },
   {
@@ -601,7 +621,7 @@ export const ITENS: Item[] = [
     categoria: 0,
     espaco: 1,
     tipo: 'Explosivo',
-    descricao: 'Libera fumaça espessa e escura em raio 6m. Seres na área ficam cegos e sob camuflagem total. A fumaça dura 2 rodadas.',
+    descricao: `${ARREMESSAR_GRANADA} A fumaça ocupa um raio de 6m por 2 rodadas. Enquanto estiverem na área, os seres ficam Cegos e sob camuflagem total.`,
     livro: 'Regras Básicas'
   },
 
@@ -610,7 +630,7 @@ export const ITENS: Item[] = [
     categoria: 0,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Par de algemas de aço. Para prender alguém que não esteja indefeso: empunhe as algemas, agarre a pessoa e vença um novo teste de agarrar. Pode prender os dois pulsos (–5 em testes que exijam as mãos, impede conjuração) ou um pulso a um objeto imóvel adjacente. Escapar: Acrobacia DT 30 (ou as chaves).',
+    descricao: 'Par de algemas de aço. Para prender alguém que não esteja indefeso, empunhe as algemas, agarre a pessoa e vença outro teste de agarrar. Prender os dois pulsos impõe –5 em testes que exigem as mãos e impede conjurar. Prender um pulso a um objeto imóvel adjacente impede o deslocamento. Para escapar sem as chaves, gaste uma ação completa e passe em Acrobacia DT 30.',
     livro: 'Regras Básicas'
   },
   {
@@ -714,7 +734,23 @@ export const ITENS: Item[] = [
     categoria: 0,
     espaco: 1,
     tipo: 'Geral (Operacional)',
-    descricao: 'Dispara um sinalizador luminoso para chamar outras pessoas à sua localização. Pode ser usada como arma de disparo leve (alcance curto, 2d6 fogo). Vem com 2 cargas.',
+    descricao: 'Dispara um sinalizador luminoso para indicar sua localização. Pode ser usada como arma de disparo leve (alcance curto, 2d6 de fogo). Vem com 2 cargas. Uma caixa adicional com 2 cargas é de categoria 0 e ocupa 1 espaço.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Dardos para Pistola (Caixa)',
+    categoria: 0,
+    espaco: 1,
+    tipo: 'Geral',
+    descricao: 'Caixa de reposição com 2 dardos para a Pistola de Dardos.',
+    livro: 'Regras Básicas'
+  },
+  {
+    nome: 'Cargas para Pistola Sinalizadora (Caixa)',
+    categoria: 0,
+    espaco: 1,
+    tipo: 'Geral',
+    descricao: 'Caixa de reposição com 2 cargas para a Pistola Sinalizadora.',
     livro: 'Regras Básicas'
   },
   {
@@ -804,7 +840,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 2,
     tipo: 'Proteção',
-    descricao: 'Jaqueta de couro pesada ou colete de kevlar. Fornece +5 na Defesa.',
+    descricao: 'Jaqueta reforçada ou colete de kevlar. Quando vestida, fornece +5 na Defesa. Sem proficiência em proteção leve, sofre -2d20 em testes de Força e Agilidade. Conjurar com ela é condição ruim (Vontade DT 15 + custo do ritual em PE).',
     stats: { defesa: 5 },
     livro: 'Regras Básicas'
   },
@@ -813,7 +849,7 @@ export const ITENS: Item[] = [
     categoria: 2,
     espaco: 5,
     tipo: 'Proteção',
-    descricao: 'Equipamento pesado com placas e capacete. Fornece +10 na Defesa e resistência a balístico, corte, impacto e perfuração 2, mas impõe –5 em perícias afetadas por carga.',
+    descricao: 'Equipamento pesado com placas e capacete. Quando vestido, fornece +10 na Defesa e resistência a balístico, corte, impacto e perfuração 2. Impõe -5 em testes de perícias que sofrem penalidade de carga. Sem proficiência em proteção pesada, sofre -2d20 em testes de Força e Agilidade. Conjurar com ela é condição terrível (Vontade DT 20 + custo do ritual em PE).',
     stats: { defesa: 10, resistencia: 2 },
     livro: 'Regras Básicas'
   },
@@ -822,7 +858,7 @@ export const ITENS: Item[] = [
     categoria: 1,
     espaco: 2,
     tipo: 'Proteção',
-    descricao: 'Escudo moderno ou medieval. Fornece +2 na Defesa e precisa ser empunhado em uma mão. O bônus acumula com o de uma proteção. Para proficiência, conta como proteção pesada.',
+    descricao: 'Escudo moderno ou medieval. Empunhado em uma mão, fornece +2 na Defesa e acumula com o bônus de uma proteção. Só se pode usar um escudo por vez. Sem proficiência em proteção pesada, sofre -2d20 em testes de Força e Agilidade.',
     stats: { defesa: 2 },
     livro: 'Regras Básicas'
   },

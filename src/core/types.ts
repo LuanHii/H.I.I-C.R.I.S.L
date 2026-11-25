@@ -198,6 +198,7 @@ export interface Weapow {
   espaco: number;
   tipo: string;
   proficiencia: string;
+  corpoACorpoComAlcance?: true;
   descricao: string;
   stats: {
     Dano_Base: string;
@@ -210,7 +211,7 @@ export interface Weapow {
 
 export interface ModificacaoArma {
   nome: string;
-  tipo: 'universal' | 'cac' | 'disparo' | 'fogo' | 'municao';
+  tipo: 'universal' | 'cac-disparo' | 'fogo' | 'fogo-bestas' | 'municao';
   requisito?: string;
   efeito: string;
   stats: {
@@ -233,7 +234,7 @@ export interface ModificacaoArma {
     capacidadeMunicaoDupla?: boolean;
     recargaLivre?: boolean;
   };
-  livro: 'Regras Básicas' | 'Sobrevivendo ao Horror';
+  livro: 'Regras Básicas' | 'Sobrevivendo ao Horror' | 'Ajuste de mesa';
 }
 
 export interface ArmaModificada extends Weapow {
@@ -299,17 +300,24 @@ export interface PendenciaNex {
   valorEscolhido?: string | string[];
 }
 
+export type TipoAtaqueCondicao = 'corpo-a-corpo' | 'distancia';
+
 export interface EfeitoCondicao {
   defesa?: number;
+  defesaPorAtaque?: Partial<Record<TipoAtaqueCondicao, number>>;
+  desprevenido?: true;
+  falhaEmReflexos?: true;
   pericias?: {
     atributos?: AtributoKey[];
     somentePericias?: PericiaName[];
     somenteAtaque?: boolean;
+    tambemEmAtaques?: true;
     penalidadeDados?: number;
     penalidadeValor?: number;
   };
-  deslocamento?: 'zero' | 'metade';
+  deslocamento?: 'zero' | 'metade' | number;
   acoes?: 'nenhuma' | 'mentais' | 'padrao';
+  bloqueiaReacoes?: true;
 }
 
 export interface Condicao {

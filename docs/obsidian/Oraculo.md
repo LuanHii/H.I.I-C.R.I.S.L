@@ -29,3 +29,33 @@ No teste stdio em 21/11/2026, o MCP anunciou `buscar_regras` e usou o índice lo
 A busca por grafia aproximada agora usa o marcador `nome aproximado`. Acerto textual identifica a entidade indexada. O score informa ordenação por modelo e pede conferência da passagem. Para alterações de ranking ou fonte, rode a bateria real de `teste_bateria.py` e compare posição do trecho esperado, casos sem resposta e latência.
 
 Próxima extensão do contrato, quando houver consumidor: adicionar uma consulta estruturada ao lado da tool atual. Cada trecho deve trazer edição, versão do corpus, arquivo, caminho de seção, localizador verificável, texto e tipo de correspondência. Mantenha o contrato textual usado pelos clientes. Use dados sintéticos nos testes de ranking e mantenha credenciais e dados de campanha fora dos exemplos.
+
+## Revisão OP1 · Armas e proteções
+
+A consulta de crítico trouxe **Acertos Críticos** e **Características das Armas**. A extração do Markdown coloca as colunas da tabela 3.3 em blocos separados. Conferimos as linhas e os cabeçalhos no PDF antes de usar os valores no H.I.I-C.R.I.S.
+
+| Caso | Fonte conferida |
+| --- | --- |
+| Pistola 18/x2, Revólver 19/x3 e Fuzil de Assalto 19/x3 | Livro de Regras v1.3, tabela 3.3, pp. 56–57 impressas (66–67 no PDF). `Ordem PyMuPDF.md:2009–2021` e `:3294–3302` para os padrões de crítico. |
+| Faca, Lança, Machadinha, Faca Tática e Bastão Policial | Tabelas 3.3 e 1.4 e `Ordem PyMuPDF.md:1981–1989` e `:2023`. Armas corpo a corpo com alcance usam Luta de perto ou Pontaria quando arremessadas. |
+| Shuriken e Espingarda de Cano Duplo | Sobrevivendo ao Horror v1.3, pp. 37–38 impressas (38–39 no PDF). `SOH PyMuPDF.md:950–951` e `:974–975` para recarga, ataque extra e contagem opcional. Tabela 1.4 em `:977–1041`. |
+| Proteção Leve, Pesada e Escudo | Livro de Regras v1.3, tabela 3.6, p. 62 impressa (72 no PDF). `Ordem PyMuPDF.md:2476–2492`, `:2508–2516`, `:4402–4412` e `:12513–12514` para uso, proficiência, conjuração e acúmulo. |
+| Teste de ataque, dano e Mirar | Livro de Regras v1.3, `Ordem PyMuPDF.md:3246–3264` e `:3451–3452`. |
+
+Na ficha, as alternativas de ataque recebem suas próprias penalidades. Com Caído, por exemplo, a Faca recebe -2d20 em Luta e conserva a rolagem de Pontaria. A aba Ações e o resumo usam a mesma preparação, inclusive ao ler armas antigas com o nome e alcance do catálogo. A regra geral para improvisar um arremesso, a empunhadura, o uso de proteções, os testes situacionais de conjuração e a contagem de munição são resolvidos pelo mestre.
+
+## Revisão OP1 · Explosivos, consumíveis e modificações
+
+O Oráculo encontrou os verbetes do livro base e do suplemento, além do texto da opção de contagem de munição. A categoria, o espaço e os grupos de modificações foram conferidos diretamente nas tabelas em PDF.
+
+| Caso | Fonte conferida |
+| --- | --- |
+| Granadas, área de efeito e resultados de resistência | Livro de Regras v1.3, tabela 3.8, p. 63 impressa (73 no PDF), e `Ordem PyMuPDF.md:2652–2673`. Para DT baseada em atributo e redução de dano, linhas 3128–3130 e 12487–12495. |
+| Gás Sonífero, PEM, Dinamite, Explosivo Plástico e Galão Vermelho | Sobrevivendo ao Horror v1.3, pp. 40–41 impressas (41–42 no PDF), tabela 1.5 e `SOH PyMuPDF.md:1206–1220`. |
+| Cicatrizante, dardos, cargas, Spray de Pimenta, Taser e medicamentos | `Ordem PyMuPDF.md:2691–2694` e `:2716–2729`, pp. 65–66 (75–76 no PDF). `SOH PyMuPDF.md:1229–1230` e `:1263–1282`, p. 43 para medicamentos (44 no PDF). |
+| Munição padrão, contagem opcional e Carregador Rápido | Livro de Regras v1.3, tabela 3.4, p. 59 impressa (69 no PDF), `Ordem PyMuPDF.md:2348–2371` e `:7473–7501`. `SOH PyMuPDF.md:1043–1059`. |
+| Modificações de armas e proteções | Livro de Regras v1.3, tabela 3.5, p. 61 (71 no PDF), `Ordem PyMuPDF.md:2373–2420`, e tabela 3.7, p. 62 (72 no PDF), linhas 2494–2506. |
+
+O seletor de modificações usa os grupos específicos da tabela 3.5. Coronha Rebatível, Cano Longo e Carregador Estendido ficaram identificados como ajustes de mesa, pois a revisão dos dois livros não localizou essas opções. Aplicações anteriores continuam legíveis e removíveis. Uma Espada cruel exibe `1d8+2/1d10+2`, e modificações duplicadas em fichas anteriores entram uma vez no cálculo.
+
+Munições comuns e reposições de dardos e cargas podem ser escolhidas como itens. Para Taser e Spray de Pimenta antigos, a ficha exibe o item fora da lista de ataques. Doses, munição, área, resistências, duração dos efeitos e modificações de proteção são resolvidas pelo mestre nesta etapa.

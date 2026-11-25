@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { Item } from '../core/types';
-import { calcularStatsModificados, MODIFICACOES_ARMAS } from '../data/equipment/modifications';
+import { calcularStatsModificados, formatarCriticoCompleto, MODIFICACOES_ARMAS } from '../data/equipment/modifications';
+import { ehArmaDeEquipamento } from '../core/rules/catalogo';
 import { Swords, Target, Zap, ArrowRight, Shield, Crosshair, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -24,7 +25,7 @@ export function WeaponStatsDisplay({
     const baseStats = item.stats;
     const isCursed = item.tipo?.includes('Amaldiçoado');
 
-    const isWeapon = item.tipo === 'Arma' || (item.stats && (item.stats.dano || item.stats.danoBase));
+    const isWeapon = ehArmaDeEquipamento(item);
 
     if (!isWeapon) {
         return (
@@ -115,7 +116,7 @@ export function WeaponStatsDisplay({
                                         "text-xs font-mono font-bold",
                                         hasMods && baseStats?.critico !== displayStats.critico ? 'text-ordem-red' : 'text-white'
                                     )}>
-                                        {displayStats.critico}
+                                        {formatarCriticoCompleto(displayStats.critico)}
                                     </span>
                                 </div>
                             )}

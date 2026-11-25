@@ -2,17 +2,15 @@
 
 import React from 'react';
 import { PERICIA_ATRIBUTO } from '@/logic/rulesEngine';
-import { prepararTesteDaFicha } from '@/logic/combatUtils';
-import { rollPericia } from '@/logic/diceRoller';
-import type { DiceRollResult } from '@/logic/diceRoller';
+import { prepararTesteDaFicha, rolarTesteDaFicha, type ResultadoTesteDaFicha } from '@/logic/combatUtils';
 import type { AtributoKey, PericiaName, Personagem } from '@/core/types';
 import { Dices } from 'lucide-react';
 
 interface SkillsTabContentProps {
   agent: Personagem;
   isEditingMode: boolean;
-  lastRoll: { pericia: PericiaName; result: DiceRollResult } | null;
-  onLastRollChange: (roll: { pericia: PericiaName; result: DiceRollResult } | null) => void;
+  lastRoll: { pericia: PericiaName; result: ResultadoTesteDaFicha } | null;
+  onLastRollChange: (roll: { pericia: PericiaName; result: ResultadoTesteDaFicha } | null) => void;
   editingSkill: PericiaName | null;
   tempSkillBonus: string;
   onTempSkillBonusChange: (v: string) => void;
@@ -43,13 +41,13 @@ export function SkillsTabContent({
             <span className="font-carimbo text-[10px] uppercase tracking-[0.22em] text-ordem-text-muted">Última rolagem</span>
             <p className="text-sm font-semibold text-white">
               {lastRoll.pericia}
-              <span className="ml-2 font-mono text-xs font-normal text-ordem-text-muted">{lastRoll.result.diceCount}d20 ({lastRoll.result.criterio}) {lastRoll.result.bonusFixo >= 0 ? '+' : ''}{lastRoll.result.bonusFixo}</span>
+              {!('falhaAutomatica' in lastRoll.result) && <span className="ml-2 font-mono text-xs font-normal text-ordem-text-muted">{lastRoll.result.diceCount}d20 ({lastRoll.result.criterio}) {lastRoll.result.bonusFixo >= 0 ? '+' : ''}{lastRoll.result.bonusFixo}</span>}
             </p>
             <p className="font-mono text-xs text-ordem-text-secondary">
-              [{lastRoll.result.dice.join(', ')}] → {lastRoll.result.chosen}
+              {'falhaAutomatica' in lastRoll.result ? 'Falha automática' : `[${lastRoll.result.dice.join(', ')}] → ${lastRoll.result.chosen}`}
             </p>
           </div>
-          <span className="font-display text-4xl font-bold leading-none text-white">{lastRoll.result.total}</span>
+          {!('falhaAutomatica' in lastRoll.result) && <span className="font-display text-4xl font-bold leading-none text-white">{lastRoll.result.total}</span>}
         </div>
       )}
       <div className="space-y-5">
@@ -72,7 +70,7 @@ export function SkillsTabContent({
                       <span className={`block truncate text-sm ${(detalhe.grau || 'Destreinado') === 'Destreinado' ? 'text-ordem-text-muted' : 'font-medium text-white'}`}>{nome}</span>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <button type="button" onClick={() => { const pericia = nome as PericiaName; const det = prepararTesteDaFicha(agent, pericia); if (!det) return; onLastRollChange({ pericia, result: rollPericia(det) }); }} className="grid h-9 w-9 place-items-center rounded border border-ordem-border text-ordem-text-secondary hover:border-ordem-text-muted hover:text-white focus-visible:outline focus-visible:outline-ordem-red-light" aria-label={`Rolar ${nome}`} title="Rolar teste">
+                      <button type="button" onClick={() => { const pericia = nome as PericiaName; const det = prepararTesteDaFicha(agent, pericia); if (!det) return; onLastRollChange({ pericia, result: rolarTesteDaFicha(det) }); }} className="grid h-9 w-9 place-items-center rounded border border-ordem-border text-ordem-text-secondary hover:border-ordem-text-muted hover:text-white focus-visible:outline focus-visible:outline-ordem-red-light" aria-label={`Rolar ${nome}`} title="Rolar teste">
                         <Dices size={14} />
                       </button>
                       {((detalhe.grau || 'Destreinado') !== 'Destreinado' || isEditingMode) && (

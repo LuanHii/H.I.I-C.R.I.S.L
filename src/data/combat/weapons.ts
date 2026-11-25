@@ -84,6 +84,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 1,
     tipo: 'Simples',
     proficiencia: 'Armas Simples',
+    corpoACorpoComAlcance: true,
     descricao: 'Lâmina curta de uso geral. Arma leve, ágil. Pode ser arremessada.',
     stats: {
       Dano_Base: '1d4',
@@ -99,6 +100,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 1,
     tipo: 'Simples',
     proficiencia: 'Armas Simples',
+    corpoACorpoComAlcance: true,
     descricao: 'Haste de madeira com ponta metálica afiada. Pode ser arremessada.',
     stats: {
       Dano_Base: '1d6',
@@ -237,6 +239,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 1,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
+    corpoACorpoComAlcance: true,
     descricao: 'Machado pequeno. Arma leve, pode ser arremessada.',
     stats: {
       Dano_Base: '1d6',
@@ -665,6 +668,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 1,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
+    corpoACorpoComAlcance: true,
     descricao: 'Bastão com guarda lateral. Arma ágil. Ao usar a ação especial esquiva com ele, o bônus na Defesa aumenta em +1.',
     stats: {
       Dano_Base: '1d6',
@@ -680,6 +684,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 1,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
+    corpoACorpoComAlcance: true,
     descricao: 'Faca balanceada. Arma ágil, arremessável. Contra-ataque: +2 ataque. Bloqueio: 2 PE + sacrifica para +20 RD.',
     stats: {
       Dano_Base: '1d6',
@@ -695,7 +700,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 0.5,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
-    descricao: 'Projéteis em forma de estrela. Veterano em Pontaria: 1 PE para ataque adicional. Pacote para 2 cenas.',
+    descricao: 'Projéteis em forma de estrela. Se for veterano em Pontaria, uma vez por rodada, ao atacar com uma shuriken, pode gastar 1 PE para fazer um ataque adicional de shuriken contra o mesmo alvo. Um pacote dura 2 cenas ou contém 10 shurikens se a mesa usar a regra opcional de contagem de munição.',
     stats: {
       Dano_Base: '1d4',
       Dano_Tipo: 'Perfuração',
@@ -725,7 +730,7 @@ export const WEAPONS: Weapow[] = [
     espaco: 2,
     tipo: 'Tática',
     proficiencia: 'Armas Táticas',
-    descricao: 'Espingarda com dois canos. Recarregar é ação de movimento. Disparar ambos: -1d20 ataque, dano 6d6. Usa cartuchos.',
+    descricao: 'Cada cano comporta um cartucho. Após disparar os dois cartuchos, recarregar exige uma ação de movimento. Pode disparar os dois canos no mesmo alvo com -1d20 no teste de ataque e dano base de 6d6.',
     stats: {
       Dano_Base: '4d6',
       Dano_Tipo: 'Balístico',
@@ -822,36 +827,6 @@ export const WEAPONS: Weapow[] = [
       Dano_Tipo: '—',
       Critico: '—',
       Alcance: '—'
-    },
-    livro: 'Ordem Paranormal RPG'
-  },
-  {
-    nome: 'Taser',
-    categoria: 1,
-    espaco: 1,
-    tipo: 'Especial',
-    proficiencia: 'Armas Simples',
-    descricao: 'Dispositivo de eletrochoque. Ação padrão: ser adjacente sofre 1d6 de eletricidade e fica atordoado por 1 rodada (Fortitude DT Agi evita). Bateria dura dois usos.',
-    stats: {
-      Dano_Base: '1d6',
-      Dano_Tipo: 'Eletricidade',
-      Critico: 'x2',
-      Alcance: 'Corpo a corpo'
-    },
-    livro: 'Ordem Paranormal RPG'
-  },
-  {
-    nome: 'Spray de Pimenta',
-    categoria: 0,
-    espaco: 0.5,
-    tipo: 'Especial',
-    proficiencia: 'Armas Simples',
-    descricao: 'Spray irritante. Ação padrão: ser adjacente fica cego por 1d4 rodadas (Fortitude DT Agi evita). Carga dura dois usos.',
-    stats: {
-      Dano_Base: '—',
-      Dano_Tipo: 'Químico',
-      Critico: '—',
-      Alcance: 'Corpo a corpo'
     },
     livro: 'Ordem Paranormal RPG'
   }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getCondicao, getCategoriaCor, getCategoriaIcon, type CondicaoCompleta } from '../data/combat/conditions';
+import { calcularPenalidadeDados, calcularPenalidadeDefesa, combinarModificadoresDeCondicao, getCondicao, getCategoriaCor, getCategoriaIcon, type CondicaoCompleta } from '../data/combat/conditions';
 
 interface ConditionBadgeProps {
     nome: string;
@@ -80,14 +80,19 @@ export const ConditionBadge: React.FC<ConditionBadgeProps> = ({
                                 <div className="flex items-center gap-2 text-xs">
                                     <span className="text-ordem-text-muted">Deslocamento:</span>
                                     <span className="text-amber-400">
-                                        {cond.efeito.deslocamento === 'zero' ? '0m (Imóvel)' : 'Metade'}
+                                        {cond.efeito.deslocamento === 'zero' ? '0m (Imóvel)' :
+                                            cond.efeito.deslocamento === 'metade' ? 'Metade' : `${cond.efeito.deslocamento.toLocaleString('pt-BR')} m`}
                                     </span>
                                 </div>
                             )}
                             {cond.efeito.acoes && (
                                 <div className="flex items-center gap-2 text-xs">
                                     <span className="text-ordem-text-muted">Ações:</span>
-                                    <span className="text-amber-400 capitalize">{cond.efeito.acoes}</span>
+                                    <span className="text-amber-400">
+                                        {cond.efeito.acoes === 'nenhuma'
+                                            ? cond.efeito.bloqueiaReacoes ? 'Nenhuma, incluindo reações' : 'Sem ações normais'
+                                            : cond.efeito.acoes === 'mentais' ? 'Só ações mentais' : 'Uma ação padrão ou de movimento por rodada'}
+                                    </span>
                                 </div>
                             )}
                             {cond.efeito.pericias?.penalidadeDados !== undefined && (
@@ -95,11 +100,13 @@ export const ConditionBadge: React.FC<ConditionBadgeProps> = ({
                                     <span className="text-ordem-text-muted">Dados:</span>
                                     <span className={cond.efeito.pericias.penalidadeDados < 0 ? 'text-red-400' : 'text-green-400'}>
                                         {cond.efeito.pericias.penalidadeDados > 0 ? '+' : ''}{cond.efeito.pericias.penalidadeDados}d20
-                                        {cond.efeito.pericias.atributos && (
-                                            <span className="text-ordem-text-muted ml-1">
-                                                ({cond.efeito.pericias.atributos.join('/')})
-                                            </span>
-                                        )}
+                                        <span className="text-ordem-text-muted ml-1">
+                                            {[
+                                                cond.efeito.pericias.somenteAtaque || cond.efeito.pericias.tambemEmAtaques ? 'Ataques' : null,
+                                                cond.efeito.pericias.somentePericias?.join('/'),
+                                                cond.efeito.pericias.atributos?.join('/'),
+                                            ].filter(Boolean).join(' · ')}
+                                        </span>
                                     </span>
                                 </div>
                             )}
@@ -183,29 +190,31 @@ interface ConditionsSummaryProps {
 export const ConditionsSummary: React.FC<ConditionsSummaryProps> = ({ efeitosAtivos }) => {
     if (efeitosAtivos.length === 0) return null;
 
-    let defesaTotal = 0;
-    let dadosGeral = 0;
-    let valorGeral = 0;
+    const defesaTotal = calcularPenalidadeDefesa(efeitosAtivos);
+    const dadosGeral = calcularPenalidadeDados(efeitosAtivos);
+    const valoresGerais: number[] = [];
     let acoesBloqueadas = false;
+    let bloqueiaReacoes = false;
+    let soAcoesMentais = false;
     let deslocamentoStatus: 'normal' | 'metade' | 'zero' = 'normal';
 
     for (const nome of efeitosAtivos) {
         const cond = getCondicao(nome);
         if (!cond?.efeito) continue;
 
-        if (cond.efeito.defesa) defesaTotal += cond.efeito.defesa;
-        if (cond.efeito.pericias?.penalidadeDados && !cond.efeito.pericias.atributos) {
-            dadosGeral += cond.efeito.pericias.penalidadeDados;
-        }
-        if (cond.efeito.pericias?.penalidadeValor && !cond.efeito.pericias.atributos) {
-            valorGeral += cond.efeito.pericias.penalidadeValor;
+        const pericias = cond.efeito.pericias;
+        if (pericias?.penalidadeValor && !pericias.atributos && !pericias.somenteAtaque && !pericias.somentePericias) {
+            valoresGerais.push(pericias.penalidadeValor);
         }
         if (cond.efeito.acoes === 'nenhuma') acoesBloqueadas = true;
+        if (cond.efeito.bloqueiaReacoes) bloqueiaReacoes = true;
+        if (cond.efeito.acoes === 'mentais') soAcoesMentais = true;
         if (cond.efeito.deslocamento === 'zero') deslocamentoStatus = 'zero';
         else if (cond.efeito.deslocamento === 'metade' && deslocamentoStatus !== 'zero') {
             deslocamentoStatus = 'metade';
         }
     }
+    const valorGeral = combinarModificadoresDeCondicao(valoresGerais);
 
     return (
         <div className="flex flex-wrap gap-3 text-xs font-mono">
@@ -229,9 +238,11 @@ export const ConditionsSummary: React.FC<ConditionsSummaryProps> = ({ efeitosAti
                     {deslocamentoStatus === 'zero' ? '🚫 IMÓVEL' : '🐢 LENTO'}
                 </div>
             )}
-            {acoesBloqueadas && (
+            {(acoesBloqueadas || soAcoesMentais) && (
                 <div className="px-2 py-1 border border-red-800 bg-red-900/20 text-red-400 animate-pulse">
-                    ⛔ SEM AÇÕES
+                    ⛔ {acoesBloqueadas
+                        ? bloqueiaReacoes ? 'SEM AÇÕES NEM REAÇÕES' : 'SEM AÇÕES NORMAIS'
+                        : 'SÓ AÇÕES MENTAIS'}
                 </div>
             )}
         </div>

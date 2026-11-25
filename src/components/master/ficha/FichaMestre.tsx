@@ -5,7 +5,7 @@ import React, { useMemo, useState } from 'react';
 import { Backpack, ClipboardList, Dumbbell, Flame, ShieldAlert, Sparkles, Star, Swords, Zap } from 'lucide-react';
 import type { AtributoKey, Item, Patente, PericiaName, Personagem, Poder, Ritual } from '../../../core/types';
 import { getPatenteConfig } from '../../../logic/rulesEngine';
-import type { DiceRollResult } from '../../../logic/diceRoller';
+import type { ResultadoTesteDaFicha } from '../../../logic/combatUtils';
 import { definirPerdaManual, somarPerdasDeRecurso } from '../../../core/rules/marcas';
 import type { FichaPersistida, Problema, ValorEscolha } from '../../../core/ficha/tipos';
 import { buildFicha } from '../../../core/ficha/buildFicha';
@@ -105,7 +105,7 @@ export function FichaMestre({
   const [poderAberto, setPoderAberto] = useState(false);
   const [ritualAberto, setRitualAberto] = useState(false);
 
-  const [lastRoll, setLastRoll] = useState<{ pericia: PericiaName; result: DiceRollResult } | null>(null);
+  const [lastRoll, setLastRoll] = useState<{ pericia: PericiaName; result: ResultadoTesteDaFicha } | null>(null);
   const [editingSkill, setEditingSkill] = useState<PericiaName | null>(null);
   const [tempSkillBonus, setTempSkillBonus] = useState('');
 

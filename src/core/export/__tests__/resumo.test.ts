@@ -90,6 +90,26 @@ describe('o resumo diz o que o personagem TEM — nunca o que ele não tem', () 
     expect(md).toMatch(/^- Canivete \(Cat\. 0\) — Luta \d+d20 \+\d+ corpo a corpo ou Pontaria \d+d20 \+\d+ arremessada · dano 1d4 Corte/m);
   });
 
+  it('lê o Bastão Policial antigo com Luta ou Pontaria pela tabela 1.4 do suplemento', () => {
+    const bastao: Item = {
+      ...faca, nome: 'Bastão Policial', livro: 'Sobrevivendo ao Horror',
+      descricao: 'Bastão com guarda lateral. Arma ágil.',
+      stats: { dano: '1d6', tipoDano: 'Impacto', alcance: 'Curto', critico: 'x2' },
+    };
+    const md = resumoDoPersonagem(combatente({ equipamentos: [bastao] }));
+    expect(md).toMatch(/^- Bastão Policial .* — Luta .* corpo a corpo ou Pontaria .* arremessada · dano 1d6 Impacto/m);
+  });
+
+  it('a Shuriken do suplemento usa apenas Pontaria mesmo com descrição editada', () => {
+    const shuriken: Item = {
+      ...faca, nome: 'Shuriken', livro: 'Sobrevivendo ao Horror',
+      descricao: 'Estrela arremessável.',
+      stats: { dano: '1d4', tipoDano: 'Perfuração', alcance: 'Curto', critico: 'x2' },
+    };
+    const md = resumoDoPersonagem(combatente({ equipamentos: [shuriken] }));
+    expect(md).toMatch(/^- Shuriken .* — Pontaria \d+d20 \+\d+ · dano 1d4 Perfuração/m);
+  });
+
   it('cada seção é separada por linha em branco, inclusive Ataques → Proteções', () => {
     const md = resumoDoPersonagem(combatente());
     expect(md).toContain('\n\n## Proteções\n');
@@ -97,8 +117,11 @@ describe('o resumo diz o que o personagem TEM — nunca o que ele não tem', () 
   });
 
   it('condições ativas entram nos recursos e nas penalidades de perícia', () => {
-    const md = resumoDoPersonagem(combatente({ efeitosAtivos: ['Caído'] }));
+    const p = combatente({ efeitosAtivos: ['Caído'] });
+    const md = resumoDoPersonagem(p);
     expect(md).toMatch(/^- Condições ativas: Caído$/m);
+    expect(md).toContain(`efetiva ${p.defesa - 5} contra corpo a corpo, ${p.defesa + 5} contra ataques à distância`);
+    expect(md).toContain('Deslocamento 1.5m');
   });
 
   it('poderes agrupados por proveniência, com descrição — a habilidade de classe não vem vazia', () => {

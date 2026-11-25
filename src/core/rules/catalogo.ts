@@ -1,10 +1,16 @@
-import type { Poder } from '../types';
+import type { Item, Poder } from '../types';
 
 export type OrigemDeRegra = 'oficial' | 'homebrew';
 
 export type LivroDeRegras = 'Regras Básicas' | 'Sobrevivendo ao Horror';
 
 export const LIVROS: readonly LivroDeRegras[] = ['Regras Básicas', 'Sobrevivendo ao Horror'];
+
+export function ehArmaDeEquipamento(item: Item): boolean {
+  // Fichas antigas podem ter recebido estes itens operacionais pelo catálogo de armas.
+  if (item.nome === 'Taser' || item.nome === 'Spray de Pimenta') return false;
+  return item.tipo === 'Arma' || Boolean(item.stats?.dano || item.stats?.danoBase);
+}
 
 export interface OpcoesCatalogo {
   homebrewHabilitado: boolean;

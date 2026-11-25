@@ -5,8 +5,8 @@ import { AtributoKey, Personagem, PericiaName } from '../core/types';
 import { StatusBar } from './StatusBar';
 import { ActionsTab } from './ActionsTab';
 import { PERICIA_ATRIBUTO } from '../logic/rulesEngine';
-import { prepararTesteDaFicha } from '@/logic/combatUtils';
-import { rollPericia, type DiceRollResult } from '../logic/diceRoller';
+import { prepararTesteDaFicha, rolarTesteDaFicha, type ResultadoTesteDaFicha } from '@/logic/combatUtils';
+import { ehArmaDeEquipamento } from '@/core/rules/catalogo';
 import { Backpack, Dices, Footprints, Search, Shield, ShieldAlert, Swords, X, Zap } from 'lucide-react';
 import { ActiveConditionsDisplay, ConditionsSummary } from './ConditionBadge';
 import { WeaponStatsDisplay } from './WeaponStatsDisplay';
@@ -62,7 +62,7 @@ export function RemoteAgentView({
   onOpenOverlayFull,
 }: RemoteAgentViewProps) {
   const [aba, setAba] = useState<AbaRemota>('pericias');
-  const [ultimaRolagem, setUltimaRolagem] = useState<{ pericia: PericiaName; result: DiceRollResult } | null>(null);
+  const [ultimaRolagem, setUltimaRolagem] = useState<{ pericia: PericiaName; result: ResultadoTesteDaFicha } | null>(null);
   const [busca, setBusca] = useState('');
   const [bonusSituacional, setBonusSituacional] = useState(0);
   const [soTreinadas, setSoTreinadas] = useState(false);
@@ -95,7 +95,7 @@ export function RemoteAgentView({
   const rolar = (pericia: PericiaName) => {
     const det = prepararTesteDaFicha(agent, pericia, { bonusFixo: bonusSituacional });
     if (!det) return;
-    setUltimaRolagem({ pericia, result: rollPericia(det) });
+    setUltimaRolagem({ pericia, result: rolarTesteDaFicha(det) });
   };
 
   const abas: { id: AbaRemota; rotulo: string; icone: React.ReactNode; badge?: React.ReactNode }[] = [
@@ -105,7 +105,7 @@ export function RemoteAgentView({
     { id: 'condicoes', rotulo: 'Condições', icone: <ShieldAlert size={15} />, badge: condicoes.length > 0 ? <span className="font-mono text-[10px] text-red-400">{condicoes.length}</span> : undefined },
   ];
 
-  const armas = agent.equipamentos.filter((it) => it.tipo === 'Arma' || (it.stats && (it.stats.dano || it.stats.danoBase)));
+  const armas = agent.equipamentos.filter(ehArmaDeEquipamento);
   const protecoes = agent.equipamentos.filter((it) => !armas.includes(it) && (it.tipo === 'Proteção' || it.stats?.defesa));
   const outros = agent.equipamentos.filter((it) => !armas.includes(it) && !protecoes.includes(it));
   const categoriaRomana = ['0', 'I', 'II', 'III', 'IV'];
@@ -217,11 +217,13 @@ export function RemoteAgentView({
             <div className="space-y-4">
               {ultimaRolagem && (
                 <div className="fixed inset-x-3 top-3 z-50 flex items-center gap-4 border border-[var(--mestre-primary,#DC2626)] bg-[var(--mestre-superficie,#16161a)] px-4 py-3 shadow-[0_20px_60px_-20px_rgba(0,0,0,1)] sm:left-1/2 sm:right-auto sm:top-6 sm:w-auto sm:min-w-[320px] sm:-translate-x-1/2">
-                  <span className="font-display text-4xl font-bold leading-none text-white">{ultimaRolagem.result.total}</span>
+                  {!('falhaAutomatica' in ultimaRolagem.result) && <span className="font-display text-4xl font-bold leading-none text-white">{ultimaRolagem.result.total}</span>}
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-white">{ultimaRolagem.pericia}</p>
                     <p className="truncate font-mono text-[11px] text-ordem-text-secondary">
-                      {ultimaRolagem.result.diceCount}d20 [{ultimaRolagem.result.dice.join(', ')}] → {ultimaRolagem.result.chosen} {ultimaRolagem.result.bonusFixo >= 0 ? '+' : ''}{ultimaRolagem.result.bonusFixo}
+                      {'falhaAutomatica' in ultimaRolagem.result
+                        ? 'Falha automática'
+                        : `${ultimaRolagem.result.diceCount}d20 [${ultimaRolagem.result.dice.join(', ')}] → ${ultimaRolagem.result.chosen} ${ultimaRolagem.result.bonusFixo >= 0 ? '+' : ''}${ultimaRolagem.result.bonusFixo}`}
                     </p>
                   </div>
                   <button type="button" onClick={() => setUltimaRolagem(null)} aria-label="Fechar" className="grid h-8 w-8 shrink-0 place-items-center border border-white/10 text-ordem-text-muted transition hover:text-white">

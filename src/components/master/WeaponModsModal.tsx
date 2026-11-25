@@ -5,13 +5,11 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, Minus, Swords, Target, Zap, Shield, ArrowRight, Info, Check } from 'lucide-react';
 import { Personagem, Item, ModificacaoArma } from '../../core/types';
+import { ehArmaDeEquipamento } from '../../core/rules/catalogo';
 import {
     MODIFICACOES_ARMAS,
-    calcularStatsModificados,
-    parseCritico,
-    parseDano,
-    formatDano,
-    formatCritico
+    getModificacoesParaArma,
+    calcularStatsModificados
 } from '../../data/equipment/modifications';
 import { cn } from '@/lib/utils';
 
@@ -87,7 +85,7 @@ function ModChip({
                         ? "bg-ordem-ooze/30 border-ordem-border/50 text-ordem-text-muted cursor-not-allowed opacity-50"
                         : "bg-ordem-ooze/50 border-ordem-border text-ordem-text-secondary hover:border-ordem-green hover:text-ordem-green"
             )}
-            title={mod.efeito}
+            title={mod.livro === 'Ajuste de mesa' ? `Ajuste de mesa. ${mod.efeito}` : mod.efeito}
         >
             {applied ? <Check size={12} /> : <Plus size={12} />}
             <span>{mod.nome}</span>
@@ -111,38 +109,15 @@ function WeaponCard({
 }) {
     const [expanded, setExpanded] = useState(true);
 
-    const modsAplicadas = useMemo(() => arma.modificacoes || [], [arma.modificacoes]);
+    const modsAplicadas = Array.from(new Set(arma.modificacoes));
     const statsModificados = calcularStatsModificados(arma);
     const statsBase = arma.stats || {};
 
-    const isArmaFogo = (statsBase.alcance && statsBase.alcance !== 'Corpo a corpo') ||
-        arma.descricao?.toLowerCase().includes('fogo') ||
-        arma.descricao?.toLowerCase().includes('balas') ||
-        arma.descricao?.toLowerCase().includes('disparo');
-
-    const tipoArma: 'cac' | 'fogo' = isArmaFogo ? 'fogo' : 'cac';
-
-    const modsDisponiveis = useMemo(() =>
-        MODIFICACOES_ARMAS.filter(mod => {
-            if (modsAplicadas.includes(mod.nome)) return false;
-            if (mod.tipo === 'universal') return true;
-            if (mod.tipo === 'cac' && tipoArma === 'cac') return true;
-            if (mod.tipo === 'fogo' && tipoArma === 'fogo') return true;
-            if (mod.tipo === 'disparo' && tipoArma === 'fogo') return true;
-            return false;
-        }), [modsAplicadas, tipoArma]);
-
-    const modsAplicadasObj = useMemo(() =>
-        modsAplicadas.map(nome => MODIFICACOES_ARMAS.find(m => m.nome === nome)).filter(Boolean) as ModificacaoArma[]
-        , [modsAplicadas]);
+    const modsDisponiveis = getModificacoesParaArma(arma).filter(mod => !modsAplicadas.includes(mod.nome));
+    const modsAplicadasObj = MODIFICACOES_ARMAS.filter(mod => modsAplicadas.includes(mod.nome));
 
     const podeAdicionar = arma.categoria < 4;
-    const categoriaBase = arma.categoriaBase ?? arma.categoria - modsAplicadas.length;
-
-    const danoBase = parseDano(statsBase.dano || statsBase.danoBase || '1d6');
-    const danoMod = parseDano(statsModificados.dano || '1d6');
-    const criticoBase = parseCritico(statsBase.critico || 'x2');
-    const criticoMod = parseCritico(statsModificados.critico || 'x2');
+    const categoriaBase = arma.categoriaBase ?? arma.categoria - (arma.modificacoes?.length ?? 0);
 
     return (
         <motion.div
@@ -170,12 +145,6 @@ function WeaponCard({
                             {modsAplicadas.length > 0 && (
                                 <span className="text-ordem-text-muted">(base: {['0', 'I', 'II', 'III', 'IV'][Math.max(0, categoriaBase)]})</span>
                             )}
-                            <span className="text-ordem-border">•</span>
-                            <span className={cn(
-                                tipoArma === 'fogo' ? 'text-orange-400' : 'text-blue-400'
-                            )}>
-                                {tipoArma === 'fogo' ? '🔫 Fogo' : '⚔️ Corpo a Corpo'}
-                            </span>
                         </div>
                     </div>
                 </div>
@@ -303,29 +272,29 @@ function WeaponModsModalContent({ personagem, onUpdate, onClose }: Omit<WeaponMo
     const armas = useMemo(() =>
         personagem.equipamentos
             .map((eq, idx) => ({ eq, idx }))
-            .filter(({ eq }) => eq.tipo === 'Arma' || (eq.stats && (eq.stats.dano || eq.stats.danoBase)))
+            .filter(({ eq }) => ehArmaDeEquipamento(eq))
         , [personagem.equipamentos]);
 
     const aplicarModificacao = useCallback((armaIdx: number, modNome: string) => {
         const equipamentos = [...personagem.equipamentos];
-        const arma = { ...equipamentos[armaIdx] };
+        const arma = equipamentos[armaIdx];
+        if (!arma || arma.categoria >= 4 || !ehArmaDeEquipamento(arma) || arma.modificacoes?.includes(modNome)
+            || !getModificacoesParaArma(arma).some(mod => mod.nome === modNome)) return;
 
-        if (!arma.categoriaBase) {
-            arma.categoriaBase = arma.categoria;
-        }
-
-        const novaCategoria = Math.min(4, arma.categoria + 1) as 0 | 1 | 2 | 3 | 4;
-        const novasMods = [...(arma.modificacoes || []), modNome];
-
-        if (!arma.stats) arma.stats = {};
-        if (!arma.stats.danoBase && arma.stats.dano) {
-            arma.stats.danoBase = arma.stats.dano;
-        }
+        const categoriaBase = arma.categoriaBase
+            ?? Math.max(0, arma.categoria - (arma.modificacoes?.length ?? 0)) as Item['categoria'];
+        const novasMods = [...Array.from(new Set(arma.modificacoes)), modNome];
+        const novaCategoria = Math.min(4, categoriaBase + novasMods.length) as Item['categoria'];
+        const stats = arma.stats?.dano && !arma.stats.danoBase
+            ? { ...arma.stats, danoBase: arma.stats.dano }
+            : arma.stats;
 
         equipamentos[armaIdx] = {
             ...arma,
+            categoriaBase,
             categoria: novaCategoria,
-            modificacoes: novasMods
+            modificacoes: novasMods,
+            ...(stats ? { stats } : {})
         };
 
         onUpdate({ ...personagem, equipamentos });
@@ -335,8 +304,8 @@ function WeaponModsModalContent({ personagem, onUpdate, onClose }: Omit<WeaponMo
         const equipamentos = [...personagem.equipamentos];
         const arma = { ...equipamentos[armaIdx] };
 
-        const novasMods = (arma.modificacoes || []).filter(m => m !== modNome);
-        const categoriaBase = arma.categoriaBase ?? arma.categoria;
+        const novasMods = Array.from(new Set(arma.modificacoes)).filter(m => m !== modNome);
+        const categoriaBase = arma.categoriaBase ?? Math.max(0, arma.categoria - (arma.modificacoes?.length ?? 0));
         const novaCategoria = Math.min(4, Math.max(0, categoriaBase + novasMods.length)) as 0 | 1 | 2 | 3 | 4;
 
         equipamentos[armaIdx] = {
@@ -462,7 +431,7 @@ interface WeaponModsButtonProps {
 
 export function WeaponModsButton({ personagem, onUpdate, className = '' }: WeaponModsButtonProps) {
     const [showModal, setShowModal] = useState(false);
-    const armasCount = personagem.equipamentos.filter(eq => eq.tipo === 'Arma' || (eq.stats && (eq.stats.dano || eq.stats.danoBase))).length;
+    const armasCount = personagem.equipamentos.filter(ehArmaDeEquipamento).length;
 
     const handleOpenModal = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
