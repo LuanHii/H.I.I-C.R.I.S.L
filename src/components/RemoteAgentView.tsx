@@ -9,6 +9,7 @@ import { prepararTesteDaFicha, rolarTesteDaFicha, type ResultadoTesteDaFicha } f
 import { ehArmaDeEquipamento } from '@/core/rules/catalogo';
 import { Backpack, Dices, Footprints, Search, Shield, ShieldAlert, Swords, X, Zap } from 'lucide-react';
 import { ActiveConditionsDisplay, ConditionsSummary } from './ConditionBadge';
+import { descricaoDoEquipamento } from '@/data/equipment/descricaoDoEquipamento';
 import { WeaponStatsDisplay } from './WeaponStatsDisplay';
 import { CustomDiceRoller } from './CustomDiceRoller';
 import { Cantos, Fita, RotuloSecao } from './master/ui/Pecas';
@@ -380,7 +381,7 @@ export function RemoteAgentView({
                             </div>
                             {it.stats?.defesa && <span className="shrink-0 font-mono text-sm font-bold text-ordem-blue">DEF +{it.stats.defesa}</span>}
                           </div>
-                          {it.descricao && <p className="mt-1.5 whitespace-pre-line text-xs text-ordem-text-secondary">{it.descricao}</p>}
+                          <p className="mt-1.5 whitespace-pre-wrap break-words text-sm text-ordem-text-secondary">{descricaoDoEquipamento(it)}</p>
                         </li>
                       ))}
                     </ul>

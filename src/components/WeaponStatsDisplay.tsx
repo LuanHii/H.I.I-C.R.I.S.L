@@ -3,6 +3,7 @@
 import React from 'react';
 import { Item } from '../core/types';
 import { calcularStatsModificados, formatarCriticoCompleto, MODIFICACOES_ARMAS } from '../data/equipment/modifications';
+import { descricaoDoEquipamento } from '@/data/equipment/descricaoDoEquipamento';
 import { ehArmaDeEquipamento } from '../core/rules/catalogo';
 import { Swords, Target, Zap, ArrowRight, Shield, Crosshair, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -40,8 +41,8 @@ export function WeaponStatsDisplay({
                         </div>
                     </div>
                 </div>
-                {showDescription && item.descricao && (
-                    <div className="text-xs text-ordem-text-secondary mt-2 whitespace-pre-line">{item.descricao}</div>
+                {showDescription && (
+                    <div className="text-xs text-ordem-text-secondary mt-2 whitespace-pre-line">{descricaoDoEquipamento(item)}</div>
                 )}
             </div>
         );
@@ -184,10 +185,10 @@ export function WeaponStatsDisplay({
                 )}
             </div>
 
-            {showDescription && item.descricao && (
+            {showDescription && (
                 <div className="px-3 pb-3">
-                    <div className="text-xs text-ordem-text-secondary border-t border-ordem-border/30 pt-2 leading-relaxed">
-                        {item.descricao}
+                    <div className="whitespace-pre-wrap break-words text-sm text-ordem-text-secondary border-t border-ordem-border/30 pt-2 leading-relaxed">
+                        {descricaoDoEquipamento(item)}
                     </div>
                 </div>
             )}

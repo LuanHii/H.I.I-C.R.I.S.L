@@ -1,7 +1,8 @@
 'use client';
 
 import { useRef } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, Plus, Trash2 } from 'lucide-react';
+import { descricaoDoEquipamento } from '@/data/equipment/descricaoDoEquipamento';
 import type { Personagem } from '@/core/types';
 import { Fita, RotuloSecao } from '../ui/Pecas';
 
@@ -42,14 +43,22 @@ export function InventoryTabContent({ agent, readOnly, onAddItem, onRemoveItem }
       ) : (
         <ul className="divide-y divide-ordem-border rounded-lg border border-ordem-border bg-white/[0.02]">
           {agent.equipamentos.map((item, idx) => (
-            <li key={`${item.nome}-${idx}`} className="flex min-w-0 items-center justify-between gap-2 px-2.5 py-2 sm:px-3">
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-white [overflow-wrap:anywhere]">{item.nome}</p>
-                <p className="mt-1 flex flex-wrap items-center gap-1.5 font-dados text-xs text-ordem-text-secondary">
-                  <Fita variante="neutra">Cat. {item.categoria}</Fita>
-                  <span>{item.espaco} espaço{item.espaco === 1 ? '' : 's'}</span>
+            <li key={`${item.nome}-${idx}`} className="flex min-w-0 items-start justify-between gap-2 px-2.5 py-2 sm:px-3">
+              <details className="group min-w-0 flex-1">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded focus-visible:outline focus-visible:outline-ordem-green-muted [&::-webkit-details-marker]:hidden">
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold text-white [overflow-wrap:anywhere]">{item.nome}</span>
+                    <span className="mt-1 flex flex-wrap items-center gap-1.5 font-dados text-xs text-ordem-text-secondary">
+                      <Fita variante="neutra">Cat. {item.categoria}</Fita>
+                      <span>{item.espaco} espaço{item.espaco === 1 ? '' : 's'}</span>
+                    </span>
+                  </span>
+                  <ChevronDown size={18} aria-hidden className="shrink-0 text-ordem-text-secondary group-open:rotate-180" />
+                </summary>
+                <p className="mt-2 whitespace-pre-wrap break-words border-t border-ordem-border py-2 text-sm leading-relaxed text-ordem-white-muted">
+                  {descricaoDoEquipamento(item)}
                 </p>
-              </div>
+              </details>
               {!readOnly && (
                 <button
                   type="button"
