@@ -1,3 +1,6 @@
+import { adicionarPericiaLivre } from '../ajustes';
+import { opcoesDaPendencia } from '../pendencias';
+import { replayParaFrente } from '../migracao/replay';
 import { describe, expect, it } from 'vitest';
 import { buildFicha, definirNivel } from '../buildFicha';
 import { chaveNex, montarId } from '../ids';
@@ -248,5 +251,32 @@ describe('fluxo completo: criar, subir, responder, descer, subir', () => {
 
     const devolta = buildFicha({ ficha: definirNivel(definirNivel(ficha, 10), 20) });
     expect(devolta).toEqual(noTopo);
+  });
+});
+
+describe('treino manual na progressão', () => {
+  const promocao = montarId('pericia', chaveNex(35));
+  const poder = { tipo: 'poder', poder: 'Golpe Demolidor' } as const;
+
+  it('aceita o poder oferecido e reconhece seu pré-requisito ao rever o histórico', () => {
+    const base = fichaBase();
+    expect(registrarEscolha(base, ID_PODER, poder).aplicada).toBe(false);
+    const treinada = adicionarPericiaLivre(base, 'Luta');
+    const opcao = opcoesDaPendencia(treinada, slotDe(treinada, ID_PODER)).find(o => o.rotulo === poder.poder);
+    expect(opcao?.elegivel).toBe(true);
+    const resultado = registrarEscolha(treinada, ID_PODER, poder);
+    expect(resultado.problemas).toEqual([]);
+    expect(resultado.aplicada).toBe(true);
+    expect(replayParaFrente(resultado.ficha).falhas).toEqual([]);
+  });
+
+  it('grava a promoção de Luta treinada manualmente e preserva o bloqueio para destreinados', () => {
+    const base = fichaBase({ progressao: { nex: 35 } });
+    const valor = { tipo: 'pericias' as const, pericias: ['Luta' as const] };
+    expect(registrarEscolha(base, promocao, valor).aplicada).toBe(false);
+    const treinada = adicionarPericiaLivre(base, 'Luta');
+    const resultado = registrarEscolha(treinada, promocao, valor);
+    expect(resultado.aplicada).toBe(true);
+    expect(buildFicha({ ficha: resultado.ficha }).derivados.graus.Luta).toBe('Veterano');
   });
 });

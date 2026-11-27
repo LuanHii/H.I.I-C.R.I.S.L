@@ -17,6 +17,8 @@ Abra [[Mapa H.I.I-C.R.I.S]] para navegar pelo sistema. Veja [[Oraculo|Oráculo]]
 | Foundry | `app/api/foundry`, `app/api/ficha/[id]/foundry` e `core/foundry` | Pareamento, mesa publicada e projeções para importação |
 | Mesa 3D | `app/api/mesa3d/sessao/route.ts` → `core/mesa3d/sessaoDaMesa.ts` → `prepararGravacao` | Sessão com pré-condição de versão na ficha privada e espelho público |
 
+Na evolução de OP1, a lista de opções, a gravação da escolha e a revisão do histórico consultam as perícias no nível do marco. Treinar uma perícia pela edição da ficha conta para poderes com esse pré-requisito e para o avanço de grau.
+
 Na aba Itens do painel do mestre, 'Ler descrição' abre o texto completo de itens gerais e armas no próprio cartão. A lista inclui o catálogo da edição e os registros personalizados da mesa.
 
 Os caminhos da tabela começam em `src/`. A ficha legada ainda circula como `Personagem`. O arquivo `logic/levelUp.ts` citado nos handoffs antigos já saiu da árvore. A migração hoje depende de releitura do histórico de escolhas, compatibilidade dos números e confirmação do mestre quando há divergência.

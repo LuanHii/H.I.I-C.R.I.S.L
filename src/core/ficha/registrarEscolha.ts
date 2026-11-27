@@ -1,5 +1,5 @@
 import { derivarSlots } from './slots';
-import { opcoesPara, type ContextoOpcoes } from './opcoes';
+import { opcoesDaPendencia } from './pendencias';
 import { ordenarPorId } from './ids';
 import type {
   Escolha,
@@ -14,11 +14,6 @@ export interface ResultadoRegistro {
   ficha: FichaPersistida;
   problemas: Problema[];
   aplicada: boolean;
-}
-
-function contextoDe(ficha: FichaPersistida): ContextoOpcoes {
-  const { estadoFinal } = derivarSlots(ficha.identidade, ficha.progressao, ficha.escolhas);
-  return { identidade: ficha.identidade, parcial: estadoFinal };
 }
 
 function tipoCompativel(slot: Slot, valor: ValorEscolha): boolean {
@@ -83,7 +78,7 @@ export function registrarEscolha(
     return { ficha, problemas, aplicada: false };
   }
 
-  const opcoes = opcoesPara(slot, contextoDe(ficha));
+  const opcoes = opcoesDaPendencia(ficha, slot);
   const escolhida = opcoes.find((o) => mesmoValor(o.valor, valor));
 
   if (!escolhida) {

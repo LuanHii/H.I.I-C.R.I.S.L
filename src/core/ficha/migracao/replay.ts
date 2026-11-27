@@ -1,8 +1,7 @@
 import { NEX_EVENTOS } from '../../rules/nexEventos';
 import { buildFicha, definirNivel } from '../buildFicha';
-import { opcoesPara } from '../opcoes';
+import { opcoesDaPendencia } from '../pendencias';
 import { derivarSlots } from '../slots';
-import { nivelDoId } from '../ids';
 import type { FichaPersistida } from '../tipos';
 import type { FalhaReplay } from './tipos';
 
@@ -94,15 +93,7 @@ function verificarRequisitosDeAquisicao(ficha: FichaPersistida): FalhaReplay[] {
     const slot = resultado.slots.find((s) => s.id === escolha.id);
     if (!slot) continue;
 
-    const ate = derivarSlots(
-      ficha.identidade,
-      ficha.identidade.classe === 'Sobrevivente'
-        ? { nex: 0, estagio: slot.nivel }
-        : { nex: slot.nivel },
-      ficha.escolhas.filter((e) => (nivelDoId(e.id) ?? 0) < slot.nivel),
-    );
-
-    const opcoes = opcoesPara(slot, { identidade: ficha.identidade, parcial: ate.estadoFinal });
+    const opcoes = opcoesDaPendencia(ficha, slot);
     const escolhido = opcoes.find(
       (o) => o.valor.tipo === 'poder' && o.valor.poder === valor.poder,
     );

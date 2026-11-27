@@ -332,7 +332,7 @@ describe('a porta do replay é independente da dos números', () => {
         ...base.ficha!,
         escolhas: [
           ...base.ficha!.escolhas.filter((e) => !e.id.startsWith('poderClasse@nex:15')),
-          { id: 'poderClasse@nex:15#0', valor: { tipo: 'poder', poder: 'Ciente das Cicatrizes' } },
+          { id: 'poderClasse@nex:15#0', valor: { tipo: 'poder', poder: 'Segurar o Gatilho' } },
         ],
       },
     };
@@ -356,7 +356,7 @@ describe('a porta do replay é independente da dos números', () => {
   it('e o motivo diz QUAL marco e por quê, não só que falhou', () => {
     const r = resolverPersonagem(comHistoriaIlegal());
     expect(r.motivo).toContain('15%');
-    expect(r.motivo).toContain('Ciente das Cicatrizes');
+    expect(r.motivo).toContain('Segurar o Gatilho');
   });
 });
 
