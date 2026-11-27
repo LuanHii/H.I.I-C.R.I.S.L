@@ -270,13 +270,34 @@ describe('treino manual na progressão', () => {
     expect(replayParaFrente(resultado.ficha).falhas).toEqual([]);
   });
 
-  it('grava a promoção de Luta treinada manualmente e preserva o bloqueio para destreinados', () => {
-    const base = fichaBase({ progressao: { nex: 35 } });
-    const valor = { tipo: 'pericias' as const, pericias: ['Luta' as const] };
-    expect(registrarEscolha(base, promocao, valor).aplicada).toBe(false);
-    const treinada = adicionarPericiaLivre(base, 'Luta');
+  const origem = fichaBase();
+  const combatente = fichaBase({
+    progressao: { nex: 35 },
+    identidade: {
+      ...origem.identidade,
+      atributosBase: { ...origem.identidade.atributosBase, INT: 0 },
+      periciasLivres: ['Atletismo', 'Diplomacia', 'Reflexos'],
+    },
+  });
+  const treinada = adicionarPericiaLivre(combatente, 'Luta');
+
+  it('confirma Luta e Reflexos juntas e encerra o marco de NEX 35%', () => {
+    expect(slotDe(treinada, promocao).quantidade).toBe(2);
+    const valor = { tipo: 'pericias' as const, pericias: ['Luta', 'Reflexos'] as PericiaName[] };
     const resultado = registrarEscolha(treinada, promocao, valor);
+    expect(resultado.problemas).toEqual([]);
     expect(resultado.aplicada).toBe(true);
-    expect(buildFicha({ ficha: resultado.ficha }).derivados.graus.Luta).toBe('Veterano');
+    expect(resultado.ficha.escolhas.filter(e => e.id === promocao)).toEqual([{ id: promocao, valor }]);
+    const build = buildFicha({ ficha: resultado.ficha });
+    expect(build.derivados.graus).toMatchObject({ Luta: 'Veterano', Reflexos: 'Veterano', Atletismo: 'Treinado' });
+    expect(build.pendencias.some(p => p.slot.id === promocao)).toBe(false);
+  });
+
+  it.each<PericiaName[][]>([
+    [['Luta']], [['Luta', 'Reflexos', 'Atletismo']], [['Luta', 'Luta']], [['Luta', 'Ocultismo']],
+  ])('recusa a seleção inválida %j sem aplicar uma parte dela', pericias => {
+    const resultado = registrarEscolha(treinada, promocao, { tipo: 'pericias', pericias });
+    expect(resultado.aplicada).toBe(false);
+    expect(resultado.ficha).toBe(treinada);
   });
 });

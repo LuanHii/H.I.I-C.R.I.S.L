@@ -78,36 +78,53 @@ export function registrarEscolha(
     return { ficha, problemas, aplicada: false };
   }
 
+  if (valor.tipo === 'pericias' && (
+    valor.pericias.length !== slot.quantidade || new Set(valor.pericias).size !== valor.pericias.length
+  )) {
+    problemas.push({
+      gravidade: 'erro',
+      codigo: 'selecao_de_pericias_invalida',
+      mensagem: `Selecione ${slot.quantidade} perícia(s) distinta(s) para este marco.`,
+      escolhaId: id,
+    });
+    return { ficha, problemas, aplicada: false };
+  }
+
+  const valores: ValorEscolha[] = valor.tipo === 'pericias'
+    ? valor.pericias.map(pericia => ({ tipo: 'pericias', pericias: [pericia] }))
+    : [valor];
   const opcoes = opcoesDaPendencia(ficha, slot);
-  const escolhida = opcoes.find((o) => mesmoValor(o.valor, valor));
+  for (const item of valores) {
+    const escolhida = opcoes.find((o) => mesmoValor(o.valor, item));
 
-  if (!escolhida) {
-    problemas.push({
-      gravidade: 'erro',
-      codigo: 'opcao_inexistente',
-      mensagem: `O valor escolhido não está entre as opções de "${id}".`,
-      escolhaId: id,
-    });
-    return { ficha, problemas, aplicada: false };
-  }
+    if (!escolhida) {
+      problemas.push({
+        gravidade: 'erro',
+        codigo: 'opcao_inexistente',
+        mensagem: `O valor escolhido não está entre as opções de "${id}".`,
+        escolhaId: id,
+      });
+      return { ficha, problemas, aplicada: false };
+    }
 
-  if (!escolhida.elegivel) {
-    problemas.push({
-      gravidade: 'erro',
-      codigo: 'opcao_inelegivel',
-      mensagem: escolhida.motivos.join('; ') || 'Opção inelegível.',
-      escolhaId: id,
-    });
-    return { ficha, problemas, aplicada: false };
-  }
+    if (!escolhida.elegivel) {
+      problemas.push({
+        gravidade: 'erro',
+        codigo: 'opcao_inelegivel',
+        mensagem: escolhida.motivos.join('; ') || 'Opção inelegível.',
+        escolhaId: id,
+      });
+      return { ficha, problemas, aplicada: false };
+    }
 
-  for (const indeterminado of escolhida.indeterminados) {
-    problemas.push({
-      gravidade: 'aviso',
-      codigo: 'requisito_indeterminado',
-      mensagem: `Não foi possível verificar: ${indeterminado}`,
-      escolhaId: id,
-    });
+    for (const indeterminado of escolhida.indeterminados) {
+      problemas.push({
+        gravidade: 'aviso',
+        codigo: 'requisito_indeterminado',
+        mensagem: `Não foi possível verificar: ${indeterminado}`,
+        escolhaId: id,
+      });
+    }
   }
 
   const nova: Escolha = { id, valor };
