@@ -1,224 +1,195 @@
 'use client';
 
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, X, Search, Info } from 'lucide-react';
-import { REGRAS, type Regra } from '@/data/reference/guiaRegras';
-import { getConditionColor } from './CombatManagerTypes';
+import React, { useEffect, useId, useRef, useState } from 'react';
+import { ChevronDown, Search, X } from 'lucide-react';
+import { ConditionBadge } from '@/components/ConditionBadge';
+import { agruparCondicoes, buscarCondicoes, getCondicao, type CondicaoCompleta } from '@/data/combat/conditions';
+import { REGRAS } from '@/data/reference/guiaRegras';
+import type { ReaplicacaoCondicao } from '@/core/rules/condicoes';
 import { cn } from '@/lib/utils';
+
+const REFERENCIAS_ANTIGAS = new Set([
+    'ferimento-morte', 'dano-nao-letal', 'condicoes-debilitantes',
+    'condicoes-paralisia-dano', 'imunidade-e-remocao-de-condicoes',
+    'condicoes-sentidos-mente', 'outras-condicoes',
+]);
+const TITULOS_ANTIGOS = new Map(
+    REGRAS.filter(regra => REFERENCIAS_ANTIGAS.has(regra.id)).map(regra => [regra.id, regra.titulo]),
+);
 
 interface ConditionPickerProps {
     selectedConditions: string[];
-    onAdd: (conditionId: string) => void;
-    onRemove: (conditionId: string) => void;
+    onAdd: (nome: string, reaplicacao?: ReaplicacaoCondicao) => void;
+    onRemove: (nome: string) => void;
     compact?: boolean;
 }
-const CONDITIONS = REGRAS.filter(r => r.categoria === 'condicoes');
 
 export function ConditionPicker({ selectedConditions, onAdd, onRemove, compact = false }: ConditionPickerProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');
-    const [hoveredCondition, setHoveredCondition] = useState<Regra | null>(null);
-    const dropdownRef = useRef<HTMLDivElement>(null);
+    const [reaplicando, setReaplicando] = useState<CondicaoCompleta | null>(null);
+    const container = useRef<HTMLDivElement>(null);
+    const trigger = useRef<HTMLButtonElement>(null);
+    const campo = useRef<HTMLInputElement>(null);
+    const id = useId();
+
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
-            }
+        if (!isOpen) return;
+        const fecharFora = (event: MouseEvent) => {
+            if (!container.current?.contains(event.target as Node)) setIsOpen(false);
         };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+        document.addEventListener('mousedown', fecharFora);
+        return () => document.removeEventListener('mousedown', fecharFora);
+    }, [isOpen]);
 
-    const filteredConditions = useMemo(() => {
-        if (!search.trim()) return CONDITIONS;
-        const term = search.toLowerCase();
-        return CONDITIONS.filter(c =>
-            c.titulo.toLowerCase().includes(term) ||
-            c.resumo.toLowerCase().includes(term) ||
-            c.tags.some(t => t.toLowerCase().includes(term))
-        );
-    }, [search]);
-
-    const getConditionById = (id: string): Regra | undefined => {
-        return CONDITIONS.find(c => c.id === id);
+    const grupos = agruparCondicoes(buscarCondicoes(search));
+    const selecionadas = new Set(selectedConditions.map(nome => getCondicao(nome)?.nome));
+    const voltar = () => {
+        setReaplicando(null);
+        campo.current?.focus();
     };
 
     return (
-        <div className="relative" ref={dropdownRef}>
-            <div className="flex flex-wrap gap-1.5 mb-2">
-                {selectedConditions.map(condId => {
-                    const condition = getConditionById(condId);
-                    if (!condition) return null;
-                    return (
-                        <motion.div
-                            key={condId}
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.8, opacity: 0 }}
-                            className="group relative"
-                            onMouseEnter={() => setHoveredCondition(condition)}
-                            onMouseLeave={() => setHoveredCondition(null)}
-                        >
-                            <span className={cn(
-                                'inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium text-white',
-                                getConditionColor(condId)
-                            )}>
-                                {condition.titulo}
-                                <button
-                                    onClick={() => onRemove(condId)}
-                                    className="ml-0.5 hover:bg-white/20 rounded p-0.5 transition-colors"
-                                >
-                                    <X size={12} />
-                                </button>
-                            </span>
-
-                            {hoveredCondition?.id === condId && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 5 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="absolute z-50 bottom-full left-0 mb-2 w-64 p-3 bg-ordem-black border border-ordem-border rounded-lg shadow-xl"
-                                >
-                                    <h4 className="font-bold text-white mb-1">{condition.titulo}</h4>
-                                    <p className="text-xs text-ordem-text-secondary">{condition.resumo}</p>
-                                    {condition.detalhes && (
-                                        <p className="text-xs text-ordem-text-muted mt-2 whitespace-pre-line">{condition.detalhes}</p>
-                                    )}
-                                </motion.div>
-                            )}
-                        </motion.div>
-                    );
-                })}
-            </div>
+        <div
+            ref={container}
+            onKeyDown={event => {
+                if (event.key !== 'Escape' || !isOpen) return;
+                event.preventDefault();
+                event.stopPropagation();
+                setIsOpen(false);
+                trigger.current?.focus();
+            }}
+        >
+            {selectedConditions.length > 0 && <ConditionBadges conditions={selectedConditions} onRemove={onRemove} />}
 
             <button
-                onClick={() => setIsOpen(!isOpen)}
+                ref={trigger}
+                type="button"
+                aria-expanded={isOpen}
+                aria-controls={id}
+                onClick={() => {
+                    setSearch('');
+                    setReaplicando(null);
+                    setIsOpen(!isOpen);
+                }}
                 className={cn(
-                    'flex items-center gap-2 px-3 py-1.5 rounded border transition-colors',
-                    'bg-ordem-ooze border-ordem-border hover:border-ordem-green/50 text-ordem-text-secondary hover:text-white',
-                    compact ? 'text-xs' : 'text-sm'
+                    'mt-2 inline-flex min-h-9 items-center gap-2 rounded border border-ordem-border bg-ordem-ooze px-3 py-1.5 text-ordem-text-secondary hover:text-white focus-visible:outline focus-visible:outline-ordem-green-muted',
+                    compact ? 'text-xs' : 'text-sm',
                 )}
             >
                 <span>+ Condição</span>
-                <ChevronDown size={14} className={cn('transition-transform', isOpen && 'rotate-180')} />
+                <ChevronDown size={14} aria-hidden className={cn(isOpen && 'rotate-180')} />
             </button>
 
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="absolute z-50 top-full left-0 mt-1 w-72 bg-ordem-black border border-ordem-border rounded-lg shadow-xl overflow-hidden"
-                    >
-                        <div className="p-2 border-b border-ordem-border">
-                            <div className="relative">
-                                <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-ordem-text-muted" />
-                                <input
-                                    type="text"
-                                    placeholder="Buscar condição..."
-                                    value={search}
-                                    onChange={e => setSearch(e.target.value)}
-                                    className="w-full bg-ordem-ooze border border-ordem-border-light rounded pl-8 pr-3 py-1.5 text-sm text-white placeholder:text-ordem-text-muted focus:outline-none focus:border-ordem-green/50"
-                                    autoFocus
-                                />
+            {isOpen && (
+                <div id={id} className="mt-2 w-full max-w-xl rounded-lg border border-ordem-border-light bg-ordem-black-deep">
+                    <div className="relative border-b border-ordem-border p-2">
+                        <Search size={15} aria-hidden className="absolute left-4 top-1/2 -translate-y-1/2 text-ordem-text-muted" />
+                        <input
+                            ref={campo}
+                            type="search"
+                            aria-label="Buscar condição"
+                            placeholder="Buscar condição…"
+                            value={search}
+                            onChange={event => {
+                                setSearch(event.target.value);
+                                setReaplicando(null);
+                            }}
+                            className="min-h-9 w-full rounded border border-ordem-border bg-ordem-ooze py-1.5 pl-8 pr-3 text-sm text-white focus-visible:outline focus-visible:outline-ordem-green-muted"
+                            autoFocus
+                        />
+                    </div>
+
+                    {reaplicando ? (
+                        <div role="group" aria-label={'Reaplicar ' + reaplicando.nome} className="space-y-2 p-3">
+                            <p className="text-sm font-semibold text-white">Reaplicar {reaplicando.nome}</p>
+                            <p className="text-xs text-ordem-text-secondary">Efeitos de dois rituais não acumulam. Agrave a condição quando a fonte permitir.</p>
+                            <div className="flex flex-wrap gap-2">
+                                <button type="button" className="rounded border border-ordem-border px-2.5 py-2 text-xs text-white" onClick={voltar}>
+                                    Manter {reaplicando.nome}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="rounded border border-ordem-red/50 px-2.5 py-2 text-xs text-white"
+                                    onClick={() => {
+                                        onAdd(reaplicando.nome, 'acumulo-permitido');
+                                        voltar();
+                                    }}
+                                >
+                                    Agravar condição
+                                </button>
                             </div>
                         </div>
-
-                        <div className="max-h-64 overflow-y-auto custom-scrollbar">
-                            {filteredConditions.length === 0 ? (
-                                <p className="p-3 text-sm text-ordem-text-muted text-center">Nenhuma condição encontrada</p>
-                            ) : (
-                                filteredConditions.map(condition => {
-                                    const isSelected = selectedConditions.includes(condition.id);
-                                    return (
-                                        <button
-                                            key={condition.id}
-                                            onClick={() => {
-                                                if (!isSelected) {
-                                                    onAdd(condition.id);
-                                                }
-                                            }}
-                                            disabled={isSelected}
-                                            className={cn(
-                                                'w-full px-3 py-2 text-left flex items-start gap-2 transition-colors',
-                                                isSelected
-                                                    ? 'bg-ordem-ooze/50 opacity-50 cursor-not-allowed'
-                                                    : 'hover:bg-ordem-ooze'
-                                            )}
-                                        >
-                                            <span className={cn(
-                                                'shrink-0 w-2 h-2 rounded-full mt-1.5',
-                                                getConditionColor(condition.id)
-                                            )} />
-                                            <div className="flex-1 min-w-0">
-                                                <h4 className="text-sm font-medium text-white">{condition.titulo}</h4>
-                                                <p className="text-xs text-ordem-text-muted truncate">{condition.resumo}</p>
-                                            </div>
-                                            {isSelected && (
-                                                <span className="text-xs text-ordem-green">✓</span>
-                                            )}
-                                        </button>
-                                    );
-                                })
-                            )}
+                    ) : (
+                        <div className="max-h-72 overflow-y-auto custom-scrollbar">
+                            {grupos.map(grupo => (
+                                <section key={grupo.id} aria-label={grupo.titulo}>
+                                    <h4 className="sticky top-0 z-10 border-y border-ordem-border bg-ordem-black-deep px-3 py-1.5 text-xs font-semibold text-ordem-text-secondary">
+                                        {grupo.titulo}
+                                    </h4>
+                                    {grupo.condicoes.map(condicao => {
+                                        const ativa = selecionadas.has(condicao.nome);
+                                        return (
+                                            <button
+                                                key={condicao.nome}
+                                                type="button"
+                                                disabled={ativa && !condicao.acumulo}
+                                                aria-label={ativa && condicao.acumulo ? 'Reaplicar ' + condicao.nome : condicao.nome}
+                                                onClick={() => ativa ? setReaplicando(condicao) : onAdd(condicao.nome)}
+                                                className="block w-full px-3 py-2 text-left hover:bg-ordem-ooze focus-visible:outline focus-visible:outline-ordem-green-muted disabled:opacity-50"
+                                            >
+                                                <span className="flex items-center justify-between gap-2 text-sm font-medium text-white">
+                                                    {condicao.nome}
+                                                    {ativa && <span className="text-xs font-normal text-ordem-text-secondary">{condicao.acumulo ? 'Reaplicar' : 'Ativa'}</span>}
+                                                </span>
+                                                <span className="mt-0.5 line-clamp-2 text-xs text-ordem-text-secondary">{condicao.descricao}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </section>
+                            ))}
+                            {grupos.length === 0 && <p className="p-3 text-sm text-ordem-text-muted">Nenhuma condição encontrada.</p>}
                         </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    )}
+                </div>
+            )}
         </div>
     );
 }
+
 export function ConditionBadges({
-    conditions,
-    onRemove,
-    showTooltip = true
+    conditions, onRemove,
 }: {
     conditions: string[];
-    onRemove?: (id: string) => void;
-    showTooltip?: boolean;
+    onRemove?: (nome: string) => void;
 }) {
-    const [hoveredCondition, setHoveredCondition] = useState<Regra | null>(null);
-
     return (
-        <div className="flex flex-wrap gap-1">
-            {conditions.map(condId => {
-                const condition = CONDITIONS.find(c => c.id === condId);
-                if (!condition) return null;
+        <div className="flex flex-wrap gap-1.5">
+            {Array.from(new Set(conditions)).map(valor => {
+                const condicao = getCondicao(valor);
+                if (condicao) {
+                    return <ConditionBadge key={valor} nome={condicao.nome} compact onRemove={onRemove ? () => onRemove(valor) : undefined} />;
+                }
 
+                const titulo = TITULOS_ANTIGOS.get(valor);
                 return (
-                    <div
-                        key={condId}
-                        className="relative group"
-                        onMouseEnter={() => showTooltip && setHoveredCondition(condition)}
-                        onMouseLeave={() => setHoveredCondition(null)}
+                    <span
+                        key={valor}
+                        className="inline-flex max-w-full items-center gap-1.5 border border-ordem-border bg-ordem-ooze/50 px-1.5 py-0.5 text-xs text-ordem-text-secondary"
+                        title={titulo ? 'Remova este registro e aplique a condição individual que está valendo.' : undefined}
                     >
-                        <span className={cn(
-                            'inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-white cursor-default',
-                            getConditionColor(condId)
-                        )}>
-                            {condition.titulo}
-                            {onRemove && (
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); onRemove(condId); }}
-                                    className="hover:bg-white/20 rounded p-0.5"
-                                >
-                                    <X size={10} />
-                                </button>
-                            )}
-                        </span>
-
-                        {showTooltip && hoveredCondition?.id === condId && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 5 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="absolute z-50 bottom-full left-0 mb-2 w-56 p-2 bg-ordem-black border border-ordem-border rounded shadow-xl pointer-events-none"
+                        <span className="break-words">{titulo ? 'Registro antigo · ' + titulo : valor}</span>
+                        {onRemove && (
+                            <button
+                                type="button"
+                                aria-label={'Remover ' + (titulo ?? valor)}
+                                className="shrink-0 rounded p-0.5 hover:bg-white/20 focus-visible:outline focus-visible:outline-ordem-green-muted"
+                                onClick={() => onRemove(valor)}
                             >
-                                <h4 className="font-bold text-white text-xs mb-0.5">{condition.titulo}</h4>
-                                <p className="text-[10px] text-ordem-text-secondary">{condition.resumo}</p>
-                            </motion.div>
+                                <X size={12} aria-hidden />
+                            </button>
                         )}
-                    </div>
+                    </span>
                 );
             })}
         </div>

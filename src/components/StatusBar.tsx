@@ -191,7 +191,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ label, current, max, color
               aria-label={(amount > 0 ? 'Adicionar ' + amount : 'Reduzir ' + Math.abs(amount)) + ' ' + label}
               onClick={() => handleAdjust(amount)}
               className={cn(
-                'min-h-11 border text-center font-dados text-sm transition-colors focus-visible:outline focus-visible:outline-ordem-green-muted sm:min-h-8',
+                'min-h-11 border text-center font-dados text-sm transition-colors focus-visible:outline focus-visible:outline-ordem-green-muted',
                 'border-white/10 bg-white/[0.02] text-ordem-text-secondary',
                 amount < 0
                   ? 'hover:border-ordem-red/50 hover:bg-ordem-red/10 hover:text-ordem-red'

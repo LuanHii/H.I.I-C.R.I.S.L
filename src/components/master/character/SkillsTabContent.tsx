@@ -61,7 +61,7 @@ export function SkillsTabContent({
                 {attr}
                 <span className="font-mono text-ordem-text-secondary">{agent.atributos[attr]}</span>
               </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2">
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,16rem),1fr))] gap-2">
                 {skills.map(([nome, detalhe]) => (
                   <div key={nome} className={`group flex items-center justify-between gap-3 border px-2.5 py-2 transition-colors ${(detalhe.grau || 'Destreinado') === 'Destreinado'
                     ? 'border-white/[0.06] bg-transparent hover:border-white/15'

@@ -12,6 +12,7 @@ import {
     type Regra,
     type RegraCategoria
 } from '@/data/reference/guiaRegras';
+import { GRUPOS_DE_CONDICAO } from '@/data/combat/conditions';
 import { cn } from '@/lib/utils';
 import { InvestigationManager } from './InvestigationManager';
 import { InterludeManager } from './InterludeManager';
@@ -98,18 +99,17 @@ export function GuiaMestre({ fichas, onUpdateFicha }: GuiaMestreProps) {
     const contentRef = useRef<HTMLDivElement>(null);
 
     const regrasFiltradas = useMemo(() => {
-        let resultado = busca.trim()
-            ? buscarRegras(busca)
-            : categoriaAtiva === 'todas'
-                ? REGRAS
-                : regrasPorCategoria(categoriaAtiva);
+        const resultado = busca.trim() ? buscarRegras(busca) : REGRAS;
 
-        return resultado.sort((a, b) => {
-            const aFav = favoritos.has(a.id) ? 0 : 1;
-            const bFav = favoritos.has(b.id) ? 0 : 1;
-            return aFav - bFav;
-        });
+        return resultado.filter(regra => categoriaAtiva === 'todas' || regra.categoria === categoriaAtiva)
+            .sort((a, b) => Number(favoritos.has(b.id)) - Number(favoritos.has(a.id)));
     }, [busca, categoriaAtiva, favoritos]);
+
+    const secoes = categoriaAtiva === 'condicoes'
+        ? GRUPOS_DE_CONDICAO.map(grupo => ({
+            ...grupo, regras: regrasFiltradas.filter(regra => regra.grupoCondicao === grupo.id),
+        })).filter(grupo => grupo.regras.length > 0)
+        : [{ id: 'regras', titulo: '', regras: regrasFiltradas }];
 
     const regrasPorCat = useMemo(() => {
         const map: Record<string, number> = {};
@@ -322,7 +322,8 @@ export function GuiaMestre({ fichas, onUpdateFicha }: GuiaMestreProps) {
                                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-white/40 transition-colors" />
                                 <input
                                     type="text"
-                                    placeholder="Buscar regra... (ex: agarrar, crítico, DT)"
+                                    aria-label={categoriaAtiva === 'condicoes' ? 'Buscar condição no guia' : 'Buscar regra'}
+                                    placeholder={categoriaAtiva === 'condicoes' ? 'Buscar condição…' : 'Buscar regra... (ex: agarrar, crítico, DT)'}
                                     value={busca}
                                     onChange={(e) => setBusca(e.target.value)}
                                     className="relative w-full bg-white/[0.03] border border-white/[0.06] rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/15 transition-all backdrop-blur-sm"
@@ -365,26 +366,31 @@ export function GuiaMestre({ fichas, onUpdateFicha }: GuiaMestreProps) {
                             </div>
 
                             <div ref={contentRef} className="space-y-2.5 overflow-y-auto max-h-[calc(100vh-280px)] pr-1 custom-scrollbar">
-                                <AnimatePresence mode="popLayout">
-                                    {regrasFiltradas.map((regra, index) => (
-                                        <motion.div
-                                            key={regra.id}
-                                            layout="position"
-                                            initial={{ opacity: 0, y: 6 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, scale: 0.97 }}
-                                            transition={{ ...springTransition, delay: index * 0.012 }}
-                                        >
-                                            <RegraCard
-                                                regra={regra}
-                                                expandido={expandidos.has(regra.id)}
-                                                favorito={favoritos.has(regra.id)}
-                                                onToggle={() => toggleExpandido(regra.id)}
-                                                onFavorito={() => toggleFavorito(regra.id)}
-                                            />
-                                        </motion.div>
-                                    ))}
-                                </AnimatePresence>
+                                {secoes.map(secao => (
+                                    <section key={secao.id} aria-label={secao.titulo || 'Regras'} className="space-y-2.5">
+                                        {secao.titulo && <h3 className="pt-2 text-sm font-semibold text-ordem-text-secondary">{secao.titulo}</h3>}
+                                        <AnimatePresence mode="popLayout">
+                                            {secao.regras.map((regra, index) => (
+                                                <motion.div
+                                                    key={regra.id}
+                                                    layout="position"
+                                                    initial={{ opacity: 0, y: 6 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    exit={{ opacity: 0, scale: 0.97 }}
+                                                    transition={{ ...springTransition, delay: index * 0.012 }}
+                                                >
+                                                    <RegraCard
+                                                        regra={regra}
+                                                        expandido={expandidos.has(regra.id)}
+                                                        favorito={favoritos.has(regra.id)}
+                                                        onToggle={() => toggleExpandido(regra.id)}
+                                                        onFavorito={() => toggleFavorito(regra.id)}
+                                                    />
+                                                </motion.div>
+                                            ))}
+                                        </AnimatePresence>
+                                    </section>
+                                ))}
 
                                 {regrasFiltradas.length === 0 && (
                                     <div className="text-center py-16">
@@ -442,6 +448,7 @@ function RegraCard({ regra, expandido, favorito, onToggle, onFavorito }: RegraCa
 
                 <button
                     onClick={onToggle}
+                    aria-expanded={expandido}
                     className="flex-1 p-3 sm:p-3.5 flex items-start justify-between text-left transition-colors"
                 >
                     <div className="flex-1 min-w-0">

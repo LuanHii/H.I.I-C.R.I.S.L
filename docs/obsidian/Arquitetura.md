@@ -17,7 +17,20 @@ Abra [[Mapa H.I.I-C.R.I.S]] para navegar pelo sistema. Veja [[Oraculo|Oráculo]]
 | Foundry | `app/api/foundry`, `app/api/ficha/[id]/foundry` e `core/foundry` | Pareamento, mesa publicada e projeções para importação |
 | Mesa 3D | `app/api/mesa3d/sessao/route.ts` → `core/mesa3d/sessaoDaMesa.ts` → `prepararGravacao` | Sessão com pré-condição de versão na ficha privada e espelho público |
 
+Na aba Itens do painel do mestre, 'Ler descrição' abre o texto completo de itens gerais e armas no próprio cartão. A lista inclui o catálogo da edição e os registros personalizados da mesa.
+
 Os caminhos da tabela começam em `src/`. A ficha legada ainda circula como `Personagem`. O arquivo `logic/levelUp.ts` citado nos handoffs antigos já saiu da árvore. A migração hoje depende de releitura do histórico de escolhas, compatibilidade dos números e confirmação do mestre quando há divergência.
+
+## Uso durante a mesa em tablet
+
+| Momento | Onde o mestre atua | O que conferir |
+| --- | --- | --- |
+| Preparar a sessão | Fichas → selecionar jogador → Mesa ou Construção | Em paisagem, a lista de jogadores e o editor têm rolagem independente. Filtros e ordem podem ser recolhidos. Em uma janela estreita, selecionar um jogador abre o detalhe com volta para a lista. |
+| Montar o encontro | Ficha → encontro → Combate → Montar encontro | Conferir participantes, iniciativa e recursos copiados para o encontro. |
+| Resolver uma ação | Combate → detalhes do alvo → Pontos de vida | Dano e cura aceitam um toque nos valores rápidos ou uma quantidade inteira positiva. Na ficha, os controles de PV gravam a sessão do jogador. No combate, alteram os PV do participante do encontro. |
+| Acompanhar efeitos e turnos | Condições do alvo → Referência → Próximo turno | A referência fica ao lado da ordem em paisagem larga. O mestre decide quando retirar o efeito segundo a fonte. |
+
+O mestre conduz manualmente o uso de itens, a escolha do alvo, a resolução da resistência e a aplicação das condições.
 
 ## Arquitetura de referência
 

@@ -65,15 +65,15 @@ export function NavBar() {
           </Link>
         </div>
 
-        <div className="mx-auto hidden max-w-6xl items-center gap-4 px-4 py-3 pr-36 sm:flex">
-          <Link href="/" aria-current={naInicial ? 'page' : undefined} className="font-mono text-xs tracking-[0.5em] text-ordem-green">C.R.I.S</Link>
+        <div className="mx-auto hidden max-w-6xl items-center gap-3 px-4 py-2 pr-36 sm:flex">
+          <Link href="/" aria-current={naInicial ? 'page' : undefined} className="inline-flex min-h-11 items-center font-mono text-xs tracking-[0.5em] text-ordem-green">C.R.I.S</Link>
           <div className="flex flex-1 justify-center gap-2 text-xs">
             {LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 title={link.discreto ? 'Ordem Paranormal 2 — Playtest Alpha' : undefined}
-                className={`whitespace-nowrap border px-3 py-2 tracking-[0.3em] transition ${ativo(link.href)
+                className={`inline-flex min-h-11 items-center whitespace-nowrap border px-3 py-2 tracking-[0.3em] transition ${ativo(link.href)
                   ? 'border-ordem-green text-ordem-green'
                   : link.discreto
                     ? 'border-ordem-white/10 text-ordem-white/40 hover:border-ordem-white/40 hover:text-ordem-white/70'

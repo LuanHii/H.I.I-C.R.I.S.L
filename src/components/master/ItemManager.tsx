@@ -3,7 +3,7 @@ import { ITENS } from '../../data/equipment/items';
 import { WEAPONS } from '../../data/combat/weapons';
 import { useCloudItems } from '../../core/storage';
 import { Item, Weapow } from '../../core/types';
-import { Cloud, CloudOff } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
 export const ItemManager: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'items' | 'weapons'>('items');
@@ -91,66 +91,48 @@ export const ItemManager: React.FC = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-        {activeTab === 'items' ? (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 lg:gap-4">
-            {allItems.map((item, idx) => (
-              <div key={idx} className="bg-ordem-black/40 border border-ordem-border p-4 rounded hover:border-ordem-border-light transition-colors group relative">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-bold text-gray-200 group-hover:text-white">{item.nome}</h3>
-                  <span className="text-xs font-mono text-ordem-text-muted border border-ordem-border px-1 rounded">
-                    Cat {item.categoria}
-                  </span>
-                </div>
-                <p className="text-sm text-ordem-text-secondary mb-3 line-clamp-2">{item.descricao}</p>
-                <div className="flex gap-2 text-xs text-ordem-text-muted font-mono">
-                  <span>{item.tipo}</span>
-                  <span>•</span>
-                  <span>{item.espaco} slots</span>
-                </div>
-                {customItems.some(i => i.nome === item.nome) && (
-                  <button
-                    onClick={() => removeCustomItem(item.nome)}
-                    className="absolute top-2 right-2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Remover item customizado"
-                  >
-                    ×
+        <div className="grid grid-cols-1 items-start gap-3 md:grid-cols-2 lg:grid-cols-3 lg:gap-4">
+          {(activeTab === 'items' ? allItems : allWeapons).map((entry, idx) => {
+            const isCustom = idx >= (activeTab === 'items' ? ITENS.length : WEAPONS.length);
+            return (
+              <article key={`${activeTab}-${entry.nome}-${idx}`} className="min-w-0 rounded border border-ordem-border bg-ordem-black/40 hover:border-ordem-border-light">
+                <details className="group">
+                  <summary aria-label={`Descrição de ${entry.nome}`} className="cursor-pointer list-none rounded p-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ordem-red [&::-webkit-details-marker]:hidden">
+                    <span className="mb-2 flex items-start justify-between gap-2">
+                      <span className="break-words font-bold text-gray-200">{entry.nome}</span>
+                      <span className="shrink-0 rounded border border-ordem-border px-1 font-mono text-xs text-ordem-text-muted">Cat {entry.categoria}</span>
+                    </span>
+                    <span aria-hidden="true" className="mb-3 line-clamp-2 break-words text-sm text-ordem-text-secondary group-open:hidden">{entry.descricao}</span>
+                    {'proficiencia' in entry ? (
+                      <span className="grid grid-cols-2 gap-2 rounded bg-ordem-black/20 p-2 font-mono text-xs text-ordem-white-muted">
+                        <span>Dano: {entry.stats.Dano_Base}</span>
+                        <span>Crítico: {entry.stats.Critico}</span>
+                        <span>Tipo: {entry.stats.Dano_Tipo}</span>
+                        <span>Alcance: {entry.stats.Alcance}</span>
+                      </span>
+                    ) : (
+                      <span className="block font-mono text-xs text-ordem-text-muted">{entry.tipo} · {entry.espaco} espaços</span>
+                    )}
+                    <span className="mt-3 flex items-center gap-1 text-sm text-ordem-white-muted">
+                      <ChevronDown aria-hidden="true" size={16} className="group-open:rotate-180" />
+                      <span className="group-open:hidden">Ler descrição</span>
+                      <span className="hidden group-open:inline">Recolher descrição</span>
+                    </span>
+                  </summary>
+                  <p className="whitespace-pre-wrap break-words border-t border-ordem-border p-4 text-sm leading-relaxed text-ordem-white-muted">{entry.descricao}</p>
+                </details>
+                {isCustom && (
+                  <button type="button" aria-label={`Remover ${entry.nome}`}
+                    onClick={() => activeTab === 'items' ? removeCustomItem(entry.nome) : removeCustomWeapon(entry.nome)}
+                    className="mx-4 mb-2 min-h-11 text-xs text-red-400 hover:underline">
+                    Remover
                   </button>
                 )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {allWeapons.map((weapon, idx) => (
-              <div key={idx} className="bg-ordem-black/40 border border-ordem-border p-4 rounded hover:border-ordem-border-light transition-colors group relative">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-bold text-gray-200 group-hover:text-white">{weapon.nome}</h3>
-                  <span className="text-xs font-mono text-ordem-text-muted border border-ordem-border px-1 rounded">
-                    Cat {weapon.categoria}
-                  </span>
-                </div>
-                <p className="text-sm text-ordem-text-secondary mb-3 line-clamp-2">{weapon.descricao}</p>
-                <div className="grid grid-cols-2 gap-2 text-xs text-ordem-text-muted font-mono bg-ordem-black/20 p-2 rounded">
-                  <div>Dano: <span className="text-ordem-white-muted">{weapon.stats.Dano_Base}</span></div>
-                  <div>Crítico: <span className="text-ordem-white-muted">{weapon.stats.Critico}</span></div>
-                  <div>Tipo: <span className="text-ordem-white-muted">{weapon.stats.Dano_Tipo}</span></div>
-                  <div>Alcance: <span className="text-ordem-white-muted">{weapon.stats.Alcance}</span></div>
-                </div>
-                {customWeapons.some(w => w.nome === weapon.nome) && (
-                  <button
-                    onClick={() => removeCustomWeapon(weapon.nome)}
-                    className="absolute top-2 right-2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Remover arma customizada"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+              </article>
+            );
+          })}
+        </div>
       </div>
-
       {isCreating && (
         <div className="fixed inset-0 bg-ordem-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-ordem-ooze border border-ordem-border-light p-6 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">

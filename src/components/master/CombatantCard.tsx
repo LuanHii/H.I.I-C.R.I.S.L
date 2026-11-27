@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { type Combatant } from './CombatManagerTypes';
 import { ConditionPicker, ConditionBadges } from './ConditionPicker';
+import { aplicarCondicao } from '@/core/rules/condicoes';
 import { participanteInimigo } from '@/core/rules/ordemCombate';
 import { cn } from '@/lib/utils';
 
@@ -37,7 +38,7 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
     dragHandleProps
 }, ref) {
     const [isExpanded, setIsExpanded] = useState(false);
-    const [damageInput, setDamageInput] = useState('');
+    const [quantidadePv, setQuantidadePv] = useState('');
     const [isEditingName, setIsEditingName] = useState(false);
     const [editedName, setEditedName] = useState(combatant.name);
     const [isEditingInit, setIsEditingInit] = useState(false);
@@ -62,12 +63,13 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
         onUpdate({ hp: { ...combatant.hp, current: newHp } });
     };
 
-    const handleDamageSubmit = () => {
-        const amount = parseInt(damageInput, 10);
-        if (!isNaN(amount) && amount > 0) {
-            applyDamage(amount);
-            setDamageInput('');
-        }
+    const quantidade = Number(quantidadePv);
+    const quantidadeValida = Number.isSafeInteger(quantidade) && quantidade > 0;
+    const aplicarQuantidade = (tipo: 'dano' | 'cura') => {
+        if (!quantidadeValida) return;
+        if (tipo === 'dano') applyDamage(quantidade);
+        else applyHealing(quantidade);
+        setQuantidadePv('');
     };
 
     const handleNameSave = () => {
@@ -113,7 +115,7 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
         <div
             ref={ref}
             className={cn(
-                'border rounded-lg overflow-hidden transition-all',
+                'border rounded-lg transition-all',
                 'bg-ordem-ooze/50',
                 isCurrentTurn && !isDead && 'ring-2 ring-ordem-green shadow-lg shadow-ordem-green/20',
                 isDead && 'opacity-60 grayscale',
@@ -200,7 +202,7 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
 
                     {combatant.semTesteDeIniciativa && !combatant.iniciativaManual && <p className="pl-5 text-xs text-ordem-text-secondary">Iniciativa manual</p>}
                     {combatant.type === 'npc' && <p className="pl-5 text-xs text-ordem-text-secondary">{participanteInimigo(combatant) ? 'NPC inimigo' : 'NPC aliado'}</p>}
-                    {combatant.conditions.length > 0 && (
+                    {!isExpanded && combatant.conditions.length > 0 && (
                         <div className="mt-1">
                             <ConditionBadges
                                 conditions={combatant.conditions}
@@ -277,34 +279,34 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                     initial={{ height: 0 }}
                     animate={{ height: 'auto' }}
                     exit={{ height: 0 }}
-                    className="border-t border-ordem-border bg-ordem-black/50 p-3 space-y-3"
+                    className="space-y-3 rounded-b-lg border-t border-ordem-border bg-ordem-black/50 p-3"
                 >
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs text-ordem-text-secondary">Dano:</span>
-                        <div className="flex items-center gap-1">
-                            <button onClick={() => applyDamage(1)} className="px-2 py-1 text-xs bg-red-600/20 hover:bg-red-600/40 text-red-400 rounded">-1</button>
-                            <button onClick={() => applyDamage(5)} className="px-2 py-1 text-xs bg-red-600/20 hover:bg-red-600/40 text-red-400 rounded">-5</button>
-                            <button onClick={() => applyDamage(10)} className="px-2 py-1 text-xs bg-red-600/20 hover:bg-red-600/40 text-red-400 rounded">-10</button>
+                    <fieldset className="min-w-0 space-y-2 font-dados">
+                        <legend className="mb-1 text-sm font-semibold text-ordem-white">Pontos de vida</legend>
+                        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                            {(['dano', 'cura'] as const).map(tipo => (
+                                <div key={tipo} role="group" aria-label={tipo === 'dano' ? 'Dano rápido' : 'Cura rápida'} className="flex items-center gap-1">
+                                    <span className="mr-1 text-sm text-ordem-text-secondary">{tipo === 'dano' ? 'Dano' : 'Cura'}</span>
+                                    {[1, 5, 10].map(valor => (
+                                        <button key={valor} type="button"
+                                            onClick={() => tipo === 'dano' ? applyDamage(valor) : applyHealing(valor)}
+                                            aria-label={tipo === 'dano' ? `Aplicar ${valor} de dano` : `Curar ${valor} PV`}
+                                            className={cn('min-h-11 min-w-11 rounded border px-2 text-sm tabular-nums', tipo === 'dano'
+                                                ? 'border-red-500/30 bg-red-600/15 text-red-300' : 'border-green-500/30 bg-green-600/15 text-green-300')}>
+                                            {tipo === 'dano' ? '−' : '+'}{valor}
+                                        </button>
+                                    ))}
+                                </div>
+                            ))}
                         </div>
-                        <input
-                            type="number"
-                            value={damageInput}
-                            onChange={e => setDamageInput(e.target.value)}
-                            onKeyDown={e => e.key === 'Enter' && handleDamageSubmit()}
-                            placeholder="Qtd"
-                            className="w-14 px-2 py-1 text-xs bg-ordem-ooze border border-ordem-border rounded text-white text-center"
-                        />
-                        <button
-                            onClick={handleDamageSubmit}
-                            className="px-2 py-1 text-xs bg-red-600 hover:bg-red-700 text-white rounded"
-                        >
-                            Aplicar
-                        </button>
-                        <span className="text-xs text-ordem-text-secondary ml-2">Cura:</span>
-                        <button onClick={() => applyHealing(1)} className="px-2 py-1 text-xs bg-green-600/20 hover:bg-green-600/40 text-green-400 rounded">+1</button>
-                        <button onClick={() => applyHealing(5)} className="px-2 py-1 text-xs bg-green-600/20 hover:bg-green-600/40 text-green-400 rounded">+5</button>
-                        <button onClick={() => applyHealing(10)} className="px-2 py-1 text-xs bg-green-600/20 hover:bg-green-600/40 text-green-400 rounded">+10</button>
-                    </div>
+                        <form className="flex flex-wrap items-center gap-2" onSubmit={e => { e.preventDefault(); aplicarQuantidade('dano'); }}>
+                            <input type="number" inputMode="numeric" min={1} step={1} aria-label="Quantidade de PV"
+                                placeholder="Qtd. PV" value={quantidadePv} onChange={e => setQuantidadePv(e.target.value)}
+                                className="min-h-11 w-24 rounded border border-ordem-border bg-ordem-ooze px-2 text-white" />
+                            <button type="submit" disabled={!quantidadeValida} aria-label="Aplicar dano informado" className="min-h-11 rounded border border-red-500/40 px-3 text-sm text-red-300 disabled:opacity-45">Aplicar dano</button>
+                            <button type="button" disabled={!quantidadeValida} onClick={() => aplicarQuantidade('cura')} aria-label="Curar quantidade informada" className="min-h-11 rounded border border-green-500/40 px-3 text-sm text-green-300 disabled:opacity-45">Curar</button>
+                        </form>
+                    </fieldset>
 
                     {(combatant.pe || combatant.pd || combatant.san) && (
                         <div className="flex flex-wrap items-center gap-3 font-dados">
@@ -332,7 +334,7 @@ export const CombatantCard = forwardRef<HTMLDivElement, CombatantCardProps>(func
                         <span className="text-xs text-ordem-text-secondary mb-1 block">Condições:</span>
                         <ConditionPicker
                             selectedConditions={combatant.conditions}
-                            onAdd={(id) => onUpdate({ conditions: [...combatant.conditions, id] })}
+                            onAdd={(nome, reaplicacao) => onUpdate({ conditions: aplicarCondicao(combatant.conditions, nome, reaplicacao) })}
                             onRemove={(id) => onUpdate({ conditions: combatant.conditions.filter(c => c !== id) })}
                             compact
                         />

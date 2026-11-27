@@ -23,7 +23,7 @@ function MestreLink({
       prefetch={false}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'relative px-4 py-2.5 font-mono text-sm transition-colors whitespace-nowrap',
+        'relative inline-flex min-h-11 items-center px-2 xl:px-4 py-2.5 font-mono text-sm transition-colors whitespace-nowrap',
         active ? 'text-white' : 'text-ordem-text-secondary hover:text-ordem-white-muted',
       )}
     >
@@ -77,11 +77,11 @@ export function MestreNavbar({
         {(slotMobile ?? rightSlot) && <div className="flex shrink-0 items-center gap-1.5">{slotMobile ?? rightSlot}</div>}
       </div>
 
-      <div className="hidden h-16 items-center justify-between gap-6 px-6 lg:flex">
-        <div className="flex items-center gap-8">
-          <div className="flex shrink-0 flex-col">
-            <h1 className="font-serif text-xl leading-none tracking-wider text-ordem-red">{title}</h1>
-            <span className="font-mono text-[10px] tracking-[0.2em] text-ordem-text-secondary">{subtitle}</span>
+      <div className="hidden h-16 items-center justify-between gap-2 px-3 xl:gap-6 xl:px-6 lg:flex">
+        <div className="flex min-w-0 items-center gap-3 xl:gap-8">
+          <div className="flex min-w-0 flex-col">
+            <h1 className="truncate font-serif text-xl leading-none tracking-wider text-ordem-red">{title}</h1>
+            <span className="truncate font-mono text-[10px] tracking-[0.2em] text-ordem-text-secondary">{subtitle}</span>
           </div>
 
           <nav aria-label="Seções do mestre" className="flex items-center gap-1">
@@ -92,7 +92,7 @@ export function MestreNavbar({
         </div>
 
         <div className="flex items-center gap-3 pr-[124px]">
-          {rightSlot}
+          {slotMobile ? <><div className="2xl:hidden">{slotMobile}</div><div className="hidden 2xl:block">{rightSlot}</div></> : rightSlot}
           <Link
             href="/"
             title="Voltar ao início do site"

@@ -1,13 +1,15 @@
-import { condicoes, getCondicao } from '../../data/combat/conditions';
-
-const NOMES = new Set(condicoes.map((c) => c.nome));
+import { getCondicao } from '../../data/combat/conditions';
 
 export function ehCondicao(nome: string): boolean {
-  return NOMES.has(nome);
+  return getCondicao(nome)?.nome === nome;
 }
 
 export function apenasCondicoes(efeitos: readonly string[] | undefined): string[] {
-  return (efeitos ?? []).filter(ehCondicao);
+  const nomes = (efeitos ?? []).flatMap(efeito => {
+    const condicao = getCondicao(efeito);
+    return condicao ? [condicao.nome] : [];
+  });
+  return Array.from(new Set(nomes));
 }
 
 export type ReaplicacaoCondicao = 'acumulo-permitido' | 'entre-rituais';
@@ -20,7 +22,8 @@ export function aplicarCondicao(
 ): string[] {
   const condicao = getCondicao(nome);
   if (!condicao) return [...efeitos];
-  if (!efeitos.includes(condicao.nome)) return [...efeitos, condicao.nome];
+  const mesmaCondicao = (efeito: string) => getCondicao(efeito) === condicao;
+  if (!efeitos.some(mesmaCondicao)) return [...efeitos, condicao.nome];
   if (reaplicacao !== 'acumulo-permitido' || !condicao.acumulo) return [...efeitos];
-  return aplicarCondicao(efeitos.filter(efeito => efeito !== condicao.nome), condicao.acumulo, reaplicacao);
+  return aplicarCondicao(efeitos.filter(efeito => !mesmaCondicao(efeito)), condicao.acumulo, reaplicacao);
 }

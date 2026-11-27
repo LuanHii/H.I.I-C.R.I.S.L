@@ -59,3 +59,9 @@ O Oráculo encontrou os verbetes do livro base e do suplemento, além do texto d
 O seletor de modificações usa os grupos específicos da tabela 3.5. Coronha Rebatível, Cano Longo e Carregador Estendido ficaram identificados como ajustes de mesa, pois a revisão dos dois livros não localizou essas opções. Aplicações anteriores continuam legíveis e removíveis. Uma Espada cruel exibe `1d8+2/1d10+2`, e modificações duplicadas em fichas anteriores entram uma vez no cálculo.
 
 Munições comuns e reposições de dardos e cargas podem ser escolhidas como itens. Para Taser e Spray de Pimenta antigos, a ficha exibe o item fora da lista de ataques. Doses, munição, área, resistências, duração dos efeitos e modificações de proteção são resolvidas pelo mestre nesta etapa.
+
+## Catálogo de condições no guia e no combate
+
+A ficha, o seletor de combate, a referência rápida e a seção Condições do Guia do Mestre leem as entradas individuais de `src/data/combat/conditions.ts`. As categorias seguem o Apêndice do Livro de Regras v1.3. Consulte `Ordem PyMuPDF.md:12376–12485` e a regra de fim de cena na linha 12420. A remoção de Machucado e Perturbado segue o limite de recursos definido nas linhas 12456–12457 e 3538.
+
+Os artigos gerais preservam seus identificadores no guia. Em encontros salvos, referências que foram aplicadas como se fossem condições aparecem como registros antigos, com remoção manual. Uma referência como “Condições Fatais” não identifica se o combatente estava Morrendo, Inconsciente ou ambos. Condições conhecidas entram com seu nome no encontro. Ao incluir um agente, o combate lê as condições ativas da ficha naquele momento.

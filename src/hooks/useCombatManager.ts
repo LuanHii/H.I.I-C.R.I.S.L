@@ -14,6 +14,8 @@ import {
 } from '@dnd-kit/sortable';
 import { type Combatant, type CombatState, generateCombatantId, rollInitiative } from '@/components/master/CombatManagerTypes';
 import { REGRAS } from '@/data/reference/guiaRegras';
+import { agruparCondicoes, buscarCondicoes } from '@/data/combat/conditions';
+import { apenasCondicoes } from '@/core/rules/condicoes';
 import { montarCatalogoAmeacas } from '@/core/rules/catalogoAmeacas';
 import { useCloudCampanhas, useCloudFichas, useCloudMonsters, useCloudNPCs } from '@/core/storage';
 import { apresentarEfeitoDeRitual, formatarCustoDoRitual } from '@/core/rules/rituais';
@@ -25,8 +27,6 @@ import type { CombatantAbility } from '@/components/master/CombatManagerTypes';
 const QUICK_ACTIONS = REGRAS.filter(r =>
     r.categoria === 'combate' || r.categoria === 'ataques' || r.categoria === 'manobras'
 ).slice(0, 15);
-
-const QUICK_CONDITIONS = REGRAS.filter(r => r.categoria === 'condicoes').slice(0, 12);
 
 export function useCombatManager() {
     const { fichas, salvar: salvarFicha } = useCloudFichas();
@@ -68,6 +68,7 @@ export function useCombatManager() {
             san: p.usarPd ? undefined : { current: p.san?.atual ?? 0, max: p.san?.max ?? 0 },
             pd: p.usarPd && p.pd ? { current: p.pd.atual, max: p.pd.max } : undefined,
             defesa: p.defesa ?? 10,
+            conditions: apenasCondicoes(p.efeitosAtivos),
             initiativeSkill: prepararTesteDaFicha(p, 'Iniciativa') ?? undefined,
             abilities
         };
@@ -108,15 +109,10 @@ export function useCombatManager() {
         );
     }, [quickRefQuery]);
 
-    const filteredQuickConditions = useMemo(() => {
-        const q = quickRefQuery.trim().toLowerCase();
-        if (!q) return QUICK_CONDITIONS;
-        return QUICK_CONDITIONS.filter(rule =>
-            rule.titulo.toLowerCase().includes(q) ||
-            rule.resumo.toLowerCase().includes(q) ||
-            (rule.tags || []).some(t => t.toLowerCase().includes(q))
-        );
-    }, [quickRefQuery]);
+    const filteredQuickConditions = useMemo(
+        () => agruparCondicoes(buscarCondicoes(quickRefQuery)),
+        [quickRefQuery],
+    );
 
     useEffect(() => {
         try {

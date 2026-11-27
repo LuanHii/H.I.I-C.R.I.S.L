@@ -3,16 +3,15 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Personagem } from '../core/types';
-import { condicoes, getCategoriaCor, type CondicaoCompleta, type ConditionCategory } from '../data/combat/conditions';
-import { ConditionBadge, ConditionsSummary } from './ConditionBadge';
+import { agruparCondicoes, buscarCondicoes, getCategoriaCor, getCondicao, GRUPOS_DE_CONDICAO, remocaoDaCondicao, type CondicaoCompleta, type ConditionCategory } from '../data/combat/conditions';
+import { ConditionsSummary } from './ConditionBadge';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { Badge } from './ui/Badge';
-import { Collapsible } from './ui/Collapsible';
 import { listContainer, listItem, slideUp, scaleIn } from '@/lib/motion';
 import { Plus, X, Search } from 'lucide-react';
 import { RotuloSecao } from './master/ui/Pecas';
-import { aplicarCondicao, type ReaplicacaoCondicao } from '@/core/rules/condicoes';
+import { apenasCondicoes, aplicarCondicao, type ReaplicacaoCondicao } from '@/core/rules/condicoes';
 
 interface ConditionsManagerProps {
   personagem: Personagem;
@@ -30,9 +29,10 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
     () => personagem.efeitosAtivos || [],
     [personagem.efeitosAtivos]
   );
+  const nomesAtivos = useMemo(() => new Set(apenasCondicoes(activeConditions)), [activeConditions]);
 
   const handleAddCondition = (condicaoNome: string, reaplicacao?: ReaplicacaoCondicao) => {
-    const repetir = activeConditions.includes(condicaoNome);
+    const repetir = nomesAtivos.has(condicaoNome);
     const efeitosAtivos = reaplicacao && !repetir
       ? activeConditions
       : aplicarCondicao(activeConditions, condicaoNome, reaplicacao);
@@ -69,33 +69,15 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
   };
 
   const filteredConditions = useMemo(() => {
-    return condicoes.filter(c => {
-      const matchesSearch = c.nome.toLowerCase().includes(searchTerm.toLowerCase());
+    return buscarCondicoes(searchTerm).filter(c => {
       const matchesCategory = categoryFilter === 'todas' || (c.categoria ?? 'outros') === categoryFilter;
-      const podeAplicar = !activeConditions.includes(c.nome) || Boolean(c.acumulo);
-      return matchesSearch && matchesCategory && podeAplicar;
+      const podeAplicar = !nomesAtivos.has(c.nome) || Boolean(c.acumulo);
+      return matchesCategory && podeAplicar;
     });
-  }, [searchTerm, categoryFilter, activeConditions]);
+  }, [searchTerm, categoryFilter, nomesAtivos]);
 
-  const conditionsByCategory = useMemo(() => {
-    const grouped: Record<string, CondicaoCompleta[]> = {};
-    for (const cond of filteredConditions) {
-      const cat = cond.categoria || 'outros';
-      if (!grouped[cat]) grouped[cat] = [];
-      grouped[cat].push(cond);
-    }
-    return grouped;
-  }, [filteredConditions]);
-
-  const categories: Array<{ value: ConditionCategory | 'todas'; label: string }> = [
-    { value: 'todas', label: 'Todas' },
-    { value: 'medo', label: 'Medo' },
-    { value: 'mental', label: 'Mental' },
-    { value: 'paralisia', label: 'Paralisia' },
-    { value: 'sentidos', label: 'Sentidos' },
-    { value: 'fadiga', label: 'Fadiga' },
-    { value: 'outros' as ConditionCategory, label: 'Outros' }
-  ];
+  const conditionsByCategory = useMemo(() => agruparCondicoes(filteredConditions), [filteredConditions]);
+  const categories = [{ value: 'todas' as const, label: 'Todas' }, ...GRUPOS_DE_CONDICAO.map(grupo => ({ value: grupo.id, label: grupo.titulo }))];
 
   return (
     <div className="space-y-3">
@@ -197,22 +179,22 @@ export const ConditionsManager: React.FC<ConditionsManagerProps> = ({ personagem
                 animate="animate"
                 className="max-h-64 overflow-y-auto space-y-1 custom-scrollbar"
               >
-                {Object.entries(conditionsByCategory).map(([category, conds]) => (
-                  <div key={category}>
+                {conditionsByCategory.map(grupo => (
+                  <div key={grupo.id}>
                     <div className="sticky top-0 z-10 bg-ordem-black-deep px-2 py-1 font-carimbo text-[10px] uppercase tracking-[0.18em] text-ordem-text-muted">
-                      {category}
+                      {grupo.titulo}
                     </div>
-                    {conds.map(cond => (
+                    {grupo.condicoes.map(cond => (
                       <motion.button
                         key={cond.nome}
                         variants={listItem}
                         whileHover={{ x: 4, backgroundColor: 'rgba(58, 58, 58, 0.5)' }}
-                        onClick={() => activeConditions.includes(cond.nome) ? setReaplicando(cond) : handleAddCondition(cond.nome)}
+                        onClick={() => nomesAtivos.has(cond.nome) ? setReaplicando(cond) : handleAddCondition(cond.nome)}
                         className="w-full text-left px-3 py-2.5 flex flex-col gap-0.5 group border-l-2 border-transparent hover:border-l-2"
                       >
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-ordem-white group-hover:text-red-400 text-sm transition-colors">
-                            {activeConditions.includes(cond.nome) ? `Reaplicar ${cond.nome}` : cond.nome}
+                            {nomesAtivos.has(cond.nome) ? `Reaplicar ${cond.nome}` : cond.nome}
                           </span>
                           {cond.efeito?.defesa && (
                             <Badge variant="danger" size="sm">
@@ -292,7 +274,7 @@ interface ConditionCardActiveProps {
 
 const ConditionCardActive: React.FC<ConditionCardActiveProps> = ({ nome, onRemove }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const cond = condicoes.find(c => c.nome === nome);
+  const cond = getCondicao(nome);
 
   if (!cond) {
     return (
@@ -466,12 +448,10 @@ const ConditionCardActive: React.FC<ConditionCardActiveProps> = ({ nome, onRemov
                     <span className="opacity-80">Torna-se <span className="underline">{cond.acumulo}</span></span>
                   </div>
                 )}
-                {cond.remocao && (
-                  <div className="flex gap-1">
-                    <span className="font-bold shrink-0">Remoção:</span>
-                    <span className="opacity-80">{cond.remocao}</span>
-                  </div>
-                )}
+                <div className="flex gap-1">
+                  <span className="font-bold shrink-0">Como termina</span>
+                  <span className="opacity-80">{remocaoDaCondicao(cond)}</span>
+                </div>
               </div>
             </div>
           </motion.div>

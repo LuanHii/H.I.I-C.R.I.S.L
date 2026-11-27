@@ -24,6 +24,7 @@ interface AgenteEncontro {
   pd?: Combatant['pd'];
   san?: Combatant['san'];
   defesa: number;
+  conditions: string[];
   initiativeSkill?: PericiaDetalhada;
   abilities?: CombatantAbility[];
 }
@@ -114,7 +115,7 @@ export function AddCombatantModal({ isOpen, revisao, setRevisao, onClose, onAdd,
           id: generateCombatantId(), name: agente.nome, type: 'agent', sourceId: agente.id,
           initiative: 0, initiativeBonus: bonus, initiativeSkill: agente.initiativeSkill,
           hp: { ...agente.hp }, pe: agente.pe ? { ...agente.pe } : undefined, pd: agente.pd ? { ...agente.pd } : undefined, san: agente.san ? { ...agente.san } : undefined,
-          defense: agente.defesa, conditions: [], notes: '', isActive: true, abilities: agente.abilities,
+          defense: agente.defesa, conditions: [...agente.conditions], notes: '', isActive: true, abilities: agente.abilities,
         });
       } else if (entrada.tipo === 'ameaca') {
         const origem = threats.find(t => t.chave === entrada.id);

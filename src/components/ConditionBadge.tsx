@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { calcularPenalidadeDados, calcularPenalidadeDefesa, combinarModificadoresDeCondicao, getCondicao, getCategoriaCor, getCategoriaIcon, type CondicaoCompleta } from '../data/combat/conditions';
+import { calcularPenalidadeDados, calcularPenalidadeDefesa, combinarModificadoresDeCondicao, getCondicao, getCategoriaCor, getCategoriaIcon, remocaoDaCondicao, type CondicaoCompleta } from '../data/combat/conditions';
 
 interface ConditionBadgeProps {
     nome: string;
@@ -23,6 +23,11 @@ export const ConditionBadge: React.FC<ConditionBadgeProps> = ({
     return (
         <div
             className="relative inline-block"
+            tabIndex={showTooltip && cond ? 0 : undefined}
+            onFocus={() => setIsHovered(true)}
+            onBlur={event => {
+                if (!event.currentTarget.contains(event.relatedTarget)) setIsHovered(false);
+            }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -33,12 +38,13 @@ export const ConditionBadge: React.FC<ConditionBadgeProps> = ({
         ${categoriaClasses}
       `}>
                 {!compact && <span className="text-xs">{icon}</span>}
-                <span className="font-medium">{nome}</span>
+                <span className="font-medium">{cond?.nome ?? nome}</span>
                 {onRemove && (
                     <button
+                        type="button"
                         onClick={(e) => { e.stopPropagation(); onRemove(); }}
                         className="ml-1 hover:text-white transition-colors"
-                        title="Remover condição"
+                        aria-label={'Remover ' + (cond?.nome ?? nome)}
                     >
                         ✕
                     </button>
@@ -138,11 +144,9 @@ export const ConditionBadge: React.FC<ConditionBadgeProps> = ({
                         </div>
                     )}
 
-                    {cond.remocao && (
-                        <div className="text-[11px] text-green-400">
-                            <span className="font-bold">Remoção:</span> {cond.remocao}
-                        </div>
-                    )}
+                    <div className="text-[11px] text-green-400">
+                        <span className="font-bold">Como termina</span> {remocaoDaCondicao(cond)}
+                    </div>
                 </div>
             )}
         </div>

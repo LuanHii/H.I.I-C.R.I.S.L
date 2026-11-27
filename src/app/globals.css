@@ -154,6 +154,10 @@ body {
     min-height: 44px;
   }
 
+  :where(summary, [role="tab"], textarea, input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"])) {
+    min-height: 44px;
+  }
+
   /* Add touch feedback */
   button:active,
   a:active,
@@ -389,7 +393,7 @@ html[data-overlay='valor'] .vinheta {
 }
 
 /* Celular: fonte 16px em campos evita o zoom automático do iOS ao focar. */
-@media (max-width: 1023px) {
+@media (max-width: 1023px), (pointer: coarse) {
   input:not([type='checkbox']):not([type='radio']),
   select,
   textarea {

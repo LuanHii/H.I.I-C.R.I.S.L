@@ -9,7 +9,7 @@ export default function MainLayout({
   return (
     <>
       <NavBar />
-      <main id="conteudo-principal" className="relative z-10 mx-auto max-w-6xl px-4 pb-8 pt-[calc(var(--altura-app-bar)+1rem)] sm:pt-28">
+      <main id="conteudo-principal" className="relative z-10 mx-auto max-w-6xl px-4 pb-8 pt-[calc(var(--altura-app-bar)+1rem)] sm:pt-[calc(4.75rem+env(safe-area-inset-top))]">
         {children}
       </main>
     </>

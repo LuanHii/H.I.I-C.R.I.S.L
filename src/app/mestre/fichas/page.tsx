@@ -6,12 +6,12 @@ import { AbasDoMestre } from '../../../components/master/AbasDoMestre';
 
 export default function FichasPage() {
   return (
-    <div className="min-h-screen bg-ordem-black text-ordem-white flex flex-col">
+    <div className="h-dvh min-h-0 bg-ordem-black text-ordem-white flex flex-col">
       <MestreNavbar
         title="MESTRE"
         subtitle="ARQUIVO // FICHAS"
       />
-      <main className="flex-1 overflow-hidden bg-ordem-black-deep">
+      <main className="flex min-h-0 flex-1 flex-col overflow-hidden bg-ordem-black-deep">
         <FichasManager />
       </main>
       <AbasDoMestre />

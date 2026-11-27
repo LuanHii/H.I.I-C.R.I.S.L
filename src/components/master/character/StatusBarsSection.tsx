@@ -22,7 +22,7 @@ export function StatusBarsSection({
   const onMaxChange = isEditingMode ? onMaxStatChange : undefined;
 
   return (
-    <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+    <div className="mb-4 grid grid-cols-[repeat(auto-fit,minmax(min(100%,13rem),1fr))] gap-3">
       <StatusBar label="PV" current={agent.pv.atual} max={agent.pv.max} color="red" onChange={(v) => onStatChange('pv', v)} onMaxChange={onMaxChange ? (v) => onMaxChange('pv', v) : undefined} readOnly={readOnly} />
       {agent.usarPd ? (
         <StatusBar label="PD" current={agent.pd?.atual || 0} max={agent.pd?.max || 0} color="purple" onChange={(v) => onStatChange('pd', v)} onMaxChange={onMaxChange ? (v) => onMaxChange('pd', v) : undefined} readOnly={readOnly} />

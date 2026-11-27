@@ -25,6 +25,7 @@ import { AddCombatantModal } from './AddCombatantModal';
 import { DiceRoller } from './DiceRoller';
 import { cn } from '@/lib/utils';
 import { useCombatManager } from '@/hooks/useCombatManager';
+import { remocaoDaCondicao } from '@/data/combat/conditions';
 
 function SortableCombatantCard({
     combatant,
@@ -186,7 +187,7 @@ export function CombatManager() {
                 </div>
             </section>
 
-            <div className="flex flex-col gap-5 xl:flex-row xl:gap-6">
+            <div className="flex flex-col gap-5 lg:flex-row lg:gap-4 xl:gap-6">
                 <div className="min-w-0 flex-1">
                     {state.combatants.length === 0 ? (
                         <motion.div
@@ -280,7 +281,7 @@ export function CombatManager() {
                             initial={{ opacity: 0, y: -8 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0 }}
-                            className="order-first w-full min-w-0 shrink-0 xl:order-none xl:w-80"
+                            className="order-first w-full min-w-0 shrink-0 lg:order-none lg:w-72 xl:w-80"
                         >
                             <div className="w-full overflow-hidden rounded-xl border border-ordem-border bg-ordem-ooze/50">
                                 <div className="p-3 border-b border-ordem-border bg-ordem-black/50">
@@ -319,7 +320,7 @@ export function CombatManager() {
                                     </button>
                                 </div>
 
-                                <div className="max-h-[calc(100vh-300px)] overflow-y-auto custom-scrollbar">
+                                <div className="max-h-[min(55dvh,36rem)] overflow-y-auto custom-scrollbar">
                                     {quickRefTab === 'dice' && (
                                         <div className="p-2">
                                             <DiceRoller compact />
@@ -359,20 +360,22 @@ export function CombatManager() {
                                                 value={quickRefQuery}
                                                 onChange={(e) => setQuickRefQuery(e.target.value)}
                                                 placeholder="Buscar condições..."
+                                                aria-label="Buscar condições na referência rápida"
                                                 className="w-full bg-ordem-black/40 border border-ordem-border-light text-white px-3 py-2 rounded focus:border-ordem-red focus:outline-none text-xs"
                                             />
-                                            <div className="text-[10px] text-ordem-text-muted">
-                                                {filteredQuickConditions.length} resultado(s)
-                                            </div>
-                                            {filteredQuickConditions.map(rule => (
-                                                <div
-                                                    key={rule.id}
-                                                    className="p-2 hover:bg-ordem-ooze rounded transition-colors"
-                                                    title={rule.detalhes || rule.resumo}
-                                                >
-                                                    <h4 className="text-sm font-medium text-white">{rule.titulo}</h4>
-                                                    <p className="text-xs text-ordem-text-muted">{rule.resumo}</p>
-                                                </div>
+                                            {filteredQuickConditions.map(grupo => (
+                                                <section key={grupo.id} aria-label={grupo.titulo} className="border-t border-ordem-border pt-2">
+                                                    <h4 className="px-2 text-xs font-semibold text-ordem-text-secondary">{grupo.titulo}</h4>
+                                                    {grupo.condicoes.map(condicao => (
+                                                        <details key={condicao.nome} className="rounded p-2 text-xs text-ordem-text-secondary hover:bg-ordem-ooze">
+                                                            <summary className="cursor-pointer text-sm font-medium text-white">{condicao.nome}</summary>
+                                                            <p className="mt-2">{condicao.descricao}</p>
+                                                            {condicao.especial && <p className="mt-1">{condicao.especial}</p>}
+                                                            {condicao.acumulo && <p className="mt-1">Pode agravar para {condicao.acumulo} quando a fonte permitir.</p>}
+                                                            <p className="mt-2"><strong className="text-white">Como termina</strong> {remocaoDaCondicao(condicao)}</p>
+                                                        </details>
+                                                    ))}
+                                                </section>
                                             ))}
                                             {filteredQuickConditions.length === 0 && (
                                                 <div className="text-xs text-ordem-text-muted italic py-2">

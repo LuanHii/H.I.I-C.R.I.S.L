@@ -2,8 +2,12 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { ActionsTab } from '@/components/ActionsTab';
+import { ConditionBadges } from '@/components/master/ConditionPicker';
 import type { Item } from '@/core/types';
 import { WEAPONS } from '@/data/combat/weapons';
+import { condicoes } from '@/data/combat/conditions';
+import { aplicarCondicao } from '@/core/rules/condicoes';
+import { buscarRegras, regrasPorCategoria } from '@/data/reference/guiaRegras';
 import { prepararAtaquesDaFicha } from '@/logic/combatUtils';
 import { criarFicha } from '@/testUtils/fixtures';
 
@@ -80,5 +84,32 @@ describe('resumo de ataques de OP1', () => {
     const ficha = criarFicha({ classe: 'Combatente' });
     ficha.equipamentos = [arma, { ...arma, nome: 'Taser' }, { ...arma, nome: 'Spray de Pimenta' }];
     expect(prepararAtaquesDaFicha(ficha).map(ataque => ataque.item.nome)).toEqual([arma.nome]);
+  });
+});
+
+describe('condições individuais no combate e no guia de OP1', () => {
+  it('o guia contém uma entrada por condição e deixa os artigos de combate na categoria correspondente', () => {
+    const entradas = regrasPorCategoria('condicoes');
+    expect(entradas.map(regra => regra.titulo).sort()).toEqual(condicoes.map(condicao => condicao.nome).sort());
+    expect(regrasPorCategoria('combate').some(regra => regra.id === 'dano-nao-letal')).toBe(true);
+    expect(buscarRegras('caido').some(regra => regra.titulo === 'Caído')).toBe(true);
+  });
+
+  it('aceita grafias sem acento e evita duplicar condições salvas com formas antigas', () => {
+    expect(aplicarCondicao([], 'em-chamas')).toEqual(['Em Chamas']);
+    expect(aplicarCondicao(['caido'], 'Caído')).toEqual(['caido']);
+    expect(aplicarCondicao(['Fatigado'], 'Fatigado', 'acumulo-permitido')).toEqual(['Exausto']);
+  });
+
+  it('exibe a condição individual e permite remover uma referência antiga sem inferir condições', () => {
+    const html = renderToStaticMarkup(createElement(ConditionBadges, {
+      conditions: ['caido', 'ferimento-morte', 'Condição da mesa'],
+      onRemove: () => undefined,
+    }));
+    expect(html).toContain('Remover Caído');
+    expect(html).toContain('Registro antigo');
+    expect(html).toContain('Condições Fatais (Morrendo e Inconsciente)');
+    expect(html).toContain('Condição da mesa');
+    expect(html).not.toContain('aria-label="Remover Morrendo"');
   });
 });

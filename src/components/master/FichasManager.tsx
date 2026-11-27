@@ -395,7 +395,7 @@ export function FichasManager() {
         </div>
 
         {acoesAbertas.has(registro.id) && (
-        <div className="relative mt-3 grid grid-cols-2 gap-1.5 border-t border-white/[0.06] pt-3 sm:grid-cols-3">
+        <div className="relative mt-3 grid grid-cols-[repeat(auto-fit,minmax(min(100%,7rem),1fr))] gap-1.5 border-t border-white/[0.06] pt-3">
           <button
             type="button"
             onClick={(event) => {
@@ -500,11 +500,11 @@ export function FichasManager() {
   };
 
   return (
-    <div className="flex h-[calc(100dvh-var(--altura-app-bar))] flex-col overflow-hidden lg:grid lg:h-[calc(100vh-64px)] lg:grid-cols-3">
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden lg:grid lg:grid-cols-[minmax(18rem,30%)_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)]">
       <section
         className={`
           lg:border-r border-ordem-border
-          flex flex-col gap-3 overflow-hidden p-3 lg:gap-4 lg:p-6
+          min-h-0 min-w-0 flex-col gap-3 overflow-y-auto overscroll-contain p-3 lg:p-4
           ${mobileDetailOpen ? 'hidden lg:flex' : 'flex'}
           ${isSidebarCollapsed ? 'lg:hidden' : ''}
         `}
@@ -589,7 +589,7 @@ export function FichasManager() {
         )}
 
         {fichasViewMode === 'observadas' && isLoggedIn ? (
-          <div className="flex-1 overflow-y-auto -mx-4 px-4 lg:mx-0 lg:px-0">
+          <div className="pb-16 -mx-3 px-3 lg:pb-0 lg:mx-0 lg:px-0">
             <WatchedFichasSection />
           </div>
         ) : (
@@ -611,7 +611,7 @@ export function FichasManager() {
                 type="button"
                 onClick={() => setFiltrosAbertos((v) => !v)}
                 aria-expanded={filtrosAbertos}
-                className="flex h-11 w-full items-center justify-between border border-white/10 px-3 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary lg:hidden"
+                className="flex h-11 w-full items-center justify-between border border-white/10 px-3 font-carimbo text-[10px] uppercase tracking-[0.16em] text-ordem-text-secondary 2xl:hidden"
               >
                 <span className="flex items-center gap-2">
                   <SlidersHorizontal size={14} />
@@ -622,7 +622,7 @@ export function FichasManager() {
                 </span>
               </button>
 
-              <div className={`${filtrosAbertos ? 'flex' : 'hidden'} flex-col gap-2 lg:flex`}>
+              <div className={`${filtrosAbertos ? 'flex' : 'hidden'} flex-col gap-2 2xl:flex`}>
               <div className="flex flex-wrap items-center gap-2">
                 <select
                   value={filtroClasse}
@@ -726,7 +726,7 @@ export function FichasManager() {
               </div>
             </div>
 
-            <div className="-mx-3 flex-1 space-y-3 overflow-y-auto px-3 pb-[calc(60px+env(safe-area-inset-bottom))] touch-scroll custom-scrollbar lg:mx-0 lg:px-0 lg:pb-0 lg:pr-2">
+            <div className="-mx-3 space-y-3 px-3 pb-[calc(60px+env(safe-area-inset-bottom))] touch-scroll custom-scrollbar lg:mx-0 lg:px-0 lg:pb-0 lg:pr-2">
               {campanhas.map((campanha, indiceCampanha) => (!buscaAtiva || !!fichasPorCampanha.get(campanha.id)?.length) && (
                 <CampanhaSection
                   key={campanha.id}
@@ -801,8 +801,8 @@ export function FichasManager() {
 
       <section
         className={`
-          lg:col-span-2 bg-ordem-black-deep overflow-hidden flex flex-col
-          ${isSidebarCollapsed ? 'lg:col-span-3' : ''}
+          min-w-0 min-h-0 bg-ordem-black-deep overflow-hidden flex flex-col
+          ${isSidebarCollapsed ? 'lg:col-span-2' : ''}
           ${mobileDetailOpen ? 'absolute inset-0 z-50 lg:relative lg:z-auto' : 'hidden lg:flex'}
         `}
       >
@@ -823,7 +823,7 @@ export function FichasManager() {
             </div>
 
             <div className="hidden lg:flex items-center justify-between p-4 border-b border-ordem-border bg-ordem-black shrink-0">
-              <div className="flex items-center gap-4">
+              <div className="flex min-w-0 items-center gap-4">
                 <button
                   onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
                   className="-ml-2 flex items-center justify-center border border-white/10 p-2 text-ordem-text-muted transition-colors hover:border-white/30 hover:text-white"
@@ -855,8 +855,8 @@ export function FichasManager() {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto touch-scroll p-3 pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:p-6">
-              <div className="overflow-hidden border border-white/10">
+            <div className="flex-1 overflow-y-auto touch-scroll p-3 pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:p-4">
+              <div className="min-w-0 border border-white/10">
                 {registroAtual && <AtalhosEncontroFicha id={registroAtual.id} nome={fichaAtual.nome} />}
                 {registroAtual?.fonte === 'v2' && registroAtual.ficha ? (
                   <FichaMestre

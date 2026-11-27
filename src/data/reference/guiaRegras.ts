@@ -1,3 +1,6 @@
+import { chaveDeComparacao } from '../../core/rules/pericias';
+import { condicoes, remocaoDaCondicao, type ConditionCategory } from '../combat/conditions';
+
 export type RegraCategoria =
     | 'criacao'
     | 'testes'
@@ -14,6 +17,7 @@ export interface Regra {
     id: string;
     titulo: string;
     categoria: RegraCategoria;
+    grupoCondicao?: ConditionCategory;
     resumo: string;
     detalhes?: string;
     tabela?: { cabecalho: string[]; linhas: string[][] };
@@ -27,14 +31,14 @@ export const CATEGORIAS: { id: RegraCategoria; nome: string; icone: string; cor:
     { id: 'combate', nome: 'Combate (Estrutura)', icone: '⚔️', cor: 'text-red-400' },
     { id: 'ataques', nome: 'Ações e Ataques', icone: '🎯', cor: 'text-orange-400' },
     { id: 'manobras', nome: 'Manobras de Combate', icone: '🤼', cor: 'text-yellow-400' },
-    { id: 'condicoes', nome: 'Condições e Ferimentos', icone: '💀', cor: 'text-purple-400' },
+    { id: 'condicoes', nome: 'Condições', icone: '💀', cor: 'text-purple-400' },
     { id: 'sanidade', nome: 'Sanidade e Loucura', icone: '🧠', cor: 'text-cyan-400' },
     { id: 'rituais', nome: 'Rituais', icone: '✨', cor: 'text-pink-400' },
     { id: 'equipamento', nome: 'Equipamento', icone: '🔧', cor: 'text-green-400' },
     { id: 'investigacao', nome: 'Investigação', icone: '🔍', cor: 'text-amber-400' },
 ];
 
-export const REGRAS: Regra[] = [
+const REFERENCIAS: Regra[] = [
 
     {
         id: 'estrutura-combate',
@@ -269,7 +273,7 @@ export const REGRAS: Regra[] = [
     {
         id: 'ferimento-morte',
         titulo: 'Condições Fatais (Morrendo e Inconsciente)',
-        categoria: 'condicoes',
+        categoria: 'combate',
         resumo: 'Regras de PV, Estabilização e Morte.',
         detalhes: '• Machucado: PV ≤ metade do máximo.\n• Ao chegar a 0 PV, fica Inconsciente e Morrendo, salvo exceções como dano não letal.\n• Morte: começa três turnos Morrendo na mesma cena, mesmo quando não são consecutivos.\n\nCurar pelo menos 1 PV encerra a inconsciência causada por chegar a 0 PV. Morrendo exige Medicina ou efeito específico. Primeiros Socorros gastam uma ação padrão em alvo adjacente, Morrendo e Inconsciente (DT 20, +5 por estabilização anterior na cena). Em sucesso, o alvo perde as duas condições e fica com 1 PV.\n\nDano Massivo: dano de pelo menos metade dos PV máximos de uma só vez, sem chegar a 0 PV, exige Fortitude (DT 15 + 2 por cada 10 pontos de dano sofrido). Na falha, vai a 0 PV.',
         tags: ['morte', 'morrendo', 'pv', 'dano massivo', 'inconsciente', 'machucado']
@@ -277,7 +281,7 @@ export const REGRAS: Regra[] = [
     {
         id: 'dano-nao-letal',
         titulo: 'Dano Não Letal',
-        categoria: 'condicoes',
+        categoria: 'combate',
         resumo: 'Ataques nocautes dão -5 no acerto.',
         detalhes: '• Dano não letal soma com o letal para determinar Inconsciente. Para determinar Morrendo, considere apenas o dano letal.\n• Se houver ambos quando o alvo receber cura, cure primeiro o dano não letal.\n• Para trocar dano letal por não letal com arma corpo a corpo, aplique -5 no teste de ataque. Também se aplica -5 ao converter para letal um ataque desarmado ou arma que costuma causar dano não letal.',
         tags: ['não letal', 'nocaute', 'apagar']
@@ -285,7 +289,7 @@ export const REGRAS: Regra[] = [
     {
         id: 'condicoes-debilitantes',
         titulo: 'Debuffs Escaláveis (Atributos e Fadiga)',
-        categoria: 'condicoes',
+        categoria: 'testes',
         resumo: 'Condições que pioram ao aplicar repetidas vezes.',
         tabela: {
             cabecalho: ['Tipo', 'Progressão', 'Efeito Final'],
@@ -300,7 +304,7 @@ export const REGRAS: Regra[] = [
     {
         id: 'condicoes-paralisia-dano',
         titulo: 'Condições Punitivas (Chamas, Sangramento)',
-        categoria: 'condicoes',
+        categoria: 'combate',
         resumo: 'Fogo, Venenos e asfixia causam dano por turno.',
         tabela: {
             cabecalho: ['Doença/Situação', 'Regra da Condição'],
@@ -317,7 +321,7 @@ export const REGRAS: Regra[] = [
     {
         id: 'imunidade-e-remocao-de-condicoes',
         titulo: 'Imunidade e Remoção de Condições',
-        categoria: 'condicoes',
+        categoria: 'testes',
         resumo: 'Confira a origem da condição e se a proteção está ativa.',
         tabela: {
             cabecalho: ['Fonte', 'Regra'],
@@ -333,7 +337,7 @@ export const REGRAS: Regra[] = [
     {
         id: 'condicoes-sentidos-mente',
         titulo: 'Condições Mentais, Sentidos e Medo',
-        categoria: 'condicoes',
+        categoria: 'testes',
         resumo: 'Cego, Surdo, Pasmo, Confuso e Tabela de Medo.',
         tabela: {
             cabecalho: ['Condição', 'Problema Mecânico'],
@@ -354,7 +358,7 @@ export const REGRAS: Regra[] = [
     {
         id: 'outras-condicoes',
         titulo: 'Condições Clássicas (Indefeso, Vulnerável, etc)',
-        categoria: 'condicoes',
+        categoria: 'combate',
         resumo: 'Penalidades de defesa do grid.',
         tabela: {
             cabecalho: ['Nome', 'Regra'],
@@ -575,14 +579,28 @@ export const REGRAS: Regra[] = [
     }
 ];
 
+export const REGRAS: Regra[] = [
+    ...REFERENCIAS,
+    ...condicoes.map((condicao): Regra => ({
+        id: 'condicao-' + chaveDeComparacao(condicao.nome).replace(/\s+/g, '-'),
+        titulo: condicao.nome,
+        categoria: 'condicoes',
+        grupoCondicao: condicao.categoria ?? 'outros',
+        resumo: condicao.descricao,
+        detalhes: [
+            condicao.especial,
+            condicao.acumulo && `Quando a fonte permite agravar, torna-se ${condicao.acumulo}.`,
+            `Como termina\n${remocaoDaCondicao(condicao)}`,
+        ].filter(Boolean).join('\n\n'),
+        tags: condicao.categoria ? [condicao.categoria] : [],
+    })),
+];
+
 export function buscarRegras(query: string): Regra[] {
-    const q = query.toLowerCase();
-    return REGRAS.filter(r =>
-        r.titulo.toLowerCase().includes(q) ||
-        r.resumo.toLowerCase().includes(q) ||
-        (r.detalhes && r.detalhes.toLowerCase().includes(q)) ||
-        r.tags.some(tag => tag.toLowerCase().includes(q))
-    );
+    const q = chaveDeComparacao(query);
+    return REGRAS.filter(regra =>
+        [regra.titulo, regra.resumo, regra.detalhes ?? '', ...regra.tags].some(texto => chaveDeComparacao(texto).includes(q))
+    ).sort((a, b) => Number(chaveDeComparacao(b.titulo) === q) - Number(chaveDeComparacao(a.titulo) === q));
 }
 
 export function regrasPorCategoria(categoria: RegraCategoria): Regra[] {

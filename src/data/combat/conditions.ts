@@ -1,6 +1,16 @@
 import type { Condicao, TipoAtaqueCondicao } from '../../core/types';
+import { chaveDeComparacao } from '../../core/rules/pericias';
 
 export type ConditionCategory = 'medo' | 'mental' | 'paralisia' | 'sentidos' | 'fadiga' | 'outros';
+
+export const GRUPOS_DE_CONDICAO: readonly { id: ConditionCategory; titulo: string }[] = [
+  { id: 'medo', titulo: 'Medo' },
+  { id: 'mental', titulo: 'Mentais' },
+  { id: 'paralisia', titulo: 'Paralisia' },
+  { id: 'sentidos', titulo: 'Sentidos' },
+  { id: 'fadiga', titulo: 'Fadiga' },
+  { id: 'outros', titulo: 'Outras condições' },
+];
 
 export interface CondicaoCompleta extends Condicao {
   categoria?: ConditionCategory;
@@ -292,7 +302,8 @@ export const condicoes: CondicaoCompleta[] = [
   {
     nome: 'Machucado',
     descricao: 'O personagem tem metade ou menos de seus pontos de vida totais.',
-    especial: 'Esta é uma condição de status, não causa penalidades diretas mas pode ativar efeitos de outras habilidades.'
+    especial: 'Pode ativar efeitos de algumas habilidades, como Sangue Vivo.',
+    remocao: 'Encerra ao recuperar PV suficientes para ficar acima da metade dos PV máximos.'
   },
   {
     nome: 'Morrendo',
@@ -338,7 +349,8 @@ export const condicoes: CondicaoCompleta[] = [
   {
     nome: 'Perturbado',
     descricao: 'O personagem tem menos da metade de seus pontos de Sanidade totais.',
-    especial: 'Na primeira vez que isso acontece em uma cena, você recebe um efeito de insanidade. Esta é uma condição de status e não causa penalidades diretas.'
+    especial: 'Na primeira vez que isso acontece em uma cena, você recebe um efeito de insanidade que afeta sua interpretação.',
+    remocao: 'Encerra ao recuperar Sanidade suficiente para atingir pelo menos metade do total.'
   },
   {
     nome: 'Petrificado',
@@ -388,8 +400,30 @@ export const condicoes: CondicaoCompleta[] = [
   }
 ];
 
+function chaveDaCondicao(nome: string): string {
+  return chaveDeComparacao(nome).replace(/[-\s]+/g, ' ');
+}
+
+const CONDICOES_POR_NOME = new Map(condicoes.map(condicao => [chaveDaCondicao(condicao.nome), condicao]));
+
 export function getCondicao(nome: string): CondicaoCompleta | undefined {
-  return condicoes.find(c => c.nome.toLowerCase() === nome.toLowerCase());
+  return CONDICOES_POR_NOME.get(chaveDaCondicao(nome));
+}
+
+export function buscarCondicoes(busca: string): CondicaoCompleta[] {
+  const termo = chaveDaCondicao(busca);
+  return condicoes.filter(condicao => chaveDaCondicao(condicao.nome).includes(termo));
+}
+
+export function agruparCondicoes(lista: readonly CondicaoCompleta[]) {
+  return GRUPOS_DE_CONDICAO.map(grupo => ({
+    ...grupo,
+    condicoes: lista.filter(condicao => (condicao.categoria ?? 'outros') === grupo.id),
+  })).filter(grupo => grupo.condicoes.length > 0);
+}
+
+export function remocaoDaCondicao(condicao: CondicaoCompleta): string {
+  return condicao.remocao ?? FIM_DA_DURACAO;
 }
 
 // Livro de Regras v1.3, Apêndice > Exceções & Explicações > Condições

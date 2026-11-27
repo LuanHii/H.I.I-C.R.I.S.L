@@ -235,7 +235,7 @@ export function FichaMestre({
   ];
 
   return (
-    <div data-classe={ficha.identidade.classe} className="relative flex flex-col lg:h-full">
+    <div data-classe={ficha.identidade.classe} className="relative flex min-w-0 flex-col">
       <span aria-hidden className="mestre-aura pointer-events-none absolute inset-x-0 top-0 h-64" />
 
       <CabecalhoFicha
