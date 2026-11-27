@@ -65,3 +65,15 @@ Munições comuns e reposições de dardos e cargas podem ser escolhidas como it
 A ficha, o seletor de combate, a referência rápida e a seção Condições do Guia do Mestre leem as entradas individuais de `src/data/combat/conditions.ts`. As categorias seguem o Apêndice do Livro de Regras v1.3. Consulte `Ordem PyMuPDF.md:12376–12485` e a regra de fim de cena na linha 12420. A remoção de Machucado e Perturbado segue o limite de recursos definido nas linhas 12456–12457 e 3538.
 
 Os artigos gerais preservam seus identificadores no guia. Em encontros salvos, referências que foram aplicadas como se fossem condições aparecem como registros antigos, com remoção manual. Uma referência como “Condições Fatais” não identifica se o combatente estava Morrendo, Inconsciente ou ambos. Condições conhecidas entram com seu nome no encontro. Ao incluir um agente, o combate lê as condições ativas da ficha naquele momento.
+
+## Revisão OP1 · Catálogo de rituais
+
+Conferência de nome, livro, elemento e círculo nas 82 descrições do livro básico e nas 16 do suplemento. Amaldiçoar Arma tem quatro elementos possíveis e uma única descrição no livro. A criação e a progressão registram o elemento escolhido. O nome antigo Comando Inexistente corresponde a Pronunciar Sigilo.
+
+| Caso | Fonte da revisão |
+| --- | --- |
+| Espirais da Perdição, Ouvir os Sussurros e Tecer Ilusão | Ordem PyMuPDF.md, linhas 5354–5367, 5636–5653 e 5842–5857. |
+| Singularidade Temporal, Pronunciar Sigilo e Tremeluzir | SOH PyMuPDF.md, linhas 1573–1586, 1621–1636 e 1647–1652. O Oráculo também localizou Singularidade Temporal pelo nome exato. |
+| Milagre Ionizante | SOH PyMuPDF.md, linha 1669 em diante. O PDF do suplemento, página 57 do arquivo, traz Energia 3. |
+| Amaldiçoar Arma e acesso aos círculos | Ordem PyMuPDF.md, linhas 4783–4796, 1169–1171 e 4200–4203. O limite de Aprender Ritual depende do NEX e difere do limite da classe Ocultista. |
+| Rituais de Medo | Ordem PyMuPDF.md, linhas 4561–4565 e 4753. Os cinco de 4º círculo exigem poder de trilha. Rejeitar Névoa consta no livro básico, linha 5789. |

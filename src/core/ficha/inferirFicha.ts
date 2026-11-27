@@ -7,7 +7,7 @@ import { PODERES } from '../../data/character/powers';
 import { buildFicha } from './buildFicha';
 import { nomesAutomaticos } from './automaticos';
 import { circuloMaximoPorNivel } from './opcoes';
-import { RITUAIS } from '../../data/magic/rituals';
+import { ritualPorChave, chaveDoRitual } from '../../data/magic/rituals';
 import { chaveEstagio, chaveNex, montarId, montarIdFilho, ordenarPorId } from './ids';
 import { getPatenteConfig } from '../../logic/rulesEngine';
 import type { Escolha, FichaPersistida, Problema, ValorEscolha } from './tipos';
@@ -254,7 +254,7 @@ export function inferirFicha(personagem: Personagem): ResultadoInferencia {
     );
 
     const doPersonagem = (personagem.rituais ?? [])
-      .map((r) => RITUAIS.find((c) => c.nome === r.nome) ?? r)
+      .map((r) => ritualPorChave(chaveDoRitual(r)) ?? r)
       .slice()
       .sort((a, b) => (b.circulo ?? 1) - (a.circulo ?? 1));
 
@@ -271,7 +271,7 @@ export function inferirFicha(personagem: Personagem): ResultadoInferencia {
       usadas.add(`${vaga.nivel}#${vaga.ordinal}`);
       inferidasDeRitual.push({
         id: montarId('ritual', chaveNex(vaga.nivel), vaga.ordinal),
-        valor: { tipo: 'ritual', ritual: ritual.nome },
+        valor: { tipo: 'ritual', ritual: chaveDoRitual(ritual) },
         confianca: 'media',
         nota: `Atribuído ao marco de NEX ${vaga.nivel}% — o mais cedo que aceita um ritual de ${circulo}º círculo. O v0 não registra quando foi aprendido.`,
       });

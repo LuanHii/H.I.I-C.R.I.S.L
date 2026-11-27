@@ -125,16 +125,14 @@ describe('círculo de ritual por NEX', () => {
     expect(alto!.motivos[0]).toMatch(/Círculo 4/);
   });
 
-  it('rituais de Medo não são concedidos por progressão', () => {
-    const ficha = fichaBase({
-      identidade: { ...fichaBase().identidade, classe: 'Ocultista' },
-      progressao: { nex: 85 },
-    });
+  it('oferece os rituais de Medo comuns e reserva os de 4º círculo às trilhas', () => {
+    const ficha = fichaBase({ identidade: { ...fichaBase().identidade, classe: 'Ocultista' }, progressao: { nex: 85 } });
     const slot = slotDe(ficha, montarId('ritual', chaveNex(85)));
-    const medo = opcoesPara(slot, ctxDe(ficha)).filter((o) => /Medo\)/.test(o.rotulo));
-    if (medo.length > 0) {
-      expect(medo.every((o) => !o.elegivel)).toBe(true);
+    const opcoes = opcoesDaPendencia(ficha, slot);
+    for (const nome of ['Cinerária', 'Rejeitar Névoa', 'Singularidade Temporal', 'Pronunciar Sigilo', 'Tremeluzir', 'Espirais da Perdição']) {
+      expect(opcoes.find(o => o.valor.tipo === 'ritual' && o.valor.ritual === nome)?.elegivel, nome).toBe(true);
     }
+    expect(opcoes.find(o => o.rotulo.startsWith('Lâmina do Medo'))?.elegivel).toBe(false);
   });
 });
 

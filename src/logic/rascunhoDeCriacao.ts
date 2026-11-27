@@ -1,7 +1,7 @@
 import type { Atributos, ClasseName, Item, Origem, Patente, PericiaName, Personagem, Trilha, Weapow } from '../core/types';
 import { ORIGENS } from '../data/character/origins';
 import { TRILHAS } from '../data/character/tracks';
-import { RITUAIS } from '../data/magic/rituals';
+import { ritualPorChave, chaveDoRitual } from '../data/magic/rituals';
 import { PODERES } from '../data/character/powers';
 import { validateAttributes } from '../core/rules/attributes';
 import { TODAS_PERICIAS } from '../core/rules/pericias';
@@ -336,7 +336,7 @@ export function estadoDe(r: Rascunho): CreationState {
       atributos: { ...r.atributos },
       periciasTreinadas: [...(meta?.obrigatorias ?? []), ...r.periciasLivres],
       periciasSelecionadas: [...r.periciasLivres],
-      rituais: r.rituais.map((nome) => RITUAIS.find((x) => x.nome === nome)).filter((x): x is NonNullable<typeof x> => Boolean(x)),
+      rituais: r.rituais.map((nome) => ritualPorChave(nome)).filter((x): x is NonNullable<typeof x> => Boolean(x)),
       equipamentos: equipamentosFinais(r),
     },
   };
@@ -370,7 +370,7 @@ export function rascunhoDeDraft(draft: RecreateDraft): Rascunho {
     estagio: draft.tipo === 'Sobrevivente' ? draft.nexOrEstagio : RASCUNHO_INICIAL.estagio,
     periciasLivres: [...(draft.periciasLivres ?? [])],
     trilha: draft.trilha,
-    rituais: (draft.rituaisIniciais ?? []).map((x) => x.nome),
+    rituais: (draft.rituaisIniciais ?? []).map(chaveDoRitual),
     equipamentos,
     modificacoes,
   };

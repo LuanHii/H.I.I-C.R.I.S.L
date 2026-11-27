@@ -13,3 +13,9 @@ export function formatarCustoDoRitual(circulo: Ritual['circulo'], usarPd?: boole
 export function apresentarEfeitoDeRitual(texto: string, usarPd?: boolean): string {
   return usarPd ? texto.replace(/\bPE\b/g, 'PD') : texto;
 }
+
+export function circuloMaximoAprenderRitual(nex: number): 1 | 2 | 3 {
+  if (nex >= 75) return 3;
+  if (nex >= 45) return 2;
+  return 1;
+}

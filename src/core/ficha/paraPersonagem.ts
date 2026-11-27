@@ -2,7 +2,7 @@ import type { Personagem, Patente, Poder, Ritual } from '../types';
 import { PODERES } from '../../data/character/powers';
 import { TRILHAS } from '../../data/character/tracks';
 import { ORIGENS } from '../../data/character/origins';
-import { RITUAIS } from '../../data/magic/rituals';
+import { chaveDoRitual, ritualPorChave, atualizarRitualAntigo } from '../../data/magic/rituals';
 import { getPatenteConfig, calcularCarga, listarEventosNex } from '../../logic/rulesEngine';
 import { apenasCondicoes } from '../rules/condicoes';
 import { buildFicha, type BuildResultado } from './buildFicha';
@@ -78,12 +78,12 @@ export interface RenderInput {
 }
 
 function unirRituais(doV0: readonly Ritual[], derivados: readonly string[]): Ritual[] {
-  const saida = [...doV0];
-  const conhecidos = new Set(saida.map((r) => r.nome));
+  const saida = doV0.map(atualizarRitualAntigo);
+  const conhecidos = new Set(saida.map(chaveDoRitual));
 
   for (const nome of derivados) {
-    if (conhecidos.has(nome)) continue;
-    const doCatalogo = RITUAIS.find((r) => r.nome === nome);
+    if (conhecidos.has(nome) || saida.some(r => r.nome === nome)) continue;
+    const doCatalogo = ritualPorChave(nome);
     if (!doCatalogo) continue;
     saida.push(doCatalogo);
     conhecidos.add(nome);

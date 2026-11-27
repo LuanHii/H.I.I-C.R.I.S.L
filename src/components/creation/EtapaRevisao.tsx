@@ -7,7 +7,7 @@ import { descricaoAutomatica } from '@/core/rules/habilidadesDeClasse';
 import { PODERES } from '@/data/character/powers';
 import { TRILHAS } from '@/data/character/tracks';
 import { ORIGENS } from '@/data/character/origins';
-import { RITUAIS } from '@/data/magic/rituals';
+import { ritualPorChave } from '@/data/magic/rituals';
 import { custoDoRitual } from '@/core/rules/rituais';
 import { resumoDePendencias } from '@/core/ficha/pendencias';
 import { Fita, Recurso, RotuloSecao } from '../master/ui/Pecas';
@@ -180,7 +180,7 @@ export function EtapaRevisao({ rascunho, numero, irPara }: { rascunho: Rascunho;
             <Bloco titulo="Rituais" onEditar={() => irPara('rituais')}>
               <ul className="space-y-1.5">
                 {build.rituais.map((nome) => {
-                  const r = RITUAIS.find((x) => x.nome === nome);
+                  const r = ritualPorChave(nome);
                   return (
                     <li key={nome} className="text-[11px] text-ordem-text-secondary">
                       <span className="text-sm font-semibold text-white">{nome}</span>

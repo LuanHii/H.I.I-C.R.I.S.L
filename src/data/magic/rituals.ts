@@ -30,7 +30,7 @@ export const RITUAIS: Ritual[] = [
     resistencia: 'Nenhuma',
     descricao: 'Quando falha em teste de Acrobacia ou Atletismo, pode repetir o teste usando Presença. Alternativamente, quando sofre dano de impacto, pode reduzir o dano em 20. Se reduzir dano, fica atordoado por 1 rodada.',
     efeito: {
-      padrao: 'Repete teste Acrobacia/Atletismo (usa Pre) OU RD 20 impacto (fica atordoado 1 rodada).',
+      padrao: 'Uma vez por rodada: repita o teste falho de Acrobacia ou Atletismo usando Presença, ou reduza dano de impacto em 20 e fique atordoado por uma rodada, mesmo se reduzir o dano a zero.',
       discente: 'Redução de dano de impacto muda para 40 (+3 PE).',
       verdadeiro: 'Redução de dano de impacto muda para 70. Requer 4º círculo e afinidade (+7 PE).'
     },
@@ -45,9 +45,9 @@ export const RITUAIS: Ritual[] = [
     alvo: 'Você',
     duracao: 'Cena',
     resistencia: 'Nenhuma',
-    descricao: 'Permite que você perceba odores emitidos pelo caçador ou pela presa. Na próxima cena, você sofre de fome e sede (OPRPG, p. 292).',
+    descricao: 'Concede faro. Na próxima cena, sofre fome e sede como se tivesse falhado no teste do primeiro dia, até suprir a necessidade.',
     efeito: {
-      padrao: 'Seres em alcance longo/extremo sofrem penalidade no teste de Furtividade/Sobrevivência para esconder-se/perseguição se caçador/caça emitir odores.',
+      padrao: 'Em perseguição, se a presa ou o caçador emitir odores, recebe +5 em Atletismo e não perde PV ao usar esforço extra.',
       discente: 'Muda alcance para toque e o alvo para 1 ser (+4 PE).',
       verdadeiro: 'Muda alcance para curto e o alvo para até 5 seres. Requer afinidade (+9 PE).'
     },
@@ -124,6 +124,23 @@ export const RITUAIS: Ritual[] = [
   },
 
   {
+    nome: 'Singularidade Temporal',
+    elemento: 'Morte',
+    circulo: 4,
+    execucao: 'Padrão',
+    alcance: 'Curto',
+    alvo: '1 objeto Médio não paranormal',
+    duracao: 'Instantânea',
+    resistencia: 'Fortitude se o objeto estiver em uso',
+    descricao: 'Envelhece um objeto até o maior grau de decomposição possível para seu material. O mestre determina o resultado.',
+    efeito: {
+      padrao: 'O objeto pode permanecer intacto, ficar danificado (–5 em testes que o empreguem) ou ser destruído. Quem estiver usando o objeto pode protegê-lo com Fortitude.',
+      discente: '+5 PE: afeta um objeto Grande.',
+      verdadeiro: '+10 PE: afeta um objeto Enorme.'
+    },
+    livro: 'Sobrevivendo ao Horror'
+  },
+  {
     nome: 'Desfazer Sinapses',
     elemento: 'Conhecimento',
     circulo: 1,
@@ -175,17 +192,17 @@ export const RITUAIS: Ritual[] = [
     livro: 'Sobrevivendo ao Horror'
   },
   {
-    nome: 'Comando Inexistente',
+    nome: 'Pronunciar Sigilo',
     elemento: 'Conhecimento',
     circulo: 4,
     execucao: 'Padrão',
     alcance: 'Curto',
     alvo: '1 ser',
-    duracao: 'Instantânea',
+    duracao: 'Instantânea ou veja texto',
     resistencia: 'Vontade parcial',
     descricao: 'Você profere um som indescritível que causa Esquecer, Cegar ou Inexistir (desaparecer) no alvo.',
     efeito: {
-      padrao: 'Causa Esquecer (atordoado 1d4+1 rodadas/desprevenido 1d4), Cegar (cego/ofuscado 1d4), ou Inexistir (desaparece 1d4+1 rodadas/1 rodada se passar).',
+      padrao: 'Esquecer atordoa por 1d4+1 rodadas, uma vez por cena; resistir ou já ter sido atordoado deixa o alvo desprevenido por 1d4 rodadas. Cegar causa cegueira, ou ofuscamento por 1d4 rodadas se resistir. Inexistir retira o alvo por 1d4+1 rodadas (1 se resistir), uma vez por cena. Ele volta ao lugar original ou adjacente se ocupado; criaturas escolhem um ponto em até 18m.',
       discente: 'Muda alcance para extremo (+5 PE).',
       verdadeiro: 'Muda o alvo para até 5 seres. Requer afinidade (+10 PE).'
     },
@@ -206,6 +223,23 @@ export const RITUAIS: Ritual[] = [
       padrao: 'Pode atravessar objetos sólidos (25% de chance de falhar) e ignora a penalidade de Atletismo ao Cortar Caminho. Sofre 1d4 dano Energia/rodada (ignora RD).',
       discente: 'Muda alcance para toque e alvo para 1 ser voluntário (+3 PE).',
       verdadeiro: 'Muda alcance para curto e alvo para até 5 seres voluntários. Requer 4º círculo (+7 PE).'
+    },
+    livro: 'Sobrevivendo ao Horror'
+  },
+  {
+    nome: 'Tremeluzir',
+    elemento: 'Energia',
+    circulo: 2,
+    execucao: 'Padrão',
+    alcance: 'Pessoal',
+    alvo: 'Você',
+    duracao: 'Sustentada',
+    resistencia: 'Nenhuma',
+    descricao: 'Você e o equipamento que carrega podem atravessar objetos sólidos. Cada travessia exige uma ação de movimento e falha em 1 em 1d4.',
+    efeito: {
+      padrao: 'Em perseguições, pode cortar caminho sem a penalidade em Atletismo. A cada rodada sofre 1d4 de Energia que ignora resistência. Terminar a rodada dentro de um objeto causa mais 1d4 de Energia.',
+      discente: '+3 PE: alcance de toque e alvo de um ser voluntário.',
+      verdadeiro: '+7 PE: alcance curto e até cinco seres voluntários. Requer 4º círculo.'
     },
     livro: 'Sobrevivendo ao Horror'
   },
@@ -235,9 +269,9 @@ export const RITUAIS: Ritual[] = [
     alvo: '1 ser',
     duracao: 'Instantânea',
     resistencia: 'Nenhuma',
-    descricao: 'Remove uma condição elegível, uma doença ou um veneno de origem paranormal. A cura exclui efeitos da entidade de Energia e condições permanentes. Depois, o alvo faz Fortitude (DT 30). Se falhar, é incubado pelo vírus do infecticídio.',
+    descricao: 'Remove uma condição elegível, uma doença ou um veneno. A cura exclui efeitos da entidade de Energia e condições permanentes. Depois, o alvo faz Fortitude (DT 30). Se falhar, é incubado pelo vírus do infecticídio.',
     efeito: {
-      padrao: 'Escolha uma condição entre Abalado, Apavorado, Alquebrado, Atordoado, Cego, Confuso, Debilitado, Enjoado, Envenenado, Esmorecido, Exausto, Fascinado, Fatigado, Fraco, Frustrado, Lento, Ofuscado, Paralisado, Pasmo e Surdo. Você também pode escolher uma doença ou um veneno. O ritual remove o efeito escolhido se for de origem paranormal. Exclui efeitos causados pela entidade de Energia e condições permanentes. Após a cura, o alvo faz Fortitude (DT 30). Em falha, é incubado pelo vírus do infecticídio.',
+      padrao: 'Escolha uma condição entre Abalado, Apavorado, Alquebrado, Atordoado, Cego, Confuso, Debilitado, Enjoado, Envenenado, Esmorecido, Exausto, Fascinado, Fatigado, Fraco, Frustrado, Lento, Ofuscado, Paralisado, Pasmo e Surdo. Você também pode escolher uma doença ou um veneno. Também afeta efeitos paranormais. Exclui efeitos causados pela entidade de Energia e condições permanentes. Após a cura, o alvo faz Fortitude (DT 30). Em falha, é incubado pelo vírus do infecticídio.',
       discente: 'Não possui forma Discente listada.',
       verdadeiro: 'Não possui forma Verdadeira listada.'
     },
@@ -255,11 +289,11 @@ export const RITUAIS: Ritual[] = [
     resistencia: 'Nenhuma',
     descricao: 'Cria uma nuvem que aumenta o custo de rituais em +2 PE/círculo, aumenta a execução em um passo e anula os efeitos de Cinerária.',
     efeito: {
-      padrao: 'Rituais na área custam +2 PE/círculo, execução aumenta em 1 passo, anula Cinerária.',
+      padrao: 'Na névoa, conjurar custa mais 2 PE por círculo e demora um passo adicional. Anula Cinerária; se o outro conjurador gastar uma ação completa por rodada mantendo Cinerária, os dois efeitos se neutralizam.',
       discente: 'A DT para resistir a rituais realizados na área diminui em –5 (+2 PE).',
       verdadeiro: 'Como Discente, e o dano causado por rituais dentro da névoa é sempre mínimo (+5 PE).'
     },
-    livro: 'Sobrevivendo ao Horror'
+    livro: 'Regras Básicas'
   },
 
   {
@@ -267,7 +301,7 @@ export const RITUAIS: Ritual[] = [
     elemento: 'Sangue',
     circulo: 1,
     execucao: 'Padrão',
-    alcance: 'Curto',
+    alcance: 'Toque',
     alvo: '1 arma corpo a corpo ou pacote de munição',
     duracao: 'Cena',
     resistencia: 'Nenhuma',
@@ -467,6 +501,23 @@ export const RITUAIS: Ritual[] = [
     livro: 'Regras Básicas'
   },
   {
+    nome: 'Espirais da Perdição',
+    elemento: 'Morte',
+    circulo: 1,
+    execucao: 'Padrão',
+    alcance: 'Curto',
+    alvo: '1 ser',
+    duracao: 'Cena',
+    resistencia: 'Nenhuma',
+    descricao: 'Espirais retardam os movimentos do alvo durante a cena.',
+    efeito: {
+      padrao: 'O alvo perde 1d20 nos testes de ataque.',
+      discente: '+2 PE: a penalidade passa a –2d20. Requer 2º círculo.',
+      verdadeiro: '+8 PE: aplica –2d20 nos testes de ataque dos seres escolhidos. Requer 3º círculo.'
+    },
+    livro: 'Regras Básicas'
+  },
+  {
     nome: 'Ferver Sangue',
     elemento: 'Sangue',
     circulo: 3,
@@ -524,7 +575,7 @@ export const RITUAIS: Ritual[] = [
     execucao: 'Padrão',
     alcance: 'Médio',
     alvo: 'Efeito: 1 enxame Grande (quadrado de 3m)',
-    duracao: '5 rodadas',
+    duracao: 'Sustentada',
     resistencia: 'Reflexos reduz à metade',
     descricao: 'Cria um enxame que causa 5d12 Sangue no ser em seu espaço. Pode mover o enxame 12m (Movimento).',
     efeito: {
@@ -591,7 +642,7 @@ export const RITUAIS: Ritual[] = [
     elemento: 'Morte',
     circulo: 1,
     execucao: 'Padrão',
-    alcance: 'Curto',
+    alcance: 'Toque',
     alvo: '1 arma corpo a corpo ou pacote de munição',
     duracao: 'Cena',
     resistencia: 'Nenhuma',
@@ -677,8 +728,8 @@ export const RITUAIS: Ritual[] = [
     circulo: 2,
     execucao: 'Reação',
     alcance: 'Curto',
-    alvo: '1 ser ou objetos até 10 espaços',
-    duracao: 'Até chegar ao solo ou cena',
+    alvo: '1 ser ou objetos somando até 10 espaços',
+    duracao: 'Até chegar ao solo ou cena, o que vier primeiro',
     resistencia: 'Nenhuma',
     descricao: 'Alvo cai lentamente (18m/rodada), evitando dano de queda. Se usado em projétil, causa metade do dano normal.',
     efeito: {
@@ -713,7 +764,7 @@ export const RITUAIS: Ritual[] = [
     alcance: 'Médio',
     alvo: 'Área: nuvem com 6m de raio',
     duracao: 'Instantânea',
-    resistencia: 'Fortitude parcial',
+    resistencia: 'Fortitude parcial (veja texto)',
     descricao: 'Causa 4d8 dano químico e deixa enjoado por 1 rodada.',
     efeito: {
       padrao: '4d8 dano químico e condição enjoado.',
@@ -745,7 +796,7 @@ export const RITUAIS: Ritual[] = [
     circulo: 2,
     execucao: 'Padrão',
     alcance: 'Médio',
-    alvo: 'Área: esfera de 6m de raio',
+    alvo: 'Área: esfera com 6m de raio',
     duracao: 'Instantânea',
     resistencia: 'Fortitude reduz à metade',
     descricao: 'Cria implosão de distorção temporal, causando 6d6 Morte em todos na área.',
@@ -798,7 +849,7 @@ export const RITUAIS: Ritual[] = [
     alcance: 'Médio',
     alvo: 'Área: nuvem com 6m de raio',
     duracao: 'Sustentada',
-    resistencia: 'Fortitude',
+    resistencia: 'Fortitude (veja texto)',
     descricao: 'Seres e objetos na área sofrem 4d8 Morte (metade se passar). Alvos que falharem não podem recuperar PV por uma rodada.',
     efeito: {
       padrao: '4d8 Morte, alvos não recuperam PV se falharem.',
@@ -849,7 +900,7 @@ export const RITUAIS: Ritual[] = [
     alcance: '1,5m',
     alvo: '1 pessoa',
     duracao: 'Sustentada',
-    resistencia: 'Vontade parcial, Fortitude parcial',
+    resistencia: 'Vontade parcial e Fortitude parcial',
     descricao: 'Cria um algoz incorpóreo que persegue a vítima. Se terminar o turno perto, a vítima faz Vontade (se falhar, abalada) e Fortitude (se falhar, 0 PV).',
     efeito: {
       padrao: 'Cria algoz que persegue a vítima (Vontade e Fortitude parciais).',
@@ -864,8 +915,8 @@ export const RITUAIS: Ritual[] = [
     circulo: 4,
     execucao: 'Padrão',
     alcance: 'Pessoal',
-    alvo: 'Você',
-    duracao: '3 rodadas',
+    alvo: 'Veja texto',
+    duracao: 'Veja texto',
     resistencia: 'Nenhuma',
     descricao: 'Cria um bolsão temporal de 3 rodadas onde você pode agir, mas não interagir com seres/objetos externos ou se deslocar. Efeitos contínuos não o afetam.',
     efeito: {
@@ -898,7 +949,7 @@ export const RITUAIS: Ritual[] = [
     elemento: 'Conhecimento',
     circulo: 1,
     execucao: 'Padrão',
-    alcance: 'Curto',
+    alcance: 'Toque',
     alvo: '1 arma corpo a corpo ou pacote de munição',
     duracao: 'Cena',
     resistencia: 'Nenhuma',
@@ -918,7 +969,7 @@ export const RITUAIS: Ritual[] = [
     alcance: 'Toque',
     alvo: '1 ser ou objeto',
     duracao: 'Cena',
-    resistencia: 'Vontade anula',
+    resistencia: 'Vontade anula (veja texto)',
     descricao: 'Permite a você compreender a linguagem do alvo ou o conteúdo de um objeto ilegível.',
     efeito: {
       padrao: 'Permite compreender linguagem escrita ou falada.',
@@ -963,9 +1014,9 @@ export const RITUAIS: Ritual[] = [
   },
   {
     nome: 'Ouvir os Sussurros',
-    elemento: 'Medo',
+    elemento: 'Conhecimento',
     circulo: 1,
-    execucao: 'Padrão',
+    execucao: 'Completa',
     alcance: 'Pessoal',
     alvo: 'Você',
     duracao: 'Instantânea',
@@ -973,8 +1024,8 @@ export const RITUAIS: Ritual[] = [
     descricao: 'Faz uma pergunta sobre um evento da cena que pode ser respondida com “sim” ou “não”. Resultado 1 em 1d6 falha (resultado "não").',
     efeito: {
       padrao: 'Pergunta sobre evento na cena ("sim", "não" ou "sim e não"). Falha em 1d6 = 1.',
-      discente: 'Muda a execução para 1 minuto. Pergunta sobre evento em até 1 dia no futuro. Falha em 1d6 = 1. Requer 2º círculo (+2 PE).',
-      verdadeiro: 'Muda a execução para 10 minutos e a duração para 5 rodadas. Uma pergunta por rodada ("sim", "não" ou "ninguém sabe"). Requer 3º círculo (+5 PE).'
+      discente: '+2 PE: execução de 1 minuto. Consulte um evento de até um dia no futuro; o mestre fornece uma pista ou profecia. Em um resultado 1 no d6, não há resposta. Requer 2º círculo.',
+      verdadeiro: '+5 PE: execução de 10 minutos e duração de 5 rodadas. Faça uma pergunta por rodada, com uma rolagem de falha para cada uma. Em falha, a resposta é “ninguém sabe”. Requer 3º círculo.'
     },
     livro: 'Regras Básicas'
   },
@@ -1051,7 +1102,7 @@ export const RITUAIS: Ritual[] = [
     elemento: 'Conhecimento',
     circulo: 2,
     execucao: 'Padrão',
-    alcance: 'Médio ou Toque',
+    alcance: 'Médio ou toque',
     alvo: '1 ser ou 2 pessoas voluntárias',
     duracao: 'Instantânea ou 1 dia',
     resistencia: 'Vontade parcial ou nenhuma',
@@ -1083,17 +1134,17 @@ export const RITUAIS: Ritual[] = [
   {
     nome: 'Tecer Ilusão',
     elemento: 'Conhecimento',
-    circulo: 2,
+    circulo: 1,
     execucao: 'Padrão',
-    alcance: 'Curto',
-    alvo: 'Efeito: até 4 cubos de 1,5m',
-    duracao: 'Instantânea',
+    alcance: 'Médio',
+    alvo: 'Efeito: ilusão que se estende a até 4 cubos de 1,5m',
+    duracao: 'Cena',
     resistencia: 'Vontade desacredita',
     descricao: 'Cria ilusão visual ou sonora (voz de uma pessoa por cubo). Não cria cheiros/texturas.',
     efeito: {
-      padrao: 'Cria ilusão visual ou sonora simples.',
+      padrao: 'Cria imagem ou som simples. Seres e objetos atravessam a ilusão; ela se desfaz se o conjurador sair do alcance.',
       discente: 'Muda o efeito para até 8 cubos de 1,5m e a duração para sustentada. Pode criar ilusões de imagem/sons combinados, complexos, odores, sensações térmicas/táteis. Requer 2º círculo (+2 PE).',
-      verdadeiro: 'Cria a ilusão de um perigo mortal. Alvo sofre 6d6 Conhecimento se falhar em Vontade (Vontade anula o efeito para o alvo). Requer 3º círculo (+5 PE).'
+      verdadeiro: '+5 PE: um alvo que interage com o perigo ilusório testa Vontade na conjuração e no início de cada turno do conjurador. Cada falha causa 6d6 de Conhecimento. Dois sucessos seguidos anulam o efeito para aquele alvo. Requer 3º círculo.'
     },
     livro: 'Regras Básicas'
   },
@@ -1139,7 +1190,7 @@ export const RITUAIS: Ritual[] = [
     alcance: 'Toque',
     alvo: '1 pessoa',
     duracao: 'Sustentada',
-    resistencia: 'Vontade parcial',
+    resistencia: 'Vontade parcial (veja texto)',
     descricao: 'No início de cada turno, alvo deve fazer Vontade. Se falhar, responde uma pergunta de sim/não (incapaz de mentir). Você fica desprevenido durante.',
     efeito: {
       padrao: 'Alvo responde pergunta sim/não (não pode mentir) se falhar em Vontade.',
@@ -1155,7 +1206,7 @@ export const RITUAIS: Ritual[] = [
     execucao: 'Completa',
     alcance: 'Ilimitado',
     alvo: '1 ser',
-    duracao: 'Sustentada',
+    duracao: '5 rodadas',
     resistencia: 'Vontade anula',
     descricao: 'Através de uma superfície reflexiva, pode ver e ouvir um alvo e seus arredores. O alvo faz Vontade para anular (bônus/penalidades variam com o conhecimento sobre o alvo).',
     efeito: {
@@ -1239,7 +1290,7 @@ export const RITUAIS: Ritual[] = [
     elemento: 'Energia',
     circulo: 1,
     execucao: 'Padrão',
-    alcance: 'Curto',
+    alcance: 'Toque',
     alvo: '1 arma corpo a corpo ou pacote de munição',
     duracao: 'Cena',
     resistencia: 'Nenhuma',
@@ -1327,7 +1378,7 @@ export const RITUAIS: Ritual[] = [
     alcance: 'Curto',
     alvo: '1 objeto',
     duracao: 'Cena',
-    resistencia: 'Vontade anula',
+    resistencia: 'Vontade anula (veja texto)',
     descricao: 'O objeto emite luz em uma área com 9m de raio.',
     efeito: {
       padrao: 'Objeto emite luz em 9m de raio.',
@@ -1409,9 +1460,9 @@ export const RITUAIS: Ritual[] = [
     elemento: 'Energia',
     circulo: 2,
     execucao: 'Padrão',
-    alcance: 'Curto',
-    alvo: 'Veja texto',
-    duracao: 'Cena',
+    alcance: 'Médio',
+    alvo: 'Área: varia',
+    duracao: 'Sustentada',
     resistencia: 'Veja texto',
     descricao: 'Altera os movimentos de massas de ar de forma caótica: Ascender, Sopro, Vento.',
     efeito: {
@@ -1495,7 +1546,7 @@ export const RITUAIS: Ritual[] = [
     circulo: 3,
     execucao: 'Padrão',
     alcance: 'Longo',
-    alvo: '9 cubos com 1,5m de lado',
+    alvo: 'Área: 9 cubos com 1,5m de lado',
     duracao: 'Instantânea',
     resistencia: 'Veja texto',
     descricao: 'Manipula terra/pedra/lama/areia: Amolecer (desabamento 10d6 impacto), Modelar (cria objetos simples) ou Solidificar (agarra seres).',
@@ -1571,7 +1622,7 @@ export const RITUAIS: Ritual[] = [
     efeito: {
       padrao: 'Rituais conjurados dentro da névoa têm sua DT aumentada em +5.',
       discente: 'Rituais conjurados dentro da névoa custam –2 PE (+2 PE).',
-      verdadeiro: 'Rituais conjurados dentro da névoa causam dano maximizado. Requer afinidade (+5 PE).'
+      verdadeiro: '+5 PE: além do efeito básico, maximiza o dano dos rituais conjurados na névoa.'
     },
     livro: 'Regras Básicas'
   },
@@ -1581,7 +1632,7 @@ export const RITUAIS: Ritual[] = [
     circulo: 3,
     execucao: 'Padrão',
     alcance: 'Médio',
-    alvo: '1 ser ou objeto ou esfera com 3m de raio',
+    alvo: 'Alvo ou Área: 1 ser ou objeto, ou esfera com 3m de raio',
     duracao: 'Instantânea',
     resistencia: 'Nenhuma',
     descricao: 'Dissipa rituais ativos com DT igual ou menor que o resultado de Ocultismo. Pode tornar item amaldiçoado em mundano por 1 dia.',
@@ -1616,7 +1667,7 @@ export const RITUAIS: Ritual[] = [
     execucao: 'Padrão',
     alcance: 'Toque',
     alvo: '1 pessoa',
-    duracao: 'Cena',
+    duracao: 'Instantânea',
     resistencia: 'Vontade parcial',
     descricao: 'Manifesta medo absoluto. Se falhar em Vontade, SAN é reduzida a 0 e fica enlouquecendo. Se passar, 10d6 mental e apavorado 1 rodada. Pessoa insana vira criatura paranormal.',
     efeito: {
@@ -1678,3 +1729,22 @@ export const RITUAIS: Ritual[] = [
     livro: 'Regras Básicas'
   },
 ];
+
+export function nomeAtualDoRitual(nome: string): string {
+  return nome === 'Comando Inexistente' ? 'Pronunciar Sigilo' : nome;
+}
+
+export function atualizarRitualAntigo(ritual: Ritual): Ritual {
+  const nome = nomeAtualDoRitual(ritual.nome);
+  if (nome === ritual.nome) return ritual;
+  return RITUAIS.find(r => r.nome === nome) ?? ritual;
+}
+
+export function chaveDoRitual(ritual: Ritual): string {
+  return ritual.nome === 'Amaldiçoar Arma' ? ritual.nome + ' (' + ritual.elemento + ')' : ritual.nome;
+}
+
+export function ritualPorChave(chave: string): Ritual | undefined {
+  const nome = nomeAtualDoRitual(chave);
+  return RITUAIS.find(ritual => chaveDoRitual(ritual) === nome || ritual.nome === nome);
+}

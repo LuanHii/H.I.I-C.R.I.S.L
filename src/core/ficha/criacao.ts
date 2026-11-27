@@ -1,3 +1,4 @@
+import { chaveDoRitual, ritualPorChave } from '../../data/magic/rituals';
 import type { Atributos, ClasseName, Patente, PericiaName } from '../types';
 import { CLASSES } from '../../data/character/classes';
 import { TRILHAS } from '../../data/character/tracks';
@@ -87,7 +88,8 @@ export function criarFicha(dados: DadosDeCriacao): ResultadoCriacao {
       .map((p) => p.slot)
       .filter((s) => s.kind === 'ritual' && s.nivel === 5 && !s.paiId && !s.poderPai);
     rituais.slice(0, vagas.length).forEach((ritual, i) => {
-      responder(vagas[i].id, { tipo: 'ritual', ritual });
+      const doCatalogo = ritualPorChave(ritual);
+      responder(vagas[i].id, { tipo: 'ritual', ritual: doCatalogo ? chaveDoRitual(doCatalogo) : ritual });
     });
     if (rituais.length > vagas.length) {
       problemas.push({

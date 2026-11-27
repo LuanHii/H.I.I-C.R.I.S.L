@@ -22,6 +22,7 @@ import {
 import { ActionsTab } from '../../ActionsTab';
 import { ProgressionTab } from '../../ProgressionTab';
 import { ConditionsManager } from '../../ConditionsManager';
+import { chaveDoRitual } from '@/data/magic/rituals';
 import { RitualChoiceModal } from '../../RitualChoiceModal';
 import { ItemSelectorModal } from '../ItemSelectorModal';
 import { AbilitySelectorModal } from '../AbilitySelectorModal';
@@ -168,7 +169,10 @@ export function FichaMestre({
     salvarSessao({ ...personagem, equipamentos, carga: { ...personagem.carga, atual: equipamentos.reduce((a, i) => a + i.espaco, 0) } });
   };
 
-  const ritualDerivado = (index: number) => build.rituais.includes(personagem.rituais[index]?.nome);
+  const ritualDerivado = (index: number) => {
+    const ritual = personagem.rituais[index];
+    return ritual && (build.rituais.includes(ritual.nome) || build.rituais.includes(chaveDoRitual(ritual)));
+  };
 
   const handleAddRitual = (ritual: Ritual) => {
     salvarSessao({ ...personagem, rituais: [...personagem.rituais, ritual] });

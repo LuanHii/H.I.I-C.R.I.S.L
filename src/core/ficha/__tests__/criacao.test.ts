@@ -110,6 +110,13 @@ describe('uma ficha nova nasce no motor novo e bate com a criação antiga no po
 });
 
 describe('o que a criação registra além da identidade', () => {
+  it('mantém o elemento escolhido de Amaldiçoar Arma na ficha criada', () => {
+    const state = estadoDe('Ocultista', 'Acadêmico', ATRIBUTOS.sabio);
+    const resultado = criarFicha(dadosDe(state, { rituais: ['Amaldiçoar Arma (Energia)', 'Tecer Ilusão', 'Cinerária'] }));
+    expect(criacaoValida(resultado)).toBe(true);
+    const personagem = paraPersonagem({ ficha: resultado.ficha, carregarDe: finalizarCriacao(state) });
+    expect(personagem.rituais.find(r => r.nome === 'Amaldiçoar Arma')?.elemento).toBe('Energia');
+  });
   it('Ocultista começa com os 3 rituais de 1º círculo já respondidos', () => {
     const state = estadoDe('Ocultista', 'Acadêmico', ATRIBUTOS.sabio);
     const iniciais = RITUAIS.filter((r) => r.circulo === 1).slice(0, 3).map((r) => r.nome);

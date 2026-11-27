@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { RITUAIS } from '@/data/magic/rituals';
+import { RITUAIS, chaveDoRitual } from '@/data/magic/rituals';
 import type { Elemento } from '@/core/types';
 import { ELEMENTOS } from '@/core/rules/pericias';
 import { custoDoRitual } from '@/core/rules/rituais';
@@ -45,9 +45,9 @@ export function EtapaRituais({ rascunho, onChange, numero }: { rascunho: Rascunh
 
       <div className="mt-3 grid max-h-[55vh] grid-cols-1 gap-2 overflow-y-auto pr-1 sm:grid-cols-2 xl:grid-cols-3">
         {lista.map((r) => {
-          const ativo = rascunho.rituais.includes(r.nome);
+          const ativo = rascunho.rituais.includes(chaveDoRitual(r));
           return (
-            <Cartao key={`${r.nome}-${r.elemento}`} compacto selecionado={ativo} desabilitado={!ativo && cheio} onClick={() => alternar(r.nome)}>
+            <Cartao key={`${r.nome}-${r.elemento}`} compacto selecionado={ativo} desabilitado={!ativo && cheio} onClick={() => alternar(chaveDoRitual(r))}>
               <div className="flex items-baseline justify-between gap-2 pr-6">
                 <span className="font-display text-base font-bold text-white">{r.nome}</span>
                 <span className={`font-carimbo text-[10px] uppercase tracking-[0.16em] ${TOM[r.elemento]}`}>{r.elemento}</span>

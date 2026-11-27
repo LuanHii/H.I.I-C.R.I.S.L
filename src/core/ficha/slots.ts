@@ -1,6 +1,7 @@
 import type { ClasseName } from '../types';
 import { NEX_EVENTOS } from '../rules/nexEventos';
 import { TRILHAS } from '../../data/character/tracks';
+import { nomeAtualDoRitual } from '../../data/magic/rituals';
 import { ORIGENS } from '../../data/character/origins';
 import { PODERES } from '../../data/character/powers';
 import { habilidadesAutomaticas } from './automaticos';
@@ -114,8 +115,8 @@ function aplicar(estado: EstadoParcial, escolha: Escolha, nivel: number): void {
       gravarEscolhaInterna(estado, escolha.id, v.poder);
       break;
     case 'ritual':
-      estado.rituais.push(v.ritual);
-      gravarEscolhaInterna(estado, escolha.id, v.ritual);
+      estado.rituais.push(nomeAtualDoRitual(v.ritual));
+      gravarEscolhaInterna(estado, escolha.id, nomeAtualDoRitual(v.ritual));
       break;
     case 'origem': {
       const outra = ORIGENS.find((o) => o.nome === v.origem);

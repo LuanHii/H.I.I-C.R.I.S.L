@@ -2,7 +2,8 @@
 
 import React, { useState, useMemo } from 'react';
 import { Personagem, Ritual, Elemento } from '../core/types';
-import { RITUAIS } from '../data/magic/rituals';
+import { RITUAIS, chaveDoRitual } from '../data/magic/rituals';
+import { circuloMaximoAprenderRitual } from '../core/rules/rituais';
 import { ELEMENTO_CONFIG } from '../data/magic/elementColors';
 import { Fita } from './master/ui/Pecas';
 import { CHIP_DO_SELETOR, OpcaoDoSeletor, SeletorModal } from './master/ui/SeletorModal';
@@ -17,12 +18,6 @@ interface RitualChoiceModalProps {
 
 const ELEMENTOS: Elemento[] = ['Sangue', 'Morte', 'Conhecimento', 'Energia', 'Medo'];
 
-function calcularCirculoMaximo(nex: number): number {
-    if (nex >= 75) return 3;
-    if (nex >= 45) return 2;
-    return 1;
-}
-
 export function RitualChoiceModal({
     agent,
     onSelect,
@@ -33,14 +28,13 @@ export function RitualChoiceModal({
     const [filtroElemento, setFiltroElemento] = useState<Elemento | 'todos'>('todos');
     const [filtroCirculo, setFiltroCirculo] = useState<number | 'todos'>('todos');
     const [ritualSelecionado, setRitualSelecionado] = useState<string | null>(null);
-    const circuloMaximo = circuloMaximoProp ?? calcularCirculoMaximo(agent.nex);
-    const rituaisConhecidos = useMemo(() => new Set(agent.rituais.map(r => r.nome)), [agent.rituais]);
+    const circuloMaximo = circuloMaximoProp ?? circuloMaximoAprenderRitual(agent.nex);
+    const rituaisConhecidos = useMemo(() => new Set(agent.rituais.map(chaveDoRitual)), [agent.rituais]);
 
     const rituaisFiltrados = useMemo(() => {
         let lista = RITUAIS.filter(r => {
             if (r.circulo > circuloMaximo) return false;
-            if (rituaisConhecidos.has(r.nome)) return false;
-            if (r.circulo === 4) return false;
+            if (rituaisConhecidos.has(chaveDoRitual(r))) return false;
             return true;
         });
         if (filtroElemento !== 'todos') {
@@ -71,7 +65,7 @@ export function RitualChoiceModal({
         if (ritual) onSelect(ritual);
     };
 
-    const circulosDisponiveis = Array.from({ length: Math.min(circuloMaximo, 3) }, (_, i) => i + 1);
+    const circulosDisponiveis = Array.from({ length: Math.min(circuloMaximo, 4) }, (_, i) => i + 1);
 
     return (
         <SeletorModal

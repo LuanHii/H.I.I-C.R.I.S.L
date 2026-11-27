@@ -3,6 +3,7 @@
 import React from 'react';
 import { ChevronDown, Plus, Trash2 } from 'lucide-react';
 import type { Personagem } from '@/core/types';
+import { apresentarEfeitoDeRitual, formatarCustoDoRitual } from '@/core/rules/rituais';
 import { Fita } from '../ui/Pecas';
 
 interface RitualsTabContentProps {
@@ -30,6 +31,17 @@ export function RitualsTabContent({ agent, isEditingMode, onAddRitual, onRemoveR
             <ChevronDown size={14} className="shrink-0 text-ordem-text-muted transition-transform group-open:rotate-180" />
           </summary>
           <p className="border-t border-white/[0.06] px-3 py-2.5 text-sm text-ordem-white-muted">{ritual.descricao}</p>
+          <dl className="grid gap-2 px-3 pb-3 text-sm text-ordem-text-secondary">
+            {Object.entries({
+              Custo: formatarCustoDoRitual(ritual.circulo, agent.usarPd),
+              Execução: ritual.execucao, Alcance: ritual.alcance, Alvo: ritual.alvo,
+              Duração: ritual.duracao, Resistência: ritual.resistencia,
+              Padrão: ritual.efeito?.padrao, Discente: ritual.efeito?.discente, Verdadeiro: ritual.efeito?.verdadeiro,
+            }).map(([campo, texto]) => texto && (
+              <div key={campo}><dt className="font-semibold text-ordem-white">{campo}</dt>
+                <dd>{apresentarEfeitoDeRitual(texto, agent.usarPd)}</dd></div>
+            ))}
+          </dl>
           {isEditingMode && (podeRemover ? podeRemover(idx) : true) && (
             <button
               type="button"

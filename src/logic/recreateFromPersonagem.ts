@@ -1,5 +1,5 @@
 import { ORIGENS } from '../data/character/origins';
-import { RITUAIS } from '../data/magic/rituals';
+import { RITUAIS, chaveDoRitual } from '../data/magic/rituals';
 import type { Atributos, ClasseName, PericiaName, Personagem, Ritual } from '../core/types';
 import type { ClassePreferencias } from './rulesEngine';
 import { calcularPericiasIniciais, TODAS_PERICIAS } from './characterUtils';
@@ -67,8 +67,8 @@ function clampLevel(tipo: 'Agente' | 'Sobrevivente', value: number): number {
 function pickRituaisIniciais(p: Personagem): Ritual[] {
   if (p.classe !== 'Ocultista') return [];
 
-  const nomes = new Set((p.rituais ?? []).map((r) => r.nome));
-  return RITUAIS.filter((r) => r.circulo === 1 && nomes.has(r.nome)).slice(0, 3);
+  const nomes = new Set((p.rituais ?? []).map(chaveDoRitual));
+  return RITUAIS.filter((r) => r.circulo === 1 && nomes.has(chaveDoRitual(r))).slice(0, 3);
 }
 
 export function buildRecreateDraftFromPersonagem(p: Personagem): RecreateDraft {

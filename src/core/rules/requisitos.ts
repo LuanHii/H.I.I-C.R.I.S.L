@@ -1,6 +1,6 @@
 import type { AtributoKey, Atributos, Elemento, GrauTreinamento, PericiaName, Poder } from '../types';
 import { chaveDeComparacao, normalizarElemento, normalizarPericia } from './pericias';
-import { RITUAIS } from '../../data/magic/rituals';
+import { ritualPorChave } from '../../data/magic/rituals';
 
 export type Requisito =
   | { tipo: 'atributo'; atributo: AtributoKey; minimo: number }
@@ -138,7 +138,7 @@ export function elementoEfetivo(poder: Poder): Elemento | undefined {
   if (poder.tipo !== 'Paranormal') return undefined;
   if (poder.elemento) return poder.elemento;
   if (!poder.escolhaInterna) return undefined;
-  return RITUAIS.find((r) => r.nome === poder.escolhaInterna)?.elemento;
+  return ritualPorChave(poder.escolhaInterna ?? '')?.elemento;
 }
 
 function contarPoderesDeElemento(estado: EstadoParaRequisitos, elemento: Elemento): number {

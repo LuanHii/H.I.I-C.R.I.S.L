@@ -1,10 +1,11 @@
+import { circuloMaximoAprenderRitual } from '../rules/rituais';
 import type { Elemento, GrauTreinamento, PericiaName, Poder } from '../types';
 import { avaliarPoder, type EstadoParaRequisitos } from '../rules/requisitos';
 import { TODAS_PERICIAS } from '../rules/pericias';
 import { PODERES, getPoderesClasse, getPoderesForaDaClasse, getPoderesGerais, getPoderesParanormais } from '../../data/character/powers';
 import { TRILHAS } from '../../data/character/tracks';
 import { ORIGENS } from '../../data/character/origins';
-import { RITUAIS } from '../../data/magic/rituals';
+import { RITUAIS, chaveDoRitual } from '../../data/magic/rituals';
 import type { EstadoParcial } from './slots';
 import type { FichaIdentidade, Slot, ValorEscolha } from './tipos';
 
@@ -162,18 +163,20 @@ export function opcoesPara(slot: Slot, ctx: ContextoOpcoes): Opcao[] {
         });
 
     case 'ritual': {
-      const teto = circuloMaximoPorNivel(slot.nivel);
+      const teto = slot.poderPai === 'Aprender Ritual'
+        ? circuloMaximoAprenderRitual(slot.nivel)
+        : circuloMaximoPorNivel(slot.nivel);
       const conhecidos = new Set(parcial.rituais);
       return RITUAIS.map((ritual) => {
         const motivos: string[] = [];
         if (ritual.circulo > teto) {
           motivos.push(`Círculo ${ritual.circulo} exige NEX maior (acessível até ${teto}º neste marco)`);
         }
-        if (conhecidos.has(ritual.nome)) motivos.push('Você já conhece este ritual');
-        if (ritual.elemento === 'Medo') motivos.push('Rituais de Medo não são concedidos por progressão');
+        if (conhecidos.has(ritual.nome) || conhecidos.has(chaveDoRitual(ritual))) motivos.push('Você já conhece este ritual');
+        if (ritual.elemento === 'Medo' && ritual.circulo === 4) motivos.push('Este ritual exige o poder da trilha correspondente');
         return {
           rotulo: `${ritual.nome} (${ritual.circulo}º, ${ritual.elemento})`,
-          valor: { tipo: 'ritual', ritual: ritual.nome },
+          valor: { tipo: 'ritual', ritual: chaveDoRitual(ritual) },
           elegivel: motivos.length === 0,
           motivos,
           indeterminados: [],

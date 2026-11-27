@@ -7,7 +7,7 @@ import type { Opcao } from '../../core/ficha/opcoes';
 import { pendenciasResolviveis } from '../../core/ficha/pendencias';
 import { PODERES } from '../../data/character/powers';
 import { TRILHAS } from '../../data/character/tracks';
-import { RITUAIS } from '../../data/magic/rituals';
+import { ritualPorChave } from '../../data/magic/rituals';
 import { ORIGENS } from '../../data/character/origins';
 import { Fita, RotuloSecao } from './ui/Pecas';
 
@@ -50,7 +50,7 @@ function descricaoDaOpcao(opcao: Opcao): string | undefined {
     case 'versatilidade':
       return TRILHAS.find((t) => t.nome === v.trilha)?.descricao;
     case 'ritual': {
-      const r = RITUAIS.find((x) => x.nome === v.ritual);
+      const r = ritualPorChave(v.ritual);
       return r ? `${r.circulo}º círculo · ${r.elemento} — ${r.descricao}` : undefined;
     }
     case 'origem': {

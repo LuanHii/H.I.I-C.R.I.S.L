@@ -1,3 +1,4 @@
+import { atualizarRitualAntigo } from '../data/magic/rituals';
 import { PericiaName, Personagem } from './types';
 import {
   calcularPericiasDetalhadas,
@@ -80,6 +81,7 @@ export function normalizePersonagem(personagem: Personagem, autoPatente: boolean
   const normalizado = {
     ...personagem,
     patente,
+    rituais: (personagem.rituais ?? []).map(atualizarRitualAntigo),
     poderes: migrarNomesDePoder(personagem.poderes ?? []),
     efeitosAtivos: desduplicarEfeitosDeOrigem(personagem.efeitosAtivos),
     periciasDetalhadas: periciasRecalc,
