@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { criarCopiasAmeaca } from '@/components/master/criarCopiasAmeaca';
 import { AMEACAS } from '@/data/combat/monsters';
-import { montarCatalogoAmeacas, normalizarBusca } from '../catalogoAmeacas';
+import { montarCatalogoAmeacas, lerAmeacasImportadas, normalizarBusca } from '../catalogoAmeacas';
 import { lerEncontro, LIMITE_COPIAS_ENCONTRO, quantificarEncontro, resumirDesafio } from '../encontro';
 
 describe('rascunho de encontro', () => {
@@ -69,5 +69,53 @@ describe('ameaças do encontro', () => {
     primeira.hp.current -= 5;
     expect(segunda.hp.current).toBe(77);
     expect(primeira.conditions).not.toBe(segunda.conditions);
+  });
+
+  it('importa ameaça única, lista e backup JSON, validando e normalizando campos', () => {
+    const unica = lerAmeacasImportadas(JSON.stringify({
+      nome: 'Diretor Ícaro (Fase 1)',
+      vd: 80,
+      tipo: 'Conhecimento',
+      tamanho: 'Médio',
+      vida: 100,
+      defesa: 25,
+      atributos: { AGI: 4, FOR: 2, INT: 4, PRE: 3, VIG: 3 },
+      fortitude: '3d20+10',
+      acoes: [{ nome: 'Eco do Retalhador', descricao: '2 cortes', tipo: 'Padrão' }],
+      habilidades: [{ nome: 'Corta!', descricao: 'Trava dano excedente.' }],
+    }));
+    expect(unica.erro).toBeUndefined();
+    expect(unica.ameacas).toHaveLength(1);
+    expect(unica.ameacas[0]).toMatchObject({
+      nome: 'Diretor Ícaro (Fase 1)',
+      vd: 80,
+      vida: 100,
+      defesa: 25,
+      fortitude: '3d20+10',
+      livro: 'Regras Básicas',
+    });
+
+    const pacote = lerAmeacasImportadas(JSON.stringify([
+      { nome: 'Fase 1', vida: 100, defesa: 25 },
+      { nome: 'Figurante', pv: 18, defesa: 20, abilities: [{ name: 'Golpe', description: '1d6+4' }] },
+    ]));
+    expect(pacote.erro).toBeUndefined();
+    expect(pacote.ameacas).toHaveLength(2);
+    expect(pacote.ameacas[1]).toMatchObject({
+      nome: 'Figurante',
+      vida: 18,
+      acoes: [{ nome: 'Golpe', descricao: '1d6+4' }],
+    });
+
+    const backup = lerAmeacasImportadas(JSON.stringify({
+      version: '1.0.0',
+      monstros: [{ id: 'm1', ameaca: { nome: 'O Rasgo', vida: 165, defesa: 26, tipo: 'Medo' } }],
+    }));
+    expect(backup.erro).toBeUndefined();
+    expect(backup.ameacas).toHaveLength(1);
+    expect(backup.ameacas[0].nome).toBe('O Rasgo');
+
+    expect(lerAmeacasImportadas('{invalido').erro).toBeTruthy();
+    expect(lerAmeacasImportadas(JSON.stringify({ vida: 50 })).erro).toBeTruthy();
   });
 });

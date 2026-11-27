@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronDown, ChevronUp, ListPlus, Plus, Search, SlidersHorizontal } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { ChevronDown, ChevronUp, ListPlus, Plus, Search, SlidersHorizontal, Upload } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import type { Ameaca } from '@/core/types';
-import { montarCatalogoAmeacas, normalizarBusca, type EntradaCatalogoAmeaca } from '@/core/rules/catalogoAmeacas';
+import { lerAmeacasImportadas, montarCatalogoAmeacas, normalizarBusca, type EntradaCatalogoAmeaca } from '@/core/rules/catalogoAmeacas';
 import { LIMITE_COPIAS_ENCONTRO } from '@/core/rules/encontro';
 import { useCloudMonsters } from '@/core/storage';
 import { downloadJSON } from '@/core/storage/exportImportUtils';
@@ -59,6 +59,54 @@ export function MonsterList() {
   const [carregado, setCarregado] = useState(false);
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
   const [editor, setEditor] = useState<{ ameaca?: Ameaca; id?: string } | null>(null);
+  const [avisoImportacao, setAvisoImportacao] = useState<{ tipo: 'ok' | 'erro'; texto: string } | null>(null);
+  const inputImportacaoRef = useRef<HTMLInputElement>(null);
+
+  const handleImportarArquivos = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setAvisoImportacao(null);
+    const existentesPorNome = new Map(monstros.map(m => [normalizarBusca(m.ameaca.nome), m.id]));
+    let importadas = 0;
+    let atualizadas = 0;
+    const erros: string[] = [];
+
+    for (const file of Array.from(files)) {
+      try {
+        const conteudo = await file.text();
+        const { ameacas, erro } = lerAmeacasImportadas(conteudo);
+        if (erro) {
+          erros.push(`${file.name}: ${erro}`);
+          continue;
+        }
+        for (const ameaca of ameacas) {
+          const chaveNome = normalizarBusca(ameaca.nome);
+          const idExistente = existentesPorNome.get(chaveNome);
+          await salvar(ameaca, idExistente);
+          if (idExistente) {
+            atualizadas += 1;
+          } else {
+            importadas += 1;
+          }
+        }
+      } catch {
+        erros.push(`${file.name}: não foi possível ler o arquivo.`);
+      }
+    }
+
+    if (inputImportacaoRef.current) inputImportacaoRef.current.value = '';
+
+    const totalSalvo = importadas + atualizadas;
+    if (totalSalvo > 0 && erros.length === 0) {
+      const partes: string[] = [];
+      if (importadas > 0) partes.push(`${importadas} importada${importadas > 1 ? 's' : ''}`);
+      if (atualizadas > 0) partes.push(`${atualizadas} atualizada${atualizadas > 1 ? 's' : ''}`);
+      setAvisoImportacao({ tipo: 'ok', texto: `Ameaças personalizadas salvas (${partes.join(', ')}).` });
+    } else if (totalSalvo > 0) {
+      setAvisoImportacao({ tipo: 'erro', texto: `${totalSalvo} ameaça(s) salva(s), mas houve erro em: ${erros.join(' ')}` });
+    } else {
+      setAvisoImportacao({ tipo: 'erro', texto: erros.join(' ') || 'Nenhuma ameaça importada.' });
+    }
+  };
 
   useEffect(() => {
     setFiltros(lerFiltros());
@@ -111,10 +159,35 @@ export function MonsterList() {
         <div className="flex flex-wrap items-center justify-between gap-2 pb-4">
           <p role="status" className="text-sm text-ordem-text-secondary">{loading ? 'Carregando ameaças' : exibidas.length + ' ameaças encontradas'}</p>
           <div className="flex flex-wrap gap-2">
+            <input
+              ref={inputImportacaoRef}
+              type="file"
+              accept=".json,application/json"
+              multiple
+              className="hidden"
+              onChange={e => { void handleImportarArquivos(e.target.files); }}
+            />
+            <button type="button" className={SECUNDARIO} onClick={() => inputImportacaoRef.current?.click()}>
+              <Upload size={16} aria-hidden /> Importar personalizada
+            </button>
             {monstros.length > 0 && <button type="button" className={SECUNDARIO} onClick={() => downloadJSON(JSON.stringify(monstros.map(m => m.ameaca), null, 2), 'ameacas-custom.json')}>Exportar personalizadas</button>}
             <button type="button" className={SECUNDARIO} onClick={() => setEditor({})}><Plus size={17} aria-hidden /> Criar ameaça</button>
           </div>
         </div>
+        {avisoImportacao && (
+          <div
+            role="status"
+            className={cn(
+              'mb-3 flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-xs',
+              avisoImportacao.tipo === 'ok'
+                ? 'border-ordem-green-muted/40 bg-ordem-green-muted/10 text-ordem-green-muted'
+                : 'border-ordem-red/50 bg-ordem-red/10 text-ordem-red-light'
+            )}
+          >
+            <span>{avisoImportacao.texto}</span>
+            <button type="button" className="underline hover:text-white" onClick={() => setAvisoImportacao(null)}>Fechar</button>
+          </div>
+        )}
         <div className="flex gap-2">
           <label className="relative min-w-0 flex-1">
             <span className="sr-only">Buscar ameaça</span>

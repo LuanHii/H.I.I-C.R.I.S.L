@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Ameaca, AtributoKey, Elemento } from '../../core/types';
+import React, { useState, useRef } from 'react';
+import { Upload } from 'lucide-react';
+import { Ameaca, AtributoKey } from '../../core/types';
+import { lerAmeacasImportadas } from '../../core/rules/catalogoAmeacas';
 
 interface MonsterEditorProps {
   initialData?: Ameaca;
@@ -26,6 +28,26 @@ const DEFAULT_MONSTER: Ameaca = {
 
 export const MonsterEditor: React.FC<MonsterEditorProps> = ({ initialData, onSave, onCancel }) => {
   const [monster, setMonster] = useState<Ameaca>(initialData || DEFAULT_MONSTER);
+  const [erroImportacao, setErroImportacao] = useState<string | null>(null);
+  const inputJsonRef = useRef<HTMLInputElement>(null);
+
+  const handleImportarJsonEditor = async (file: File | null) => {
+    if (!file) return;
+    setErroImportacao(null);
+    try {
+      const conteudo = await file.text();
+      const { ameacas, erro } = lerAmeacasImportadas(conteudo);
+      if (erro || ameacas.length === 0) {
+        setErroImportacao(erro || 'Não foi possível importar o JSON.');
+      } else {
+        setMonster(ameacas[0]);
+      }
+    } catch {
+      setErroImportacao('Não foi possível ler o arquivo selecionado.');
+    } finally {
+      if (inputJsonRef.current) inputJsonRef.current.value = '';
+    }
+  };
 
   const handleChange = (field: keyof Ameaca, value: any) => {
     setMonster(prev => ({ ...prev, [field]: value }));
@@ -70,13 +92,32 @@ export const MonsterEditor: React.FC<MonsterEditorProps> = ({ initialData, onSav
   return (
     <div className="fixed inset-0 bg-ordem-black/90 z-50 flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-ordem-ooze border border-ordem-border-light rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto custom-scrollbar p-6">
-        <div className="flex justify-between items-center mb-6 border-b border-ordem-border pb-4">
+        <div className="flex flex-wrap justify-between items-center gap-2 mb-4 border-b border-ordem-border pb-4">
           <h2 className="text-2xl font-serif text-white">Editor de Ameaça</h2>
-          <div className="flex gap-2">
-            <button onClick={onCancel} className="px-4 py-2 text-sm text-ordem-text-secondary hover:text-white border border-ordem-border-light rounded">Cancelar</button>
-            <button onClick={() => onSave(monster)} className="px-4 py-2 text-sm bg-ordem-red text-white rounded hover:bg-red-700">Salvar</button>
+          <div className="flex flex-wrap gap-2">
+            <input
+              ref={inputJsonRef}
+              type="file"
+              accept=".json,application/json"
+              className="hidden"
+              onChange={e => { void handleImportarJsonEditor(e.target.files?.[0] ?? null); }}
+            />
+            <button
+              type="button"
+              onClick={() => inputJsonRef.current?.click()}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-sm text-ordem-white hover:border-ordem-green-muted/60 border border-ordem-border-light rounded"
+            >
+              <Upload size={15} aria-hidden /> Importar JSON
+            </button>
+            <button type="button" onClick={onCancel} className="px-4 py-2 text-sm text-ordem-text-secondary hover:text-white border border-ordem-border-light rounded">Cancelar</button>
+            <button type="button" onClick={() => onSave(monster)} className="px-4 py-2 text-sm bg-ordem-red text-white rounded hover:bg-red-700">Salvar</button>
           </div>
         </div>
+        {erroImportacao && (
+          <div role="alert" className="mb-4 rounded border border-ordem-red/50 bg-ordem-red/10 px-3 py-2 text-xs text-ordem-red-light">
+            {erroImportacao}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
